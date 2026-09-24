@@ -15,6 +15,14 @@ BaseWidget {
     // notifications for its own badge.
     notifications: SIPCallManager.missedCalls + ChatConnectorManager.unreadNotificationsCount
 
+    onAdditionalSettingsLoaded: () => {
+                                    // Load persisted filter value
+                                    const saved = control.config.get("mediumFilter").trim()
+                                    if (saved !== "") {
+                                        activitiesFilterMediumSelector.currentValue = Number(saved)
+                                    }
+                                }
+
     Rectangle {
         id: activitiesWidget
         parent: control.root
@@ -81,6 +89,13 @@ BaseWidget {
                 Accessible.role: Accessible.ComboBox
                 Accessible.name: qsTr("Activity type picker")
                 Accessible.description: qsTr("Select the activity type to filter by")
+
+                onCurrentValueChanged: () => {
+                                           const val = activitiesFilterMediumSelector.currentValue
+                                           if (val !== undefined && val !== null) {
+                                               control.config.set("mediumFilter", val)
+                                           }
+                                       }
 
                 delegate: ItemDelegate {
                     id: activitiesFilterMediumSelectorDelg
