@@ -11,7 +11,10 @@ Item {
     property IChatRoom chatRoom
 
     property bool showTitleBar: true
-    readonly property alias isScrolledDown: chatMessageList.isScrolledDown
+    property IChatRoom previousChatRoom
+    property date enteredTimestamp: new Date(NaN)
+    property var roomDwell: ({})
+    property IChatRoom bubbleTargetRoom
 
     readonly property int capabilities: control.chatProvider?.capabilities ?? 0
 
@@ -27,16 +30,30 @@ Item {
     }
 
     onChatRoomChanged: () => {
+                           const newRoom = control.chatRoom
+                           const prevRoom = control.previousChatRoom
+
+                           if (newRoom !== prevRoom && prevRoom !== null && !isNaN(control.enteredTimestamp.getTime())) {
+                               control.roomDwell[prevRoom.id] = Date.now() - control.enteredTimestamp.getTime()
+                           }
+
+                           const priorDwell = (newRoom && control.roomDwell.hasOwnProperty(newRoom.id))
+                                              ? control.roomDwell[newRoom.id]
+                                              : 0
+                           if (priorDwell >= 2000) {
+                               newRoom.markAsRead()
+                           }
+
+                           if (newRoom) {
+                               control.bubbleTargetRoom = newRoom
+                               bubbleTimer.restart()
+                               control.enteredTimestamp = new Date()
+                           }
+
+                           control.previousChatRoom = newRoom
                            relatedMsg.chatMessage = null
                            control.loadMessages()
-                           readTimer.stop()
                        }
-
-    onIsScrolledDownChanged: () => {
-                                 if (control.isScrolledDown) {
-                                     readTimer.restart()
-                                 }
-                             }
 
     Connections {
         target: control.chatRoom
@@ -271,6 +288,7 @@ Item {
                     // Send new message
                     control.chatRoom.sendMessage(chatMessageBox.text,
                                                          relatedMsg.chatMessage ? relatedMsg.chatMessage.eventId : "")
+                    control.chatRoom.markAsRead()
                 }
 
                 relatedMsg.chatMessage = null
@@ -296,22 +314,14 @@ Item {
     }
 
     Timer {
-        id: readTimer
-        interval: 6000
+        id: bubbleTimer
+        interval: 2000
         onTriggered: () => {
-            if (control.Window.active && control.isScrolledDown && control.chatRoom) {
-                control.chatRoom.resetUnreadCount()
-            }
-        }
-    }
-
-    HoverHandler {
-        id: chatHoverHandler
-        onPointChanged: () => {
-            if (control.Window.active) {
-                readTimer.start()
-            }
-        }
+                         const room = control.bubbleTargetRoom
+                         if (room !== null && room === control.chatRoom) {
+                             room.resetUnreadCount()
+                         }
+                     }
     }
 
     FileDropArea {

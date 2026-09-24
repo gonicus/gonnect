@@ -91,6 +91,10 @@ public:
     virtual IChatRoom::Permissions permissions() = 0;
     Q_INVOKABLE virtual void resetUnreadCount() = 0;
 
+    /// Mark this room as read to control the "unread messages" mark. This is different from
+    /// resetting the unread count.
+    Q_INVOKABLE virtual void markAsRead() = 0;
+
     bool isLoadingMessageHistory() const { return m_isLoadingMessageHistory; }
     void setIsLoadingMessageHistory(bool value);
 
