@@ -462,7 +462,6 @@ void IpcDispatcher::sendFile(const QString &roomId, const QString &filePath,
 {
     if (!chatRoomByRoomId(roomId)) {
         qCCritical(lcIpcDispatcher) << "Unable to find room with id" << roomId << "- aborting";
-        markPendingMessageFailed(roomId, tempEventId);
         return;
     }
 
@@ -1881,7 +1880,7 @@ IpcDispatcher::createOrUpdateReceivedChatMessage(const de::gonicus::gonnect::Mes
         chatMessage = room->chatMessageById(message.messageId());
     }
 
-    bool isNew = !room->hasMessage(chatMessage);
+    const bool isNew = !room->hasMessage(chatMessage);
 
     ChatMessage::Flags flags = m_configInfo.userId == message.senderId()
             ? ChatMessage::Flag::OwnMessage

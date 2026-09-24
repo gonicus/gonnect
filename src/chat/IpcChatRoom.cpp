@@ -194,11 +194,9 @@ void IpcChatRoom::sendFile(const QString &filePath)
 
     // Create pending/optimistic message for immediate display
     const auto tempEventId = QUuid::createUuid().toString(QUuid::WithoutBraces);
-
-    auto *provider = chatProvider();
-    const QString ownUserId = provider ? provider->ownUserId() : id();
+    const auto ownUserId = dispatcher->ownUserId();
     QString nickName = ownUserId;
-    if (const auto *ownUser = provider ? provider->userById(ownUserId) : nullptr) {
+    if (const auto *ownUser = dispatcher->userById(ownUserId)) {
         nickName = ownUser->displayName();
     }
 
@@ -220,8 +218,6 @@ void IpcChatRoom::sendFile(const QString &filePath)
 
     connect(watcher, &QFutureWatcher<QString>::finished, this,
             [this, watcher, filePath, originalFileName, tempEventId]() {
-                watcher->deleteLater();
-
                 const auto uploadedUrl = watcher->result();
                 if (uploadedUrl.isEmpty()) {
                     qCCritical(lcIpcChatRoom) << "Error on uploading file" << filePath;

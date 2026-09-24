@@ -1,7 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QtQuick.Controls.Material
+import QtQuick.Controls
 import QtQuick.Controls.impl
 import QtQuick.Effects
 import base
@@ -226,11 +226,13 @@ Item {
                                        || control.content instanceof ChatMessageContentFile
                                        || control.content instanceof ChatMessageContentAudioFile
                                        || control.content instanceof ChatMessageContentVideoFile)
-        x: (attachmentLoader.visible && attachmentLoader.item) ? attachmentLoader.item.x : messageImage.x
-        y: (attachmentLoader.visible && attachmentLoader.item) ? attachmentLoader.item.y : messageImage.y
-        width: (attachmentLoader.visible && attachmentLoader.item) ? attachmentLoader.item.width : messageImage.paintedWidth
-        height: (attachmentLoader.visible && attachmentLoader.item) ? attachmentLoader.item.height : messageImage.paintedHeight
+        x: uploadingOverlay.hasAttachment ? attachmentLoader.x : messageImage.x
+        y: uploadingOverlay.hasAttachment ? attachmentLoader.y : messageImage.y
+        width: uploadingOverlay.hasAttachment ? attachmentLoader.item.width : messageImage.paintedWidth
+        height: uploadingOverlay.hasAttachment ? attachmentLoader.item.height : messageImage.paintedHeight
         z: 100
+
+        readonly property bool hasAttachment: attachmentLoader.visible && !!attachmentLoader.item
 
         Rectangle {
             id: uploadingBgRect
@@ -248,7 +250,7 @@ Item {
                 running: uploadingOverlay.visible
                 width: 3 * Theme.d
                 height: 3 * Theme.d
-                Material.accent: Theme.pickForegroundColor(uploadingBgRect.color)
+                circleColor: Theme.pickForegroundColor(uploadingBgRect.color)
                 anchors.verticalCenter: parent.verticalCenter
             }
 
