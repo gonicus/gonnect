@@ -79,10 +79,21 @@ void IpcChatRoom::setIsDirect(bool value)
 void IpcChatRoom::resetUnreadCount()
 {
     if (m_unreadCount) {
-        setOwnLastReadTimestamp(QDateTime::currentDateTimeUtc());
+        m_suppressOwnReadMarker = true;
         ipcDispatcher()->markAsRead(id());
         setUnreadCount(0);
     }
+}
+
+void IpcChatRoom::markAsRead()
+{
+    if (ownLastReadTimestamp().isValid() && ownLastReadTimestamp() >= latestMessageDateTime()) {
+        return;
+    }
+
+    m_suppressOwnReadMarker = false;
+    setOwnLastReadTimestamp(QDateTime::currentDateTimeUtc());
+    ipcDispatcher()->markAsRead(id());
 }
 
 ChatMessage *IpcChatRoom::pinnedChatMessageByIndex(qsizetype index) const
@@ -229,6 +240,8 @@ void IpcChatRoom::togglePin(const QString &messageId)
 void IpcChatRoom::addExistingMessage(ChatMessage *message, bool isUnread, bool isIndependent)
 {
     Q_CHECK_PTR(message);
+
+    m_suppressOwnReadMarker = false;
 
     if (isUnread) {
         setUnreadCount(notificationCount() + 1);
@@ -644,6 +657,9 @@ QDateTime IpcChatRoom::ownLastReadTimestamp() const
 
 void IpcChatRoom::setOwnLastReadTimestamp(const QDateTime &timestamp)
 {
+    if (m_suppressOwnReadMarker) {
+        return;
+    }
     if (m_ownLastReadTimestamp != timestamp) {
         m_ownLastReadTimestamp = timestamp;
         Q_EMIT ownLastReadTimestampChanged();
