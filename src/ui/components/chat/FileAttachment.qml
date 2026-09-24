@@ -24,7 +24,7 @@ ChatMessageAttachmentRectangle {
               : (control.content?.fileName
                  ? control.content.fileName
                  : qsTr("File"))
-        color: Theme.pickForegroundColor(control.color)
+        color: Theme.pickForegroundColor(Theme.backgroundSecondaryColor)
         icon.source: Icons.mailAttachment
         font {
             pixelSize: Theme.fontSizeNormal
