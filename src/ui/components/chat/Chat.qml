@@ -61,6 +61,33 @@ Item {
         function onOwnUserJoinStateChanged() {
             control.loadMessages()
         }
+
+        function onNotificationCountChanged() {
+            if (SelectionState.isMainWindowActive && control.bubbleTargetRoom) {
+                bubbleTimer.start()
+            }
+        }
+    }
+
+    Connections {
+        target: SelectionState
+
+        function onIsMainWindowActiveChanged() {
+            if (SelectionState.isMainWindowActive && control.bubbleTargetRoom) {
+                bubbleTimer.start()
+            }
+        }
+    }
+
+    Timer {
+        id: bubbleTimer
+        interval: 2000
+        onTriggered: () => {
+                         const room = control.bubbleTargetRoom
+                         if (room !== null && room === control.chatRoom && SelectionState.isMainWindowActive) {
+                             room.resetUnreadCount()
+                         }
+                     }
     }
 
     ChatButtonBar {
@@ -311,17 +338,6 @@ Item {
             leftMargin: 10
             rightMargin: 10
         }
-    }
-
-    Timer {
-        id: bubbleTimer
-        interval: 2000
-        onTriggered: () => {
-                         const room = control.bubbleTargetRoom
-                         if (room !== null && room === control.chatRoom) {
-                             room.resetUnreadCount()
-                         }
-                     }
     }
 
     FileDropArea {
