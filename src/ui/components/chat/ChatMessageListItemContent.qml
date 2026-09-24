@@ -239,7 +239,7 @@ Item {
             anchors.fill: parent
             radius: 8
             color: Theme.backgroundColor
-            opacity: 0.68
+            opacity: 0.9
         }
 
         Row {
