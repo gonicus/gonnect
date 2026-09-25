@@ -43,7 +43,7 @@ void GenericFavoriteHelper::updateIsFavorite()
     bool newIsFavorite = false;
 
     if (!m_contactString.isEmpty()) {
-        newIsFavorite = NumberStats::instance().isFavorite(m_contactString);
+        newIsFavorite = NumberStats::instance().isFavorite(m_contactString, m_contactType);
     }
 
     if (m_isFavorite != newIsFavorite) {
