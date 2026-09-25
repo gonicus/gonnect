@@ -430,6 +430,7 @@ qt_add_qml_module(gonnect
         ui/components/popups/EditChatRoom.qml
         ui/components/popups/EditChatMessage.qml
         ui/components/popups/EditStatusText.qml
+        ui/components/popups/EditUrlDialog.qml
         ui/components/popups/EmojiPickerPopup.qml
         ui/components/popups/FileSelectionOverview.qml
         ui/components/popups/FilteredEmojis.qml
@@ -756,6 +757,8 @@ qt_add_qml_module(gonnect
         # helper/SpellCheckHighlighter.cpp
         helper/TextFormatHelper.h
         helper/TextFormatHelper.cpp
+        helper/VideoCallHelper.h
+        helper/VideoCallHelper.cpp
 
         media/AudioManager.h
         media/AudioManager.cpp

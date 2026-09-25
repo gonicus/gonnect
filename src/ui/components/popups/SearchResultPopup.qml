@@ -293,7 +293,7 @@ Popup {
                             }
 
                             readonly property bool shallBeVisible: ViewHelper.isJitsiAvailable
-                                                                   && !ViewHelper.isActiveVideoCall
+                                                                   && !VideoCallHelper.hasActiveVideoCall
                                                                    && ViewHelper.isValidJitsiRoomName(control.immediateSearchPhrase)
 
                             onManuallyHovered: () => {
@@ -449,7 +449,7 @@ Popup {
                                 onTriggerPrimaryAction: () => {
                                     if (historyDelg.isPhoneNumber) {
                                         SIPCallManager.call("account0", historyDelg.url, "", identitySelector.currentValue);
-                                    } else if (!ViewHelper.isActiveVideoCall) {
+                                    } else if (!VideoCallHelper.hasActiveVideoCall) {
                                         ViewHelper.requestMeeting(historyDelg.url)
                                     }
                                     control.primaryActionTriggered()
@@ -478,7 +478,7 @@ Popup {
                                         onCallClicked: () => {
                                             if (historyDelg.isPhoneNumber) {
                                                 SIPCallManager.call("account0", historyDelg.url, "", identitySelector.currentValue);
-                                            } else if (!ViewHelper.isActiveVideoCall) {
+                                            } else if (!VideoCallHelper.hasActiveVideoCall) {
                                                 ViewHelper.requestMeeting(historyDelg.url)
                                             }
                                             control.primaryActionTriggered()
@@ -510,7 +510,7 @@ Popup {
                                         roomName: historyDelg.url
                                         width: 230
                                         onCallClicked: () => {
-                                            if (!ViewHelper.isActiveVideoCall) {
+                                            if (!VideoCallHelper.hasActiveVideoCall) {
                                                 ViewHelper.requestMeeting(historyDelg.url)
                                             }
                                         }
