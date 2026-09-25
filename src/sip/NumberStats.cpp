@@ -401,9 +401,12 @@ QStringList NumberStats::mostCalled(quint8 limit, bool includeFavorites) const
     return result;
 }
 
-bool NumberStats::isFavorite(const QString &phoneNumber) const
+bool NumberStats::isFavorite(const QString &phoneNumber, const ContactType contactType) const
 {
-    return m_favoriteLookup.contains(PhoneNumberUtil::canonicalNumber(phoneNumber));
+    const auto normalizedNumber = contactType == NumberStats::ContactType::PhoneNumber
+            ? PhoneNumberUtil::canonicalNumber(phoneNumber)
+            : phoneNumber;
+    return m_favoriteLookup.contains(normalizedNumber);
 }
 
 void NumberStats::toggleFavorite(const QString &phoneNumber,
