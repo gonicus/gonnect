@@ -144,6 +144,8 @@ public:
     /// Pin or unpin a message inside the room.
     void pinOrUnpinMessage(const QString &roomId, const QString &messageId, bool pin);
 
+    void setConferenceUrl(const QString &roomId, const QString &url);
+
     // IChatProvider interface
     virtual qint64 mediaSizeLimit() const override { return m_mediaSizeLimit; }
     virtual qsizetype chatRoomsCount() override;

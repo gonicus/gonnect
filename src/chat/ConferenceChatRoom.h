@@ -62,6 +62,7 @@ public:
     virtual bool isUserMemberOfRoom(const QString &userId) const override;
     virtual bool isUserInvitable(ChatUser *user) const override;
     virtual void clear() override;
+    virtual void requestSetConferenceUrl(const QString &) override { }
 
     /// Add a message object to be handled by this room. Takes ownership of that object.
     void addMessage(ChatMessage *chatMessageObj);

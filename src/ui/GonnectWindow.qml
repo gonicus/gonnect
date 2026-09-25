@@ -93,7 +93,7 @@ BaseWindow {
             const isOnCallPage = SelectionState.selectedPage.type === MainPageSelection.PageType.Call
             const isOnConferencePage = SelectionState.selectedPage.type === MainPageSelection.PageType.Conference
 
-            if (count && isOnCallPage && ViewHelper.isActiveVideoCall) {
+            if (count && isOnCallPage && VideoCallHelper.hasActiveVideoCall) {
                 control.showPage(SelectionState.conferencePageId(),
                                            MainPageSelection.PageType.Conference)
             } else if (count && isOnConferencePage && isConference) {
@@ -477,6 +477,9 @@ BaseWindow {
         target: ViewHelper
         function onUrlCopyDialogRequested(url, text) {
             drawerStackView.push("qrc:/qt/qml/base/ui/components/popups/UrlCopyDialog.qml", { url, text })
+        }
+        function onUrlEditDialogRequested(chatRoom : IChatRoom) {
+            drawerStackView.push("qrc:/qt/qml/base/ui/components/popups/EditUrlDialog.qml", { chatRoom })
         }
         function onShowDialPad() {
             const item = drawerStackView.push("qrc:/qt/qml/base/ui/components/controls/DtmfDialer.qml")

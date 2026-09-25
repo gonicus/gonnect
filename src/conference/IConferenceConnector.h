@@ -101,6 +101,7 @@ public:
     virtual QString displayName() const = 0;
     virtual QString conferenceName() const = 0;
     virtual QUrl conferenceUrl() const = 0;
+    virtual QUrl baseUrl() const = 0;
 
     enum class VideoQuality { AudioOnly, Minimum, Low, Average, High, Maximum };
     Q_ENUM(VideoQuality)

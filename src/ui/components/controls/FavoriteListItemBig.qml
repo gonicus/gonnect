@@ -339,7 +339,7 @@ Item {
             roomName: rowJitsiContextMenu.addr.addr
             width: 230
             onCallClicked: () => {
-                if (!ViewHelper.isActiveVideoCall) {
+                if (!VideoCallHelper.hasActiveVideoCall) {
                     ViewHelper.requestMeeting(rowJitsiContextMenu.addr.addr)
                 }
             }

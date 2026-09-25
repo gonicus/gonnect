@@ -58,6 +58,8 @@ public:
     // Interface methods
     ContactInfo remoteContactInfo() const override;
 
+    virtual QUrl baseUrl() const override;
+
     bool hasCapability(const Capability capabilityToCheck) const override;
     bool isInitialized() override { return m_isApiLoadingFinished; }
     bool isInConference() const override { return m_isInConference; }

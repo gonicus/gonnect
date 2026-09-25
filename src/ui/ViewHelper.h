@@ -35,7 +35,6 @@ class ViewHelper : public QObject
                        globalEmojiPickerPopupChanged FINAL)
     Q_PROPERTY(QObject *globalFilteredEmojiPickerPopup MEMBER m_globalFilteredEmojiPickerPopup
                        NOTIFY globalFilteredEmojiPickerPopupChanged FINAL)
-    Q_PROPERTY(bool isActiveVideoCall READ isActiveVideoCall NOTIFY isActiveVideoCallChanged FINAL)
     Q_PROPERTY(bool unsupportedPlatform READ isUnsupportedPlatform CONSTANT FINAL)
     Q_PROPERTY(bool canSyncSystemMute READ canSyncSystemMute CONSTANT FINAL)
     Q_PROPERTY(QString culturalSphereExtension READ culturalSphereExtension CONSTANT FINAL)
@@ -116,6 +115,7 @@ public:
     Q_INVOKABLE void respondRecoveryKey(const QString &id, const QString &key);
 
     void requestUrlCopyDialog(const QUrl &url, const QString &text);
+    Q_INVOKABLE void requestUrlEditDialog(IChatRoom *chatRoom);
 
     Q_INVOKABLE uint durationCallVisibleAfterEnd() const { return GONNECT_CALL_VISIBLE_AFTER_END; }
 
@@ -136,7 +136,6 @@ public:
 
     Q_INVOKABLE void requestExternalAppointment(const QString &link);
 
-    bool isActiveVideoCall() const { return m_isActiveVideoCall; }
     Q_INVOKABLE bool hasNonSilentCall() const;
 
     Q_INVOKABLE bool isBusyOnBusy() const;
@@ -162,7 +161,6 @@ public Q_SLOTS:
 
 private Q_SLOTS:
     void updateCurrentUser();
-    void updateIsActiveVideoCall();
 
 private:
     explicit ViewHelper(QObject *parent = nullptr);
@@ -182,7 +180,6 @@ private:
     QObject *m_topDrawer = nullptr;
     QObject *m_globalEmojiPickerPopup = nullptr;
     QObject *m_globalFilteredEmojiPickerPopup = nullptr;
-    bool m_isActiveVideoCall = false;
 
 Q_SIGNALS:
     void activateSearch();
@@ -193,7 +190,6 @@ Q_SIGNALS:
     void topDrawerChanged();
     void globalEmojiPickerPopupChanged();
     void globalFilteredEmojiPickerPopupChanged();
-    void isActiveVideoCallChanged();
 
     void showSettings();
     void showAudioSettings();
@@ -242,6 +238,7 @@ Q_SIGNALS:
     void userVerificationResponded(QString id, bool isAccepted);
 
     void urlCopyDialogRequested(QUrl url, QString text);
+    void urlEditDialogRequested(IChatRoom *chatRoom);
 };
 
 class ViewHelperWrapper
