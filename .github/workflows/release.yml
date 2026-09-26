@@ -16,7 +16,7 @@ env:
 
 jobs:
   semantic-release:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     name: Semantic Release
     # A release will only be triggered on the release, freeze and hotfix branches.
     if: github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/heads/freeze') || startsWith(github.ref, 'refs/heads/hotfix')
