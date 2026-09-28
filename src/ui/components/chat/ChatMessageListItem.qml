@@ -621,50 +621,8 @@ Item {
                 required property bool isOwnReaction
                 required property list<ChatUser> users
 
-                Rectangle {
-                    id: reactionBg
-                    radius: 6
-                    anchors.fill: parent
-                    color: rDelg.isOwnReaction
-                           ? Theme.backgroundOffsetColor
-                           : (rDelg.hovered
-                              ? Theme.backgroundOffsetHoveredColor
-                              : Theme.backgroundSecondaryColor)
-                     border {
-                         width: 1
-                         color: reactionDelg.isOwnReaction
-                                ? Theme.highlightColor
-                                : Theme.borderColor
-                     }
-                }
-
-                Label {
-                    id: reactionLabel
-                    text: rDelg.reaction
-                    font {
-                        family: "Noto Color Emoji"
-                        pixelSize: Theme.fontSizeNormal
-                    }
-                    anchors {
-                        left: parent.left
-                        leftMargin: 4
-                        verticalCenter: parent.verticalCenter
-                        verticalCenterOffset: 1
-                    }
-                }
-
-                Label {
-                    id: reactionCountLabel
-                    text: rDelg.count
-                    anchors {
-                        left: reactionLabel.right
-                        leftMargin: 4
-                        verticalCenter: parent.verticalCenter
-                    }
-                }
-
                 ToolTip.text: rDelg.users.map(user => user.computedName).join(", ")
-                ToolTip.visible: rDelg.hovered
+                ToolTip.visible: reactionDelgHoverHandler.hovered
                 ToolTip.toolTip.y: rDelg.height + Theme.d
 
                 HoverHandler {
