@@ -55,6 +55,8 @@ class IChatRoom : public QObject
     Q_PROPERTY(QDateTime ownLastReadTimestamp READ ownLastReadTimestamp NOTIFY
                        ownLastReadTimestampChanged FINAL)
 
+    Q_PROPERTY(QString conferenceUrl READ conferenceUrl NOTIFY conferenceUrlChanged FINAL)
+
 public:
     enum class UserRoomState { Unjoined, Joined, Invited, Knocked, Banned };
     Q_ENUM(UserRoomState)
@@ -71,6 +73,7 @@ public:
         CanKick = 1 << 2,
         CanBan = 1 << 3,
         CanPinMessages = 1 << 4,
+        CanEditConferenceUrl = 1 << 5
     };
     Q_ENUM(Permission)
     Q_DECLARE_FLAGS(Permissions, Permission)
@@ -91,6 +94,10 @@ public:
     virtual IChatRoom::Permissions permissions() = 0;
     Q_INVOKABLE virtual void resetUnreadCount() = 0;
 
+    /// Mark this room as read to control the "unread messages" mark. This is different from
+    /// resetting the unread count.
+    Q_INVOKABLE virtual void markAsRead() = 0;
+
     bool isLoadingMessageHistory() const { return m_isLoadingMessageHistory; }
     void setIsLoadingMessageHistory(bool value);
 
@@ -102,6 +109,10 @@ public:
 
     RoomSettings roomSettings() const { return m_roomSettings; }
     void setRoomSettings(const RoomSettings &roomSettings);
+
+    QString conferenceUrl() const { return m_conferenceUrl; }
+    void setConferenceUrl(const QString &url);
+    Q_INVOKABLE virtual void requestSetConferenceUrl(const QString &url) = 0;
 
     /// List of chat messages of this room, sorted by timestamp ascending
     virtual QList<ChatMessage *> chatMessages() const = 0;
@@ -225,6 +236,7 @@ private:
     QDateTime m_latestMessageDateTime;
     bool m_isLoadingMessageHistory = false;
     bool m_isCompletelyLoaded = false;
+    QString m_conferenceUrl;
 
 Q_SIGNALS:
     void roomSettingsChanged();
@@ -247,6 +259,7 @@ Q_SIGNALS:
     void joinedChatUserCountChanged();
     void readMarkersChanged();
     void ownLastReadTimestampChanged();
+    void conferenceUrlChanged();
 
     /// Send when a chat message has been added. index is the one in the list returned by
     /// chatMessages(). Ownership remains in this room object.

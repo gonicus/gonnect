@@ -33,11 +33,13 @@ public:
     virtual IChatRoom::JoinRule joinRule() override { return m_joinRule; }
     virtual qsizetype notificationCount() override { return m_unreadCount; }
     virtual IChatRoom::Permissions permissions() override { return m_permissions; }
+    virtual void requestSetConferenceUrl(const QString &url) override;
 
     virtual bool isInitiallyLoaded() const override { return m_isInitiallyLoaded; }
     virtual void loadMessages() override;
 
     virtual void resetUnreadCount() override;
+    virtual void markAsRead() override;
     virtual QList<ChatMessage *> chatMessages() const override { return m_messages; }
     virtual QList<ChatMessage *> pinnedChatMessages() const override { return m_pinnedMessages; }
     virtual qsizetype pinnedChatMessageCount() const override { return m_pinnedMessages.size(); }
@@ -131,4 +133,5 @@ private:
     QHash<QString, QDateTime> m_readMarkers;
 
     QDateTime m_ownLastReadTimestamp;
+    bool m_suppressOwnReadMarker = false;
 };

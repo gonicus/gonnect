@@ -11,10 +11,12 @@ Menu {
     signal leaveRoomTriggered
     signal editRoomTriggered
     signal inviteUsersTriggered
+    signal editConferenceUrlTriggered
 
     property bool toggleFavoriteVisible: true
     property bool editRoomVisible: true
     property bool inviteUsersVisible: true
+    property bool editConferenceUrlVisible: false
 
     HideableMenuItem {
         visible: control.toggleFavoriteVisible
@@ -35,6 +37,13 @@ Menu {
         text: qsTr("Invite users...")
         icon.source: Icons.listAdd
         onTriggered: () => control.inviteUsersTriggered()
+    }
+
+    HideableMenuItem {
+        visible: control.editConferenceUrlVisible
+        text: qsTr("Edit conference url...")
+        icon.source: Icons.videoCall
+        onTriggered: () => control.editConferenceUrlTriggered()
     }
 
     HideableMenuItem {
