@@ -481,7 +481,7 @@ Item {
                 onDoubleTapped: () => {
                     if (delg.isSIPCall) {
                         SIPCallManager.call(delg.account, delg.remoteUrl, delg.contactId)
-                    } else if (delg.isJitsiMeetCall && !ViewHelper.isActiveVideoCall) {
+                    } else if (delg.isJitsiMeetCall && !VideoCallHelper.hasActiveVideoCall) {
                         ViewHelper.requestMeeting(delg.remoteUrl)
                     }
                 }

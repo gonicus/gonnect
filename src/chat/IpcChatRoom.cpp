@@ -461,6 +461,11 @@ QString IpcChatRoom::avatarPath()
     return "";
 }
 
+void IpcChatRoom::requestSetConferenceUrl(const QString &url)
+{
+    ipcDispatcher()->setConferenceUrl(id(), url);
+}
+
 void IpcChatRoom::loadMessages()
 {
     if (isLoadingMessageHistory() || isCompletelyLoaded()) {
