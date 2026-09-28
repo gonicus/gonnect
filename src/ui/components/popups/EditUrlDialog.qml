@@ -24,7 +24,7 @@ Item {
         id: internal
 
         readonly property string trimmedUrl: urlField.text.trim()
-        readonly property bool isModified: internal.trimmedUrl !== control.url
+        readonly property bool isModified: !!control.chatRoom && internal.trimmedUrl !== control.chatRoom.conferenceUrl
 
         function commitChanges() {
             if (saveButton.enabled && internal.isModified) {
@@ -86,9 +86,24 @@ Item {
         Component.onCompleted: initialFocusTimer.start()
 
         Keys.onPressed: keyEvent => {
-            if ((keyEvent.modifiers & Qt.ControlModifier) && keyEvent.key === Qt.Key_Return) {
-                saveButton.click()
-            }
+                            if ((keyEvent.modifiers & Qt.ControlModifier) && keyEvent.key === Qt.Key_Return) {
+                                keyEvent.accepted = true
+                                saveButton.click()
+                            }
+                        }
+    }
+
+    Label {
+        id: noConnectorHintLabel
+        visible: internal.trimmedUrl !== "" && !VideoCallHelper.hasMatchingConferenceConnector(internal.trimmedUrl)
+        wrapMode: Label.Wrap
+        color: Theme.secondaryTextColor
+        text: qsTr("This URL does not belong to a configured conference server and cannot be joined from GOnnect.")
+        anchors {
+            top: urlField.bottom
+            left: urlField.left
+            right: urlField.right
+            topMargin: Theme.d
         }
     }
 

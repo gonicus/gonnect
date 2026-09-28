@@ -159,7 +159,7 @@ Item {
 
             Accessible.name: qsTr("Start conference")
 
-            onClicked: () => VideoCallHelper.joinOrStartConfernece(control.chatRoom?.conferenceUrl)
+            onClicked: () => VideoCallHelper.joinOrStartConference(control.chatRoom?.conferenceUrl)
         }
 
         BarButton {
@@ -168,7 +168,9 @@ Item {
             toggled: true
             toggledColor: Theme.redColor
             iconPath: Icons.callStop
-            visible: !!internal.activeConferenceConnector && control.chatRoom.conferenceUrl === VideoCallHelper.activeVideoCall
+            visible: !!internal.activeConferenceConnector
+                     && VideoCallHelper.activeVideoCallUrl !== ""
+                     && VideoCallHelper.isActiveVideoCallUrl(control.chatRoom.conferenceUrl)
 
             Accessible.name: qsTr("Leave conference")
 
@@ -178,7 +180,7 @@ Item {
                 if (conn.ownRole === ConferenceUser.Role.Moderator && conn.numberOfUsers > 1) {
                     leaveMenu.popup(leaveConferenceButton, -leaveMenu.width + leaveConferenceButton.width, leaveConferenceButton.height)
                 } else {
-                    internal.activeConferenceConnector.leaveConference()
+                    conn.leaveConference()
                 }
             }
 

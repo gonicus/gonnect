@@ -21,9 +21,10 @@ public:
         return _instance;
     }
 
-    Q_INVOKABLE void joinOrStartConfernece(const QString &url) const;
+    Q_INVOKABLE void joinOrStartConference(const QString &url) const;
     Q_INVOKABLE bool hasMatchingConferenceConnector(const QString &url) const;
     Q_INVOKABLE IConferenceConnector *matchingConferenceConnector(const QString &url) const;
+    Q_INVOKABLE bool isActiveVideoCallUrl(const QString &url) const;
 
 private:
     explicit VideoCallHelper(QObject *parent = nullptr);

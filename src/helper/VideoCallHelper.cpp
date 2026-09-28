@@ -26,9 +26,8 @@ VideoCallHelper::VideoCallHelper(QObject *parent) : QObject{ parent }
 QUrl VideoCallHelper::normalizeUrl(const QUrl &url) const
 {
     const auto str = url.toString(QUrl::FullyEncoded).trimmed();
-    auto normUrl = QUrl::fromEncoded(str.toUtf8(), QUrl::TolerantMode);
-    normUrl = url.adjusted(QUrl::NormalizePathSegments);
-    return normUrl;
+    const auto normUrl = QUrl::fromEncoded(str.toUtf8(), QUrl::TolerantMode);
+    return normUrl.adjusted(QUrl::NormalizePathSegments);
 }
 
 bool VideoCallHelper::isPrefix(const QUrl &url, const QUrl &possiblePrefix) const
@@ -57,7 +56,7 @@ bool VideoCallHelper::isPrefix(const QUrl &url, const QUrl &possiblePrefix) cons
     }
 
     for (qsizetype i = 0; i < segPrefix.size(); ++i) {
-        if (segPrefix.at(i) != segFull.at(i)) {
+        if (segPrefix.at(i).compare(segFull.at(i), Qt::CaseInsensitive) != 0) {
             return false;
         }
     }
@@ -98,6 +97,18 @@ IConferenceConnector *VideoCallHelper::matchingConferenceConnector(const QString
     return nullptr;
 }
 
+bool VideoCallHelper::isActiveVideoCallUrl(const QString &url) const
+{
+    if (url.isEmpty() || m_activeVideoCallUrl.isEmpty()) {
+        return false;
+    }
+
+    const QUrl candidate(url);
+    const QUrl active(m_activeVideoCallUrl);
+
+    return isPrefix(candidate, active) && isPrefix(active, candidate);
+}
+
 void VideoCallHelper::updateActiveVideoCall()
 {
 
@@ -127,7 +138,7 @@ void VideoCallHelper::updateActiveVideoCall()
     }
 }
 
-void VideoCallHelper::joinOrStartConfernece(const QString &url) const
+void VideoCallHelper::joinOrStartConference(const QString &url) const
 {
     if (auto *connector = matchingConferenceConnector(url)) {
 
