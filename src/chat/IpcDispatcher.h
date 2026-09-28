@@ -127,7 +127,7 @@ public:
     /// Send a message in the specified room with the file as an attachment. The file must
     /// have already been uploaded.
     void sendFile(const QString &roomId, const QString &filePath,
-                  const QString &originalFileName = "");
+                  const QString &originalFileName = "", const QString &tempEventId = "");
 
     /// Call to accept or reject a preceeding invitation to a room.
     virtual void respondToInvitation(const QString &roomId, bool acceptInvitation) override;
@@ -143,6 +143,8 @@ public:
 
     /// Pin or unpin a message inside the room.
     void pinOrUnpinMessage(const QString &roomId, const QString &messageId, bool pin);
+
+    void setConferenceUrl(const QString &roomId, const QString &url);
 
     // IChatProvider interface
     virtual qint64 mediaSizeLimit() const override { return m_mediaSizeLimit; }
@@ -278,6 +280,8 @@ private:
 
     /// Dispatch the response container and its content payload.
     void processResponse(const de::gonicus::gonnect::ResponseContainer &responseContainer);
+
+    void markPendingMessageFailed(const QString &roomId, const QString &tempEventId);
 
     bool hasOwnUserMention(const ChatMessage &message) const;
     ChatMessage *createOrUpdateReceivedChatMessage(const de::gonicus::gonnect::Message &message,

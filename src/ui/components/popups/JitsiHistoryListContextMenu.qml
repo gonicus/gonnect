@@ -18,7 +18,7 @@ Menu {
     Action {
         id: startAction
         text: qsTr('Start conference')
-        enabled: !ViewHelper.isActiveVideoCall
+        enabled: !VideoCallHelper.hasActiveVideoCall
         onTriggered: () => control.callClicked()
 
         Accessible.role: Accessible.MenuItem

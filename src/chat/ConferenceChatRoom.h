@@ -25,6 +25,7 @@ public:
     virtual void loadMessages() override { }
     virtual qsizetype notificationCount() override;
     virtual void resetUnreadCount() override;
+    virtual void markAsRead() override;
     virtual IChatRoom::JoinRule joinRule() override;
     virtual IChatRoom::Permissions permissions() override;
     virtual QList<ChatMessage *> chatMessages() const override { return m_messages; }
@@ -61,6 +62,7 @@ public:
     virtual bool isUserMemberOfRoom(const QString &userId) const override;
     virtual bool isUserInvitable(ChatUser *user) const override;
     virtual void clear() override;
+    virtual void requestSetConferenceUrl(const QString &) override { }
 
     /// Add a message object to be handled by this room. Takes ownership of that object.
     void addMessage(ChatMessage *chatMessageObj);
