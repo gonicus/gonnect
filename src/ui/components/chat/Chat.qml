@@ -17,15 +17,23 @@ Item {
     property IChatRoom bubbleTargetRoom
 
     readonly property int capabilities: control.chatProvider?.capabilities ?? 0
+    readonly property alias isThreadMode: chatMessageList.isThreadMode
 
     function giveFocus() {
         chatMessageBox.giveFocus()
     }
 
-    function loadMessages() {
+    function loadMessages(threadId : string) {
         const room = control.chatRoom
-        if (room && !room.isInitiallyLoaded && room.ownUserJoinState === IChatRoom.UserRoomState.Joined) {
-            room.loadMessages()
+        if (!room || room.ownUserJoinState !== IChatRoom.UserRoomState.Joined) {
+            return
+        }
+        if (threadId.length > 0) {
+            if (!room.isCompletelyLoaded(threadId)) {
+                room.loadMessages(threadId)
+            }
+        } else if (!room.isInitiallyLoaded) {
+            room.loadMessages(threadId)
         }
     }
 
@@ -52,14 +60,15 @@ Item {
 
                            control.previousChatRoom = newRoom
                            relatedMsg.chatMessage = null
-                           control.loadMessages()
+
+                           control.loadMessages(chatMessageList.threadId)
                        }
 
     Connections {
         target: control.chatRoom
 
         function onOwnUserJoinStateChanged() {
-            control.loadMessages()
+            control.loadMessages(chatMessageList.threadId)
         }
 
         function onNotificationCountChanged() {
@@ -92,15 +101,16 @@ Item {
 
     ChatButtonBar {
         id: messageListCardHeading
-        height: messageListCardHeading.implicitHeight
+        visible: control.showTitleBar && !!control.chatRoom
         shallBeVisible: control.showTitleBar && !!control.chatRoom
         chatProvider: control.chatProvider
         chatRoom: control.chatRoom
+        threadId: chatMessageList.threadId
         anchors {
             left: parent.left
             right: parent.right
-            top: parent.top
         }
+        onCloseThreadRequested: () => chatMessageList.threadId = ""
     }
 
     Rectangle {
@@ -162,6 +172,8 @@ Item {
                                 control.chatProvider.retrySendMessage(control.chatRoom.id, messageId)
                             }
                         }
+
+        onThreadIdChanged: () => control.loadMessages(chatMessageList.threadId)
     }
 
     Item {
@@ -314,7 +326,8 @@ Item {
                 } else {
                     // Send new message
                     control.chatRoom.sendMessage(chatMessageBox.text,
-                                                         relatedMsg.chatMessage ? relatedMsg.chatMessage.eventId : "")
+                                                 relatedMsg.chatMessage ? relatedMsg.chatMessage.eventId : "",
+                                                 chatMessageList.threadId)
                     control.chatRoom.markAsRead()
                 }
 
