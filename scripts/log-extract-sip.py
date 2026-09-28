@@ -7,6 +7,15 @@ Handles multiple log formats:
   - Journalctl: Mai 26 16:00:26 host app[pid]: 16:00:26.071 gonnect.pjsip: ...
   - ISO date + local TZ: 2026-03-19 13:51:15.883 Mitteleuropäische Zeit ...
 
+Two message layouts are supported:
+  - Legacy/inline: the whole SIP message follows the pjsua header line as raw
+    text and is terminated by "--end msg--".
+  - Split (SIPLogWriter): the pjsua header line stays in gonnect.pjsip, every
+    SIP line becomes its own log line in category gonnect.sip.trace, and
+    "--end msg--" is written as an empty gonnect.sip.trace line. Because the
+    writer splits on [\r\n]+, the blank line separating headers from body is
+    lost and gets reconstructed here from Content-Length.
+
 Supports IPv4 and IPv6 addresses.
 
 Output formats (--format): pcap (default), ascii, or both.
@@ -39,9 +48,10 @@ TS_RE = re.compile(
     r"\.(\d+)"                    # fractional seconds
 )
 
-# pjsua log-line header
+# pjsua log-line header. The pjsua source-file column ("pjsua_core.c") is only
+# present in raw pjsua dumps; SIPLogWriter forwards the bare message.
 SIP_START_LOG_LINE_RE = re.compile(
-    r".*?pjsua_core\.c\s+"
+    r".*?(?:pjsua_core\.c\s+)?"
     r"\.{0,12}(TX|RX)\s+"
     r"\d+\s+bytes\s+"
     r"(?:Request\s+msg|Response\s+msg)\s+"
@@ -53,6 +63,19 @@ LOG_LINE_RE = re.compile(
     r"\.(\d+)\s"                    # fractional seconds
     r"gonnect\."
 )
+
+# One SIP line logged under the gonnect.sip.trace category. The message pattern
+# puts an ANSI reset between the category and the message, so the separator is
+# "<category>: " + <ansi> + " "; everything after that is verbatim SIP (leading
+# whitespace of folded headers must survive).
+TRACE_LINE_RE = re.compile(
+    r"gonnect\.sip\.trace:(?:[ \t]*(?:\x1b\[[0-9;]*[a-zA-Z])+)?[ \t]?"
+)
+
+# Header field line (RFC 3261 token followed by ':') or a folded continuation
+HEADER_LINE_RE = re.compile(r"^[!#$%&'*+\-.^_`|~0-9A-Za-z]+\s*:")
+
+CONTENT_LENGTH_RE = re.compile(r"(?i)^(?:content-length|l)\s*:\s*(\d+)\s*$")
 
 # Full date + time at the start of a log line
 # Format 1: 2026-05-21 13:37:16.128 CEST
@@ -85,6 +108,18 @@ def _clean_line(line: str) -> str:
     line = ANSI_RE.sub("", line)
     line = JOURNAL_RE.sub("", line)
     return line
+
+
+def _trace_content(raw_line: str) -> str | None:
+    """Return the SIP line carried by a gonnect.sip.trace log line, else None.
+
+    An empty string means the "--end msg--" marker (SIPLogWriter logs it as an
+    empty message).
+    """
+    m = TRACE_LINE_RE.search(raw_line)
+    if not m:
+        return None
+    return ANSI_RE.sub("", raw_line[m.end():]).rstrip("\r\n")
 
 
 def _parse_ts(line: str) -> tuple[int, int]:
@@ -141,6 +176,45 @@ def _parse_dir_ip(line: str) -> tuple[str, str, int]:
     return "", "", 0
 
 
+def _split_headers_body(lines: list[str]) -> tuple[list[str], list[str]]:
+    """Split a message whose header/body separator was lost by the line split.
+
+    Primary strategy is Content-Length: accumulate lines from the end until the
+    CRLF-joined length matches the announced body size (a tolerance of 2 covers
+    a body logged without its trailing CRLF). If that fails (no/garbled
+    Content-Length, truncated log), fall back to the first line after the start
+    line that is neither a header field nor a folded continuation.
+    """
+    content_length = None
+    for line in lines:
+        m = CONTENT_LENGTH_RE.match(line)
+        if m:
+            content_length = int(m.group(1))
+            break
+
+    if content_length == 0:
+        return lines, []
+
+    if content_length:
+        sizes = [len(line.encode("utf-8", "replace")) + 2 for line in lines]
+        total = 0
+        for i in range(len(lines) - 1, 0, -1):
+            total += sizes[i]
+            if total >= content_length:
+                if total <= content_length + 2:
+                    return lines[:i], lines[i:]
+                break
+
+    for i, line in enumerate(lines):
+        if i == 0:
+            continue
+        if HEADER_LINE_RE.match(line) or line[:1] in (" ", "\t"):
+            continue
+        return lines[:i], lines[i:]
+
+    return lines, []
+
+
 def _rebuild_message(lines: list[str]) -> str:
     """Reassemble a SIP message preserving the header/body separator.
 
@@ -148,6 +222,9 @@ def _rebuild_message(lines: list[str]) -> str:
     Leading/trailing blank lines (e.g. the ones before "--end msg--") are
     dropped, but the single separator and the body are kept verbatim so the
     body length stays consistent with the Content-Length header.
+
+    In the split log layout no blank line survives, so the separator position is
+    recovered via _split_headers_body().
     """
     lines = list(lines)
     while lines and not lines[0].strip():
@@ -157,7 +234,7 @@ def _rebuild_message(lines: list[str]) -> str:
 
     sep_idx = next((i for i, l in enumerate(lines) if not l.strip()), None)
     if sep_idx is None:
-        headers, body = lines, []
+        headers, body = _split_headers_body(lines)
     else:
         headers = lines[:sep_idx]
         body = lines[sep_idx + 1:]
@@ -182,36 +259,65 @@ def extract_sip_messages(log_path: str) -> list[tuple[str, int, int, str, str, i
     known_local_ip = "127.0.0.1"
     known_local_port = 5060
     in_message = False
+    split_mode = False
+
+    def finish() -> None:
+        """Close the message collected so far and append it to the results."""
+        nonlocal in_message, split_mode, current_lines
+        nonlocal known_local_ip, known_local_port
+
+        in_message = False
+        split_mode = False
+        lines, current_lines = current_lines, []
+        if not any(l.strip() for l in lines):
+            return
+
+        via_ip, via_port = _parse_via_host(lines)
+
+        if via_ip != current_peer_ip:
+            local_ip, local_port = via_ip, via_port
+            known_local_ip, known_local_port = local_ip, local_port
+        else:
+            local_ip, local_port = known_local_ip, known_local_port
+
+        if current_direction == "TX":
+            src_ip, src_port, dst_ip, dst_port = (
+                local_ip, local_port, current_peer_ip, current_peer_port
+            )
+        else:
+            src_ip, src_port, dst_ip, dst_port = (
+                current_peer_ip, current_peer_port, local_ip, local_port
+            )
+
+        raw_sip = _rebuild_message(lines)
+        results.append((raw_sip, current_ts_sec, current_ts_usec, current_direction,
+                        src_ip, src_port, dst_ip, dst_port))
 
     with open(log_path, "r", encoding="utf-8", errors="replace") as f:
         for raw_line in f:
-            line = raw_line.rstrip("\r\n")
-            line = _clean_line(line)
+            raw_line = raw_line.rstrip("\r\n")
+            trace = _trace_content(raw_line)
+
+            if trace is not None:
+                # Split layout: one SIP line per log line, empty line = end marker
+                if not in_message:
+                    continue    # trace line whose header line is missing/truncated
+                split_mode = True
+                if not trace.strip() or trace.strip() == END_MARKER:
+                    finish()
+                else:
+                    current_lines.append(trace)
+                continue
+
+            line = _clean_line(raw_line)
+
+            if in_message and split_mode:
+                # Any other category ends a split message (marker lost/interleaved)
+                finish()
 
             if in_message:
                 if line.strip() == END_MARKER or LOG_LINE_RE.match(line):
-                    in_message = False
-
-                    via_ip, via_port = _parse_via_host(current_lines)
-
-                    if via_ip != current_peer_ip:
-                        local_ip, local_port = via_ip, via_port
-                        known_local_ip, known_local_port = local_ip, local_port
-                    else:
-                        local_ip, local_port = known_local_ip, known_local_port
-
-                    if current_direction == "TX":
-                        src_ip, src_port, dst_ip, dst_port = (
-                            local_ip, local_port, current_peer_ip, current_peer_port
-                        )
-                    else:
-                        src_ip, src_port, dst_ip, dst_port = (
-                            current_peer_ip, current_peer_port, local_ip, local_port
-                        )
-
-                    raw_sip = _rebuild_message(current_lines)
-                    results.append((raw_sip, current_ts_sec, current_ts_usec, current_direction, src_ip, src_port, dst_ip, dst_port))
-                    current_lines = []
+                    finish()
                 else:
                     current_lines.append(line)
 
@@ -222,7 +328,8 @@ def extract_sip_messages(log_path: str) -> list[tuple[str, int, int, str, str, i
                 current_ts_sec, current_ts_usec = _parse_ts(line)
                 continue
 
-
+    if in_message:
+        finish()
 
     return results
 

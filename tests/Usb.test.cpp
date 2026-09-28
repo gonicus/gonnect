@@ -108,13 +108,14 @@ void UsbTest::testTeamsIgnoresNonTeams()
 void UsbTest::testRealDescriptors_data()
 {
     QTest::addColumn<QString>("file");
-    QTest::addColumn<bool>("expectHeadset"); // has a top-level Telephony/Headset (0x0B/0x05) collection
+    QTest::addColumn<bool>(
+            "expectHeadset"); // has a top-level Telephony/Headset (0x0B/0x05) collection
     QTest::addColumn<bool>("hasTeamsPage"); // has a vendor (0xFF99) usage page at all
 
     // Classification is derived from the descriptor's marker bytes (05 0B 09 05 A1 01 for the
     // headset application collection, 06 99 FF for the Teams vendor page) — independent of the
     // parser's internal computation, so these rows are not circular.
-    QTest::newRow("Logitech G535 Wireless Gaming Headset")   << "046d-0ac4.bin" << false << false;
+    QTest::newRow("Logitech G535 Wireless Gaming Headset") << "046d-0ac4.bin" << false << false;
     QTest::newRow("Plantronics Poly BT700") << "047f-02e6.bin" << true << true;
     QTest::newRow("Plantronics Poly Voyager Base CD") << "047f-02ec.bin" << true << false;
     QTest::newRow("Plantronics Blackwire C5220") << "047f-c053.bin" << true << true;

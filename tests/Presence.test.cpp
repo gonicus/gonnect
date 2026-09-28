@@ -105,8 +105,7 @@ void PresenceTest::testStateTextJoin()
     aggregator.registerStateProvider(&first);
     aggregator.registerStateProvider(&second);
 
-    QCOMPARE(textParts(aggregator.stateText()),
-             (QStringList{ "Back at 3pm", "In a meeting" }));
+    QCOMPARE(textParts(aggregator.stateText()), (QStringList{ "Back at 3pm", "In a meeting" }));
 }
 
 void PresenceTest::testStateTextSkipsEmpty()
