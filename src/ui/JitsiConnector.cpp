@@ -1195,6 +1195,11 @@ ContactInfo JitsiConnector::remoteContactInfo() const
     return contactInfo;
 }
 
+QUrl JitsiConnector::baseUrl() const
+{
+    return GlobalInfo::instance().jitsiUrl();
+}
+
 bool JitsiConnector::hasCapability(const Capability capabilityToCheck) const
 {
     const static QSet<Capability> m_capabilites = {

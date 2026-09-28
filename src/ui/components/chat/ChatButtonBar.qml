@@ -28,7 +28,11 @@ Item {
     QtObject {
         id: internal
 
-        property bool hasActiveCall
+        readonly property IConferenceConnector activeConferenceConnector: control.chatRoom && control.chatRoom.conferenceUrl
+                                                                          ? VideoCallHelper.matchingConferenceConnector(control.chatRoom.conferenceUrl)
+                                                                          : null
+
+            property bool hasActiveCall
 
         Component.onCompleted: () => internal.updateHasActiveCall()
 
@@ -138,9 +142,65 @@ Item {
                            chatRoomMenuComponent.createObject(optionsButton, {
                                                                   toggleFavoriteVisible: false,
                                                                   editRoomVisible: !!(Number(control.chatRoom?.permissions ?? 0) & IChatRoom.Permission.CanEdit),
-                                                                  inviteUsersVisible: !!(Number(control.chatRoom?.permissions ?? 0) & IChatRoom.Permission.CanInvite)
+                                                                  inviteUsersVisible: !!(Number(control.chatRoom?.permissions ?? 0) & IChatRoom.Permission.CanInvite),
+                                                                  editConferenceUrlVisible: !!(Number(control.chatRoom?.permissions ?? 0) & IChatRoom.Permission.CanEditConferenceUrl)
                                                               }).popup()
                        }
+        }
+
+        BarButton {
+            id: startConferenceButton
+            text: qsTr("Conference")
+            toggled: true
+            toggledColor: Theme.greenColor
+            iconPath: Icons.videoCall
+            enabled: !VideoCallHelper.hasActiveVideoCall
+            visible: !!internal.activeConferenceConnector && !leaveConferenceButton.visible
+
+            Accessible.name: qsTr("Start conference")
+
+            onClicked: () => VideoCallHelper.joinOrStartConference(control.chatRoom?.conferenceUrl)
+        }
+
+        BarButton {
+            id: leaveConferenceButton
+            text: qsTr("Leave")
+            toggled: true
+            toggledColor: Theme.redColor
+            iconPath: Icons.callStop
+            visible: !!internal.activeConferenceConnector
+                     && VideoCallHelper.activeVideoCallUrl !== ""
+                     && VideoCallHelper.isActiveVideoCallUrl(control.chatRoom.conferenceUrl)
+
+            Accessible.name: qsTr("Leave conference")
+
+            onClicked: () => {
+                const conn = internal.activeConferenceConnector
+
+                if (conn.ownRole === ConferenceUser.Role.Moderator && conn.numberOfUsers > 1) {
+                    leaveMenu.popup(leaveConferenceButton, -leaveMenu.width + leaveConferenceButton.width, leaveConferenceButton.height)
+                } else {
+                    conn.leaveConference()
+                }
+            }
+
+            Menu {
+                id: leaveMenu
+
+                MenuItem {
+                    text: qsTr("Leave conference")
+                    onClicked: () => {
+                        internal.activeConferenceConnector.leaveConference()
+                    }
+                }
+
+                MenuItem {
+                    text: qsTr("End conference for all")
+                    onClicked: () => {
+                        internal.activeConferenceConnector.terminateConference()
+                    }
+                }
+            }
         }
 
         BarButton {
@@ -204,6 +264,7 @@ Item {
                                       const chatProvider = control.chatProvider
                                       item.accepted.connect(() => chatProvider.requestRoomLeave(roomId))
                                   }
+            onEditConferenceUrlTriggered: () => ViewHelper.requestUrlEditDialog(control.chatRoom)
         }
     }
 

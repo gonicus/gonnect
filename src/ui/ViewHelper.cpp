@@ -33,9 +33,6 @@ Q_LOGGING_CATEGORY(lcViewHelper, "gonnect.app.ui.ViewHelper")
 
 ViewHelper::ViewHelper(QObject *parent) : QObject{ parent }
 {
-    connect(&GlobalCallState::instance(), &GlobalCallState::globalCallStateChanged, this,
-            &ViewHelper::updateIsActiveVideoCall);
-
     m_ringerTimer.setSingleShot(true);
     m_ringerTimer.setInterval(3s);
     m_ringerTimer.callOnTimeout(this, &ViewHelper::stopTestPlayRingTone);
@@ -284,25 +281,6 @@ void ViewHelper::updateCurrentUser()
     }
 }
 
-void ViewHelper::updateIsActiveVideoCall()
-{
-    bool hasJitsiCall = false;
-    const auto &callObjects = GlobalCallState::instance().globalCallStateObjects();
-
-    for (const auto obj : callObjects) {
-        const auto jitsiConn = qobject_cast<IConferenceConnector *>(obj);
-        if (jitsiConn && jitsiConn->callState() & ICallState::State::CallActive) {
-            hasJitsiCall = true;
-            break;
-        }
-    }
-
-    if (m_isActiveVideoCall != hasJitsiCall) {
-        m_isActiveVideoCall = hasJitsiCall;
-        Q_EMIT isActiveVideoCallChanged();
-    }
-}
-
 QString ViewHelper::culturalSphereExtension() const
 {
     const auto sphere = tr("QT_CULTURAL_SPHERE", "QGuiApplication");
@@ -388,6 +366,11 @@ void ViewHelper::respondRecoveryKey(const QString &id, const QString &key)
 void ViewHelper::requestUrlCopyDialog(const QUrl &url, const QString &text)
 {
     Q_EMIT urlCopyDialogRequested(url, text);
+}
+
+void ViewHelper::requestUrlEditDialog(IChatRoom *chatRoom)
+{
+    Q_EMIT urlEditDialogRequested(chatRoom);
 }
 
 void ViewHelper::requestRecoveryKey(const QString &id, const QString &displayName)

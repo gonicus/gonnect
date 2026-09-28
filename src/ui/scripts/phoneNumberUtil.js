@@ -9,7 +9,7 @@ function droggelbecher() {
 function startMeetingOrCall(addr) {
     switch (addr.contactType) {
     case B.NumberStats.ContactType.JitsiMeetUrl:
-        if (!B.ViewHelper.isActiveVideoCall) {
+        if (!B.VideoCallHelper.hasActiveVideoCall) {
             B.ViewHelper.requestMeeting(addr.addr)
         }
         break
