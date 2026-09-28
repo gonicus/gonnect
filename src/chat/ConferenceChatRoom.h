@@ -25,6 +25,7 @@ public:
     virtual void loadMessages(const QString &) override { }
     virtual qsizetype notificationCount() override;
     virtual void resetUnreadCount() override;
+    virtual void markAsRead() override;
     virtual IChatRoom::JoinRule joinRule() override;
     virtual IChatRoom::Permissions permissions() override;
     virtual QList<ChatMessage *> chatMessages() const override { return m_messages; }

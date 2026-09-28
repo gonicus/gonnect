@@ -60,6 +60,11 @@ void ConferenceChatRoom::resetUnreadCount()
     // Unsupported
 }
 
+void ConferenceChatRoom::markAsRead()
+{
+    // Unsupported
+}
+
 IChatRoom::JoinRule ConferenceChatRoom::joinRule()
 {
     return IChatRoom::JoinRule::Unknown;

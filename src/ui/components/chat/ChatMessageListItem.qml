@@ -405,6 +405,7 @@ Item {
     ChatMessageListItemContent {
         id: messageContentItem
         isStateUpdate: control.isStateUpdate
+        isPending: control.isPending
         userState : control.userState
         affectedUserName: control.chatProvider?.userById(control.affectedUserId)?.computedName ?? ""
         content: control.content

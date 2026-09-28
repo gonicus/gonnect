@@ -11,7 +11,11 @@ Item {
     property IChatRoom chatRoom
 
     property bool showTitleBar: true
-    readonly property alias isScrolledDown: chatMessageList.isScrolledDown
+    property IChatRoom previousChatRoom
+    property date enteredTimestamp: new Date(NaN)
+    property var roomDwell: ({})
+    property IChatRoom bubbleTargetRoom
+
     readonly property int capabilities: control.chatProvider?.capabilities ?? 0
     readonly property alias isThreadMode: chatMessageList.isThreadMode
 
@@ -34,16 +38,31 @@ Item {
     }
 
     onChatRoomChanged: () => {
-                           relatedMsg.chatMessage = null
-                           control.loadMessages(chatMessageList.threadId)
-                           readTimer.stop()
-                       }
+                           const newRoom = control.chatRoom
+                           const prevRoom = control.previousChatRoom
 
-    onIsScrolledDownChanged: () => {
-                                 if (control.isScrolledDown) {
-                                     readTimer.restart()
-                                 }
-                             }
+                           if (newRoom !== prevRoom && prevRoom !== null && !isNaN(control.enteredTimestamp.getTime())) {
+                               control.roomDwell[prevRoom.id] = Date.now() - control.enteredTimestamp.getTime()
+                           }
+
+                           const priorDwell = (newRoom && control.roomDwell.hasOwnProperty(newRoom.id))
+                                              ? control.roomDwell[newRoom.id]
+                                              : 0
+                           if (priorDwell >= 2000) {
+                               newRoom.markAsRead()
+                           }
+
+                           if (newRoom) {
+                               control.bubbleTargetRoom = newRoom
+                               bubbleTimer.restart()
+                               control.enteredTimestamp = new Date()
+                           }
+
+                           control.previousChatRoom = newRoom
+                           relatedMsg.chatMessage = null
+
+                           control.loadMessages(chatMessageList.threadId)
+                       }
 
     Connections {
         target: control.chatRoom
@@ -51,6 +70,33 @@ Item {
         function onOwnUserJoinStateChanged() {
             control.loadMessages(chatMessageList.threadId)
         }
+
+        function onNotificationCountChanged() {
+            if (SelectionState.isMainWindowActive && control.bubbleTargetRoom) {
+                bubbleTimer.start()
+            }
+        }
+    }
+
+    Connections {
+        target: SelectionState
+
+        function onIsMainWindowActiveChanged() {
+            if (SelectionState.isMainWindowActive && control.bubbleTargetRoom) {
+                bubbleTimer.start()
+            }
+        }
+    }
+
+    Timer {
+        id: bubbleTimer
+        interval: 2000
+        onTriggered: () => {
+                         const room = control.bubbleTargetRoom
+                         if (room !== null && room === control.chatRoom && SelectionState.isMainWindowActive) {
+                             room.resetUnreadCount()
+                         }
+                     }
     }
 
     ChatButtonBar {
@@ -282,6 +328,7 @@ Item {
                     control.chatRoom.sendMessage(chatMessageBox.text,
                                                  relatedMsg.chatMessage ? relatedMsg.chatMessage.eventId : "",
                                                  chatMessageList.threadId)
+                    control.chatRoom.markAsRead()
                 }
 
                 relatedMsg.chatMessage = null
@@ -303,25 +350,6 @@ Item {
             bottom: parent.bottom
             leftMargin: 10
             rightMargin: 10
-        }
-    }
-
-    Timer {
-        id: readTimer
-        interval: 6000
-        onTriggered: () => {
-            if (control.Window.active && control.isScrolledDown && control.chatRoom) {
-                control.chatRoom.resetUnreadCount()
-            }
-        }
-    }
-
-    HoverHandler {
-        id: chatHoverHandler
-        onPointChanged: () => {
-            if (control.Window.active) {
-                readTimer.start()
-            }
         }
     }
 
