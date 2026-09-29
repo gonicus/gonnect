@@ -17,9 +17,6 @@ Item {
         searchInputField.forceActiveFocus(Qt.ShortcutFocusReason)
     }
 
-    Accessible.role: Accessible.Form
-    Accessible.name: placeholderLabel.text
-
     states: [
         State {
             when: searchInputField.text.trim() === ""
@@ -102,10 +99,8 @@ Item {
             rightMargin: 10
         }
 
-        Accessible.role: Accessible.EditableText
         Accessible.name: placeholderLabel.text
         Accessible.searchEdit: true
-        Accessible.focusable: true
     }
 
     Item {

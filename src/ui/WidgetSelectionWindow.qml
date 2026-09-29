@@ -121,7 +121,6 @@ BaseWindow {
                 text: qsTr("Widget")
                 Layout.alignment: Qt.AlignTop
 
-                Accessible.role: Accessible.StaticText
                 Accessible.name: qsTr("Widget selection header")
             }
 
@@ -159,7 +158,6 @@ BaseWindow {
                     }
                 }
 
-                Accessible.role: Accessible.ComboBox
                 Accessible.name: qsTr("Widget selection")
                 Accessible.description: qsTr("Select the widget that should be added to the current dashboard page")
 
@@ -171,10 +169,8 @@ BaseWindow {
                     font.weight: widgetSelection.font.weight
                     font.pixelSize: widgetSelection.font.pixelSize
 
-                    Accessible.role: Accessible.ListItem
                     Accessible.name: widgetDelg.name
                     Accessible.description: qsTr("Currently selected widget option")
-                    Accessible.focusable: true
 
                     required property string name
                     required property string description
@@ -302,10 +298,8 @@ BaseWindow {
                                 id: delgInput
                                 text: ""
 
-                                Accessible.role: Accessible.EditableText
                                 Accessible.name: qsTr("Settings text input")
                                 Accessible.description: qsTr("Input for widget setting %1").arg(delgLabel.text)
-                                Accessible.focusable: true
 
                                 Connections {
                                     target: widgetSettings
@@ -322,10 +316,8 @@ BaseWindow {
                             CheckBox {
                                 id: delgCheck
 
-                                Accessible.role: Accessible.CheckBox
                                 Accessible.name: qsTr("Settings checkbox")
                                 Accessible.description: qsTr("Checkbox for widget setting %1").arg(delgLabel.text)
-                                Accessible.focusable: true
 
                                 Connections {
                                     target: widgetSettings
@@ -366,10 +358,8 @@ BaseWindow {
 
                                     onTextEdited: () => roomPickerInternal.searchDebouncer.start()
 
-                                    Accessible.role: Accessible.EditableText
                                     Accessible.name: qsTr("Chat room search input")
                                     Accessible.description: qsTr("Search input to filter the chat rooms for the widget")
-                                    Accessible.focusable: true
                                 }
 
                                 Item {
@@ -426,8 +416,6 @@ BaseWindow {
                                                           ? Theme.backgroundOffsetColor
                                                           : "transparent")
                                                 radius: 4
-
-                                                Accessible.ignored: true
                                             }
 
                                             Rectangle {
@@ -453,8 +441,6 @@ BaseWindow {
                                                     color: Theme.accentColor
                                                     anchors.centerIn: parent
                                                 }
-
-                                                Accessible.ignored: true
                                             }
 
                                             // The row content is added as a plain child and centered via anchors on
@@ -482,7 +468,6 @@ BaseWindow {
                                                     elide: Label.ElideRight
                                                     Layout.fillWidth: true
 
-                                                    Accessible.role: Accessible.StaticText
                                                     Accessible.name: delgRoomItem.name
                                                 }
 
@@ -501,9 +486,7 @@ BaseWindow {
                                                 widgetSettings.roomSelected = true
                                             }
 
-                                            Accessible.role: Accessible.RadioButton
                                             Accessible.name: qsTr("Select chat room %1").arg(delgRoomItem.name)
-                                            Accessible.focusable: true
                                         }
                                     }
 
@@ -516,9 +499,6 @@ BaseWindow {
                                         text: roomSearchField.text.trim().length
                                               ? qsTr("No chat rooms found.")
                                               : qsTr("No chat rooms available yet")
-
-                                        Accessible.role: Accessible.StaticText
-                                        Accessible.name: roomPickerEmptyHint.text
                                     }
                                 }
                             }
@@ -530,7 +510,6 @@ BaseWindow {
                                   ? widgetSettingsModel.get(widgetSettingsDelegate.index).name
                                   : ""
 
-                            Accessible.role: Accessible.StaticText
                             Accessible.name: qsTr("Widget setting %1").arg(delgLabel.text)
                         }
 
@@ -568,11 +547,8 @@ BaseWindow {
 
                     onClicked: () => control.close()
 
-                    Accessible.role: Accessible.Button
                     Accessible.name: qsTr("Cancel widget selection")
                     Accessible.description: qsTr("Cancel button to exit widget selection selection without changes")
-                    Accessible.focusable: true
-                    Accessible.onPressAction: () => widgetCancel.click()
                 }
 
                 Button {
@@ -583,11 +559,8 @@ BaseWindow {
 
                     onClicked: () => widgetConfirm.createWidget()
 
-                    Accessible.role: Accessible.Button
                     Accessible.name: qsTr("Confirm widget selection")
                     Accessible.description: qsTr("Confirmation button to create and add the selected widget to the current dashboard")
-                    Accessible.focusable: true
-                    Accessible.onPressAction: () => widgetConfirm.click()
 
                     function createWidget() {
                         const id = `-widget_${UISettings.generateUuid()}`

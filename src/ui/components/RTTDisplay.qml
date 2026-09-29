@@ -44,9 +44,7 @@ Item {
                 required property bool isFinished
 
                 Accessible.role: Accessible.ListItem
-                Accessible.name: qsTr("RTT message")
-                Accessible.description: qsTr("Selected RTT message from %1: %2").arg(rttDelg.isMe ? qsTr("you") : qsTr("call participant")).arg(rttDelg.message)
-                Accessible.focusable: true
+                Accessible.name: qsTr("%1: %2").arg(rttDelg.isMe ? qsTr("you") : qsTr("call participant")).arg(rttDelg.message)
 
                 Rectangle {
                     id: rttBubble
@@ -71,9 +69,9 @@ Item {
                         anchors {
                             centerIn: parent
                         }
-                    }
 
-                    Accessible.ignored: true
+                        Accessible.ignored: true
+                    }
                 }
             }
         }
@@ -150,9 +148,7 @@ Item {
                 }
             }
 
-            Accessible.role: Accessible.EditableText
             Accessible.name: rttInputField.placeholderText
-            Accessible.focusable: true
         }
     }
 }

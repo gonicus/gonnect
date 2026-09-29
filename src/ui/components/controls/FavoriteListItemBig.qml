@@ -24,8 +24,8 @@ Item {
     required property string subscribableNumber
 
     Accessible.role: Accessible.ListItem
-    Accessible.name: qsTr("Favorite contact")
-    Accessible.description: qsTr("Selected favorite %1").arg(delg.name)
+    Accessible.name: delg.name
+    Accessible.description: delg.company
     Accessible.focusable: false
 
     LoggingCategory {
@@ -150,8 +150,6 @@ Item {
 
             Accessible.ignored: true
         }
-
-        Accessible.ignored: true
     }
 
     Item {
@@ -218,11 +216,7 @@ Item {
 
                     required property var modelData
 
-                    Accessible.role: Accessible.Button
-                    Accessible.name: qsTr("Favorite phone, chat or meeting button")
-                    Accessible.description: qsTr("Selected address %1").arg(menuDelg.modelData.addr)
-                    Accessible.focusable: true
-                    Accessible.onPressAction: () => PhoneNumberUtil.startMeetingOrCall(menuDelg.modelData)
+                    Accessible.description: menuDelg.modelData.addr
 
                     onTriggered: () => PhoneNumberUtil.startMeetingOrCall(menuDelg.modelData)
                 }
@@ -254,8 +248,8 @@ Item {
                 }
 
                 Accessible.role: Accessible.Button
-                Accessible.name: qsTr("Favorite phone, chat or meeting button")
-                Accessible.description: qsTr("Selected address %1").arg(addrDelg.modelData.addr)
+                Accessible.name: PhoneNumberUtil.tooltipText(addrDelg.modelData, delg.name)
+                Accessible.description: addrDelg.modelData.addr
                 Accessible.focusable: true
                 Accessible.onPressAction: () => PhoneNumberUtil.startMeetingOrCall(addrDelg.modelData)
 

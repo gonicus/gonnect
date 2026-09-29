@@ -27,10 +27,9 @@ BaseWindow {
         id: container
         anchors.fill: parent
 
-        Accessible.role: Accessible.Announcement
+        Accessible.role: Accessible.AlertMessage
         Accessible.name: qsTr("Incoming emergency call from %1").arg(control.displayName)
         Accessible.description: ongoingCallInfo.text
-        Accessible.searchEdit: true
 
         Item {
             id: cross
@@ -51,8 +50,6 @@ BaseWindow {
                     bottom: parent.bottom
                     horizontalCenter: parent.horizontalCenter
                 }
-
-                Accessible.ignored: true
             }
 
             Rectangle {
@@ -64,11 +61,7 @@ BaseWindow {
                     right: parent.right
                     verticalCenter: parent.verticalCenter
                 }
-
-                Accessible.ignored: true
             }
-
-            Accessible.ignored: true
         }
 
         Item {
@@ -114,11 +107,7 @@ BaseWindow {
 
                     Accessible.ignored: true
                 }
-
-                Accessible.ignored: true
             }
-
-            Accessible.ignored: true
         }
 
         Button {
@@ -138,11 +127,6 @@ BaseWindow {
                 control.close()
                 control.destroy()
             }
-
-            Accessible.role: Accessible.Button
-            Accessible.name: answerCallButton.text
-            Accessible.focusable: true
-            Accessible.onPressAction: () => answerCallButton.click()
         }
     }
 }

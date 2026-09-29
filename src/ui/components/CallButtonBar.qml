@@ -78,8 +78,6 @@ Item {
             right: parent.right
             bottom: parent.bottom
         }
-
-        Accessible.ignored: true
     }
 
     IconLabel {
@@ -105,6 +103,7 @@ Item {
             }
         }
 
+        Accessible.id: "call.buttonbar.security.level"
         Accessible.role: Accessible.StaticText
         Accessible.name: qsTr("Call security level")
         Accessible.description: qsTr("Security level of the ongoing call")
@@ -119,7 +118,8 @@ Item {
                     id: securityLevelColumn
                     spacing: 8
 
-                    Accessible.role: Accessible.Column
+                    Accessible.id: "call.buttonbar.security.details"
+                    Accessible.role: Accessible.Grouping
                     Accessible.name: qsTr("Call security details")
                     Accessible.description: qsTr("Detailed call security status: %1 / %2").arg(securityLevelColumn.signalEncryptionValue).arg(securityLevelColumn.mediaEncryptedValue)
 
@@ -194,6 +194,7 @@ Item {
             }
         }
 
+        Accessible.id: "call.buttonbar.quality"
         Accessible.role: Accessible.StaticText
         Accessible.name: qsTr("Call quality")
         Accessible.description: qsTr("Quality of the ongoing call")
@@ -215,7 +216,8 @@ Item {
                             id: txCol
                             spacing: 8
 
-                            Accessible.role: Accessible.Column
+                            Accessible.id: "call.buttonbar.statistics.tx"
+                            Accessible.role: Accessible.Grouping
                             Accessible.name: qsTr("Transmission statistics")
                             Accessible.description: qsTr("Call quality metrics")
 
@@ -245,6 +247,7 @@ Item {
                                     Accessible.ignored: true
                                 }
 
+                                Accessible.id: "call.buttonbar.statistics.tx.mos"
                                 Accessible.role: Accessible.StaticText
                                 Accessible.name: qsTr("Mean opinion score")
                                 Accessible.description: qsTr("Numerical metric assessing transmission-side voice call quality: %1").arg(txMosValue.text)
@@ -265,6 +268,7 @@ Item {
                                     Accessible.ignored: true
                                 }
 
+                                Accessible.id: "call.buttonbar.statistics.tx.loss"
                                 Accessible.role: Accessible.StaticText
                                 Accessible.name: txLossLabel.text
                                 Accessible.description: qsTr("%1% of packets lost in transmission").arg(txLossValue.text)
@@ -285,6 +289,7 @@ Item {
                                     Accessible.ignored: true
                                 }
 
+                                Accessible.id: "call.buttonbar.statistics.tx.jitter"
                                 Accessible.role: Accessible.StaticText
                                 Accessible.name: txJitterLabel.text
                                 Accessible.description: qsTr("Amount of transmission side jitter: %1").arg(txJitterValue.text)
@@ -305,6 +310,7 @@ Item {
                                     Accessible.ignored: true
                                 }
 
+                                Accessible.id: "call.buttonbar.statistics.tx.delay"
                                 Accessible.role: Accessible.StaticText
                                 Accessible.name: txDelayLabel.text
                                 Accessible.description: qsTr("Effective transmission side call delay: %1").arg(txDelayValue.text)
@@ -315,13 +321,12 @@ Item {
                             width: 1
                             height: txCol.height
                             color: Theme.borderColor
-
-                            Accessible.ignored: true
                         }
 
                         Column {
                             spacing: 8
 
+                            Accessible.id: "call.buttonbar.statistics.rx"
                             Accessible.role: Accessible.StaticText
                             Accessible.name: qsTr("Receiver statistics")
                             Accessible.description: qsTr("Call quality metrics")
@@ -352,6 +357,7 @@ Item {
                                     Accessible.ignored: true
                                 }
 
+                                Accessible.id: "call.buttonbar.statistics.rx.mos"
                                 Accessible.role: Accessible.StaticText
                                 Accessible.name: qsTr("Mean opinion score")
                                 Accessible.description: qsTr("Numerical metric assessing receiver-side voice/video call quality: %1").arg(rxMosValue.text)
@@ -372,6 +378,7 @@ Item {
                                     Accessible.ignored: true
                                 }
 
+                                Accessible.id: "call.buttonbar.statistics.rx.loss"
                                 Accessible.role: Accessible.StaticText
                                 Accessible.name: rxLossLabel.text
                                 Accessible.description: qsTr("%1% of packets lost in receival").arg(rxLossValue.text)
@@ -392,6 +399,7 @@ Item {
                                     Accessible.ignored: true
                                 }
 
+                                Accessible.id: "call.buttonbar.statistics.rx.jitter"
                                 Accessible.role: Accessible.StaticText
                                 Accessible.name: rxJitterLabel.text
                                 Accessible.description: qsTr("Amount of receiver side jitter: %1").arg(rxJitterValue.text)
@@ -412,6 +420,7 @@ Item {
                                     Accessible.ignored: true
                                 }
 
+                                Accessible.id: "call.buttonbar.statistics.rx.delay"
                                 Accessible.role: Accessible.StaticText
                                 Accessible.name: rxDelayLabel.text
                                 Accessible.description: qsTr("Effective receiver side call delay: %1").arg(rxDelayValue.text)
@@ -426,8 +435,6 @@ Item {
                             left: parent.left
                             right: parent.right
                         }
-
-                        Accessible.ignored: true
                     }
 
                     Row {
@@ -448,6 +455,7 @@ Item {
                             Accessible.ignored: true
                         }
 
+                        Accessible.id: "call.buttonbar.statistics.codec"
                         Accessible.role: Accessible.StaticText
                         Accessible.name: qsTr("Audio codec")
                         Accessible.description: qsTr("The currently used audio codec and frequency: %1").arg(codecValue.text)
@@ -476,8 +484,6 @@ Item {
             leftMargin: 20
             verticalCenter: parent.verticalCenter
         }
-
-        Accessible.ignored: true
     }
 
     IconLabel {
@@ -497,6 +503,7 @@ Item {
             height: 20
         }
 
+        Accessible.id: "call.buttonbar.elapsed"
         Accessible.role: Accessible.StaticText
         Accessible.name: qsTr('Elapsed call time')
         Accessible.description: qsTr("The duration in seconds the call has been active for: %1").arg(ViewHelper.secondsToNiceText(internal.elapsedSeconds))
@@ -538,6 +545,7 @@ Item {
             visible: control.showHoldButton && control.isEstablished
             onClicked: () => SIPCallManager.toggleHoldCall(control.accountId, control.callId)
 
+            Accessible.id: "call.buttonbar.hold-resume"
             Accessible.name: control.isHolding ? qsTr("Resume call") : qsTr("Hold call")
             Accessible.description: qsTr("Update the call hold state")
         }
@@ -556,6 +564,7 @@ Item {
 
             readonly property bool micMuteLocked: ViewHelper.headsetDeviceProxy().muteLocked
 
+            Accessible.id: "call.buttonbar.microphone"
             Accessible.name: AudioManager.isAudioCaptureMuted ? qsTr("Unmute microphone") : qsTr("Mute microphone")
             Accessible.description: muteButton.tooltipText || qsTr("Mute or unmute your audio input")
         }
@@ -570,6 +579,10 @@ Item {
                 ViewHelper.nextMeetingStartFlags = IConferenceConnector.StartFlag.AudioActive | IConferenceConnector.StartFlag.VideoActive
                 SIPCallManager.triggerCapability(control.accountId, control.callId, "jitsi:hangup")
             }
+
+            Accessible.id: "call.buttonbar.camera"
+            Accessible.name: videoMuteButton.toggled ? qsTr("Switch camera off") : qsTr("Switch camera on")
+            Accessible.description: videoMuteButton.tooltipText || qsTr("Enable or disable your camera")
         }
 
         BarButton {
@@ -582,6 +595,10 @@ Item {
                 ViewHelper.nextMeetingStartFlags = IConferenceConnector.StartFlag.AudioActive | IConferenceConnector.StartFlag.ScreenShareActive
                 SIPCallManager.triggerCapability(control.accountId, control.callId, "jitsi:hangup")
             }
+
+            Accessible.id: "call.buttonbar.screen"
+            Accessible.name: screenShareButton.toggled ? qsTr("Stop sharing the screen") : qsTr("Share the screen")
+            Accessible.description: screenShareButton.tooltipText || qsTr("Enable or disable screen sharing")
         }
 
         BarButton {
@@ -592,6 +609,10 @@ Item {
             showDropdownButton: true
             onClicked: () => moreMenu.popup(moreButton, -moreMenu.width + moreButton.width, moreButton.height)
             onDropDownClicked: () => moreMenu.popup(moreButton, -moreMenu.width + moreButton.width, moreButton.height)
+
+            Accessible.id: "call.buttonbar.more"
+            Accessible.name: qsTr("More call options")
+            Accessible.description: qsTr("Open sub menu with more call options")
 
             CallMoreMenu {
                 id: moreMenu
@@ -606,6 +627,10 @@ Item {
             toggledColor: Theme.greenColor
             visible: !control.isEstablished && !control.isFinished && control.isIncoming
 
+            Accessible.id: "call.buttonbar.accept"
+            Accessible.name: qsTr("Accept call")
+            Accessible.description: qsTr("Accept incoming call")
+
             onClicked: () => control.acceptCallClicked()
         }
 
@@ -616,6 +641,10 @@ Item {
             toggled: true
             toggledColor: Theme.redColor
             enabled: SIPCallManager.isConferenceMode || !control.isFinished
+
+            Accessible.id: "call.buttonbar.hangup"
+            Accessible.name: qsTr("Hangup call")
+            Accessible.description: qsTr("End active call")
 
             onClicked: () => control.hangupClicked()
         }

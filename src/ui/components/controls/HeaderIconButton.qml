@@ -29,8 +29,6 @@ Item {
         color: Theme.backgroundHeaderIconHovered
         border.width: 1
         border.color: Theme.borderColor
-
-        Accessible.ignored: true
     }
 
     IconLabel {

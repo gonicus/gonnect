@@ -22,8 +22,6 @@ Rectangle {
             left: parent.left
             right: parent.right
         }
-
-        Accessible.ignored: true
     }
 
     Rectangle {
@@ -34,8 +32,6 @@ Rectangle {
             left: parent.left
             right: parent.right
         }
-
-        Accessible.ignored: true
     }
 
     TogglerList {

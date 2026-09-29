@@ -11,8 +11,6 @@ Item {
         color: Theme.backgroundColor
         radius: 12
         anchors.fill: parent
-
-        Accessible.ignored: true
     }
 
     CardShadow {

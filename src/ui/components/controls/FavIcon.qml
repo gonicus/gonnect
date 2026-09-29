@@ -23,8 +23,6 @@ Item {
         anchors.fill: parent
         radius: 4
         color: favHoverHandler.hovered ? Theme.backgroundOffsetHoveredColor : 'transparent'
-
-        Accessible.ignored: true
     }
 
     Label {

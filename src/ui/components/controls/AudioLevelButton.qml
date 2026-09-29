@@ -39,8 +39,6 @@ Item {
         Behavior on opacity {
             NumberAnimation { duration: 300 }
         }
-
-        Accessible.ignored: true
     }
 
     Rectangle {
@@ -49,8 +47,6 @@ Item {
         radius: bg.radius
         color: Theme.backgroundOffsetHoveredColor
         anchors.fill: bg
-
-        Accessible.ignored: true
     }
 
     IconLabel {

@@ -15,8 +15,7 @@ Item {
     property string tooltipText
 
     Accessible.role: Accessible.Button
-    Accessible.name: qsTr("Emoji")
-    Accessible.description: qsTr("Selected Emoji: %1").arg(control.tooltipText)
+    Accessible.name: control.tooltipText
     Accessible.focusable: true
     Accessible.onPressAction: () => control.clicked()
 
@@ -24,8 +23,6 @@ Item {
         anchors.fill: parent
         color: Theme.backgroundOffsetHoveredColor
         visible: groupButtonHoverHandler.hovered
-
-        Accessible.ignored: true
     }
 
     Label {

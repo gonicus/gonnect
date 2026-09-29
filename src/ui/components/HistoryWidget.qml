@@ -98,7 +98,6 @@ BaseWidget {
 
                 popup.width: Math.max(width, Math.round(12 * Theme.fontSizeNormal))
 
-                Accessible.role: Accessible.ComboBox
                 Accessible.name: qsTr("History call type picker")
                 Accessible.description: qsTr("Select the call type to filter by")
 
@@ -111,10 +110,8 @@ BaseWidget {
                     font.weight: historyFilterMediumSelector.font.weight
                     font.pixelSize: historyFilterMediumSelector.font.pixelSize
 
-                    Accessible.role: Accessible.ListItem
                     Accessible.name: historyFilterMediumSelectorDelg.label
                     Accessible.description: qsTr("Currently selected call type")
-                    Accessible.focusable: true
 
                     required property string label
                 }
@@ -155,7 +152,6 @@ BaseWidget {
 
                 popup.width: Math.max(width, Math.round(12 * Theme.fontSizeNormal))
 
-                Accessible.role: Accessible.ComboBox
                 Accessible.name: qsTr("History call origin picker")
                 Accessible.description: qsTr("Select the call origin to filter by")
 
@@ -168,10 +164,8 @@ BaseWidget {
                     font.weight: historyFilterTypeSelector.font.weight
                     font.pixelSize: historyFilterTypeSelector.font.pixelSize
 
-                    Accessible.role: Accessible.ListItem
                     Accessible.name: historyFilterTypeSelectorDelg.label
                     Accessible.description: qsTr("Currently selected call origin")
-                    Accessible.focusable: true
 
                     required property string label
                 }

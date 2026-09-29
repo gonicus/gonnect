@@ -14,10 +14,9 @@ Item {
 
     property alias headerText: headerLabel.text
 
-    Accessible.role: Accessible.ColumnHeader
+    Accessible.role: Accessible.Heading
     Accessible.name: qsTr("Search result category %1").arg(control.headerText)
     Accessible.description: qsTr("Divider for the individual search result items by category")
-    Accessible.focusable: true
 
     Label {
         id: headerLabel
@@ -39,8 +38,6 @@ Item {
             right: parent.right
             top: headerLabel.bottom
         }
-
-        Accessible.ignored: true
     }
 
     Flow {

@@ -298,9 +298,6 @@ Item {
                 leftMargin: 15
                 bottomMargin: 10
             }
-
-            Accessible.role: Accessible.StaticText
-            Accessible.name: nameLabel.text
         }
 
         Rectangle {
@@ -332,8 +329,6 @@ Item {
                 anchors.fill: parent
                 radius: parent.radius
                 color: Theme.backgroundOffsetColor
-
-                Accessible.ignored: true
             }
 
             Label {
@@ -343,8 +338,6 @@ Item {
 
                 Accessible.ignored: true
             }
-
-            Accessible.ignored: true
         }
     }
 
