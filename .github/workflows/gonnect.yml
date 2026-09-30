@@ -105,7 +105,6 @@ jobs:
 
   build:
     runs-on: ubuntu-26.04
-    if: ${{ github.event_name != 'schedule' }}
     name: "Build GOnnect (Linux)"
     needs: changes
     if: ${{ inputs.run_build || needs.changes.outputs.src == 'true' || needs.changes.outputs.tests == 'true' || needs.changes.outputs.build == 'true' }}
