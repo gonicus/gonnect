@@ -95,6 +95,7 @@ jobs:
               - 'resources/font/**'
               - 'resources/sounds/**'
               - 'resources/templates/**'
+              - 'resources/roomnames/**'
               - 'migrate/**'
               - 'i18n/**/*.ts'
             resources-windows:
