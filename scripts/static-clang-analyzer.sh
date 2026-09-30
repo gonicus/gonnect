@@ -5,7 +5,11 @@ TMP_OUT=$(mktemp -d)
 
 pushd . &> /dev/null
 
-cmake --preset conan-release -GNinja -DBUILD_TESTING=OFF -DENABLE_QASSERT=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+cmake --preset conan-release -GNinja \
+  -DBUILD_TESTING=OFF \
+  -DENABLE_QASSERT=ON \
+  -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+  -DENABLE_LTO=OFF
 
 set -eo pipefail
 cd build/Release
