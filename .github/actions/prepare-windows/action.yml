@@ -8,12 +8,6 @@ outputs:
 runs:
   using: 'composite'
   steps:
-
-    - name: Setup cmake
-      uses: jwlawson/actions-setup-cmake@0d6a7d60b009d01c9e7523be22153ff8f19460d3 # v2
-      with:
-        cmake-version: 'latest'
-
     - name: Get QT-Version
       id: get-qt
       uses: ./.github/actions/get-qt-version
