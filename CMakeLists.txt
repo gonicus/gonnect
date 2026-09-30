@@ -81,6 +81,8 @@ else()
 endif()
 if(WIN32)
     add_definitions(-DNOMINMAX)
+    add_definitions(-D_WIN32_WINNT=0x0A00 -DWINVER=0x0A00 -DNTDDI_VERSION=0x0A000000)
+    add_definitions(-DWIN32_LEAN_AND_MEAN)
     add_compile_options($<$<CXX_COMPILER_ID:MSVC>:/MP>)
 endif()
 
