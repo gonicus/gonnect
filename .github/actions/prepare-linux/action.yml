@@ -31,7 +31,7 @@ runs:
       if: inputs.deps == 'true'
       run: |
         sudo apt-get update
-        sudo apt install -y --no-install-recommends ninja-build llvm libudev-dev libsasl2-dev libsecret-1-dev libnotify-dev libebook-contacts1.2-dev libebook1.2-dev libecal2.0-dev libedata-cal2.0-dev libedata-book1.2-dev libprotoc-dev libprotobuf-dev protobuf-compiler libpipewire-0.3-dev 
+        sudo apt install -y --no-install-recommends ninja-build llvm libudev-dev libsasl2-dev libsecret-1-dev libnotify-dev libebook-contacts1.2-dev libebook1.2-dev libecal2.0-dev libedata-cal2.0-dev libedata-book1.2-dev libprotoc-dev libprotobuf-dev protobuf-compiler libpipewire-0.3-dev
 
     - name: Get QT-Version
       if: inputs.qt == 'true'
