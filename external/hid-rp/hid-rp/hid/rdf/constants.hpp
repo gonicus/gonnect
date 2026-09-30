@@ -2,6 +2,8 @@
 #pragma once
 
 #include "hid/report.hpp"
+#undef ABSOLUTE
+#undef RELATIVE
 
 namespace hid::rdf
 {
