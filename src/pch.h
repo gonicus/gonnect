@@ -6,7 +6,7 @@
 
 // pjsip
 #include <pjsua2.hpp>
- 
+
 // Qt Core
 #include <QAbstractItemModel>
 #include <QAbstractListModel>
