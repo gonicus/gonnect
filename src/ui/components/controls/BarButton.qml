@@ -37,11 +37,17 @@ Item {
 
     property int toggleColorMode: BarButton.ToggleColorMode.Normal
 
+    activeFocusOnTab: control.enabled
+
     Accessible.role: Accessible.Button
     Accessible.name: control.text
     Accessible.description: control.tooltipText
     Accessible.focusable: true
     Accessible.onPressAction: () => control.clicked()
+
+    Keys.onReturnPressed: () => control.clicked()
+    Keys.onEnterPressed: () => control.clicked()
+    Keys.onSpacePressed: () => control.clicked()
 
     states: [
 

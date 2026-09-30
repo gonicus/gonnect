@@ -250,7 +250,6 @@ Item {
                 Accessible.role: Accessible.Button
                 Accessible.name: PhoneNumberUtil.tooltipText(addrDelg.modelData, delg.name)
                 Accessible.description: addrDelg.modelData.addr
-                Accessible.focusable: true
                 Accessible.onPressAction: () => PhoneNumberUtil.startMeetingOrCall(addrDelg.modelData)
 
                 ToolTip.visible: addrHoverHandler.hovered

@@ -17,10 +17,16 @@ Item {
 
     signal clicked
 
+    activeFocusOnTab: control.enabled
+
     Accessible.role: Accessible.Button
     Accessible.name: control.accessiblePurpose
     Accessible.focusable: true
     Accessible.onPressAction: () => control.clicked()
+
+    Keys.onReturnPressed: () => control.clicked()
+    Keys.onEnterPressed: () => control.clicked()
+    Keys.onSpacePressed: () => control.clicked()
 
     Rectangle {
         visible: hoverHandler.hovered

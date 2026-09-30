@@ -121,6 +121,7 @@ BaseWindow {
                 text: qsTr("Widget")
                 Layout.alignment: Qt.AlignTop
 
+                Accessible.id: "widget.selection.header"
                 Accessible.name: qsTr("Widget selection header")
             }
 
@@ -158,6 +159,7 @@ BaseWindow {
                     }
                 }
 
+                Accessible.id: "widget.selection"
                 Accessible.name: qsTr("Widget selection")
                 Accessible.description: qsTr("Select the widget that should be added to the current dashboard page")
 
@@ -169,9 +171,11 @@ BaseWindow {
                     font.weight: widgetSelection.font.weight
                     font.pixelSize: widgetSelection.font.pixelSize
 
+                    Accessible.id: "widget.selection." + index
                     Accessible.name: widgetDelg.name
                     Accessible.description: qsTr("Currently selected widget option")
 
+                    required property int index
                     required property string name
                     required property string description
                     required property string iconName
@@ -298,6 +302,7 @@ BaseWindow {
                                 id: delgInput
                                 text: ""
 
+                                Accessible.id: "widget.settings.input." + index
                                 Accessible.name: qsTr("Settings text input")
                                 Accessible.description: qsTr("Input for widget setting %1").arg(delgLabel.text)
 
@@ -316,6 +321,7 @@ BaseWindow {
                             CheckBox {
                                 id: delgCheck
 
+                                Accessible.id: "widget.settings.checkbox." + index
                                 Accessible.name: qsTr("Settings checkbox")
                                 Accessible.description: qsTr("Checkbox for widget setting %1").arg(delgLabel.text)
 
@@ -358,6 +364,7 @@ BaseWindow {
 
                                     onTextEdited: () => roomPickerInternal.searchDebouncer.start()
 
+                                    Accessible.id: "widget.settings.search." + index
                                     Accessible.name: qsTr("Chat room search input")
                                     Accessible.description: qsTr("Search input to filter the chat rooms for the widget")
                                 }
@@ -468,6 +475,7 @@ BaseWindow {
                                                     elide: Label.ElideRight
                                                     Layout.fillWidth: true
 
+                                                    Accessible.id: "widget.settings.room." + delgRoomItem.roomId
                                                     Accessible.name: delgRoomItem.name
                                                 }
 
@@ -486,6 +494,7 @@ BaseWindow {
                                                 widgetSettings.roomSelected = true
                                             }
 
+                                            Accessible.id: "widget.settings.select.room." + delgRoomItem.roomId
                                             Accessible.name: qsTr("Select chat room %1").arg(delgRoomItem.name)
                                         }
                                     }
@@ -510,6 +519,7 @@ BaseWindow {
                                   ? widgetSettingsModel.get(widgetSettingsDelegate.index).name
                                   : ""
 
+                            Accessible.id: "widget.settings." + widgetSettingsDelegate.index
                             Accessible.name: qsTr("Widget setting %1").arg(delgLabel.text)
                         }
 
@@ -547,6 +557,7 @@ BaseWindow {
 
                     onClicked: () => control.close()
 
+                    Accessible.id: "widget.select.cancel"
                     Accessible.name: qsTr("Cancel widget selection")
                     Accessible.description: qsTr("Cancel button to exit widget selection selection without changes")
                 }
@@ -559,7 +570,8 @@ BaseWindow {
 
                     onClicked: () => widgetConfirm.createWidget()
 
-                    Accessible.name: qsTr("Confirm widget selection")
+                    Accessible.id: "widget.select.add"
+                    Accessible.name: qsTr("Add widget")
                     Accessible.description: qsTr("Confirmation button to create and add the selected widget to the current dashboard")
 
                     function createWidget() {

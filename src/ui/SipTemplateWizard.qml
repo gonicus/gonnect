@@ -105,6 +105,7 @@ BaseWindow {
                 right: parent.right
             }
 
+            Accessible.id: "template.selection"
             Accessible.role: Accessible.Grouping
             Accessible.name: qsTr("SIP wizard notification")
             Accessible.description: templateHeaderLabel.text
@@ -149,6 +150,7 @@ BaseWindow {
                     right: parent.right
                 }
 
+                Accessible.id: "template.selection.selector"
                 Accessible.name: qsTr("Select SIP template")
                 Accessible.description: qsTr("Select the SIP template to be used")
 
@@ -161,6 +163,7 @@ BaseWindow {
                     font.weight: templateSelectBox.font.weight
                     font.pixelSize: templateSelectBox.font.pixelSize
 
+                    Accessible.id: "template.selection." + name
                     Accessible.name: templateSelectBoxDelg.name
                     Accessible.description: qsTr("Currently selected SIP template")
 
@@ -180,6 +183,7 @@ BaseWindow {
 
             onClicked: () => templateModel.templateId = templateSelectBox.currentValue
 
+            Accessible.id: "template.selection.next"
             Accessible.name: qsTr("Continue setup")
             Accessible.description: qsTr("Confirmation button to continue the setup")
         }
@@ -201,6 +205,7 @@ BaseWindow {
                 id: templateModel
             }
 
+            Accessible.id: "template.fields"
             Accessible.role: Accessible.List
             Accessible.name: qsTr("Template field list")
             Accessible.description: qsTr("List of all the available SIP template options")
@@ -227,6 +232,7 @@ BaseWindow {
                     }
                 }
 
+                Accessible.id: "template.fields." + delg.name
                 Accessible.role: Accessible.ListItem
                 Accessible.name: delg.name
                 Accessible.description: delg.description
@@ -241,6 +247,7 @@ BaseWindow {
                         right: parent.right
                     }
 
+                    Accessible.id: "template.fields." + delg.name + ".name"
                     Accessible.name: delg.name
                     Accessible.description: qsTr("Display name of the SIP template option")
                 }
@@ -254,6 +261,7 @@ BaseWindow {
                         right: parent.right
                     }
 
+                    Accessible.id: "template.fields." + delg.name + ".description"
                     Accessible.name: delg.description
                     Accessible.description: qsTr("Description of the SIP template option")
                 }
@@ -334,6 +342,7 @@ BaseWindow {
 
             onClicked: () => templateModel.templateId = ""
 
+            Accessible.id: "template.back"
             Accessible.description: qsTr("Back button to return to the template selection menu")
         }
 
@@ -349,6 +358,7 @@ BaseWindow {
 
             onClicked: () => control.finishWizard()
 
+            Accessible.id: "template.save"
             Accessible.description: qsTr("Confirmation button to apply the changes to the SIP template")
         }
     }
@@ -368,6 +378,7 @@ BaseWindow {
                 right: parent.right
             }
 
+            Accessible.id: "template.finish.success"
             Accessible.role: Accessible.Grouping
             Accessible.name: qsTr("Successful configuration file creation")
             Accessible.description: wizardInstallationLabel.text + " "
@@ -428,6 +439,7 @@ BaseWindow {
                         verticalCenter: parent.verticalCenter
                     }
 
+                    Accessible.id: "template.config.path"
                     Accessible.role: Accessible.Button
                     Accessible.name: qsTr("Copy to clipboard")
                     Accessible.description: qsTr("Copy the full path of the configuration file to the clipboard")
@@ -437,7 +449,7 @@ BaseWindow {
 
         Button {
             id: wizardFinishButton
-            text: qsTr("Finish")
+            text: qsTr("Close")
             highlighted: true
             anchors {
                 right: parent.right
@@ -446,8 +458,9 @@ BaseWindow {
 
             onClicked: () => SM.restart()
 
-            Accessible.name: qsTr("Finish wizard")
-            Accessible.description: qsTr("Finish the SIP configuration wizard")
+            Accessible.id: "template.finish"
+            Accessible.name: qsTr("Close wizard")
+            Accessible.description: qsTr("Close the SIP configuration wizard")
         }
     }
 }

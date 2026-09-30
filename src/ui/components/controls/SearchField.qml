@@ -113,10 +113,16 @@ Item {
             right: parent.right
         }
 
+        activeFocusOnTab: clearButton.visible
+
         Accessible.role: Accessible.Button
         Accessible.name: qsTr("Clear search field")
         Accessible.focusable: true
         Accessible.onPressAction: () => searchInputField.clear()
+
+        Keys.onReturnPressed: () => searchInputField.clear()
+        Keys.onEnterPressed: () => searchInputField.clear()
+        Keys.onSpacePressed: () => searchInputField.clear()
 
         IconLabel {
             id: clearIcon

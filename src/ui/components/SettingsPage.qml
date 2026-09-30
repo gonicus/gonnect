@@ -365,6 +365,7 @@ Item {
                                 }
                             }
 
+                            Accessible.id: "settings.theme.select"
                             Accessible.name: qsTr("Theme selection box")
                             Accessible.description: qsTr("Select the UI theme")
 
@@ -377,9 +378,11 @@ Item {
                                 font.weight: darkModeComboBox.font.weight
                                 font.pixelSize: darkModeComboBox.font.pixelSize
 
+                                Accessible.id: "settings.theme.select." + darkModeDlg.index
                                 Accessible.name: darkModeDelg.displayName
                                 Accessible.description: qsTr("Currently selected theme option")
 
+                                required property int index
                                 required property string displayName
                             }
 
@@ -532,6 +535,7 @@ Item {
                                 }
                             ].concat(SIPManager.preferredIdentities.filter(pi => pi.enabled))
 
+                            Accessible.id: "settings.preferred.identity.select"
                             Accessible.name: qsTr("Prefererred identity selection")
                             Accessible.description: qsTr("Select the preferred identity")
 
@@ -544,9 +548,11 @@ Item {
                                 font.weight: standardPreferredIdentitySelector.font.weight
                                 font.pixelSize: standardPreferredIdentitySelector.font.pixelSize
 
+                                Accessible.id: "settings.preferred.identity.select." + standardPreferredIdentityDelg.index
                                 Accessible.name: standardPreferredIdentityDelg.displayName
                                 Accessible.description: qsTr("Currently selected identity option")
 
+                                required property int index
                                 required property string displayName
                             }
 
@@ -617,6 +623,7 @@ Item {
                                     required property int index
                                     required property PreferredIdentity modelData
 
+                                    Accessible.id: "settings.identity.select." + preferredIdentityDelegate.index
                                     Accessible.role: Accessible.StaticText
                                     Accessible.name: preferredIdentityLabel.text
                                     Accessible.description: qsTr("Currently highlighted preferred identity. Tap to edit.")
@@ -730,6 +737,7 @@ Item {
                                 })
                         }
 
+                        Accessible.id: "settings.identity.add"
                         Accessible.description: qsTr("Add a new preferred identity entry")
                     }
                 }
@@ -789,6 +797,7 @@ Item {
                             }
                             model: AudioManager.devices.filter(device => device.isInput)
 
+                            Accessible.id: "settings.audio.input.device"
                             Accessible.name: qsTr("Audio input device")
 
                             delegate: ItemDelegate {
@@ -800,9 +809,11 @@ Item {
                                 font.weight: inputAudioSelector.font.weight
                                 font.pixelSize: inputAudioSelector.font.pixelSize
 
+                                Accessible.id: "settings.audio.input.device." + inputAudioSelectorDelg.index
                                 Accessible.name: inputAudioSelectorDelg.name
                                 Accessible.description: qsTr("Currently selected audio input device")
 
+                                required property int index
                                 required property string name
                             }
 
@@ -850,6 +861,7 @@ Item {
                             }
                             model: AudioManager.devices.filter(device => device.isOutput)
 
+                            Accessible.id: "settings.audio.output.device"
                             Accessible.name: qsTr("Audio output device")
 
                             delegate: ItemDelegate {
@@ -861,9 +873,11 @@ Item {
                                 font.weight: outputAudioSelector.font.weight
                                 font.pixelSize: outputAudioSelector.font.pixelSize
 
+                                Accessible.id: "settings.audio.output.device." + outputAudioSelectorDelg.index
                                 Accessible.name: outputAudioSelectorDelg.name
                                 Accessible.description: qsTr("Currently selected audio output device")
 
+                                required property int index
                                 required property string name
                             }
 
@@ -911,6 +925,7 @@ Item {
                             }
                             model: AudioManager.devices.filter(device => device.isOutput)
 
+                            Accessible.id: "settings.audio.ringtone"
                             Accessible.name: qsTr("Audio output device for ring tone")
 
                             delegate: ItemDelegate {
@@ -922,9 +937,11 @@ Item {
                                 font.weight: outputRingToneAudioSelector.font.weight
                                 font.pixelSize: outputRingToneAudioSelector.font.pixelSize
 
+                                Accessible.id: "settings.audio.ringtone." + outputRingAudioSelectorDelg.id
                                 Accessible.name: outputRingAudioSelectorDelg.name
                                 Accessible.description: qsTr("Currently selected ring output option")
 
+                                required property int index
                                 required property string name
                             }
 
@@ -1020,6 +1037,7 @@ Item {
                                     rightMargin: 20
                                 }
 
+                                Accessible.id: "settings.audio.ringtone.pause"
                                 Accessible.name: qsTr("Adjust pause between ring tones [s]")
                             }
 

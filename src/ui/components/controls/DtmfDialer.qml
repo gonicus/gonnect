@@ -24,7 +24,6 @@ Item {
 
         Accessible.role: Accessible.Button
         Accessible.name: qsTr("Character %1").arg(dialButton.value)
-        Accessible.focusable: true
         Accessible.onPressAction: () => dialButton.clicked()
 
         function clicked() {

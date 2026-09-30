@@ -16,7 +16,6 @@ Item {
 
     Accessible.role: Accessible.Button
     Accessible.name: control.tooltipText
-    Accessible.focusable: true
     Accessible.onPressAction: () => control.clicked()
 
     Rectangle {

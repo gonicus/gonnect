@@ -24,10 +24,16 @@ Item {
     signal volumeChanged(real volume)
     signal muteToggled
 
+    activeFocusOnTab: control.enabled
+
     Accessible.role: Accessible.Button
     Accessible.name: qsTr("Change volume")
     Accessible.focusable: true
     Accessible.onPressAction: () => control.toggleVolumePopup()
+
+    Keys.onReturnPressed: () => control.toggleVolumePopup()
+    Keys.onEnterPressed: () => control.toggleVolumePopup()
+    Keys.onSpacePressed: () => control.toggleVolumePopup()
 
     Rectangle {
         id: bg
