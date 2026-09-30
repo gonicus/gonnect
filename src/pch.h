@@ -32,15 +32,6 @@
 #include <QCoreApplication>
 #include <QCryptographicHash>
 #include <QDateTime>
-#include <QDBusArgument>
-#include <QDBusConnection>
-#include <QDBusInterface>
-#include <QDBusMessage>
-#include <QDBusMetaType>
-#include <QDBusObjectPath>
-#include <QDBusPendingCall>
-#include <QDBusPendingCallWatcher>
-#include <QDBusPendingReply>
 #include <QDebug>
 #include <QDesktopServices>
 #include <QDir>
@@ -126,3 +117,15 @@
 #include <qqmlintegration.h>
 #include <qqmlregistration.h>
 #include <qurlquery.h>
+
+#if defined(Q_OS_UNIX) || defined(__unix__)
+#  include <QDBusArgument>
+#  include <QDBusConnection>
+#  include <QDBusInterface>
+#  include <QDBusMessage>
+#  include <QDBusMetaType>
+#  include <QDBusObjectPath>
+#  include <QDBusPendingCall>
+#  include <QDBusPendingCallWatcher>
+#  include <QDBusPendingReply>
+#endif
