@@ -2,20 +2,18 @@
 
 // Common
 #include <cmath>
-#include <fcntl.h>
-#include <grp.h>
-#include <libusb.h>
-#include <netdb.h>
-#include <pjmedia/port.h>
-#include <pjsip/sip_msg.h>
-#include <pjsua2.hpp>
-#include <pjsua2/media.hpp>
-#include <pjsua-lib/pjsua.h>
-#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/socket.h>
-#include <unistd.h>
+#include <pjsua2.hpp>
+
+#if defined(Q_OS_UNIX) || defined(__unix__)
+#  include <fcntl.h>
+#  include <grp.h>
+#  include <netdb.h>
+#  include <signal.h>
+#  include <sys/socket.h>
+#  include <unistd.h>
+#endif
 
 // Qt
 #include <QAbstractItemModel>
