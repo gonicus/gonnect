@@ -34,11 +34,6 @@ Menu {
             required property string description
 
             onTriggered: () => control.deviceSelected(delg.id)
-
-            Accessible.role: Accessible.MenuItem
-            Accessible.name: delg.text
-            Accessible.focusable: true
-            Accessible.onPressAction: () => control.deviceSelected(delg.id)
         }
 
         onObjectAdded: (index, obj) => {
@@ -57,10 +52,5 @@ Menu {
         id: virtualBackground
         text: qsTr("Virtual background")
         onTriggered: () => control.virtualBackgroundButtonClicked()
-
-        Accessible.role: Accessible.MenuItem
-        Accessible.name: virtualBackground.text
-        Accessible.focusable: true
-        Accessible.onPressAction: () => control.virtualBackgroundButtonClicked()
     }
 }

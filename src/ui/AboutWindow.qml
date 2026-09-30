@@ -31,7 +31,8 @@ BaseWindow {
             margins: 20
         }
 
-        Accessible.role: Accessible.Column
+        Accessible.id: "about.headline"
+        Accessible.role: Accessible.Grouping
         Accessible.name: qsTr("GOnnect headline")
         Accessible.description: appHeader.text
 
@@ -68,8 +69,9 @@ BaseWindow {
             anchors.horizontalCenter: parent.horizontalCenter
             width: appLabel.width + clipboardButton.width
 
+            Accessible.id: "about.version"
             Accessible.role: Accessible.StaticText
-            Accessible.name: qsTr("GOnnect version")
+            Accessible.name: qsTr("GOnnect version %s").arg(ViewHelper.appVersion())
             Accessible.description: appLabel.text
 
             Label {
@@ -88,10 +90,10 @@ BaseWindow {
                     verticalCenter: parent.verticalCenter
                 }
 
+                Accessible.id: "about.copy.version"
                 Accessible.role: Accessible.Button
                 Accessible.name: qsTr("Copy to clipboard")
                 Accessible.description: qsTr("Copy the currently used version number of GOnnect to the clipboard")
-                Accessible.focusable: true
             }
         }
 
@@ -102,8 +104,6 @@ BaseWindow {
                 left: parent.left
                 right: parent.right
             }
-
-            Accessible.ignored: true
         }
 
         Row {
@@ -116,7 +116,7 @@ BaseWindow {
                     .replace('%2', qsTr('Homepage'))
                 onLinkActivated: link => Qt.openUrlExternally(link)
 
-                Accessible.role: Accessible.StaticText
+                Accessible.id: "about.homepage"
                 Accessible.name: qsTr('Homepage')
                 Accessible.description: qsTr("Visit the project homepage")
                 Accessible.onPressAction: () => Qt.openUrlExternally(genericSettings.homePageURL)
@@ -133,8 +133,8 @@ BaseWindow {
                     .replace('%2', qsTr('Bug Tracker'))
                 onLinkActivated: link => Qt.openUrlExternally(link)
 
-                Accessible.role: Accessible.StaticText
-                Accessible.name: qsTr('Homepage')
+                Accessible.id: "about.bugtracker"
+                Accessible.name: qsTr('Bug Tracker')
                 Accessible.description: qsTr("Visit the project bug tracker")
                 Accessible.onPressAction: () => Qt.openUrlExternally(genericSettings.issueTrackerURL)
 
@@ -150,8 +150,8 @@ BaseWindow {
                     .replace('%2', qsTr('Documentation'))
                 onLinkActivated: link => Qt.openUrlExternally(link)
 
-                Accessible.role: Accessible.StaticText
-                Accessible.name: qsTr('Homepage')
+                Accessible.id: "about.documentation"
+                Accessible.name: qsTr('Documentation')
                 Accessible.description: qsTr("Visit the online project documentation")
                 Accessible.onPressAction: () => Qt.openUrlExternally(genericSettings.documentationURL)
 

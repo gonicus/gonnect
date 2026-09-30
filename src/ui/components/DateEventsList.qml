@@ -32,7 +32,6 @@ ListView {
         Accessible.role: Accessible.StaticText
         Accessible.name: qsTr("Event section")
         Accessible.description: qsTr("Header for %1").arg(sectionHeader.text)
-        Accessible.focusable: true
 
         Label {
             id: sectionHeader
@@ -110,9 +109,8 @@ ListView {
         }
 
         Accessible.role: Accessible.ListItem
-        Accessible.name: qsTr("Event")
-        Accessible.description: qsTr("Currently selected calendar event: %1, starting time %2, remaining time %3").arg(summaryLabel.text).arg(timeLabel.text).arg(remainingMinutesLabel.text)
-        Accessible.focusable: true
+        Accessible.name: qsTr("%1, %2").arg(summaryLabel.text).arg(timeLabel.text)
+        Accessible.description: qsTr("Remaining time %1").arg(remainingMinutesLabel.text)
 
         Connections {
             target: internal
@@ -126,8 +124,6 @@ ListView {
             anchors.fill: parent
             radius: 4
             color: rowHoverHandler.hovered ? Theme.backgroundOffsetHoveredColor : 'transparent'
-
-            Accessible.ignored: true
         }
 
         RowLayout {
@@ -220,12 +216,6 @@ ListView {
                     text: delg.isJitsiMeeting ? qsTr('Join') : qsTr('Open')
                     onTriggered: () => joinAction.joinMeeting()
 
-                    Accessible.role: Accessible.Button
-                    Accessible.name: qsTr("Join meeting")
-                    Accessible.description: qsTr("Join the meeting associated with the currently selected event")
-                    Accessible.focusable: true
-                    Accessible.onPressAction: () => joinAction.joinMeeting()
-
                     function joinMeeting() {
                         if (delg.isJitsiMeeting) {
                             ViewHelper.requestMeeting(delg.roomName)
@@ -239,12 +229,6 @@ ListView {
                     id: copyAction
                     text: delg.isJitsiMeeting ? qsTr('Copy room link') : qsTr('Copy link')
                     onTriggered: () => copyAction.copyLink()
-
-                    Accessible.role: Accessible.Button
-                    Accessible.name: qsTr("Copy meeting link")
-                    Accessible.description: qsTr("Copy the meeting link associated with the currently selected event")
-                    Accessible.focusable: true
-                    Accessible.onPressAction: () => copyAction.copyLink()
 
                     function copyLink() {
                         if (delg.isJitsiMeeting) {

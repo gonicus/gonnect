@@ -30,19 +30,7 @@ Item {
 
         onMoved: () => control.moved()
 
-        Accessible.role: Accessible.Slider
         Accessible.name: qsTr("Adjust volume")
-        Accessible.focusable: true
-        Accessible.onIncreaseAction: () => {
-            if (slider.value < slider.to) {
-                slider.value += slider.stepSize
-            }
-        }
-        Accessible.onDecreaseAction: () => {
-            if (slider.value > slider.from) {
-                slider.value -= slider.stepSize
-            }
-        }
     }
 
     Label {

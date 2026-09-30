@@ -19,8 +19,6 @@ Item {
         radius: 4
         border.width: 1
         border.color: control.color
-
-        Accessible.ignored: true
     }
 
     Label {

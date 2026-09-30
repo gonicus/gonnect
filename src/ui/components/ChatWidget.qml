@@ -115,8 +115,6 @@ BaseWidget {
             verticalAlignment: Text.AlignVCenter
             anchors.centerIn: parent
 
-            Accessible.role: Accessible.StaticText
-            Accessible.name: chatInfo.text
             Accessible.description: qsTr("Displays the current status of the widget: %1").arg(chatInfo.text)
         }
     }

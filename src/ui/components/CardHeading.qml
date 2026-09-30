@@ -59,8 +59,6 @@ Item {
                 verticalCenter: parent.verticalCenter
             }
         }
-
-        Accessible.ignored: true
     }
 
     Component {
@@ -80,6 +78,8 @@ Item {
                 elide: Text.ElideRight
                 color: Theme.secondaryTextColor
                 Layout.fillWidth: true
+
+                Accessible.ignored: true
             }
 
             Pane {
@@ -92,8 +92,6 @@ Item {
                     anchors.centerIn: parent
                 }
             }
-
-            Accessible.ignored: true
         }
     }
 
@@ -105,7 +103,5 @@ Item {
             right: parent.right
             bottom: parent.bottom
         }
-
-        Accessible.ignored: true
     }
 }

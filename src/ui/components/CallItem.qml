@@ -61,8 +61,9 @@ Rectangle {
     signal clicked
 
     Accessible.role: Accessible.ListItem
-    Accessible.name: qsTr("Call")
-    Accessible.description: qsTr("Selected call %1 - contact %2, company %3, location %4/%5, number %6").arg(control.callId).arg(control.contactName).arg(control.company ?? "-").arg(control.city ?? "-").arg(control.country ?? "-").arg(control.phoneNumber)
+    Accessible.name: qsTr("%1, %2").arg(control.contactName).arg(control.phoneNumber)
+    Accessible.description: qsTr("Call %1 - company %2, location %3/%4").arg(control.callId).arg(control.company ?? "-").arg(control.city ?? "-").arg(control.country ?? "-")
+    Accessible.selected: control.selected
     Accessible.focusable: true
     Accessible.onPressAction: () => control.clicked()
 

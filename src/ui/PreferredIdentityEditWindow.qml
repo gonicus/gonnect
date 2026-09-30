@@ -107,10 +107,6 @@ BaseWindow {
                     left: parent.left
                     right: parent.right
                 }
-
-                Accessible.role: Accessible.EditableText
-                Accessible.name: displayNameTextField.text
-                Accessible.focusable: true
             }
 
             TextField {
@@ -122,10 +118,6 @@ BaseWindow {
                     left: parent.left
                     right: parent.right
                 }
-
-                Accessible.role: Accessible.EditableText
-                Accessible.name: prefixTextField.text
-                Accessible.focusable: true
             }
 
             TextField {
@@ -137,10 +129,6 @@ BaseWindow {
                     left: parent.left
                     right: parent.right
                 }
-
-                Accessible.role: Accessible.EditableText
-                Accessible.name: identityTextField.text
-                Accessible.focusable: true
             }
 
             Column {
@@ -157,10 +145,6 @@ BaseWindow {
                         left: parent.left
                         right: parent.right
                     }
-
-                    Accessible.role: Accessible.CheckBox
-                    Accessible.name: enabledCheckBox.text
-                    Accessible.focusable: true
                 }
 
                 CheckBox {
@@ -171,10 +155,6 @@ BaseWindow {
                         left: parent.left
                         right: parent.right
                     }
-
-                    Accessible.role: Accessible.CheckBox
-                    Accessible.name: autoCheckBox.text
-                    Accessible.focusable: true
                 }
             }
         }
@@ -200,11 +180,6 @@ BaseWindow {
                 }
                 control.close()
             }
-
-            Accessible.role: Accessible.Button
-            Accessible.name: deleteButton.text
-            Accessible.focusable: true
-            Accessible.onPressAction: () => deleteButton.click()
         }
 
         Button {
@@ -227,11 +202,6 @@ BaseWindow {
                 internal.save()
                 control.close()
             }
-
-            Accessible.role: Accessible.Button
-            Accessible.name: saveButton.text
-            Accessible.focusable: true
-            Accessible.onPressAction: () => saveButton.click()
         }
     }
 }
