@@ -16,4 +16,3 @@ void ErrorBus::addFatalError(const QString &message)
     qCCritical(lcErrorBus) << "FATAL ERROR:" << message;
     Q_EMIT fatalError(message);
 }
-
