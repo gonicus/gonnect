@@ -19,7 +19,7 @@ runs:
       uses: ./.github/actions/get-qt-version
 
     - name: Install Qt
-      uses: jurplel/install-qt-action@v4
+      uses: jurplel/install-qt-action@a9c63c7c123f3069cff414e7e482d95dfa9d8125 # v4
       with:
         version: ${{ steps.get-qt.outputs.qt-version }}
         host: 'windows'
