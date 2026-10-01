@@ -1,24 +1,24 @@
-/// @file
-///
-/// @author Benedek Kupper
-/// @date   2022
-///
-/// @copyright
-///         This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
-///         If a copy of the MPL was not distributed with this file, You can obtain one at
-///         https://mozilla.org/MPL/2.0/.
-///
-#ifndef __HID_RDF_SHORT_ITEM_HPP_
-#define __HID_RDF_SHORT_ITEM_HPP_
+// SPDX-License-Identifier: MPL-2.0
+#pragma once
 
+#include <bit>
 #include "hid/rdf/item.hpp"
 
 namespace hid::rdf
 {
+
 /// @brief A byte array that concatenates with another using the comma operator.
 template <std::size_t SIZE>
-class array : public std::array<byte_type, SIZE>
+class [[nodiscard]] array : public std::array<byte_type, SIZE>
 {
+    template <std::size_t Repeats, std::size_t M, std::size_t... I>
+    static constexpr hid::rdf::array<M * Repeats>
+    repeat_array_impl(const hid::rdf::array<M>& src,
+                      [[maybe_unused]] std::index_sequence<I...> parts)
+    {
+        return {src[I % M]...};
+    }
+
   public:
     template <std::size_t SIZE_2>
     constexpr array<SIZE + SIZE_2> operator,(array<SIZE_2> a2)
@@ -34,6 +34,12 @@ class array : public std::array<byte_type, SIZE>
         }
         return concat;
     }
+
+    template <std::size_t Repeats>
+    constexpr hid::rdf::array<SIZE * Repeats> repeat() const
+    {
+        return repeat_array_impl<Repeats, SIZE>(*this, std::make_index_sequence<SIZE * Repeats>{});
+    }
 };
 
 /// @brief This class stores exactly one HID report descriptor item.
@@ -43,6 +49,7 @@ class short_item : public array<1 + DATA_SIZE>
     static_assert((DATA_SIZE <= 4) and (DATA_SIZE != 3));
 
     using base_t = array<1 + DATA_SIZE>;
+    using base_t::data;
 
   public:
     template <typename TTag>
@@ -55,14 +62,15 @@ class short_item : public array<1 + DATA_SIZE>
     }
 
     template <typename TTag, typename TData>
-    constexpr short_item(TTag tag, TData data)
+    constexpr short_item(TTag tag, TData val)
         : short_item(tag)
     {
-        auto d = static_cast<std::uint32_t>(data);
+        // NOLINTNEXTLINE(bugprone-signed-char-misuse)
+        auto value = static_cast<std::uint32_t>(val);
         for (byte_type i = 0; i < DATA_SIZE; ++i)
         {
-            (*this)[1 + i] = static_cast<byte_type>(d);
-            d >>= 8;
+            (*this)[1 + i] = static_cast<byte_type>(value);
+            value >>= 8;
         }
     }
 
@@ -85,21 +93,7 @@ class short_item : public array<1 + DATA_SIZE>
         {
             return false;
         }
-        else
-        {
-#if __cplusplus > 201703L
-            return std::equal(this->begin() + 1, this->end(), rhs.data());
-#else
-            for (std::size_t i = 0; i < this->data_size(); ++i)
-            {
-                if ((*this)[1 + i] != rhs.data()[i])
-                {
-                    return false;
-                }
-            }
-            return true;
-#endif
-        }
+        return std::equal(this->begin() + 1, this->end(), rhs.data());
     }
 
     template <typename T>
@@ -107,8 +101,18 @@ class short_item : public array<1 + DATA_SIZE>
     {
         return !(*this == rhs);
     }
+
+    [[nodiscard]] constexpr std::uint32_t value_unsigned() const
+    {
+        auto header = std::bit_cast<item_header>(*data());
+        return item_header::get_unsigned_value(&header, data() + 1);
+    }
+
+    [[nodiscard]] constexpr std::int32_t value_signed() const
+    {
+        auto header = std::bit_cast<item_header>(*data());
+        return item_header::get_signed_value(&header, data() + 1);
+    }
 };
 
 } // namespace hid::rdf
-
-#endif // __HID_RDF_SHORT_ITEM_HPP_
