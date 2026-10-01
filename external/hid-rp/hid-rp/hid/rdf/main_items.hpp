@@ -1,15 +1,5 @@
-/// @file
-///
-/// @author Benedek Kupper
-/// @date   2022
-///
-/// @copyright
-///         This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
-///         If a copy of the MPL was not distributed with this file, You can obtain one at
-///         https://mozilla.org/MPL/2.0/.
-///
-#ifndef __HID_RDF_MAIN_ITEMS_HPP_
-#define __HID_RDF_MAIN_ITEMS_HPP_
+// SPDX-License-Identifier: MPL-2.0
+#pragma once
 
 #include "hid/rdf/global_items.hpp"
 #include "hid/rdf/short_item.hpp"
@@ -19,7 +9,7 @@ namespace hid::rdf
 {
 namespace main // internal use
 {
-class collection_begin_item : public short_item<1>
+class [[nodiscard]] collection_begin_item : public short_item<1>
 {
   public:
     constexpr collection_begin_item(collection_type t)
@@ -27,7 +17,7 @@ class collection_begin_item : public short_item<1>
     {}
 };
 
-class collection_end_item : public short_item<0>
+class [[nodiscard]] collection_end_item : public short_item<0>
 {
   public:
     constexpr collection_end_item()
@@ -41,7 +31,7 @@ namespace collection
 using type = main::collection_type;
 
 template <std::size_t... sz>
-constexpr auto application(array<sz>... items)
+[[nodiscard]] constexpr auto application(array<sz>... items)
 {
     static_assert(sizeof...(items) > 0);
     return main::collection_begin_item(type::APPLICATION), (items, ...),
@@ -49,21 +39,21 @@ constexpr auto application(array<sz>... items)
 }
 
 template <std::size_t... sz>
-constexpr auto logical(array<sz>... items)
+[[nodiscard]] constexpr auto logical(array<sz>... items)
 {
     static_assert(sizeof...(items) > 0);
     return main::collection_begin_item(type::LOGICAL), (items, ...), main::collection_end_item();
 }
 
 template <std::size_t... sz>
-constexpr auto report(array<sz>... items)
+[[nodiscard]] constexpr auto report(array<sz>... items)
 {
     static_assert(sizeof...(items) > 0);
     return main::collection_begin_item(type::REPORT), (items, ...), main::collection_end_item();
 }
 
 template <std::size_t... sz>
-constexpr auto named_array(array<sz>... items)
+[[nodiscard]] constexpr auto named_array(array<sz>... items)
 {
     static_assert(sizeof...(items) > 0);
     return main::collection_begin_item(type::NAMED_ARRAY), (items, ...),
@@ -71,14 +61,14 @@ constexpr auto named_array(array<sz>... items)
 }
 
 template <std::size_t... sz>
-constexpr auto physical(array<sz>... items)
+[[nodiscard]] constexpr auto physical(array<sz>... items)
 {
     static_assert(sizeof...(items) > 0);
     return main::collection_begin_item(type::PHYSICAL), (items, ...), main::collection_end_item();
 }
 
 template <std::size_t... sz>
-constexpr auto usage_modifier(array<sz>... items)
+[[nodiscard]] constexpr auto usage_modifier(array<sz>... items)
 {
     static_assert(sizeof...(items) > 0);
     return main::collection_begin_item(type::USAGE_MODIFIER), (items, ...),
@@ -86,7 +76,7 @@ constexpr auto usage_modifier(array<sz>... items)
 }
 
 template <std::size_t... sz>
-constexpr auto usage_switch(array<sz>... items)
+[[nodiscard]] constexpr auto usage_switch(array<sz>... items)
 {
     static_assert(sizeof...(items) > 0);
     return main::collection_begin_item(type::USAGE_SWITCH), (items, ...),
@@ -112,7 +102,7 @@ enum field_type : std::uint16_t
 };
 
 /// @brief Additional flags that can be set for fields beyond the base type.
-enum field_flags : std::uint16_t
+enum field_flags : std::uint16_t // NOLINT(performance-enum-size)
 {
     NONE = 0,
     WRAP = data_field_flag::WRAP,
@@ -184,8 +174,7 @@ class data_field
     }
 
     /// @brief  Creates not only the data field item, but adds @ref report_count and @ref
-    /// report_size
-    ///         items as well, in order to define a specific bit padding with a single entry.
+    /// report_size items as well, in order to define a specific bit padding with a single entry.
     /// @param  bitsize: the number of bits of padding to add as a new data field
     /// @return Minimal set of items to define a padding.
     constexpr static auto padding(byte_type bitsize)
@@ -194,7 +183,8 @@ class data_field
                data_field_item<1>(TAG, field_type::PADDING);
     }
 
-    /// @brief  Creates optional padding if the report bit size isn't byte aligned.
+    /// @brief  Creates optional padding if the report bit size isn't byte aligned
+    /// @tparam REPORT_CHUNK_BIT_SIZE: the size of the report chunk so far in bits
     /// @return Minimal set of items to define byte padding.
     template <std::size_t REPORT_CHUNK_BIT_SIZE>
     constexpr static auto byte_padding() -> rdf::array<
@@ -219,5 +209,3 @@ using output = main::data_field<report::type::OUTPUT>;
 using feature = main::data_field<report::type::FEATURE>;
 
 } // namespace hid::rdf
-
-#endif // __HID_RDF_MAIN_ITEMS_HPP_

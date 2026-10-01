@@ -19,11 +19,6 @@ runs:
   using: 'composite'
   steps:
 
-    - name: Setup cmake
-      uses: jwlawson/actions-setup-cmake@0d6a7d60b009d01c9e7523be22153ff8f19460d3 # v2
-      with:
-        cmake-version: 'latest'
-
     - name: Setup ccache
       if: inputs.deps == 'true'
       uses: hendrikmuhs/ccache-action@f09c25b45002a07be2955cbe52e8cee55643f89d # v1
@@ -36,8 +31,7 @@ runs:
       if: inputs.deps == 'true'
       run: |
         sudo apt-get update
-        sudo apt install -y ninja-build llvm llvm-dev libudev-dev libsasl2-dev libsecret-1-dev evolution-data-server-dev libnotify-dev libebook-contacts1.2-dev libebook1.2-dev libecal2.0-dev libedata-cal2.0-dev libedata-book1.2-dev git-lfs libprotoc-dev libprotobuf-dev libprotobuf-c-dev libgrpc-dev protobuf-compiler libpipewire-0.3-dev 
-        sudo snap install yq
+        sudo apt install -y --no-install-recommends ninja-build llvm libudev-dev libsasl2-dev libsecret-1-dev libnotify-dev libebook-contacts1.2-dev libebook1.2-dev libecal2.0-dev libedata-cal2.0-dev libedata-book1.2-dev libprotoc-dev libprotobuf-dev protobuf-compiler libpipewire-0.3-dev
 
     - name: Get QT-Version
       if: inputs.qt == 'true'
@@ -46,7 +40,7 @@ runs:
 
     - name: Install Qt
       if: inputs.qt == 'true'
-      uses: jurplel/install-qt-action@v4
+      uses: jurplel/install-qt-action@a9c63c7c123f3069cff414e7e482d95dfa9d8125 # v4
       with:
         version: ${{ steps.get-qt.outputs.qt-version }}
         host: 'linux'
@@ -59,7 +53,7 @@ runs:
       if: inputs.conan == 'true'
       uses: conan-io/setup-conan@ed3942a6883243f4af84e13e49c972f9440fa1c2 # v1
       with:
-        version: 2.29.0
+        version: 2.33.0
         cache_packages: true
 
     - name: Install Conan dependencies
