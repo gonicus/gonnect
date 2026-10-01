@@ -15,6 +15,7 @@ Item {
         property Button authButton
         property bool shareFullScreen
         property bool chatAutoOpened
+        property bool isWebViewLoaded: false
     }
 
     LoggingCategory {
@@ -78,10 +79,29 @@ Item {
     readonly property IConferenceConnector iConferenceConnector: JitsiConnector {
         id: confConn
         WebChannel.id: "jitsiConn"
+    }
+
+    Connections {
+        target: confConn
 
         function onIsInConferenceChanged() {
-            if (!confConn.isInConference) {
-                internal.authButton.enabled = true
+            if (confConn.isInConference) {
+                webViewShutdownTimer.stop()
+
+                // Toggle flag if we're still loaded to force a fresh view
+                if (internal.isWebViewLoaded) {
+                    internal.isWebViewLoaded = false
+                }
+
+                internal.isWebViewLoaded = true
+            } else {
+                if (internal.authButton) {
+                    internal.authButton.enabled = true
+                }
+
+                if (internal.isWebViewLoaded) {
+                    webViewShutdownTimer.restart()
+                }
             }
         }
     }
@@ -92,7 +112,7 @@ Item {
             if (!AuthManager.isAuthManagerInitialized) {
                 return undefined
             }
-            if (confConn.isInConference) {
+            if (internal.isWebViewLoaded) {
                 return jitsiViewComponent
             }
             if (AuthManager.isJitsiAuthRequired && AuthManager.isWaitingForAuth) {
@@ -111,6 +131,14 @@ Item {
             right: callListCard.visible ? verticalDragbarDummy.left : parent.right
             rightMargin: callListCard.visible ? 0 : Theme.d * 2
         }
+    }
+
+    // This timer delays the disposal of our WebView, as killing it directly
+    // harms existing GPU processes ("eglMakeCurrent failed ... EGL_BAD_DISPLAY")
+    Timer {
+        id: webViewShutdownTimer
+        interval: 1700
+        onTriggered: () => internal.isWebViewLoaded = false
     }
 
     Component {
@@ -259,6 +287,13 @@ Item {
 
             property var pendingKnocks: []
 
+            function parkWebView() {
+                jitsiView.stop()
+
+                // Pass an empty page, so that Chromium releases the conference media
+                jitsiView.url = "about:blank"
+            }
+
             function enqueueKnock(id, name) {
                 if (jitsiViewItem.pendingKnocks.some(e => e.id === id)) {
                     return
@@ -300,7 +335,7 @@ Item {
                 ConferenceButtonBar {
                     id: topBar
                     height: topBar.implicitHeight
-                    enabled: true
+                    enabled: confConn.isInConference
                     isOnHold: confConn.isOnHold
                     isMuted: confConn.isAudioMuted
                     isVideoMuted: confConn.isVideoMuted
@@ -774,7 +809,7 @@ Item {
                                 Accessible.name: qButton.text
                                 Accessible.description: qsTr("Change the video quality of this meeting")
                                 Accessible.focusable: true
-                                Accessible.onPressAction: () => onfConn.setVideoQuality(qButton.qualityValue)
+                                Accessible.onPressAction: () => confConn.setVideoQuality(qButton.qualityValue)
                             }
 
                             QualityButton {
