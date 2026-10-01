@@ -87,7 +87,6 @@ Item {
         function onIsInConferenceChanged() {
             if (confConn.isInConference) {
                 webViewShutdownTimer.stop()
-                webViewDisposeTimer.stop()
 
                 // Toggle flag if we're still loaded to force a fresh view
                 if (internal.isWebViewLoaded) {
@@ -138,22 +137,7 @@ Item {
     // harms existing GPU processes ("eglMakeCurrent failed ... EGL_BAD_DISPLAY")
     Timer {
         id: webViewShutdownTimer
-        interval: 1200
-        
-        onTriggered: () => {
-            const item = contentLoader.item
-            if (item && typeof item.parkWebView === "function") {
-                item.parkWebView()
-
-                webViewDisposeTimer.restart()
-            }
-        }
-    }
-
-    Timer {
-        id: webViewDisposeTimer
-        interval: 300
-
+        interval: 1700
         onTriggered: () => internal.isWebViewLoaded = false
     }
 
