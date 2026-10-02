@@ -194,7 +194,7 @@
     <message>
         <location filename="../src/ui/components/ActivitiesWidget.qml" line="82"/>
         <source>SIP</source>
-        <translation type="unfinished">SIP</translation>
+        <translation>SIP</translation>
     </message>
     <message>
         <location filename="../src/ui/components/ActivitiesWidget.qml" line="83"/>
@@ -839,7 +839,7 @@
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="590"/>
         <source>More</source>
-        <translation type="unfinished">Ще</translation>
+        <translation>Ще</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="603"/>
@@ -2435,12 +2435,12 @@
     <message>
         <location filename="../src/ui/components/popups/EditChatMessage.qml" line="113"/>
         <source>Save</source>
-        <translation type="unfinished">Зберегти</translation>
+        <translation>Зберегти</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/EditChatMessage.qml" line="113"/>
         <source>Remove</source>
-        <translation type="unfinished">Видалити</translation>
+        <translation>Видалити</translation>
     </message>
 </context>
 <context>
@@ -2448,17 +2448,17 @@
     <message>
         <location filename="../src/ui/components/popups/EditChatRoom.qml" line="79"/>
         <source>Room name</source>
-        <translation type="unfinished">Назва кімнати</translation>
+        <translation>Назва кімнати</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/EditChatRoom.qml" line="114"/>
         <source>Join rule:</source>
-        <translation type="unfinished">Правило входу:</translation>
+        <translation>Правило входу:</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/EditChatRoom.qml" line="133"/>
         <source>Save</source>
-        <translation type="unfinished">Зберегти</translation>
+        <translation>Зберегти</translation>
     </message>
 </context>
 <context>
@@ -2466,32 +2466,32 @@
     <message>
         <location filename="../src/ui/components/EditModeOptions.qml" line="24"/>
         <source>Add page</source>
-        <translation type="unfinished">Додати сторінку</translation>
+        <translation>Додати сторінку</translation>
     </message>
     <message>
         <location filename="../src/ui/components/EditModeOptions.qml" line="30"/>
         <source>Add a new dashboard page</source>
-        <translation type="unfinished">Додати нову сторінку панелі</translation>
+        <translation>Додати нову сторінку панелі</translation>
     </message>
     <message>
         <location filename="../src/ui/components/EditModeOptions.qml" line="39"/>
         <source>Add widget</source>
-        <translation type="unfinished">Додати віджет</translation>
+        <translation>Додати віджет</translation>
     </message>
     <message>
         <location filename="../src/ui/components/EditModeOptions.qml" line="50"/>
         <source>Add a new widget to the current dashboard page</source>
-        <translation type="unfinished">Додати новий віджет на поточну сторінку</translation>
+        <translation>Додати новий віджет на поточну сторінку</translation>
     </message>
     <message>
         <location filename="../src/ui/components/EditModeOptions.qml" line="61"/>
         <source>Finished</source>
-        <translation type="unfinished">Готово</translation>
+        <translation>Готово</translation>
     </message>
     <message>
         <location filename="../src/ui/components/EditModeOptions.qml" line="66"/>
         <source>Finish and save all dashboard and widget changes</source>
-        <translation type="unfinished">Завершити та зберегти всі зміни</translation>
+        <translation>Завершити та зберегти всі зміни</translation>
     </message>
 </context>
 <context>
@@ -2499,17 +2499,17 @@
     <message>
         <location filename="../src/ui/components/popups/EditStatusText.qml" line="48"/>
         <source>Your status message...</source>
-        <translation type="unfinished">Ваше повідомлення статусу...</translation>
+        <translation>Ваше повідомлення статусу...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/EditStatusText.qml" line="79"/>
         <source>Set</source>
-        <translation type="unfinished">Встановити</translation>
+        <translation>Встановити</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/EditStatusText.qml" line="79"/>
         <source>Remove</source>
-        <translation type="unfinished">Видалити</translation>
+        <translation>Видалити</translation>
     </message>
 </context>
 <context>
@@ -2527,7 +2527,7 @@
     <message>
         <location filename="../src/ui/components/popups/EditUrlDialog.qml" line="112"/>
         <source>Save</source>
-        <translation type="unfinished">Зберегти</translation>
+        <translation>Зберегти</translation>
     </message>
 </context>
 <context>
@@ -2535,17 +2535,17 @@
     <message>
         <location filename="../src/ui/components/pages/Emergency.qml" line="44"/>
         <source>Emergency call</source>
-        <translation type="unfinished">Екстрений виклик</translation>
+        <translation>Екстрений виклик</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Emergency.qml" line="57"/>
         <source>Clicking one of these buttons will end all current calls and start an emergency call.</source>
-        <translation type="unfinished">Натискання кнопки завершить усі поточні дзвінки та ініціює екстрений виклик.</translation>
+        <translation>Натискання кнопки завершить усі поточні дзвінки та ініціює екстрений виклик.</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Emergency.qml" line="87"/>
         <source>Tap to call emergency contact: %1 (%2)</source>
-        <translation type="unfinished">Натисніть, щоб зателефонувати на екстрений контакт: %1 (%2)</translation>
+        <translation>Натисніть, щоб зателефонувати на екстрений контакт: %1 (%2)</translation>
     </message>
 </context>
 <context>
@@ -2553,22 +2553,22 @@
     <message>
         <location filename="../src/ui/EmergencyCallIncomingWindow.qml" line="15"/>
         <source>Emergency call</source>
-        <translation type="unfinished">Екстрений виклик</translation>
+        <translation>Екстрений виклик</translation>
     </message>
     <message>
         <location filename="../src/ui/EmergencyCallIncomingWindow.qml" line="31"/>
         <source>Incoming emergency call from %1</source>
-        <translation type="unfinished">Вхідний екстрений виклик від %1</translation>
+        <translation>Вхідний екстрений виклик від %1</translation>
     </message>
     <message>
         <location filename="../src/ui/EmergencyCallIncomingWindow.qml" line="107"/>
         <source>Answering the call will automatically terminate all other ongoing calls.</source>
-        <translation type="unfinished">Відповідь автоматично завершить усі інші активні дзвінки.</translation>
+        <translation>Відповідь автоматично завершить усі інші активні дзвінки.</translation>
     </message>
     <message>
         <location filename="../src/ui/EmergencyCallIncomingWindow.qml" line="126"/>
         <source>Answer</source>
-        <translation type="unfinished">Відповісти</translation>
+        <translation>Відповісти</translation>
     </message>
 </context>
 <context>
@@ -2576,12 +2576,12 @@
     <message>
         <location filename="../src/ui/components/controls/EmojiButton.qml" line="18"/>
         <source>Emoji</source>
-        <translation type="unfinished">Емодзі</translation>
+        <translation>Емодзі</translation>
     </message>
     <message>
         <location filename="../src/ui/components/controls/EmojiButton.qml" line="19"/>
         <source>Selected Emoji: %1</source>
-        <translation type="unfinished">Вибране емодзі: %1</translation>
+        <translation>Вибране емодзі: %1</translation>
     </message>
 </context>
 <context>
@@ -2589,17 +2589,17 @@
     <message>
         <location filename="../src/ui/components/controls/EmojiPicker.qml" line="34"/>
         <source>Search for emoji...</source>
-        <translation type="unfinished">Пошук емодзі...</translation>
+        <translation>Пошук емодзі...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/controls/EmojiPicker.qml" line="76"/>
         <source>Switch Emoji category</source>
-        <translation type="unfinished">Змінити категорію емодзі</translation>
+        <translation>Змінити категорію емодзі</translation>
     </message>
     <message>
         <location filename="../src/ui/components/controls/EmojiPicker.qml" line="124"/>
         <source>Select Emoji</source>
-        <translation type="unfinished">Вибрати емодзі</translation>
+        <translation>Вибрати емодзі</translation>
     </message>
 </context>
 <context>
@@ -2607,139 +2607,139 @@
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="16"/>
         <source>Trying</source>
-        <translation type="unfinished">Спроба</translation>
+        <translation>Спроба</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="18"/>
         <location filename="../src/ui/EnumTranslation.cpp" line="291"/>
         <source>Ringing</source>
-        <translation type="unfinished">Виклик</translation>
+        <translation>Виклик</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="20"/>
         <source>Call being forwarded</source>
-        <translation type="unfinished">Дзвінок переадресовано</translation>
+        <translation>Дзвінок переадресовано</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="22"/>
         <source>Queued</source>
-        <translation type="unfinished">У черзі</translation>
+        <translation>У черзі</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="24"/>
         <source>Progress</source>
-        <translation type="unfinished">В процесі</translation>
+        <translation>В процесі</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="28"/>
         <source>Ok</source>
-        <translation type="unfinished">ОК</translation>
+        <translation>Ок</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="30"/>
         <source>Accepted</source>
-        <translation type="unfinished">Прийнято</translation>
+        <translation>Прийнято</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="46"/>
         <source>Unauthorized</source>
-        <translation type="unfinished">Не авторизовано</translation>
+        <translation>Не авторизовано</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="50"/>
         <location filename="../src/ui/EnumTranslation.cpp" line="168"/>
         <source>Rejected</source>
-        <translation type="unfinished">Відхилено</translation>
+        <translation>Відхилено</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="52"/>
         <source>Not found</source>
-        <translation type="unfinished">Не знайдено</translation>
+        <translation>Не знайдено</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="58"/>
         <source>Proxy authentication required</source>
-        <translation type="unfinished">Потрібна автентифікація проксі</translation>
+        <translation>Потрібна автентифікація проксі</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="60"/>
         <source>Request timeout</source>
-        <translation type="unfinished">Час запиту вийшов</translation>
+        <translation>Час запиту вийшов</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="112"/>
         <source>Temporarily unavailable</source>
-        <translation type="unfinished">Тимчасово недоступно</translation>
+        <translation>Тимчасово недоступно</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="122"/>
         <source>Ambiguous</source>
-        <translation type="unfinished">Неоднозначно</translation>
+        <translation>Неоднозначно</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="124"/>
         <source>Busy here</source>
-        <translation type="unfinished">Зайнято</translation>
+        <translation>Зайнято</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="126"/>
         <source>Request terminated</source>
-        <translation type="unfinished">Запит завершено</translation>
+        <translation>Запит завершено</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="128"/>
         <source>Not acceptable here</source>
-        <translation type="unfinished">Неприйнятно</translation>
+        <translation>Неприйнятно</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="140"/>
         <source>Internal server error</source>
-        <translation type="unfinished">Внутрішня помилка сервера</translation>
+        <translation>Внутрішня помилка сервера</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="142"/>
         <source>Not implemented</source>
-        <translation type="unfinished">Не реалізовано</translation>
+        <translation>Не реалізовано</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="144"/>
         <source>Bad gateway</source>
-        <translation type="unfinished">Неправильний шлюз</translation>
+        <translation>Неправильний шлюз</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="146"/>
         <source>Service unavailable</source>
-        <translation type="unfinished">Сервіс недоступний</translation>
+        <translation>Сервіс недоступний</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="148"/>
         <source>Server timeout</source>
-        <translation type="unfinished">Тайм-аут сервера</translation>
+        <translation>Тайм-аут сервера</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="158"/>
         <source>Busy everywhere</source>
-        <translation type="unfinished">Зайнято всюди</translation>
+        <translation>Зайнято всюди</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="160"/>
         <source>Decline</source>
-        <translation type="unfinished">Відхилено</translation>
+        <translation>Відхилено</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="162"/>
         <source>Does not exist anywhere</source>
-        <translation type="unfinished">Не існує ніде</translation>
+        <translation>Не існує ніде</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="164"/>
         <source>Not acceptable anywhere</source>
-        <translation type="unfinished">Ніде неприйнятно</translation>
+        <translation>Ніде неприйнятно</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="166"/>
         <source>Unwanted</source>
-        <translation type="unfinished">Небажаний</translation>
+        <translation>Небажаний</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="174"/>
@@ -2751,67 +2751,67 @@
         <location filename="../src/ui/EnumTranslation.cpp" line="281"/>
         <location filename="../src/ui/EnumTranslation.cpp" line="295"/>
         <source>Unknown</source>
-        <translation type="unfinished">Невідомо</translation>
+        <translation>Невідомо</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="189"/>
         <source>Commercial</source>
-        <translation type="unfinished">Робочий</translation>
+        <translation>Робочий</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="191"/>
         <source>Home</source>
-        <translation type="unfinished">Домашній</translation>
+        <translation>Домашній</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="193"/>
         <source>Mobile</source>
-        <translation type="unfinished">Мобільний</translation>
+        <translation>Мобільний</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="205"/>
         <source>Incoming</source>
-        <translation type="unfinished">Вхідний</translation>
+        <translation>Вхідний</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="207"/>
         <source>Outgoing</source>
-        <translation type="unfinished">Вихідний</translation>
+        <translation>Вихідний</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="209"/>
         <source>Blocked</source>
-        <translation type="unfinished">Заблокований</translation>
+        <translation>Заблокований</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="211"/>
         <source>SIP</source>
-        <translation type="unfinished">SIP</translation>
+        <translation>SIP</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="213"/>
         <source>Jitsi Meet</source>
-        <translation type="unfinished">Jitsi Meet</translation>
+        <translation>Jitsi Meet</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="226"/>
         <source>SAS string</source>
-        <translation type="unfinished">Рядок SAS</translation>
+        <translation>Рядок SAS</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="228"/>
         <source>SAS symbol</source>
-        <translation type="unfinished">Символ SAS</translation>
+        <translation>Символ SAS</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="240"/>
         <source>Alphabetical</source>
-        <translation type="unfinished">За абеткою</translation>
+        <translation>За алфавітом</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="242"/>
         <source>Latest activity</source>
-        <translation type="unfinished">Остання активність</translation>
+        <translation>Остання активність</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="255"/>
