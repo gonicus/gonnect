@@ -80,7 +80,12 @@ Repeater {
 
         onHighlightedChanged: () => internal.updateSelectedListItem()
 
-        onClicked: () => control.roomSelected(delg.roomId)
+        onClicked: () => {
+                       if (delg.highlighted) {
+                           SelectionState.selectedThreadId = ""
+                       }
+                       control.roomSelected(delg.roomId)
+                   }
         onFilesDropped: urls => {
                             const room = control.chatProvider.chatRoomByRoomId(delg.roomId)
                             ViewHelper.showFileUploadDialog(room, urls)

@@ -195,10 +195,11 @@ Item {
 
             Accessible.name: qsTr("Hang up phone call")
         }
-        
-        BarButton {
+
+        HeaderIconButton {
             visible: control.isThreadMode
-            iconPath: Icons.mobileCloseApp
+            iconSource: Icons.mobileCloseApp
+            accessiblePurpose: qsTr("Close thread")
             anchors.verticalCenter: parent.verticalCenter
             onClicked: () => control.closeThreadRequested()
         }

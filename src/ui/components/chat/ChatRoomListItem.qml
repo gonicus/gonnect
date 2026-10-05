@@ -195,7 +195,7 @@ Item {
                     right: parent?.right
                 }
 
-                onClicked: () => control.threadSelected(threadDelg.threadId)
+                onClicked: () => control.threadSelected(threadDelg.highlighted ? "" : threadDelg.threadId)
             }
         }
     }
