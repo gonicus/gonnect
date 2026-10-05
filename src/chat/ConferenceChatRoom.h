@@ -29,6 +29,7 @@ public:
     virtual IChatRoom::JoinRule joinRule() override;
     virtual IChatRoom::Permissions permissions() override;
     virtual QList<ChatMessage *> chatMessages() const override { return m_messages; }
+    virtual ChatMessage *messageById(const QString &) const override { return nullptr; }
     virtual QList<ChatMessage *> pinnedChatMessages() const override { return {}; }
     virtual qsizetype pinnedChatMessageCount() const override { return 0; }
     virtual ChatMessage *pinnedChatMessageByIndex(qsizetype) const override { return nullptr; }

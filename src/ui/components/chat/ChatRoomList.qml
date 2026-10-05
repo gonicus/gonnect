@@ -72,6 +72,7 @@ Repeater {
     delegate: ChatRoomListItem {
         id: delg
         highlighted: SelectionState.selectedChatRoom?.id === delg.roomId
+        chatRoom: control.chatProvider?.chatRoomByRoomId(delg.roomId) ?? null
         anchors {
             left: parent?.left
             right: parent?.right
@@ -102,5 +103,9 @@ Repeater {
                                   })
 
         }
+        onThreadSelected: threadId => {
+                              control.roomSelected(delg.roomId)
+                              SelectionState.selectedThreadId = threadId
+                          }
     }
 }

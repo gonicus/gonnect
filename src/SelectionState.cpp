@@ -54,6 +54,11 @@ void SelectionState::setSelectedChatRoom(IChatRoom *chatRoom)
                             [this](QObject *) { setSelectedChatRoom(nullptr); });
         }
 
+        if (!m_selectedThreadId.isEmpty()) {
+            m_selectedThreadId.clear();
+            Q_EMIT selectedThreadIdChanged();
+        }
+
         Q_EMIT selectedChatRoomChanged();
     }
 }

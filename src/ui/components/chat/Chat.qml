@@ -61,14 +61,14 @@ Item {
                            control.previousChatRoom = newRoom
                            relatedMsg.chatMessage = null
 
-                           control.loadMessages(chatMessageList.threadId)
+                           control.loadMessages(SelectionState.selectedThreadId)
                        }
 
     Connections {
         target: control.chatRoom
 
         function onOwnUserJoinStateChanged() {
-            control.loadMessages(chatMessageList.threadId)
+            control.loadMessages(SelectionState.selectedThreadId)
         }
 
         function onNotificationCountChanged() {
@@ -105,12 +105,14 @@ Item {
         shallBeVisible: control.showTitleBar && !!control.chatRoom
         chatProvider: control.chatProvider
         chatRoom: control.chatRoom
-        threadId: chatMessageList.threadId
+        threadId: SelectionState.selectedThreadId
+        height: messageListCardHeading.implicitHeight
         anchors {
             left: parent.left
             right: parent.right
+            top: parent.top
         }
-        onCloseThreadRequested: () => chatMessageList.threadId = ""
+        onCloseThreadRequested: () => SelectionState.selectedThreadId = ""
     }
 
     Rectangle {
@@ -172,8 +174,6 @@ Item {
                                 control.chatProvider.retrySendMessage(control.chatRoom.id, messageId)
                             }
                         }
-
-        onThreadIdChanged: () => control.loadMessages(chatMessageList.threadId)
     }
 
     Item {

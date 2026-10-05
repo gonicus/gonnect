@@ -28,12 +28,6 @@ public:
         Reactions,
         Flags,
 
-        IsPrivateMessage,
-        IsOwnMessage,
-        IsSystemMessage,
-        IsEncrypted,
-        IsPending,
-        IsFailed,
         IsEdited,
         IsSameUserAsPrevious,
         IsSameMinuteAsPrevious,

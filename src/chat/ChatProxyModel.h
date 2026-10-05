@@ -15,7 +15,7 @@ class ChatProxyModel : public QSortFilterProxyModel
     QML_ELEMENT
     Q_CLASSINFO("DefaultProperty", "sourceModel")
 
-    Q_PROPERTY(QString threadId MEMBER m_threadId NOTIFY threadIdChanged FINAL)
+    Q_PROPERTY(QString threadId READ threadId WRITE setThreadId NOTIFY threadIdChanged FINAL)
 
 public:
     enum class Roles {
@@ -25,6 +25,7 @@ public:
     };
 
     explicit ChatProxyModel(QObject *parent = nullptr);
+    QString threadId() const { return m_threadId; }
 
     virtual QHash<int, QByteArray> roleNames() const override;
     virtual QVariant data(const QModelIndex &index, int role) const override;
@@ -35,6 +36,8 @@ protected:
     virtual bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const override;
 
 private:
+    void setThreadId(const QString &threadId);
+
     QObject *m_sourceModelContext = nullptr;
     QObject *m_chatRoomContext = nullptr;
     QString m_threadId;

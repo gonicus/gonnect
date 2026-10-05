@@ -32,9 +32,6 @@ Item {
     required property var readUsers
 
     required property int flags
-    required property bool isOwnMessage
-    required property bool isPending
-    required property bool isFailed
     required property bool isEdited
     required property bool isStateUpdate
     required property bool isSameUserAsPrevious
@@ -51,12 +48,14 @@ Item {
     required property string relatedMessageAffectedUserId
 
     readonly property bool isThreadRoot: !!(control.flags & ChatMessage.Flag.ThreadRoot)
+    readonly property bool isOwnMessage: !!(control.flags & ChatMessage.Flag.OwnMessage)
+    readonly property bool isPending: !!(control.flags & ChatMessage.Flag.Pending)
+    readonly property bool isFailed: !!(control.flags & ChatMessage.Flag.Failed)
 
     property IChatProvider chatProvider
     property IChatRoom chatRoom
 
     property string clickedLink
-    property bool isThreadMode
 
     readonly property int capabilities: control.chatProvider?.capabilities ?? 0
     property int roomPermissions
@@ -588,7 +587,7 @@ Item {
 
     Flow {
         id: reactionsContainer
-        visible: threadBadge.visible || reactionRepeater.count > 0
+        visible: threadBadge.shallBeVisible || reactionRepeater.count > 0
         spacing: 6
         anchors {
             left: nameLabel.left
@@ -599,11 +598,14 @@ Item {
 
         ReactionButton {
             id: threadBadge
-            visible: !control.isThreadMode && (control.isThreadRoot || control.threadId !== "")
+            visible: threadBadge.shallBeVisible
             emoji: "💬"
             text: qsTr("Thread")
             highlighted: true
             onClicked: () => control.openThread(control.isThreadRoot ? control.eventId : control.threadId)
+
+            readonly property bool shallBeVisible: SelectionState.selectedThreadId === ""
+                                                   && (control.isThreadRoot || control.threadId !== "")
         }
 
         Repeater {

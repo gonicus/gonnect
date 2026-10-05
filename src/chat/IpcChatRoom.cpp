@@ -105,6 +105,14 @@ QList<ChatMessage *> IpcChatRoom::chatMessages() const
     return m_mainMessageContainer.chatMessages();
 }
 
+ChatMessage *IpcChatRoom::messageById(const QString &id) const
+{
+    if (id.isEmpty()) {
+        return nullptr;
+    }
+    return m_mainMessageContainer.messageById(id);
+}
+
 void IpcChatRoom::markAsRead()
 {
     if (ownLastReadTimestamp().isValid() && ownLastReadTimestamp() >= latestMessageDateTime()) {
@@ -408,6 +416,15 @@ void IpcChatRoom::updateMessageEventId(const QString &oldEventId, const QString 
 
         const auto value = m_threadChildren.take(oldEventId);
         m_threadChildren.insert(newEventId, value);
+
+        for (const auto &childEventId : value) {
+            if (auto *childMessage = m_mainMessageContainer.messageById(childEventId)) {
+                if (childMessage->threadId() == oldEventId) {
+                    childMessage->setEventId(newEventId);
+                    Q_EMIT chatMessageThreadIdChanged(indexOfMessage(childMessage), childMessage);
+                }
+            }
+        }
 
         for (auto it = m_threadChildren.begin(); it != m_threadChildren.end(); ++it) {
             if (it->remove(oldEventId)) {

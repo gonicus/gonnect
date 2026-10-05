@@ -108,6 +108,9 @@ public:
     /// List of chat messages of this room, sorted by timestamp ascending
     virtual QList<ChatMessage *> chatMessages() const = 0;
 
+    /// Retrieve a message by id lookup or nullptr if not found
+    virtual ChatMessage *messageById(const QString &id) const = 0;
+
     /// List of pinned chat messages of this room, sorted by timestamp ascending
     virtual QList<ChatMessage *> pinnedChatMessages() const = 0;
     virtual qsizetype pinnedChatMessageCount() const = 0;
@@ -271,6 +274,7 @@ Q_SIGNALS:
                                  ChatMessage::Flags previousFlags);
     void chatMessageReactionsChanged(qsizetype index, ChatMessage *chatMessage);
     void chatMessageEventIdChanged(qsizetype index, ChatMessage *chatMessage);
+    void chatMessageThreadIdChanged(qsizetype index, ChatMessage *chatMessage);
     void chatMessageMentionedUsersChanged(qsizetype index, ChatMessage *chatMessage);
 
     /// Send when chat messages have been cleared (i.e. removed and deleted). All objects have been
