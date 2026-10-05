@@ -35,7 +35,7 @@ env:
 jobs:
   build-windows:
     runs-on: windows-2025-vs2026
-    name: "Build GOnnect (Windows)"
+    name: "Windows"
     if: ${{ inputs.windows }}
 
     steps:
@@ -129,7 +129,7 @@ jobs:
 
   build-macos:
     runs-on: macos-26
-    name: "Build GOnnect (MacOS)"
+    name: "MacOS"
     if: ${{ inputs.macos }}
 
     steps:
@@ -160,7 +160,7 @@ jobs:
 
   flatpak:
     name: "Flatpak"
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     if: ${{ inputs.flatpak }}
     container:
       image: ghcr.io/flathub-infra/flatpak-github-actions:kde-6.10

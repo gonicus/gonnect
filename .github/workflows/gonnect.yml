@@ -32,7 +32,7 @@ on:
     branches:
       - release
       - main
-  # Use the release/main branch workflow/actions definitions rather the definitions in the pull_request
+  # PRs targeting release or main
   pull_request:
     branches:
       - release
@@ -135,7 +135,7 @@ jobs:
           retention-days: 1
 
   packages:
-    name: "Packages"
+    name: "Build packages"
     needs: changes
     uses: ./.github/workflows/build-packages.yml
     secrets: inherit
