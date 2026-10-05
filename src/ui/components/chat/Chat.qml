@@ -15,6 +15,7 @@ Item {
     property date enteredTimestamp: new Date(NaN)
     property var roomDwell: ({})
     property IChatRoom bubbleTargetRoom
+    property string newThreadId: ""
 
     readonly property int capabilities: control.chatProvider?.capabilities ?? 0
     readonly property alias isThreadMode: chatMessageList.isThreadMode
@@ -169,6 +170,12 @@ Item {
                          relatedMsg.chatMessage = control.chatRoom?.chatMessageById(messageId) ?? null
                          chatMessageBox.giveFocus()
                      }
+        onRespondInNewThread: threadId => {
+                                  relatedMsg.chatMessage = control.chatRoom?.chatMessageById(threadId) ?? null
+                                  control.newThreadId = threadId
+                                  chatMessageBox.giveFocus()
+                              }
+
         onRetryMessage: messageId => {
                             if (control.chatProvider) {
                                 control.chatProvider.retrySendMessage(control.chatRoom.id, messageId)
@@ -262,6 +269,7 @@ Item {
         content: relatedMsg.chatMessage?.content ?? null
         userState: relatedMsg.chatMessage?.state ?? ChatMessageContentUserStateChange.State.Unknown
         affectedUserName: control.chatProvider?.userById(relatedMsg.chatMessage?.affectedUserId ?? "")?.computedName ?? ""
+        startsNewThread: control.newThreadId !== ""
         anchors {
             left: replyBg.left
             right: replyBg.right
@@ -284,7 +292,10 @@ Item {
             rightMargin: 10
         }
 
-        onClicked: () => relatedMsg.chatMessage = null
+        onClicked: () => {
+                       relatedMsg.chatMessage = null
+                       control.newThreadId = ""
+                   }
     }
 
     ChatMessageBox {
@@ -327,11 +338,16 @@ Item {
                     // Send new message
                     control.chatRoom.sendMessage(chatMessageBox.text,
                                                  relatedMsg.chatMessage ? relatedMsg.chatMessage.eventId : "",
-                                                 chatMessageList.threadId)
+                                                 control.newThreadId || chatMessageList.threadId)
                     control.chatRoom.markAsRead()
+
+                    if (control.newThreadId) {
+                        SelectionState.selectedThreadId = control.newThreadId
+                    }
                 }
 
                 relatedMsg.chatMessage = null
+                control.newThreadId = ""
                 chatMessageBox.clear()
             }
         }

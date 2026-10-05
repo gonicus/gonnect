@@ -8,20 +8,6 @@ import base
 
 Item {
     id: control
-    implicitWidth: {
-        if (!control.content) {
-            return 0
-        } else if (control.isStateUpdate) {
-            return stateLabel.implicitWidth
-        } else if (control.isRemoved || (control.isText && control.content.isSimpleText)) {
-            return messageLabel.implicitWidth
-        } else if (control.content instanceof ChatMessageContentImage) {
-            return messageImage.sourceSize.width
-        } else if (attachmentLoader.item) {
-            return attachmentLoader.width
-        }
-        return 36
-    }
     implicitHeight: {
         if (!control.content) {
             return 0

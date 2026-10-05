@@ -9,12 +9,14 @@ Item {
 
     property alias chatRoom: chatModel.chatRoom
     property IChatProvider chatProvider
+    property alias threadId: chatProxyModel.threadId
 
     readonly property alias isScrolledDown: listView.atYEnd
     readonly property alias count: listView.count
     readonly property bool isThreadMode: SelectionState.selectedThreadId !== ""
 
     signal respondTo(string messageId)
+    signal respondInNewThread(string messageId)
     signal retryMessage(string messageId)
 
     onChatRoomChanged: () => {
@@ -88,6 +90,7 @@ Item {
             required property int index
 
             onRespondTo: messageId => control.respondTo(messageId)
+            onRespondInNewThread: threadId => control.respondInNewThread(threadId)
             onRetryMessage: messageId => control.retryMessage(messageId)
             onOpenThread: threadId => SelectionState.selectedThreadId = threadId
             onTogglePin: () => control.chatRoom?.togglePin(delg.eventId)

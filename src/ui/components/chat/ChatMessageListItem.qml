@@ -63,6 +63,7 @@ Item {
     readonly property bool isRemoved: control.content instanceof ChatMessageContentRemoved
 
     signal respondTo(string messageId)
+    signal respondInNewThread(string threadId)
     signal retryMessage(string eventId)
     signal openThread(string threadId)
     signal togglePin
@@ -562,6 +563,13 @@ Item {
                 text: qsTr("Reply...")
                 icon.source: Icons.mailReplyCustom
                 onTriggered: () => control.respondTo(control.eventId)
+            }
+
+            HideableMenuItem {
+                visible: !control.isFailed && !control.isPending && !control.isThreadRoot && control.threadId === "" && !!(control.capabilities & IChatProvider.Capability.MessageRelations)
+                text: qsTr("Reply in thread...")
+                icon.source: Icons.dialogMessages
+                onTriggered: () => control.respondInNewThread(control.eventId)
             }
 
             HideableMenuItem {
