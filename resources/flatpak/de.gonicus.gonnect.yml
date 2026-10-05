@@ -1,9 +1,9 @@
 id: de.gonicus.gonnect
 runtime: org.kde.Platform
-runtime-version: '6.11'
+runtime-version: '6.12'
 sdk: org.kde.Sdk
 base: io.qt.qtwebengine.BaseApp
-base-version: '6.11'
+base-version: '6.12'
 command: gonnect
 
 add-extensions:
@@ -100,6 +100,8 @@ modules:
           project-id: 13287
           stable-only: true
           url-template: https://kerberos.org/dist/krb5/${major}.${minor}/krb5-${major}.${minor}.${patch}.tar.gz
+      - type: patch
+        path: patches/krb5-c23-strchr.patch
       - type: file
         path: krb5.conf
 

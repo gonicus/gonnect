@@ -16,6 +16,8 @@
 #include "AvatarManager.h"
 #include "SecretResponse.h"
 
+using namespace Qt::StringLiterals;
+
 Q_LOGGING_CATEGORY(lcLDAPAddressBookFeeder, "gonnect.app.feeder.LDAPAddressBookFeeder")
 
 LDAPAddressBookFeeder::LDAPAddressBookFeeder(const QString &group, const int retryCount,
@@ -630,5 +632,8 @@ void LDAPAddressBookFeeder::loadAvatarsForContacts()
 
 QDateTime LDAPAddressBookFeeder::parseLDAPTimestamp(const QString &timestamp) const
 {
-    return QDateTime::fromString(timestamp, "yyyyMMddhhmmsst");
+    // TODO: only yyyyMMddHHmmss[.fff]Z might not be enough - parse timestamp by ourselves
+    QDateTime dt = QDateTime::fromString(timestamp.left(14), u"yyyyMMddHHmmss"_s);
+    dt.setTimeZone(QTimeZone::UTC);
+    return dt;
 }
