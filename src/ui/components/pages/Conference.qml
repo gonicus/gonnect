@@ -287,13 +287,6 @@ Item {
 
             property var pendingKnocks: []
 
-            function parkWebView() {
-                jitsiView.stop()
-
-                // Pass an empty page, so that Chromium releases the conference media
-                jitsiView.url = "about:blank"
-            }
-
             function enqueueKnock(id, name) {
                 if (jitsiViewItem.pendingKnocks.some(e => e.id === id)) {
                     return
