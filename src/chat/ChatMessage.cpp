@@ -78,6 +78,11 @@ void ChatMessage::setContent(QObject *content)
     }
 }
 
+void ChatMessage::setThreadId(const QString &threadId)
+{
+    m_threadId = threadId;
+}
+
 bool ChatMessage::isStateUpdate() const
 {
     return qobject_cast<ChatMessageContentUserStateChange *>(m_content);

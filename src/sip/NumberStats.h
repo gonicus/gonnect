@@ -37,7 +37,9 @@ public:
 
     QStringList mostCalled(quint8 limit, bool includeFavorites = true) const;
 
-    bool isFavorite(const QString &phoneNumber) const;
+    bool isFavorite(const QString &phoneNumber,
+                    const NumberStats::ContactType contactType =
+                            NumberStats::ContactType::PhoneNumber) const;
     void toggleFavorite(const QString &phoneNumber, const NumberStats::ContactType contactType);
 
     const NumberStat *numberStat(const QString &phoneNumber) const;

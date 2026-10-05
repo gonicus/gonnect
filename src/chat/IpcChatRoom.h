@@ -39,6 +39,8 @@ public:
 
     virtual void resetUnreadCount() override;
     virtual QList<ChatMessage *> chatMessages() const override;
+    virtual ChatMessage *messageById(const QString &id) const override;
+    virtual void markAsRead() override;
     virtual QList<ChatMessage *> pinnedChatMessages() const override { return m_pinnedMessages; }
     virtual qsizetype pinnedChatMessageCount() const override { return m_pinnedMessages.size(); }
     virtual ChatMessage *pinnedChatMessageByIndex(qsizetype index) const override;
@@ -139,4 +141,5 @@ private:
     QHash<QString, QDateTime> m_readMarkers;
 
     QDateTime m_ownLastReadTimestamp;
+    bool m_suppressOwnReadMarker = false;
 };

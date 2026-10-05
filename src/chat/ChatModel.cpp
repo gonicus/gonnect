@@ -40,12 +40,6 @@ QHash<int, QByteArray> ChatModel::roleNames() const
         { static_cast<int>(Roles::Content), "content" },
         { static_cast<int>(Roles::Flags), "flags" },
 
-        { static_cast<int>(Roles::IsPrivateMessage), "isPrivateMessage" },
-        { static_cast<int>(Roles::IsOwnMessage), "isOwnMessage" },
-        { static_cast<int>(Roles::IsSystemMessage), "isSystemMessage" },
-        { static_cast<int>(Roles::IsEncrypted), "isEncrypted" },
-        { static_cast<int>(Roles::IsPending), "isPending" },
-        { static_cast<int>(Roles::IsFailed), "isFailed" },
         { static_cast<int>(Roles::IsEdited), "isEdited" },
         { static_cast<int>(Roles::IsSameUserAsPrevious), "isSameUserAsPrevious" },
         { static_cast<int>(Roles::IsSameMinuteAsPrevious), "isSameMinuteAsPrevious" },
@@ -373,6 +367,15 @@ void ChatModel::onChatRoomChanged()
                     }
                 });
         connect(m_chatRoom,
+                QOverload<qsizetype, ChatMessage *>::of(&IChatRoom::chatMessageThreadIdChanged),
+                m_chatRoomContext, [this](qsizetype idx, ChatMessage *) {
+                    if (idx >= 0) {
+                        const auto modelIndex = createIndex(idx, 0);
+                        Q_EMIT dataChanged(modelIndex, modelIndex,
+                                           { static_cast<int>(Roles::ThreadId) });
+                    }
+                });
+        connect(m_chatRoom,
                 QOverload<qsizetype, ChatMessage *>::of(&IChatRoom::chatMessageContentChanged),
                 m_chatRoomContext, [this](qsizetype idx, ChatMessage *msgObj) {
                     const auto modelIndex = createIndex(idx, 0);
@@ -406,12 +409,6 @@ void ChatModel::onChatRoomChanged()
 
                     if (changedFlags & ChatMessage::Flag::Encrypted) {
                         affectedRoles.append(static_cast<int>(Roles::Content));
-                    }
-                    if (changedFlags & ChatMessage::Flag::Pending) {
-                        affectedRoles.append(static_cast<int>(Roles::IsPending));
-                    }
-                    if (changedFlags & ChatMessage::Flag::Failed) {
-                        affectedRoles.append(static_cast<int>(Roles::IsFailed));
                     }
                     if (changedFlags & ChatMessage::Flag::Edited) {
                         affectedRoles.append(static_cast<int>(Roles::IsEdited));

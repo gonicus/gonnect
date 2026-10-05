@@ -13,9 +13,10 @@ Item {
 
     readonly property alias isScrolledDown: listView.atYEnd
     readonly property alias count: listView.count
-    readonly property bool isThreadMode: chatProxyModel.threadId !== ""
+    readonly property bool isThreadMode: SelectionState.selectedThreadId !== ""
 
     signal respondTo(string messageId)
+    signal respondInNewThread(string messageId)
     signal retryMessage(string messageId)
 
     onChatRoomChanged: () => {
@@ -40,8 +41,12 @@ Item {
 
         readonly property Connections controlConnections: Connections {
             target: control
-            function onThreadIdChanged() { internal.updateIsCompletelyLoaded() }
             function onChatRoomChanged() { internal.updateIsCompletelyLoaded() }
+        }
+
+        readonly property Connections selectionStateConnections: Connections {
+            target: SelectionState
+            function onSelectedThreadIdChanged() { internal.updateIsCompletelyLoaded() }
         }
 
         readonly property Connections chatRoomConnections: Connections {
@@ -50,7 +55,7 @@ Item {
         }
 
         function updateIsCompletelyLoaded() {
-            internal.isCompletelyLoaded = control.chatRoom?.isCompletelyLoaded(control.threadId) ?? false
+            internal.isCompletelyLoaded = control.chatRoom?.isCompletelyLoaded(SelectionState.selectedThreadId) ?? false
         }
     }
 
@@ -61,6 +66,7 @@ Item {
         anchors.fill: parent
         model: ChatProxyModel {
             id: chatProxyModel
+            threadId: SelectionState.selectedThreadId
 
             ChatModel {
                 id: chatModel
@@ -76,7 +82,6 @@ Item {
             chatProvider: control.chatProvider
             chatRoom: control.chatRoom
             roomPermissions: control.chatRoom?.permissions ?? 0
-            isThreadMode: control.isThreadMode
             anchors {
                 left: parent?.left
                 right: parent?.right
@@ -85,8 +90,9 @@ Item {
             required property int index
 
             onRespondTo: messageId => control.respondTo(messageId)
+            onRespondInNewThread: threadId => control.respondInNewThread(threadId)
             onRetryMessage: messageId => control.retryMessage(messageId)
-            onOpenThread: threadId => control.threadId = threadId
+            onOpenThread: threadId => SelectionState.selectedThreadId = threadId
             onTogglePin: () => control.chatRoom?.togglePin(delg.eventId)
         }
 
@@ -104,7 +110,7 @@ Item {
                        && !internal.isCompletelyLoaded) {
 
                 // Load next batch from history
-                control.chatRoom.loadMessages(control.threadId)
+                control.chatRoom.loadMessages(SelectionState.selectedThreadId)
             }
         }
     }

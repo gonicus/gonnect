@@ -3,11 +3,6 @@
 
 ChatProxyModel::ChatProxyModel(QObject *parent) : QSortFilterProxyModel{ parent }
 {
-    connect(this, &ChatProxyModel::threadIdChanged, this, [this]() {
-        beginResetModel();
-        endResetModel();
-    });
-
     sort(0);
 
     connect(this, &QSortFilterProxyModel::sourceModelChanged, this,
@@ -242,6 +237,16 @@ bool ChatProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &sourcePa
 
     const auto eventId = model->data(sourceIndex, static_cast<int>(Roles::EventId)).toString();
     return m_threadId == eventId;
+}
+
+void ChatProxyModel::setThreadId(const QString &threadId)
+{
+    if (m_threadId != threadId) {
+        beginFilterChange();
+        m_threadId = threadId;
+        Q_EMIT threadIdChanged();
+        endFilterChange();
+    }
 }
 
 void ChatProxyModel::onSourceModelChanged()

@@ -3,6 +3,10 @@
 #include "ChatUser.h"
 #include "IpcDispatcher.h"
 #include "ChatMessageContentText.h"
+#include "ChatMessageContentVideoFile.h"
+#include "ChatMessageContentImage.h"
+#include "ChatMessageContentFile.h"
+#include "FileContentHelper.h"
 #include "AddressBook.h"
 #include "ErrorBus.h"
 #include "TextFormatHelper.h"
@@ -13,6 +17,7 @@
 #include <QLoggingCategory>
 #include <QFutureWatcher>
 #include <QtConcurrent>
+#include <QUuid>
 
 Q_LOGGING_CATEGORY(lcIpcChatRoom, "gonnect.app.chat.IpcChatRoom")
 
@@ -89,6 +94,7 @@ void IpcChatRoom::resetUnreadCount()
 {
     if (m_mainMessageContainer.unreadCount()) {
         setOwnLastReadTimestamp(QDateTime::currentDateTimeUtc());
+        m_suppressOwnReadMarker = true;
         ipcDispatcher()->markAsRead(id());
         setUnreadCount(0);
     }
@@ -97,6 +103,25 @@ void IpcChatRoom::resetUnreadCount()
 QList<ChatMessage *> IpcChatRoom::chatMessages() const
 {
     return m_mainMessageContainer.chatMessages();
+}
+
+ChatMessage *IpcChatRoom::messageById(const QString &id) const
+{
+    if (id.isEmpty()) {
+        return nullptr;
+    }
+    return m_mainMessageContainer.messageById(id);
+}
+
+void IpcChatRoom::markAsRead()
+{
+    if (ownLastReadTimestamp().isValid() && ownLastReadTimestamp() >= latestMessageDateTime()) {
+        return;
+    }
+
+    m_suppressOwnReadMarker = false;
+    setOwnLastReadTimestamp(QDateTime::currentDateTimeUtc());
+    ipcDispatcher()->markAsRead(id());
 }
 
 ChatMessage *IpcChatRoom::pinnedChatMessageByIndex(qsizetype index) const
@@ -202,19 +227,45 @@ void IpcChatRoom::sendFile(const QString &filePath)
         return;
     }
 
+    // Create pending/optimistic message for immediate display
+    const auto tempEventId = QUuid::createUuid().toString(QUuid::WithoutBraces);
+    const auto ownUserId = dispatcher->ownUserId();
+    QString nickName = ownUserId;
+    if (const auto *ownUser = dispatcher->userById(ownUserId)) {
+        nickName = ownUser->displayName();
+    }
+
+    QObject *pendingContent = nullptr;
+    if (FileContentHelper::instance().fileType(filePath) == FileContentHelper::FileType::Image) {
+        pendingContent = new ChatMessageContentImage(url);
+    } else {
+        pendingContent = new ChatMessageContentFile(filePath, originalFileName);
+    }
+    auto *pendingMsg = new ChatMessage(tempEventId, ownUserId, nickName, pendingContent,
+                                       QDateTime::currentDateTimeUtc(), this,
+                                       ChatMessage::Flag::OwnMessage | ChatMessage::Flag::Pending);
+    addExistingMessage(pendingMsg, false, false);
+
     // "Upload" file
     auto watcher = new QFutureWatcher<QString>(this);
-    connect(watcher, &QFutureWatcher<QString>::finished, this,
-            [this, watcher, filePath, originalFileName]() {
-                watcher->deleteLater();
 
+    connect(watcher, &QFutureWatcher<QString>::finished, watcher, &QObject::deleteLater);
+
+    connect(watcher, &QFutureWatcher<QString>::finished, this,
+            [this, watcher, filePath, originalFileName, tempEventId]() {
                 const auto uploadedUrl = watcher->result();
                 if (uploadedUrl.isEmpty()) {
                     qCCritical(lcIpcChatRoom) << "Error on uploading file" << filePath;
+                    if (auto *msg = chatMessageById(tempEventId)) {
+                        auto flags = msg->flags();
+                        flags.setFlag(ChatMessage::Flag::Pending, false);
+                        flags.setFlag(ChatMessage::Flag::Failed, true);
+                        setMessageFlags(tempEventId, flags);
+                    }
                     return;
                 }
 
-                ipcDispatcher()->sendFile(id(), uploadedUrl, originalFileName);
+                ipcDispatcher()->sendFile(id(), uploadedUrl, originalFileName, tempEventId);
             });
 
     watcher->setFuture(QtConcurrent::run(
@@ -265,6 +316,24 @@ void IpcChatRoom::setIsCompletelyLoaded(bool value, const QString &threadId)
 void IpcChatRoom::addExistingMessage(ChatMessage *message, bool isUnread, bool isIndependent)
 {
     Q_CHECK_PTR(message);
+
+    if (m_mainMessageContainer.contains(message)) {
+        return;
+    }
+
+    m_suppressOwnReadMarker = false;
+
+    if (isUnread) {
+        setUnreadCount(notificationCount() + 1);
+    }
+
+    if (auto *content = qobject_cast<ChatMessageContentVideoFile *>(message->content())) {
+        // Since the thumbnail path is available later, it must produce a signal
+        connect(content, &ChatMessageContentVideoFile::thumbnailFilePathChanged, this,
+                [this, message]() {
+                    Q_EMIT chatMessageContentChanged(indexOfMessage(message), message);
+                });
+    }
 
     const auto eventId = message->eventId();
     m_loadRequestedMessageIds.remove(eventId);
@@ -330,11 +399,32 @@ void IpcChatRoom::setPinnedMessageIds(const QStringList &messageIds)
 
 void IpcChatRoom::updateMessageEventId(const QString &oldEventId, const QString &newEventId)
 {
+    if (oldEventId == newEventId) {
+        return;
+    }
+
+    if (m_mainMessageContainer.contains(newEventId)) {
+        // Message has already arrived while optimistic message waiting for id
+        removeMessage(oldEventId);
+        return;
+    }
+
     if (auto msg = m_mainMessageContainer.updateMessageEventId(oldEventId, newEventId)) {
+        msg->setEventId(newEventId);
+
         Q_EMIT chatMessageEventIdChanged(indexOfMessage(msg), msg);
 
         const auto value = m_threadChildren.take(oldEventId);
         m_threadChildren.insert(newEventId, value);
+
+        for (const auto &childEventId : value) {
+            if (auto *childMessage = m_mainMessageContainer.messageById(childEventId)) {
+                if (childMessage->threadId() == oldEventId) {
+                    childMessage->setEventId(newEventId);
+                    Q_EMIT chatMessageThreadIdChanged(indexOfMessage(childMessage), childMessage);
+                }
+            }
+        }
 
         for (auto it = m_threadChildren.begin(); it != m_threadChildren.end(); ++it) {
             if (it->remove(oldEventId)) {
@@ -677,6 +767,9 @@ QDateTime IpcChatRoom::ownLastReadTimestamp() const
 
 void IpcChatRoom::setOwnLastReadTimestamp(const QDateTime &timestamp)
 {
+    if (m_suppressOwnReadMarker) {
+        return;
+    }
     if (m_ownLastReadTimestamp != timestamp) {
         m_ownLastReadTimestamp = timestamp;
         Q_EMIT ownLastReadTimestampChanged();

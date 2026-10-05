@@ -50,7 +50,6 @@ public:
     QString eventId() const { return m_eventId; }
     void setEventId(const QString &eventId);
     QString fromId() const { return m_fromId; }
-    QString threadId() const { return m_threadId; }
     QString nickName() const { return m_nickName; }
     QDateTime timestamp() const { return m_timestamp; }
     bool setTimestamp(const QDateTime &timestamp);
@@ -58,6 +57,9 @@ public:
     QObject *content() const { return m_content; }
     IChatRoom *chatRoom() const { return m_chatRoom; }
     void setContent(QObject *content);
+
+    QString threadId() const { return m_threadId; }
+    void setThreadId(const QString &threadId);
 
     bool isStateUpdate() const;
 

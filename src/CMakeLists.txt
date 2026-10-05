@@ -354,6 +354,7 @@ qt_add_qml_module(gonnect
         ui/components/chat/ChatRoomList.qml
         ui/components/chat/ChatRoomListItem.qml
         ui/components/chat/ChatRoomListSectionHeader.qml
+        ui/components/chat/ChatRoomListThreadItem.qml
         ui/components/chat/ChatUnjoinedPage.qml
         ui/components/chat/CodeBlock.qml
         ui/components/chat/DeviceVerification.qml
@@ -667,6 +668,8 @@ qt_add_qml_module(gonnect
         chat/ChatMessageReaction.cpp
         chat/ChatModel.h
         chat/ChatModel.cpp
+        chat/ChatThreadModel.h
+        chat/ChatThreadModel.cpp
         chat/ChatUser.h
         chat/ChatUser.cpp
         chat/ChatUsersModel.h

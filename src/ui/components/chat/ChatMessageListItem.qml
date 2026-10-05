@@ -32,9 +32,6 @@ Item {
     required property var readUsers
 
     required property int flags
-    required property bool isOwnMessage
-    required property bool isPending
-    required property bool isFailed
     required property bool isEdited
     required property bool isStateUpdate
     required property bool isSameUserAsPrevious
@@ -51,12 +48,14 @@ Item {
     required property string relatedMessageAffectedUserId
 
     readonly property bool isThreadRoot: !!(control.flags & ChatMessage.Flag.ThreadRoot)
+    readonly property bool isOwnMessage: !!(control.flags & ChatMessage.Flag.OwnMessage)
+    readonly property bool isPending: !!(control.flags & ChatMessage.Flag.Pending)
+    readonly property bool isFailed: !!(control.flags & ChatMessage.Flag.Failed)
 
     property IChatProvider chatProvider
     property IChatRoom chatRoom
 
     property string clickedLink
-    property bool isThreadMode
 
     readonly property int capabilities: control.chatProvider?.capabilities ?? 0
     property int roomPermissions
@@ -64,6 +63,7 @@ Item {
     readonly property bool isRemoved: control.content instanceof ChatMessageContentRemoved
 
     signal respondTo(string messageId)
+    signal respondInNewThread(string threadId)
     signal retryMessage(string eventId)
     signal openThread(string threadId)
     signal togglePin
@@ -405,6 +405,7 @@ Item {
     ChatMessageListItemContent {
         id: messageContentItem
         isStateUpdate: control.isStateUpdate
+        isPending: control.isPending
         userState : control.userState
         affectedUserName: control.chatProvider?.userById(control.affectedUserId)?.computedName ?? ""
         content: control.content
@@ -565,6 +566,13 @@ Item {
             }
 
             HideableMenuItem {
+                visible: !control.isFailed && !control.isPending && !control.isThreadRoot && control.threadId === "" && !!(control.capabilities & IChatProvider.Capability.MessageRelations)
+                text: qsTr("Reply in thread...")
+                icon.source: Icons.dialogMessages
+                onTriggered: () => control.respondInNewThread(control.eventId)
+            }
+
+            HideableMenuItem {
                 visible: control.threadId !== ''
                 text: qsTr("Open thread...")
                 icon.source: Icons.dialogMessages
@@ -587,7 +595,7 @@ Item {
 
     Flow {
         id: reactionsContainer
-        visible: threadBadge.visible || reactionRepeater.count > 0
+        visible: threadBadge.shallBeVisible || reactionRepeater.count > 0
         spacing: 6
         anchors {
             left: nameLabel.left
@@ -598,11 +606,14 @@ Item {
 
         ReactionButton {
             id: threadBadge
-            visible: !control.isThreadMode && (control.isThreadRoot || control.threadId !== "")
+            visible: threadBadge.shallBeVisible
             emoji: "💬"
             text: qsTr("Thread")
             highlighted: true
             onClicked: () => control.openThread(control.isThreadRoot ? control.eventId : control.threadId)
+
+            readonly property bool shallBeVisible: SelectionState.selectedThreadId === ""
+                                                   && (control.isThreadRoot || control.threadId !== "")
         }
 
         Repeater {
@@ -620,50 +631,8 @@ Item {
                 required property bool isOwnReaction
                 required property list<ChatUser> users
 
-                Rectangle {
-                    id: reactionBg
-                    radius: 6
-                    anchors.fill: parent
-                    color: rDelg.isOwnReaction
-                           ? Theme.backgroundOffsetColor
-                           : (rDelg.hovered
-                              ? Theme.backgroundOffsetHoveredColor
-                              : Theme.backgroundSecondaryColor)
-                     border {
-                         width: 1
-                         color: reactionDelg.isOwnReaction
-                                ? Theme.highlightColor
-                                : Theme.borderColor
-                     }
-                }
-
-                Label {
-                    id: reactionLabel
-                    text: rDelg.reaction
-                    font {
-                        family: "Noto Color Emoji"
-                        pixelSize: Theme.fontSizeNormal
-                    }
-                    anchors {
-                        left: parent.left
-                        leftMargin: 4
-                        verticalCenter: parent.verticalCenter
-                        verticalCenterOffset: 1
-                    }
-                }
-
-                Label {
-                    id: reactionCountLabel
-                    text: rDelg.count
-                    anchors {
-                        left: reactionLabel.right
-                        leftMargin: 4
-                        verticalCenter: parent.verticalCenter
-                    }
-                }
-
                 ToolTip.text: rDelg.users.map(user => user.computedName).join(", ")
-                ToolTip.visible: rDelg.hovered
+                ToolTip.visible: reactionDelgHoverHandler.hovered
                 ToolTip.toolTip.y: rDelg.height + Theme.d
 
                 HoverHandler {
