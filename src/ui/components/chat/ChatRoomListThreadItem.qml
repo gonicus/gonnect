@@ -42,7 +42,7 @@ Item {
         icon {
             width: Theme.d * 2 * Screen.devicePixelRatio
             height: Theme.d * 2 * Screen.devicePixelRatio
-            source: Icons.dialogMessages
+            source: Icons.messageThread
         }
         anchors {
             left: parent.left
