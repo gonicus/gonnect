@@ -694,6 +694,8 @@ qt_add_qml_module(gonnect
         chat/PinnedChatMessages.cpp
         chat/PublicChatRoom.h
 
+        conference/ConferenceLinkedRoomsProxyModel.h
+        conference/ConferenceLinkedRoomsProxyModel.cpp
         conference/ConferenceUser.h
         conference/ConferenceUser.cpp
         conference/IConferenceConnector.h

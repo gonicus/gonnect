@@ -877,7 +877,9 @@ Item {
             id: callSideBar
             anchors.fill: parent
             conferenceMode: true
-            chatAvailable: confConn.hasCapability(IConferenceConnector.Capability.ChatInCall) || upgradeRoomsAggregator.chatRooms.length > 0
+            chatAvailable: confConn.hasCapability(IConferenceConnector.Capability.ChatInCall)
+                           || upgradeRoomsAggregator.chatRooms.length > 0
+                           || callSideBar.linkedRoomsCount > 0
             personsAvailable: confConn.hasCapability(IConferenceConnector.Capability.UserRoles)
             conferenceConnector: confConn
             roomsAggregator: AggregatedDirectRoomsOfContact {
