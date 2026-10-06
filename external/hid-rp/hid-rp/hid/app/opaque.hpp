@@ -1,15 +1,5 @@
-/// @file
-///
-/// @author Benedek Kupper
-/// @date   2022
-///
-/// @copyright
-///         This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
-///         If a copy of the MPL was not distributed with this file, You can obtain one at
-///         https://mozilla.org/MPL/2.0/.
-///
-#ifndef __HID_APP_OPAQUE_HPP_
-#define __HID_APP_OPAQUE_HPP_
+// SPDX-License-Identifier: MPL-2.0
+#pragma once
 
 #include "hid/rdf/descriptor.hpp"
 #include "hid/report.hpp"
@@ -23,7 +13,7 @@ struct report : public hid::report::base<TYPE, REPORT_ID>
 };
 
 template <typename TReport, typename TUsage>
-static constexpr auto report_descriptor(TUsage use)
+[[nodiscard]] constexpr auto report_descriptor(TUsage use)
 {
     using namespace hid::rdf;
 
@@ -40,5 +30,3 @@ static constexpr auto report_descriptor(TUsage use)
 }
 
 } // namespace hid::app::opaque
-
-#endif // __HID_APP_OPAQUE_HPP_

@@ -334,11 +334,14 @@ Contact *AddressBook::lookupByNumber(const QString &number) const
         for (const auto &phoneNumber : numbers) {
             if (phoneNumber.number == number) {
                 const unsigned currPrio = contact->contactSourceInfo().prio;
+                const int nameCompare = result
+                        ? contact->contactSourceInfo().displayName.localeAwareCompare(
+                                  result->contactSourceInfo().displayName)
+                        : -1;
                 if (!result || currPrio > bestPrio
                     || (currPrio == bestPrio
-                        && contact->contactSourceInfo().displayName.localeAwareCompare(
-                                   result->contactSourceInfo().displayName)
-                                < 0)) {
+                        && (nameCompare < 0
+                            || (nameCompare == 0 && contact->id() < result->id())))) {
                     result = contact;
                     bestPrio = currPrio;
                 }

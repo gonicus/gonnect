@@ -110,7 +110,7 @@ Popup {
             Accessible.role: Accessible.Button
             Accessible.name: qsTr("Open audio settings")
             Accessible.focusable: true
-            Accessible.onPressAction: () => iewHelper.showAudioSettings()
+            Accessible.onPressAction: () => viewHelper.showAudioSettings()
         }
     }
 }

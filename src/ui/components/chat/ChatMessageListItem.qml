@@ -359,8 +359,9 @@ Item {
         }
     }
 
-    ChatMessageListItemRelatedContent {
+    Loader {
         id: relatedMessageItem
+        active: control.hasRelatedMessage
         visible: control.hasRelatedMessage
         height: 0
         anchors {
@@ -372,11 +373,13 @@ Item {
 
         onImplicitHeightChanged: () => Qt.callLater(() => relatedMessageItem.height = relatedMessageItem.implicitHeight)
 
-        nickName: control.relatedMessageNickName
-        content: control.relatedMessageContent
-        isStateUpdate: control.relatedMessageIsStateUpdate
-        userState: control.relatedMessageUserState
-        affectedUserName: control.chatProvider?.userById(control.relatedMessageAffectedUserId)?.computedName ?? ""
+        sourceComponent: ChatMessageListItemRelatedContent {
+            nickName: control.relatedMessageNickName
+            content: control.relatedMessageContent
+            isStateUpdate: control.relatedMessageIsStateUpdate
+            userState: control.relatedMessageUserState
+            affectedUserName: control.chatProvider?.userById(control.relatedMessageAffectedUserId)?.computedName ?? ""
+        }
     }
 
     Rectangle {

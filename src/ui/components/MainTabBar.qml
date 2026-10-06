@@ -96,7 +96,6 @@ Item {
                                                      labelText: name,
                                                      disabledTooltipText: "",
                                                      isEnabled: true,
-                                                     showActiveBorder: false,
                                                      attachedData: null
                                                  })
         if (tabButton === null) {
@@ -157,6 +156,10 @@ Item {
         }
         newOrder.push(...remaining)
 
+        if (newOrder.every((button, index) => button === tabOrder[index])) {
+            return
+        }
+
         for (const button of newOrder) {
             button.parent = null
             button.visible = false
@@ -188,7 +191,6 @@ Item {
             required property string pageId
             required property int pageType
             required property bool isEnabled
-            required property bool showActiveBorder
             required property string labelText
             required property string disabledTooltipText
             required property string iconSource
@@ -200,6 +202,17 @@ Item {
             property bool showNotificationBubble: delg.notifications > 0
 
             readonly property bool isSelected: SelectionState.selectedPage.id === delg.pageId
+
+            readonly property bool showActiveBorder: {
+                switch (delg.pageType) {
+                case MainPageSelection.PageType.Conference:
+                    return control.hasActiveConference && !delg.isSelected
+                case MainPageSelection.PageType.Call:
+                    return control.hasActiveUnfinishedCall && !delg.isSelected
+                default:
+                    return false
+                }
+            }
 
             Accessible.role: Accessible.Button
             Accessible.name: delg.labelText
@@ -383,7 +396,6 @@ Item {
                 labelText: qsTr("Home"),
                 disabledTooltipText: qsTr("Home"),
                 isEnabled: true,
-                showActiveBorder: false,
                 attachedData: null
             }, {
                 pageId: SelectionState.conferencePageId(),
@@ -392,7 +404,6 @@ Item {
                 labelText: qsTr("Conference"),
                 disabledTooltipText: qsTr("No active conference"),
                 isEnabled: control.hasActiveConference,
-                showActiveBorder: control.hasActiveConference && SelectionState.selectedPage.id !== SelectionState.conferencePageId(),
                 attachedData: null
             }, {
                 pageId: SelectionState.callPageId(),
@@ -401,7 +412,6 @@ Item {
                 labelText: qsTr("Call"),
                 disabledTooltipText: qsTr("No active call"),
                 isEnabled: control.hasActiveCall,
-                showActiveBorder: control.hasActiveUnfinishedCall && SelectionState.selectedPage.id !== SelectionState.callPageId(),
                 attachedData: null
             }
         ].filter(item => ViewHelper.isJitsiAvailable || item.pageType !== MainPageSelection.PageType.Conference)
@@ -465,7 +475,6 @@ Item {
                     labelText: qsTr("Settings"),
                     disabledTooltipText: qsTr("Settings"),
                     isEnabled: true,
-                    showActiveBorder: false,
                     attachedData: null
                 }
             ]

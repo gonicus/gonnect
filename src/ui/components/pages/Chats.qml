@@ -9,6 +9,7 @@ Item {
     id: control
 
     property IChatProvider attachedData
+    readonly property bool isSelectedPage: SelectionState.selectedPage.type === MainPageSelection.PageType.Chats
 
     function showChatRoom(roomId : string) {
         console.debug(category, `Showing room "${roomId}" on chats page`)
