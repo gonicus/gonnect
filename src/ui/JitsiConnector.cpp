@@ -1386,7 +1386,7 @@ void JitsiConnector::enterPassword(const QString &password, bool rememberPasswor
     }
 }
 
-void JitsiConnector::leaveConference()
+void JitsiConnector::resetConferenceState()
 {
     if (m_callHistoryItem) {
         m_callHistoryItem->endCall();
@@ -1401,7 +1401,14 @@ void JitsiConnector::leaveConference()
 
     m_chatRoom->clear();
 
-    Q_EMIT executeLeaveRoomCommand();
+    // Reset per-conference toggle state so it doesn't leak into the next conference
+    setIsSharingScreenInternal(false);
+    setVideoMutedInternal(false);
+    if (m_isAudioMuted) {
+        m_isAudioMuted = false;
+        Q_EMIT isAudioMutedChanged();
+    }
+
     setConferenceName("");
     setDisplayName("");
     setIsInConference(false);
@@ -1409,27 +1416,16 @@ void JitsiConnector::leaveConference()
     GlobalCallState::instance().unholdOtherCall();
 }
 
+void JitsiConnector::leaveConference()
+{
+    Q_EMIT executeLeaveRoomCommand();
+    resetConferenceState();
+}
+
 void JitsiConnector::terminateConference()
 {
-    if (m_callHistoryItem) {
-        m_callHistoryItem->endCall();
-        m_callHistoryItem.clear();
-    }
-
-    if (m_inConferenceNotification) {
-        NotificationManager::instance().remove(m_inConferenceNotification->id());
-        m_inConferenceNotification->deleteLater();
-        m_inConferenceNotification = nullptr;
-    }
-
-    m_chatRoom->clear();
-
     Q_EMIT executeEndConferenceCommand();
-    setConferenceName("");
-    setDisplayName("");
-    setIsInConference(false);
-    Q_EMIT GlobalCallState::instance().callEnded(true);
-    GlobalCallState::instance().unholdOtherCall();
+    resetConferenceState();
 }
 
 void JitsiConnector::setOnHold(bool shallHold)
