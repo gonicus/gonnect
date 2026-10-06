@@ -19,4 +19,10 @@
     <qresource prefix="/font">
         <file alias="NotoColorEmoji-Regular.ttf">../resources/font/NotoColorEmoji-Regular.ttf</file>
     </qresource>
+    <qresource prefix="/roomnames">
+        <file alias="adjectives.txt">../resources/roomnames/adjectives.txt</file>
+        <file alias="adverbs.txt">../resources/roomnames/adverbs.txt</file>
+        <file alias="plural-nouns.txt">../resources/roomnames/plural-nouns.txt</file>
+        <file alias="verbs.txt">../resources/roomnames/verbs.txt</file>
+    </qresource>
 </RCC>

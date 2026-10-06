@@ -123,35 +123,43 @@ Item {
         }
     }
 
-    Rectangle {
-        id: messageImageCornerCropper
-        visible: false
+    // Load on demand
+    Loader {
+        id: messageImageMask
+        active: control.content instanceof ChatMessageContentImage
         anchors.fill: messageImage
-        radius: 8
-        antialiasing: true
-        layer {
-            enabled: true
-            smooth: true
-        }
-    }
 
-    MultiEffect {
-        id: messageImageOpacityMask
-        anchors.fill: messageImage
-        visible: control.content instanceof ChatMessageContentImage
-        source: messageImage
-        maskSource: messageImageCornerCropper
-        maskEnabled: true
-        maskThresholdMin: 0.5
-        maskSpreadAtMin: 1.0
+        sourceComponent: Item {
+            Rectangle {
+                id: messageImageCornerCropper
+                visible: false
+                anchors.fill: parent
+                radius: 8
+                antialiasing: true
+                layer {
+                    enabled: true
+                    smooth: true
+                }
+            }
 
-        HoverHandler {
-            cursorShape: Qt.PointingHandCursor
-        }
+            MultiEffect {
+                id: messageImageOpacityMask
+                anchors.fill: parent
+                source: messageImage
+                maskSource: messageImageCornerCropper
+                maskEnabled: true
+                maskThresholdMin: 0.5
+                maskSpreadAtMin: 1.0
 
-        TapHandler {
-            onSingleTapped: () => {
-                ViewHelper.showLargeImage(control.content?.imagePath ?? "")
+                HoverHandler {
+                    cursorShape: Qt.PointingHandCursor
+                }
+
+                TapHandler {
+                    onSingleTapped: () => {
+                        ViewHelper.showLargeImage(control.content?.imagePath ?? "")
+                    }
+                }
             }
         }
     }
@@ -206,12 +214,13 @@ Item {
         }
     }
 
-    Item {
+    // Load on demand
+    Loader {
         id: uploadingOverlay
-        visible: control.isPending && (control.content instanceof ChatMessageContentImage
-                                       || control.content instanceof ChatMessageContentFile
-                                       || control.content instanceof ChatMessageContentAudioFile
-                                       || control.content instanceof ChatMessageContentVideoFile)
+        active: control.isPending && (control.content instanceof ChatMessageContentImage
+                                      || control.content instanceof ChatMessageContentFile
+                                      || control.content instanceof ChatMessageContentAudioFile
+                                      || control.content instanceof ChatMessageContentVideoFile)
         x: uploadingOverlay.hasAttachment ? attachmentLoader.x : messageImage.x
         y: uploadingOverlay.hasAttachment ? attachmentLoader.y : messageImage.y
         width: uploadingOverlay.hasAttachment ? attachmentLoader.item.width : messageImage.paintedWidth
@@ -220,30 +229,32 @@ Item {
 
         readonly property bool hasAttachment: attachmentLoader.visible && !!attachmentLoader.item
 
-        Rectangle {
-            id: uploadingBgRect
-            anchors.fill: parent
-            radius: 8
-            color: Theme.backgroundColor
-            opacity: 0.9
-        }
-
-        Row {
-            anchors.centerIn: parent
-            spacing: Theme.d / 2
-
-            BusyIndicator {
-                running: uploadingOverlay.visible
-                width: 3 * Theme.d
-                height: 3 * Theme.d
-                circleColor: Theme.pickForegroundColor(uploadingBgRect.color)
-                anchors.verticalCenter: parent.verticalCenter
+        sourceComponent: Item {
+            Rectangle {
+                id: uploadingBgRect
+                anchors.fill: parent
+                radius: 8
+                color: Theme.backgroundColor
+                opacity: 0.9
             }
 
-            Label {
-                text: qsTr("Uploading...")
-                color: Theme.pickForegroundColor(uploadingBgRect.color)
-                anchors.verticalCenter: parent.verticalCenter
+            Row {
+                anchors.centerIn: parent
+                spacing: Theme.d / 2
+
+                BusyIndicator {
+                    running: true
+                    width: 3 * Theme.d
+                    height: 3 * Theme.d
+                    circleColor: Theme.pickForegroundColor(uploadingBgRect.color)
+                    anchors.verticalCenter: parent.verticalCenter
+                }
+
+                Label {
+                    text: qsTr("Uploading...")
+                    color: Theme.pickForegroundColor(uploadingBgRect.color)
+                    anchors.verticalCenter: parent.verticalCenter
+                }
             }
         }
     }

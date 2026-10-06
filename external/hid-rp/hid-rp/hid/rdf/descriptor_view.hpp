@@ -1,19 +1,10 @@
-/// @file
-///
-/// @author Benedek Kupper
-/// @date   2022
-///
-/// @copyright
-///         This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
-///         If a copy of the MPL was not distributed with this file, You can obtain one at
-///         https://mozilla.org/MPL/2.0/.
-///
-#ifndef __HID_RDF_DESCRIPTOR_VIEW_HPP_
-#define __HID_RDF_DESCRIPTOR_VIEW_HPP_
+// SPDX-License-Identifier: MPL-2.0
+#pragma once
 
 #include <iterator>
 #include <span>
 #include "hid/rdf/item.hpp"
+#include "make_static.hpp"
 
 namespace hid::rdf
 {
@@ -27,17 +18,21 @@ class reinterpret_iterator
     using pointer = const value_type*;
     using reference = const value_type&;
 
+    using difference_type = std::ptrdiff_t;
     using iterator_category = std::input_iterator_tag;
 
+    constexpr reinterpret_iterator()
+        : ptr_()
+    {}
     constexpr reinterpret_iterator(const byte_type* data)
         : ptr_(data)
     {}
-    reinterpret_iterator(pointer ptr)
+    reinterpret_iterator(pointer ptr) // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
         : ptr_(reinterpret_cast<decltype(ptr_)>(ptr))
     {}
     reinterpret_iterator& operator++()
     {
-        ptr_ += (*this)->size();
+        ptr_ += (*this)->size(); // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         return *this;
     }
     reinterpret_iterator operator++(int)
@@ -48,11 +43,15 @@ class reinterpret_iterator
     }
     reference operator*() { return *ptr(); }
     pointer operator->() { return ptr(); }
-    constexpr bool operator==(const reinterpret_iterator& rhs) const { return ptr_ == rhs.ptr_; }
-    constexpr bool operator!=(const reinterpret_iterator& rhs) const { return !(*this == rhs); }
+    constexpr bool operator==(const reinterpret_iterator& rhs) const = default;
+    constexpr bool operator!=(const reinterpret_iterator& rhs) const = default;
 
   private:
-    pointer ptr() { return reinterpret_cast<pointer>(ptr_); }
+    pointer ptr()
+    {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+        return reinterpret_cast<pointer>(ptr_);
+    }
 
     template <typename TIterator>
     friend class items_view_base;
@@ -72,17 +71,21 @@ class copy_iterator
     using pointer = const value_type*;
     using reference = const value_type&;
 
+    using difference_type = std::ptrdiff_t;
     using iterator_category = std::input_iterator_tag;
 
+    constexpr copy_iterator()
+        : ptr_()
+    {}
     constexpr copy_iterator(const byte_type* data)
         : ptr_(data)
     {}
-    copy_iterator(pointer ptr)
+    copy_iterator(pointer ptr) // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
         : copy_iterator(reinterpret_cast<decltype(ptr_)>(ptr))
     {}
     constexpr copy_iterator& operator++()
     {
-        ptr_ += (*this)->size();
+        ptr_ += (*this)->size(); // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         return *this;
     }
     constexpr copy_iterator operator++(int)
@@ -107,7 +110,7 @@ class copy_iterator
     friend class items_view_base;
 
     const byte_type* ptr_;
-    short_item_buffer copy_{};
+    short_item_buffer copy_;
 };
 
 /// @brief A view to a section of items in an HID report descriptor.
@@ -124,89 +127,33 @@ class items_view_base
     using iterator = TIterator;
     using const_iterator = iterator;
 
-    constexpr const byte_type* data() const { return begin_; }
-    constexpr std::size_t size() const { return std::distance(begin_, end_); }
-    constexpr iterator begin() { return begin_; }
-    constexpr const_iterator begin() const { return begin_; }
-    constexpr iterator end() { return end_; }
-    constexpr const_iterator end() const { return end_; }
+    [[nodiscard]] constexpr const byte_type* data() const { return begin_; }
+    [[nodiscard]] constexpr auto size() const { return static_cast<std::size_t>(end_ - begin_); }
+    [[nodiscard]] constexpr iterator begin() { return begin_; }
+    [[nodiscard]] constexpr const_iterator begin() const { return begin_; }
+    [[nodiscard]] constexpr iterator end() { return end_; }
+    [[nodiscard]] constexpr const_iterator end() const { return end_; }
 
-    operator std::span<const uint8_t>() const { return {data(), size()}; }
+    [[nodiscard]] constexpr auto to_span() const
+    {
+        return std::span<const byte_type>(data(), size());
+    }
 
     /// @brief  Verifies that the view has correct bounds, all items are intact and complete.
     ///         This is the first check that needs to be done on a new HID report descriptor
     ///         (usually done by the OS itself).
     /// @return true if the view is valid, false otherwise
-    constexpr bool has_valid_bounds() const
+    [[nodiscard]] constexpr bool has_valid_bounds() const
     {
         for (auto it = this->begin(); it != this->end(); ++it)
         {
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
             if ((it.ptr_ + (*it).size()) > end_)
             {
                 return false;
             }
         }
         return true;
-    }
-
-    /// @brief  Counts the occurrences of a certain tag in the descriptor.
-    /// @tparam TTag: tag type
-    /// @param  tag: the tag to count
-    /// @return number of items having the specified tag
-    template <typename TTag>
-    constexpr std::size_t tag_count(TTag tag) const
-    {
-        std::size_t hits = 0;
-        for (const value_type& item : (*this))
-        {
-            if (item.has_tag(tag))
-            {
-                hits++;
-            }
-        }
-        return hits;
-    }
-
-    template <typename TTag, class Compare>
-    constexpr iterator tag_value_unsigned_most(TTag tag, Compare comp) const
-    {
-        iterator result = this->end();
-        std::uint32_t most = 0;
-        for (iterator it = this->begin(); it != this->end(); ++it)
-        {
-            const value_type& item = *it;
-            if (item.has_tag(tag))
-            {
-                auto value = item.value_unsigned();
-                if ((result == this->end()) or comp(most, value))
-                {
-                    result = it;
-                    most = value;
-                }
-            }
-        }
-        return result;
-    }
-
-    template <typename TTag, class Compare>
-    constexpr iterator tag_value_signed_most(TTag tag, Compare comp) const
-    {
-        iterator result = this->end();
-        std::int32_t most = 0;
-        for (iterator it = this->begin(); it != this->end(); ++it)
-        {
-            const value_type& item = *it;
-            if (item.has_tag(tag))
-            {
-                auto value = item.value_signed();
-                if ((result == this->end()) or comp(most, value))
-                {
-                    result = it;
-                    most = value;
-                }
-            }
-        }
-        return result;
     }
 
     constexpr items_view_base(const iterator& begin, const iterator& end)
@@ -246,30 +193,33 @@ class descriptor_view_base : public items_view_base<TIterator>
         : base()
     {}
     constexpr descriptor_view_base(const byte_type* data, std::size_t size)
-        : descriptor_view_base(data, data + size)
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        : base(data, data + size)
     {}
     template <typename TArray>
     constexpr descriptor_view_base(const TArray& arr)
-        : descriptor_view_base(arr.data(), arr.data() + arr.size())
+        : base(arr.data(), arr.data() + arr.size())
     {}
     template <typename TIter>
     constexpr descriptor_view_base(const TIter begin, const TIter end)
-        : descriptor_view_base(begin == end ? nullptr : std::addressof(*begin),
-                               begin == end ? nullptr : std::addressof(*begin) + std::distance(begin, end))
+        : base(std::addressof(*begin), std::addressof(*begin) + std::distance(begin, end))
     {}
-
-  private:
-    constexpr descriptor_view_base(const byte_type* begin, const byte_type* end)
-        : base(begin, end)
-    {}
+    /// @brief  This method constructs a @ref hid::rdf::descriptor_view_base object from a rvalue
+    ///         descriptor, producing a static lvalue of it in the process.
+    /// @tparam Data: the descriptor array, acquired e.g. from a @ref hid::rdf::descriptor call
+    template <auto Data>
+    static constexpr auto from_descriptor()
+    {
+        return descriptor_view_base(make_static<Data>());
+    }
 };
 
 /// @brief HID report descriptor view, use for runtime descriptor parsing.
 using descriptor_view = descriptor_view_base<reinterpret_iterator>;
+static_assert(std::ranges::range<descriptor_view>);
 
 /// @brief HID report descriptor view, use for compile-time descriptor parsing.
 using ce_descriptor_view = descriptor_view_base<copy_iterator>;
+static_assert(std::ranges::range<ce_descriptor_view>);
 
 } // namespace hid::rdf
-
-#endif // __HID_RDF_DESCRIPTOR_VIEW_HPP_
