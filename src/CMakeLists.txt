@@ -19,12 +19,7 @@ find_package(logfault CONFIG REQUIRED)
 #find_package(hunspell REQUIRED)
 find_package(cmark REQUIRED)
 find_package(KF6SyntaxHighlighting REQUIRED)
-
-# FTS5 Testing
 find_package(ICU REQUIRED COMPONENTS uc i18n data)
-find_path(STEMMER_INCLUDE_DIR libstemmer.h)
-find_library(STEMMER_LIBRARY stemmer)
-
 
 if(UNIX)
     include(FindPkgConfig)
@@ -39,10 +34,24 @@ if(UNIX)
         PkgConfig::LIBUSB1
         PkgConfig::LIBHIDAPI)
 
+    if(FLATPAK)
+        list(APPEND PLATFORM_LIBRARIES
+            sqlcipher
+            stemmer)
+    else()
+        find_package(sqlcipher REQUIRED)
+        find_package(SnowballStem REQUIRED)
+        list(APPEND PLATFORM_LIBRARIES
+            sqlcipher::sqlcipher
+            SnowballStem::libstemmer)
+    endif()
+
     add_definitions(${PJSIP_STATIC_CFLAGS})
     include_directories(${PJSIP_STATIC_INCLUDE_DIRS})
     link_directories(${PJSIP_STATIC_LIBRARY_DIRS})
 else()
+    find_package(SnowballStem REQUIRED)
+    find_package(sqlcipher REQUIRED)
     find_package(pjproject REQUIRED)
     find_package(hidapi REQUIRED)
     find_package(libusb REQUIRED)
@@ -50,6 +59,8 @@ else()
     find_package(QHotkey REQUIRED)
 
     list(APPEND PLATFORM_LIBRARIES
+        SnowballStem::libstemmer
+        sqlcipher::sqlcipher
         pjproject::pjproject
         hidapi::hidapi
         libusb::libusb
@@ -957,7 +968,9 @@ if(LINUX)
     set_target_properties(gonnect PROPERTIES LINK_FLAGS_RELEASE -s)
     target_link_options(gonnect PRIVATE
         "-Wl,--exclude-libs,libcrypto.a"
-        "-Wl,--exclude-libs,libssl.a")
+        "-Wl,--exclude-libs,libssl.a"
+        "-Wl,--exclude-libs,libldap.a"
+        "-Wl,--exclude-libs,liblber.a")
 endif()
 
 qt_extract_metatypes(gonnect)
@@ -992,7 +1005,6 @@ target_link_libraries(gonnect
         ${PLATFORM_LIBRARIES}
         qt6keychain
         hid-rp
-        sqlite
         #hunspell::hunspell
         cmark::cmark
         KF6::SyntaxHighlighting
@@ -1009,7 +1021,6 @@ target_link_libraries(gonnect
         ${LDAP_ADDRESSBOOK_FACTORY}
         ${MSGRAPH_ADDRESSBOOK_FACTORY}
         ${MSGRAPH_CALENDAR_FACTORY}
-        ${STEMMER_LIBRARY}
 )
 
 qt_import_plugins(gonnect INCLUDE
@@ -1044,11 +1055,11 @@ target_include_directories(gonnect
     rtt
     ${logfault_INCLUDE_DIRS}
     ${CMAKE_CURRENT_BINARY_DIR}
-    ${STEMMER_INCLUDE_DIR}
 )
 
 target_compile_definitions(gonnect
    PRIVATE
+    SQLITE_HAS_CODEC
     QT_DISABLE_DEPRECATED_BEFORE=0x060B00
     QT_NO_KEYWORDS)
 

@@ -65,6 +65,9 @@ public:
 
     bool optimize();
 
+Q_SIGNALS:
+    void initialized();
+
 private:
     enum class State {
         Complete, // All tables exist
@@ -72,7 +75,11 @@ private:
         Failed, // Query failed
     };
 
-    bool openDB();
+    void acquireSecret();
+    void createSecret();
+    void setupDB(const QString &secret);
+
+    bool openDB(const QByteArray &secret);
     State checkDB();
     bool initDB();
 
