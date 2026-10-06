@@ -28,7 +28,7 @@ jobs:
     with:
       ref: ${{ inputs.tag }}
       windows: true
-      macos: true
+      macos: false
       flatpak: true
       sign: true
 
