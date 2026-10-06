@@ -44,6 +44,13 @@ static int setup_unix_signal_handlers()
 
 int main(int argc, char *argv[])
 {
+#ifdef Q_OS_LINUX
+    // QDate & friends internally use localtime/mktime. Init glibc timezone
+    // state while we're single threaded. Later calls only use the cached
+    // answer and avoids race conditions.
+    tzset();
+#endif
+
     qSetMessagePattern("\033[32m%{time h:mm:ss.zzz}%{if-category}\033[32m %{category}:%{endif} "
                        "%{if-debug}\033[34m%{function}%{endif}%{if-warning}\033[31m%{endif}"
                        "%{if-critical}\033[31m%{endif}"
@@ -56,6 +63,7 @@ int main(int argc, char *argv[])
     qDBusRegisterMetaType<QList<QVariantMap>>();
     qDBusRegisterMetaType<QPair<QString, QVariantMap>>();
     qDBusRegisterMetaType<QList<QPair<QString, QVariantMap>>>();
+    qDBusRegisterMetaType<QMap<QString, QVariantMap>>();
 #endif
 
     qputenv("QT_QUICK_FLICKABLE_WHEEL_DECELERATION", "7000"); // Workaround bad scrolling

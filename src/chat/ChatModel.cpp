@@ -4,6 +4,8 @@
 #include "IChatProvider.h"
 #include "ChatMessageContentUserStateChange.h"
 #include "IpcChatRoom.h"
+#include "AddressBook.h"
+#include "AvatarPrioHelper.h"
 
 #include <QLoggingCategory>
 
@@ -12,6 +14,14 @@ Q_LOGGING_CATEGORY(lcChatModel, "gonnect.app.chat.ChatModel")
 ChatModel::ChatModel(QObject *parent) : QAbstractListModel{ parent }
 {
     connect(this, &ChatModel::chatRoomChanged, this, &ChatModel::onChatRoomChanged);
+}
+
+void ChatModel::setChatRoom(IChatRoom *room)
+{
+    if (m_chatRoom != room) {
+        m_chatRoom = room;
+        Q_EMIT chatRoomChanged();
+    }
 }
 
 QHash<int, QByteArray> ChatModel::roleNames() const
@@ -32,9 +42,9 @@ QHash<int, QByteArray> ChatModel::roleNames() const
         { static_cast<int>(Roles::IsOwnMessage), "isOwnMessage" },
         { static_cast<int>(Roles::IsSystemMessage), "isSystemMessage" },
         { static_cast<int>(Roles::IsEncrypted), "isEncrypted" },
-        { static_cast<int>(Roles::IsPinned), "isPinned" },
         { static_cast<int>(Roles::IsPending), "isPending" },
         { static_cast<int>(Roles::IsFailed), "isFailed" },
+        { static_cast<int>(Roles::IsEdited), "isEdited" },
         { static_cast<int>(Roles::IsSameUserAsPrevious), "isSameUserAsPrevious" },
         { static_cast<int>(Roles::IsSameMinuteAsPrevious), "isSameMinuteAsPrevious" },
         { static_cast<int>(Roles::IsSameDayAsPrevious), "isSameDayAsPrevious" },
@@ -163,6 +173,9 @@ QVariant ChatModel::rawData(const ChatMessage *item, int role) const
 
     case static_cast<int>(Roles::AvatarPath): {
         if (const auto user = m_chatRoom->chatUserById(item->fromId())) {
+            if (const auto *contact = AddressBook::instance().lookupByChatUser(user)) {
+                return contact->avatarUrl();
+            }
             return user->avatarPath();
         }
         return QString();
@@ -184,6 +197,14 @@ QVariant ChatModel::rawData(const ChatMessage *item, int role) const
             m.insert("reaction", reaction->reaction());
             m.insert("count", reaction->count());
             m.insert("isOwnReaction", ownUserId.isEmpty() ? false : reaction->isUser(ownUserId));
+
+            const auto &users = reaction->users();
+            QVariantList usersVariant;
+            usersVariant.reserve(users.size());
+            std::ranges::transform(users, std::back_inserter(usersVariant),
+                                   [](QObject *obj) { return QVariant::fromValue(obj); });
+            m.insert("users", usersVariant);
+
             l.append(m);
         }
         return l;
@@ -223,14 +244,14 @@ QVariant ChatModel::rawData(const ChatMessage *item, int role) const
     case static_cast<int>(Roles::IsEncrypted):
         return static_cast<bool>(item->flags() & ChatMessage::Flag::Encrypted);
 
-    case static_cast<int>(Roles::IsPinned):
-        return static_cast<bool>(item->flags() & ChatMessage::Flag::Pinned);
-
     case static_cast<int>(Roles::IsPending):
         return static_cast<bool>(item->flags() & ChatMessage::Flag::Pending);
 
     case static_cast<int>(Roles::IsFailed):
         return static_cast<bool>(item->flags() & ChatMessage::Flag::Failed);
+
+    case static_cast<int>(Roles::IsEdited):
+        return static_cast<bool>(item->flags() & ChatMessage::Flag::Edited);
 
     case static_cast<int>(Roles::HasRelatedMessage):
         return !item->relatedMessageId().isEmpty();
@@ -249,6 +270,33 @@ QVariant ChatModel::rawData(const ChatMessage *item, int role) const
     return QVariant();
 }
 
+void ChatModel::connectUserAvatarSignals(ChatUser *user)
+{
+    if (m_avatarSignaledUsers.contains(user)) {
+        return;
+    }
+    m_avatarSignaledUsers.insert(user);
+
+    connect(user, &QObject::destroyed, m_chatRoomContext,
+            [this, user]() { m_avatarSignaledUsers.remove(user); });
+    connect(user, &ChatUser::avatarPathChanged, m_chatRoomContext,
+            [this, user]() { refreshAvatarPath(user); });
+}
+
+void ChatModel::refreshAvatarPath(ChatUser *user)
+{
+    if (!m_chatRoom) {
+        return;
+    }
+    const auto messages = m_chatRoom->chatMessages();
+    for (qsizetype i = 0; i < messages.size(); ++i) {
+        if (messages.at(i)->fromId() == user->id()) {
+            const auto modelIndex = createIndex(i, 0);
+            Q_EMIT dataChanged(modelIndex, modelIndex, { static_cast<int>(Roles::AvatarPath) });
+        }
+    }
+}
+
 void ChatModel::onChatRoomChanged()
 {
     beginResetModel();
@@ -256,10 +304,23 @@ void ChatModel::onChatRoomChanged()
     if (m_chatRoomContext) {
         m_chatRoomContext->deleteLater();
         m_chatRoomContext = nullptr;
+        m_avatarSignaledUsers.clear();
     }
 
     if (m_chatRoom) {
         m_chatRoomContext = new QObject(this);
+        connect(&AddressBook::instance(), &AddressBook::chatUserMappingAdded, m_chatRoomContext,
+                [this](ChatUser *user) { refreshAvatarPath(user); });
+        connect(&AddressBook::instance(), &AddressBook::chatUserAvatarChanged, m_chatRoomContext,
+                [this](ChatUser *user) { refreshAvatarPath(user); });
+        connect(&AvatarPrioHelper::instance(), &AvatarPrioHelper::priosChanged, m_chatRoomContext,
+                [this]() {
+                    const auto rows = rowCount(QModelIndex());
+                    if (rows > 0) {
+                        Q_EMIT dataChanged(createIndex(0, 0), createIndex(rows - 1, 0),
+                                           { static_cast<int>(Roles::AvatarPath) });
+                    }
+                });
         connect(m_chatRoom, &IChatRoom::chatMessageAdded, m_chatRoomContext,
                 [this](qsizetype index, ChatMessage *msgObj) {
                     beginInsertRows(QModelIndex(), index, index);
@@ -271,6 +332,24 @@ void ChatModel::onChatRoomChanged()
                     if (index < rowCount(QModelIndex()) - 1) {
                         const auto nextIndex = createIndex(index + 1, 0);
                         Q_EMIT dataChanged(nextIndex, nextIndex, nextItemContentRoles());
+                    }
+                });
+        connect(m_chatRoom, &IChatRoom::chatMessageMoved, m_chatRoomContext,
+                [this](qsizetype oldIndex, qsizetype newIndex, ChatMessage *) {
+                    const auto dummyIndex = QModelIndex();
+                    if (beginMoveRows(dummyIndex, oldIndex, oldIndex, dummyIndex,
+                                      newIndex > oldIndex ? newIndex + 1 : newIndex)) {
+                        endMoveRows();
+                    }
+
+                    // IsSameUsersAsPrevious update
+                    const qsizetype low = std::min(oldIndex, newIndex);
+                    const qsizetype high = std::max(oldIndex, newIndex) + 1;
+                    const qsizetype rows = rowCount(dummyIndex);
+                    if (low < rows) {
+                        Q_EMIT dataChanged(createIndex(low, 0),
+                                           createIndex(std::min<qsizetype>(high, rows - 1), 0),
+                                           nextItemContentRoles());
                     }
                 });
         connect(m_chatRoom, &IChatRoom::chatMessageRemoved, m_chatRoomContext,
@@ -338,14 +417,14 @@ void ChatModel::onChatRoomChanged()
                         affectedRoles.append(static_cast<int>(Roles::IsEncrypted));
                         affectedRoles.append(static_cast<int>(Roles::Content));
                     }
-                    if (changedFlags & ChatMessage::Flag::Pinned) {
-                        affectedRoles.append(static_cast<int>(Roles::IsPinned));
-                    }
                     if (changedFlags & ChatMessage::Flag::Pending) {
                         affectedRoles.append(static_cast<int>(Roles::IsPending));
                     }
                     if (changedFlags & ChatMessage::Flag::Failed) {
                         affectedRoles.append(static_cast<int>(Roles::IsFailed));
+                    }
+                    if (changedFlags & ChatMessage::Flag::Edited) {
+                        affectedRoles.append(static_cast<int>(Roles::IsEdited));
                     }
 
                     const auto modelIndex = createIndex(idx, 0);
@@ -357,6 +436,16 @@ void ChatModel::onChatRoomChanged()
                     Q_EMIT dataChanged(modelIndex, modelIndex,
                                        { static_cast<int>(Roles::Reactions) });
                 });
+        const auto users = std::as_const(m_chatRoom->chatUsers());
+        for (auto *user : users) {
+            connectUserAvatarSignals(user);
+        }
+        connect(m_chatRoom, &IChatRoom::chatUsersChanged, m_chatRoomContext, [this]() {
+            const auto users = std::as_const(m_chatRoom->chatUsers());
+            for (auto *user : users) {
+                connectUserAvatarSignals(user);
+            }
+        });
     }
 
     endResetModel();

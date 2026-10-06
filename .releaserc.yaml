@@ -1,7 +1,7 @@
 branches: 
   - name: release
     channel: flathub
-  - name: freeze/**
+  - name: freeze/next
     channel: beta
     prerelease: beta
   - name: hotfix/**
@@ -11,12 +11,10 @@ plugins:
   - "@semantic-release/commit-analyzer"
   - "@semantic-release/release-notes-generator"
   - "@semantic-release/github"
-  - 
-    - "@semantic-release/exec"
+  - - "@semantic-release/exec"
     - prepareCmd: ./scripts/prepare-new-version.sh ${nextRelease.version}
   - "@semantic-release/changelog"
-  - 
-    - "@semantic-release/git"
+  - - "@semantic-release/git"
     - assets:
       - CMakeLists.txt
       - CHANGELOG.md

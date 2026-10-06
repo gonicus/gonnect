@@ -4,7 +4,7 @@
 <context>
     <name>CallSideBar</name>
     <message numerus="yes">
-        <location filename="../src/ui/components/CallSideBar.qml" line="212"/>
+        <location filename="../src/ui/components/CallSideBar.qml" line="217"/>
         <source>Person(s)</source>
         <translation>
             <numerusform>Person</numerusform>
@@ -15,7 +15,7 @@
 <context>
     <name>Chat</name>
     <message numerus="yes">
-        <location filename="../src/ui/components/chat/Chat.qml" line="227"/>
+        <location filename="../src/ui/components/chat/Chat.qml" line="204"/>
         <source>%1 is/are typing</source>
         <translation type="unfinished">
             <numerusform>%1 is typing</numerusform>
@@ -26,7 +26,7 @@
 <context>
     <name>ConferenceButtonBar</name>
     <message numerus="yes">
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="150"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="154"/>
         <source>%n minutes left</source>
         <translation>
             <numerusform>%n minute left</numerusform>
@@ -40,15 +40,15 @@
         <location filename="../src/ui/components/popups/FileSelectionOverview.qml" line="32"/>
         <source>Shall the following file(s) be sent? (%1)</source>
         <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
+            <numerusform>Shall the following file be sent? (%1)</numerusform>
+            <numerusform>Shall the following files be sent? (%1)</numerusform>
         </translation>
     </message>
 </context>
 <context>
     <name>PublicRoomSearch</name>
     <message numerus="yes">
-        <location filename="../src/ui/components/popups/PublicRoomSearch.qml" line="160"/>
+        <location filename="../src/ui/components/popups/PublicRoomSearch.qml" line="164"/>
         <source>%n member(s), topic: %1</source>
         <translation>
             <numerusform>%n member, topic: %1</numerusform>
@@ -56,7 +56,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/ui/components/popups/PublicRoomSearch.qml" line="161"/>
+        <location filename="../src/ui/components/popups/PublicRoomSearch.qml" line="165"/>
         <source>%n member(s)</source>
         <translation>
             <numerusform>%n member</numerusform>
@@ -77,6 +77,20 @@
     </message>
 </context>
 <context>
+    <name>ReadMarker</name>
+    <message numerus="yes">
+        <location filename="../src/ui/components/chat/ReadMarker.qml" line="44"/>
+        <source>%n of %2 have read this message:
+%3</source>
+        <translation>
+            <numerusform>%n of %2 has read this message:
+%3</numerusform>
+            <numerusform>%n of %2 have read this message:
+%3</numerusform>
+        </translation>
+    </message>
+</context>
+<context>
     <name>SettingsPage</name>
     <message numerus="yes">
         <location filename="../src/ui/components/SettingsPage.qml" line="285"/>
@@ -90,7 +104,7 @@
 <context>
     <name>ViewHelper</name>
     <message numerus="yes">
-        <location filename="../src/ui/ViewHelper.cpp" line="143"/>
+        <location filename="../src/ui/ViewHelper.cpp" line="140"/>
         <source>%n minute(s)</source>
         <translation>
             <numerusform>%n Minute</numerusform>
@@ -98,7 +112,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/ui/ViewHelper.cpp" line="146"/>
+        <location filename="../src/ui/ViewHelper.cpp" line="143"/>
         <source>1 hour and %n minute(s)</source>
         <translation>
             <numerusform>1 Stunde und %n Minute</numerusform>
@@ -106,7 +120,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/ui/ViewHelper.cpp" line="148"/>
+        <location filename="../src/ui/ViewHelper.cpp" line="145"/>
         <source>%n hour(s)</source>
         <translation>
             <numerusform>eine Stunde</numerusform>

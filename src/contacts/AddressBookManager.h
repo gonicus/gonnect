@@ -24,6 +24,7 @@ public:
 
     void initAddressBookConfigs();
     void reloadAddressBook();
+    QStringList addressBookConfigs() const { return m_addressBookConfigs; }
 
     static QString hashForSettingsGroup(const QString &group);
 
@@ -49,4 +50,7 @@ private:
     bool m_reconnectScheduled = false;
     QHash<QString, QMetaObject::Connection> m_viewHelperConnections;
     QMetaObject::Connection m_connectivityConnection;
+
+Q_SIGNALS:
+    void configsLoaded();
 };

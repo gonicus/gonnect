@@ -33,9 +33,6 @@ Q_LOGGING_CATEGORY(lcViewHelper, "gonnect.app.ui.ViewHelper")
 
 ViewHelper::ViewHelper(QObject *parent) : QObject{ parent }
 {
-    connect(&GlobalCallState::instance(), &GlobalCallState::globalCallStateChanged, this,
-            &ViewHelper::updateIsActiveVideoCall);
-
     m_ringerTimer.setSingleShot(true);
     m_ringerTimer.setInterval(3s);
     m_ringerTimer.callOnTimeout(this, &ViewHelper::stopTestPlayRingTone);
@@ -201,11 +198,15 @@ void ViewHelper::toggleFavorite(const QString &phoneNumber,
 
 QString ViewHelper::initials(const QString &name) const
 {
+    if (auto emoji = leadingEmoji(name); !emoji.isEmpty()) {
+        return emoji;
+    }
+
     const auto splitted = name.simplified().split(QChar(' '));
     if (name.length() == 0 || splitted.length() == 0) {
         return "";
     } else if (splitted.length() == 1) {
-        return name.at(0);
+        return QString(name.at(0));
     }
 
     return QString("%1%2").arg(name.at(0), splitted.at(splitted.length() - 1).at(0)).toUpper();
@@ -280,29 +281,11 @@ void ViewHelper::updateCurrentUser()
     }
 }
 
-void ViewHelper::updateIsActiveVideoCall()
-{
-    bool hasJitsiCall = false;
-    const auto &callObjects = GlobalCallState::instance().globalCallStateObjects();
-
-    for (const auto obj : callObjects) {
-        const auto jitsiConn = qobject_cast<IConferenceConnector *>(obj);
-        if (jitsiConn && jitsiConn->callState() & ICallState::State::CallActive) {
-            hasJitsiCall = true;
-            break;
-        }
-    }
-
-    if (m_isActiveVideoCall != hasJitsiCall) {
-        m_isActiveVideoCall = hasJitsiCall;
-        Q_EMIT isActiveVideoCallChanged();
-    }
-}
-
 QString ViewHelper::culturalSphereExtension() const
 {
-    auto sphere = tr("QT_CULTURAL_SPHERE", "QGuiApplication");
-    return sphere == "QT_CULTURAL_SPHERE" ? "" : sphere;
+    const auto sphere = tr("QT_CULTURAL_SPHERE", "QGuiApplication");
+    return sphere == "QT_CULTURAL_SPHERE" || sphere.isEmpty() ? QString()
+                                                              : QStringLiteral("_") + sphere;
 }
 
 void ViewHelper::quitApplicationNoConfirm() const
@@ -385,6 +368,11 @@ void ViewHelper::requestUrlCopyDialog(const QUrl &url, const QString &text)
     Q_EMIT urlCopyDialogRequested(url, text);
 }
 
+void ViewHelper::requestUrlEditDialog(IChatRoom *chatRoom)
+{
+    Q_EMIT urlEditDialogRequested(chatRoom);
+}
+
 void ViewHelper::requestRecoveryKey(const QString &id, const QString &displayName)
 {
     Q_EMIT recoveryKeyRequested(id, displayName);
@@ -435,13 +423,14 @@ bool ViewHelper::isValidJitsiRoomName(const QString &name) const
 }
 
 void ViewHelper::requestMeeting(const QString &roomName, QPointer<CallHistoryItem> callHistoryItem,
-                                const QString &displayName)
+                                const QString &displayName, QPointer<Contact> contact)
 {
     qCInfo(lcViewHelper).nospace().noquote()
             << "Requesting meeting for " << roomName << " (" << displayName
             << ") with flags:" << m_nextMeetingStartFlags;
 
-    Q_EMIT openMeetingRequested(roomName, displayName, m_nextMeetingStartFlags, callHistoryItem);
+    Q_EMIT openMeetingRequested(roomName, displayName, m_nextMeetingStartFlags, callHistoryItem,
+                                contact);
     setProperty("nextMeetingStartFlags",
                 QVariant::fromValue(IConferenceConnector::StartFlag::AudioActive));
 }
@@ -505,6 +494,16 @@ QString ViewHelper::stripLinkTags(const QString &link) const
     return s.replace(re, "\\1");
 }
 
+static constexpr char emojiUnit[] =
+        R"(\p{Extended_Pictographic}(?:\x{FE0F}|\p{Emoji_Modifier}|(?:\x{200D}\p{Extended_Pictographic})*))";
+
+bool ViewHelper::isSingleEmoji(const QString &str) const
+{
+    static const QRegularExpression re(QStringLiteral("^") + QLatin1StringView(emojiUnit)
+                                       + QStringLiteral("$"));
+    return re.match(str).hasMatch();
+}
+
 bool ViewHelper::isShortEmojiString(const QString &str) const
 {
     const auto trimmed = str.trimmed();
@@ -513,7 +512,16 @@ bool ViewHelper::isShortEmojiString(const QString &str) const
         return false;
     }
 
-    static const QRegularExpression re(
-            R"(^(\p{Extended_Pictographic}(?:\x{FE0F}|\p{Emoji_Modifier}|(?:\x{200D}\p{Extended_Pictographic}))*)(?:\s*(?:\p{Extended_Pictographic}(?:\x{FE0F}|\p{Emoji_Modifier}|(?:\x{200D}\p{Extended_Pictographic}))*)){0,2}$)");
+    static const QRegularExpression re(QStringLiteral("^") + QLatin1StringView(emojiUnit)
+                                       + QStringLiteral("(?:\\s*") + QLatin1StringView(emojiUnit)
+                                       + QStringLiteral("){0,2}$"));
     return re.match(trimmed).hasMatch();
+}
+
+QString ViewHelper::leadingEmoji(const QString &str) const
+{
+    static const QRegularExpression re(QStringLiteral("^\\s*(") + QLatin1StringView(emojiUnit)
+                                       + QStringLiteral(")"));
+    auto m = re.match(str);
+    return m.hasMatch() ? m.captured(1) : QString();
 }

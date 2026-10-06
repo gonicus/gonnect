@@ -6,6 +6,7 @@
 #include <QAbstractListModel>
 #include <QObject>
 #include <QQmlEngine>
+#include <QSet>
 
 struct NumberStat;
 class IChatRoom;
@@ -69,6 +70,7 @@ private:
     QHash<Contact *, FavoriteEntry *> m_favoriteContactLookup;
     QHash<IChatRoom *, QObject *> m_chatRoomContextObjects;
     QTimer m_modelUpdateTimer;
+    QSet<Contact *> m_avatarTrackedContacts;
 
     QObject *m_chatProviderContext = nullptr;
     bool m_isUpdating = false;

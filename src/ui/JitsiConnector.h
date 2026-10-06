@@ -33,6 +33,7 @@ public:
     Q_INVOKABLE void addIncomingMessage(QString fromId, QString nickName, QString message,
                                         QDateTime stamp, bool isPrivateMessage);
     Q_INVOKABLE void setJitsiDevices(const QVariantMap availableDevices);
+    Q_INVOKABLE void addKnockingParticipant(QString id, QString name);
 
     Q_INVOKABLE QString jitsiHtmlInternal();
     Q_INVOKABLE QString jitsiJavascriptInternal();
@@ -45,6 +46,7 @@ public:
     Q_INVOKABLE void setVideoQualityInternal(uint quality);
     Q_INVOKABLE void setIsSharingScreenInternal(bool value);
     Q_INVOKABLE void setIsTileViewInternal(bool value);
+    Q_INVOKABLE void setIsHandRaisedInternal(bool value);
 
     Q_INVOKABLE void onPasswordRequired();
 
@@ -55,6 +57,8 @@ public:
 
     // Interface methods
     ContactInfo remoteContactInfo() const override;
+
+    virtual QUrl baseUrl() const override;
 
     bool hasCapability(const Capability capabilityToCheck) const override;
     bool isInitialized() override { return m_isApiLoadingFinished; }
@@ -112,6 +116,7 @@ public:
     void setVideoQuality(VideoQuality) override;
     VideoQuality videoQuality() const override { return m_videoQuality; }
     void showVirtualBackgroundDialog() override;
+    virtual void answerKnockingParticipant(const QString &id, bool approved) override;
 
 protected:
     void toggleHoldImpl() override;
@@ -184,6 +189,7 @@ private:
     QDateTime m_establishedDateTime;
     QList<Notification *> m_chatNotifications;
     Notification *m_inConferenceNotification = nullptr;
+    QSet<QString> m_knockedIds;
 
     QList<JitsiMediaDevice *> m_audioInputDevices;
     QList<JitsiMediaDevice *> m_audioOutputDevices;
@@ -205,6 +211,7 @@ Q_SIGNALS:
     void executeToggleRaiseHandCommand();
     void executeToggleSubtitlesCommand();
     void executeToggleWhiteboardCommand();
+    void executeAnswerKnockingParticipant(QString id, bool approved);
     void executeSetAudioInputDeviceCommand(QString devicId);
     void executeSetAudioOutputDeviceCommand(QString devicId);
     void executeSetVideoInputDeviceCommand(QString devicId);

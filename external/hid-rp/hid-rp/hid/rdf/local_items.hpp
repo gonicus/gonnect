@@ -1,15 +1,5 @@
-/// @file
-///
-/// @author Benedek Kupper
-/// @date   2022
-///
-/// @copyright
-///         This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
-///         If a copy of the MPL was not distributed with this file, You can obtain one at
-///         https://mozilla.org/MPL/2.0/.
-///
-#ifndef __HID_RDF_LOCAL_ITEMS_HPP_
-#define __HID_RDF_LOCAL_ITEMS_HPP_
+// SPDX-License-Identifier: MPL-2.0
+#pragma once
 
 #include "hid/rdf/short_item.hpp"
 #include "hid/usage.hpp"
@@ -17,7 +7,7 @@
 namespace hid::rdf
 {
 template <std::size_t DATA_SIZE = 2, UsageType T>
-constexpr auto usage(T value)
+[[nodiscard]] constexpr auto usage(T value)
 {
     constexpr std::size_t ID_SIZE = std::min(sizeof(T), DATA_SIZE);
     static_assert((ID_SIZE > 0) and (ID_SIZE <= sizeof(usage_id_t)));
@@ -28,7 +18,7 @@ constexpr auto usage(T value)
 /// considered.
 ///        Extended usage is identified not by tag, but by the data size of the item.
 template <UsageType T>
-constexpr auto usage_extended(T value)
+[[nodiscard]] constexpr auto usage_extended(T value)
 {
     return short_item<sizeof(usage_t)>(local::tag::USAGE, usage_t(value));
 }
@@ -36,7 +26,7 @@ constexpr auto usage_extended(T value)
 /// @note  Usages are local items, there must be a min-max pair each time
 ///        (hence no definition for usage_min or usage_max).
 template <std::size_t DATA_MIN_SIZE = 2, std::size_t DATA_MAX_SIZE = 2, UsageType T>
-constexpr auto usage_limits(T min, T max)
+[[nodiscard]] constexpr auto usage_limits(T min, T max)
 {
     constexpr std::size_t MIN_ID_SIZE = std::min(sizeof(T), DATA_MIN_SIZE);
     constexpr std::size_t MAX_ID_SIZE = std::min(sizeof(T), DATA_MAX_SIZE);
@@ -47,7 +37,7 @@ constexpr auto usage_limits(T min, T max)
 }
 
 template <std::size_t DATA_MAX_SIZE = 2, UsageType T>
-constexpr auto usage_limits(nullusage_t min, T max)
+[[nodiscard]] constexpr auto usage_limits([[maybe_unused]] nullusage_t min, T max)
 {
     constexpr std::size_t MIN_ID_SIZE = 1;
     constexpr std::size_t MAX_ID_SIZE = std::min(sizeof(T), DATA_MAX_SIZE);
@@ -57,20 +47,31 @@ constexpr auto usage_limits(nullusage_t min, T max)
 }
 
 template <UsageType T>
-constexpr auto usage_extended_limits(T min, T max)
+[[nodiscard]] constexpr auto usage_extended_limits(T min, T max)
 {
     return short_item<sizeof(usage_t)>(local::tag::USAGE_MINIMUM, usage_t(min)),
            short_item<sizeof(usage_t)>(local::tag::USAGE_MAXIMUM, usage_t(max));
 }
 
 template <UsageType T>
-constexpr auto usage_extended_limits(nullusage_t min, T max)
+[[nodiscard]] constexpr auto usage_extended_limits([[maybe_unused]] nullusage_t nu, T max)
 {
     auto ui = usage_t(max);
     return short_item<sizeof(usage_t)>(local::tag::USAGE_MINIMUM, usage_t(ui.page_id(), 0)),
            short_item<sizeof(usage_t)>(local::tag::USAGE_MAXIMUM, ui);
 }
 
-} // namespace hid::rdf
+template <std::size_t... sz>
+[[nodiscard]] constexpr auto delimited(array<sz>... items)
+{
+    static_assert(sizeof...(items) > 0);
+    return short_item<1>(local::tag::DELIMITER, 1), (items, ...),
+           short_item<1>(local::tag::DELIMITER, 0);
+}
 
-#endif // __HID_RDF_LOCAL_ITEMS_HPP_
+constexpr auto string_index(uint8_t value)
+{
+    return short_item<1>(local::tag::STRING_INDEX, value);
+}
+
+} // namespace hid::rdf

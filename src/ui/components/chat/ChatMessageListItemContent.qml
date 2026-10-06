@@ -1,8 +1,9 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Controls
 import QtQuick.Controls.impl
-import Qt5Compat.GraphicalEffects
+import QtQuick.Effects
 import base
 
 Item {
@@ -12,7 +13,7 @@ Item {
             return 0
         } else if (control.isStateUpdate) {
             return stateLabel.implicitWidth
-        } else if (control.content instanceof ChatMessageContentText && control.content.isSimpleText) {
+        } else if (control.isRemoved || (control.isText && control.content.isSimpleText)) {
             return messageLabel.implicitWidth
         } else if (control.content instanceof ChatMessageContentImage) {
             return messageImage.sourceSize.width
@@ -26,7 +27,7 @@ Item {
             return 0
         } else if (control.isStateUpdate) {
             return stateLabel.implicitHeight
-        } else if (control.content instanceof ChatMessageContentText && control.content.isSimpleText) {
+        } else if (control.isRemoved || (control.isText && control.content.isSimpleText)) {
             return messageLabel.implicitHeight
         } else if (control.content instanceof ChatMessageContentImage) {
             return messageImage.height
@@ -42,24 +43,41 @@ Item {
     required property string affectedUserName
 
     property color textColor: Theme.primaryTextColor
+    property real maxContentHeight: -1
+    property bool isPending: false
 
     readonly property alias messageLabel: messageLabel
+    readonly property bool isText: (control.content instanceof ChatMessageContentText)
+    readonly property bool isRemoved: (control.content instanceof ChatMessageContentRemoved)
+    readonly property bool isShortEmojiOnly: control.isText && ViewHelper.isShortEmojiString(control.content.simpleText)
 
     signal openDirectChatRequested(string userId)
-
-    readonly property bool isShortEmojiOnly: control.content instanceof ChatMessageContentText
-                                             && ViewHelper.isShortEmojiString(control.content.simpleText)
 
     // Text
     TextEdit {
         id: messageLabel
-        visible: control.content instanceof ChatMessageContentText && control.content.isSimpleText
-        text: control.content instanceof ChatMessageContentText ? control.content.simpleText : ""
+        visible: control.isRemoved || (control.isText && control.content.isSimpleText)
+        text: {
+            if (control.isRemoved) {
+                const reason = control.content.reason
+                if (reason !== "") {
+                    return qsTr("Message has been removed. Reason: %1").arg(reason)
+                } else {
+                    return qsTr("Message has been removed.")
+                }
+            } else if (control.isText) {
+                return control.content.htmlText
+            }
+            return ""
+        }
         color: control.textColor
         wrapMode: Label.Wrap
-        textFormat: Text.MarkdownText
+        textFormat: Text.RichText
         readOnly: true
-        font.pixelSize: control.isShortEmojiOnly ? 48 : Theme.fontPixelSize
+        font {
+            pixelSize: control.isShortEmojiOnly ? 48 : Theme.fontSizeNormal
+            italic: control.isRemoved
+        }
         anchors {
             top: parent.top
             left: parent.left
@@ -92,7 +110,7 @@ Item {
         color: Theme.secondaryTextColor
         text: EnumTranslation.userStateChange(control.userState, control.affectedUserName)
         font {
-            pixelSize: 12
+            pixelSize: Theme.fontSizeSmall
             italic: true
         }
         anchors {
@@ -108,7 +126,7 @@ Item {
         id: messageImage
         visible: false
         source: control.content?.imagePath ?? ""
-        height: Math.min(messageImage.sourceSize.height, 200)
+        height: control.maxContentHeight > 0 ? Math.min(messageImage.sourceSize.height, 200, control.maxContentHeight) : Math.min(messageImage.sourceSize.height, 200)
         width: Math.min(messageImage.sourceSize.width, parent.width)
         fillMode: Image.PreserveAspectFit
         verticalAlignment: Image.AlignTop
@@ -124,14 +142,22 @@ Item {
         visible: false
         anchors.fill: messageImage
         radius: 8
+        antialiasing: true
+        layer {
+            enabled: true
+            smooth: true
+        }
     }
 
-    OpacityMask {
+    MultiEffect {
         id: messageImageOpacityMask
-        visible: control.content instanceof ChatMessageContentImage
-        maskSource: messageImageCornerCropper
-        source: messageImage
         anchors.fill: messageImage
+        visible: control.content instanceof ChatMessageContentImage
+        source: messageImage
+        maskSource: messageImageCornerCropper
+        maskEnabled: true
+        maskThresholdMin: 0.5
+        maskSpreadAtMin: 1.0
 
         HoverHandler {
             cursorShape: Qt.PointingHandCursor
@@ -178,11 +204,60 @@ Item {
             value: control.width
         }
 
+        Binding {
+            target: attachmentLoader.item
+            when: !!attachmentLoader.item?.hasOwnProperty("availableHeight")
+            property: "availableHeight"
+            value: control.maxContentHeight
+        }
+
         Connections {
             target: attachmentLoader.item
             ignoreUnknownSignals: true
             function openDirectChatRequested(userId : string) {
                 control.openDirectChatRequested(userId)
+            }
+        }
+    }
+
+    Item {
+        id: uploadingOverlay
+        visible: control.isPending && (control.content instanceof ChatMessageContentImage
+                                       || control.content instanceof ChatMessageContentFile
+                                       || control.content instanceof ChatMessageContentAudioFile
+                                       || control.content instanceof ChatMessageContentVideoFile)
+        x: uploadingOverlay.hasAttachment ? attachmentLoader.x : messageImage.x
+        y: uploadingOverlay.hasAttachment ? attachmentLoader.y : messageImage.y
+        width: uploadingOverlay.hasAttachment ? attachmentLoader.item.width : messageImage.paintedWidth
+        height: uploadingOverlay.hasAttachment ? attachmentLoader.item.height : messageImage.paintedHeight
+        z: 100
+
+        readonly property bool hasAttachment: attachmentLoader.visible && !!attachmentLoader.item
+
+        Rectangle {
+            id: uploadingBgRect
+            anchors.fill: parent
+            radius: 8
+            color: Theme.backgroundColor
+            opacity: 0.9
+        }
+
+        Row {
+            anchors.centerIn: parent
+            spacing: Theme.d / 2
+
+            BusyIndicator {
+                running: uploadingOverlay.visible
+                width: 3 * Theme.d
+                height: 3 * Theme.d
+                circleColor: Theme.pickForegroundColor(uploadingBgRect.color)
+                anchors.verticalCenter: parent.verticalCenter
+            }
+
+            Label {
+                text: qsTr("Uploading...")
+                color: Theme.pickForegroundColor(uploadingBgRect.color)
+                anchors.verticalCenter: parent.verticalCenter
             }
         }
     }

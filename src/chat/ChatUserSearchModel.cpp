@@ -1,5 +1,7 @@
 #include "ChatUserSearchModel.h"
 #include "ChatUser.h"
+#include "AddressBook.h"
+#include "AvatarPrioHelper.h"
 
 #include <QLoggingCategory>
 
@@ -49,8 +51,12 @@ QVariant ChatUserSearchModel::data(const QModelIndex &index, int role) const
     case static_cast<int>(Roles::Id):
         return user->id();
 
-    case static_cast<int>(Roles::AvatarPath):
+    case static_cast<int>(Roles::AvatarPath): {
+        if (const auto *contact = AddressBook::instance().lookupByChatUser(user)) {
+            return contact->avatarPath();
+        }
         return user->avatarPath();
+    }
 
     case static_cast<int>(Roles::HasPresenceState):
         return user->hasPresenceState();
@@ -70,9 +76,23 @@ void ChatUserSearchModel::onChatProviderChanged()
         m_chatProviderContext->deleteLater();
         m_chatProviderContext = nullptr;
     }
+    m_avatarSignaledUsers.clear();
 
     if (m_chatProvider) {
         m_chatProviderContext = new QObject(this);
+        connect(&AddressBook::instance(), &AddressBook::chatUserMappingAdded, m_chatProviderContext,
+                [this](ChatUser *user) { refreshAvatarPath(user); });
+        connect(&AddressBook::instance(), &AddressBook::chatUserAvatarChanged,
+                m_chatProviderContext, [this](ChatUser *user) { refreshAvatarPath(user); });
+        connect(&AvatarPrioHelper::instance(), &AvatarPrioHelper::priosChanged,
+                m_chatProviderContext, [this]() {
+                    const auto rows = rowCount(QModelIndex());
+                    if (rows > 0) {
+                        Q_EMIT dataChanged(createIndex(0, 0), createIndex(rows - 1, 0),
+                                           { static_cast<int>(Roles::AvatarPath) });
+                    }
+                });
+
         connect(m_chatProvider, &IChatProvider::userRemoved, m_chatProviderContext,
                 [this](QString, ChatUser *user, qsizetype) {
                     const auto idx = m_model.indexOf(user);
@@ -100,5 +120,30 @@ void ChatUserSearchModel::updateModel(const QList<ChatUser *> &userList)
         beginResetModel();
         m_model = userList;
         endResetModel();
+
+        for (auto *user : userList) {
+            connectUserAvatarSignals(user);
+        }
     }
+}
+
+void ChatUserSearchModel::connectUserAvatarSignals(ChatUser *user)
+{
+    if (m_avatarSignaledUsers.contains(user)) {
+        return;
+    }
+    m_avatarSignaledUsers.insert(user);
+
+    connect(user, &ChatUser::avatarPathChanged, m_chatProviderContext,
+            [this, user]() { refreshAvatarPath(user); });
+}
+
+void ChatUserSearchModel::refreshAvatarPath(ChatUser *user)
+{
+    const auto row = m_model.indexOf(user);
+    if (row < 0) {
+        return;
+    }
+    const auto idx = createIndex(row, 0);
+    Q_EMIT dataChanged(idx, idx, { static_cast<int>(Roles::AvatarPath) });
 }

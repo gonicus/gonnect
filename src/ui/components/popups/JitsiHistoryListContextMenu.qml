@@ -8,6 +8,7 @@ Menu {
     id: control
 
     signal callClicked
+    signal removeItem
 
     property string roomName
     property bool isFavorite
@@ -17,7 +18,7 @@ Menu {
     Action {
         id: startAction
         text: qsTr('Start conference')
-        enabled: !ViewHelper.isActiveVideoCall
+        enabled: !VideoCallHelper.hasActiveVideoCall
         onTriggered: () => control.callClicked()
 
         Accessible.role: Accessible.MenuItem
@@ -46,5 +47,17 @@ Menu {
         Accessible.name: copyAction.text
         Accessible.focusable: true
         Accessible.onPressAction: () => ClipboardHelper.copyToClipboard(control.roomName)
+    }
+
+    Action {
+        id: removeAction
+        text: qsTr("Remove")
+        icon.source: Icons.userTrash
+        onTriggered: () => control.removeItem()
+
+        Accessible.role: Accessible.Button
+        Accessible.name: removeAction.text
+        Accessible.focusable: true
+        Accessible.onPressAction: () => control.removeItem()
     }
 }

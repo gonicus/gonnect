@@ -214,6 +214,34 @@ void CallHistory::removeOldHistory()
     }
 }
 
+bool CallHistory::removeItemFromDatabase(qint64 dataBaseId)
+{
+
+    if (dataBaseId <= 0) {
+        qCWarning(lcCallHistory) << "Cannot remove item with invalid id" << dataBaseId;
+        return false;
+    }
+
+    auto db = QSqlDatabase::database();
+
+    if (!db.open()) {
+        qCCritical(lcCallHistory) << "Unable to open call history database:"
+                                  << db.lastError().text();
+        return false;
+    }
+
+    QSqlQuery query(db);
+
+    query.prepare("DELETE FROM history WHERE id = :id;");
+    query.bindValue(":id", dataBaseId);
+
+    if (!query.exec()) {
+        qCCritical(lcCallHistory) << "Error on executing SQL query:" << query.lastError().text();
+        return false;
+    }
+    return true;
+}
+
 void CallHistory::writeToDatabase(CallHistoryItem &item)
 {
     auto db = QSqlDatabase::database();
@@ -226,7 +254,7 @@ void CallHistory::writeToDatabase(CallHistoryItem &item)
 
         QSqlQuery query(db);
 
-        if (item.dataBaseId() < 0) {
+        if (item.dataBaseId() <= 0) {
             qCInfo(lcCallHistory) << "Writing new history item to database";
             query.prepare(
                     "INSERT INTO history (time, remoteUrl, account, type, durationSeconds, "
@@ -254,7 +282,7 @@ void CallHistory::writeToDatabase(CallHistoryItem &item)
         if (!query.exec()) {
             qCCritical(lcCallHistory)
                     << "Error on executing SQL query:" << query.lastError().text();
-        } else if (item.dataBaseId() < 0) {
+        } else if (item.dataBaseId() <= 0) {
             item.setDataBaseId(query.lastInsertId().toLongLong());
         }
     }
@@ -345,6 +373,41 @@ CallHistoryItem *CallHistory::addHistoryItem(CallHistoryItem::Types type, const 
 qsizetype CallHistory::indexOfItem(const CallHistoryItem *item) const
 {
     return m_historyItems.indexOf(item);
+}
+
+void CallHistory::removeHistoryItem(qint64 id)
+{
+    for (auto *item : std::as_const(m_historyItems)) {
+        if (item->dataBaseId() == id) {
+            removeHistoryItem(item);
+            return;
+        }
+    }
+}
+
+void CallHistory::removeHistoryItem(CallHistoryItem *item)
+{
+    if (!item) {
+        qCWarning(lcCallHistory) << "Cannot remove nullptr";
+        return;
+    }
+
+    const auto index = indexOfItem(item);
+    if (index < 0) {
+        qCWarning(lcCallHistory) << "Unable to find index for item" << *item;
+        return;
+    }
+
+    if (!removeItemFromDatabase(item->dataBaseId())) {
+        qCCritical(lcCallHistory) << "Error while removing" << *item << "from database";
+        ErrorBus::instance().addError(tr("Database error: cannot remove history row"));
+        return;
+    }
+
+    m_historyItems.removeAt(index);
+    Q_EMIT itemRemoved(index, item);
+
+    item->deleteLater();
 }
 
 QDebug operator<<(QDebug debug, const CallHistory &history)

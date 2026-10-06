@@ -46,6 +46,7 @@ public:
         UploadMedia = 1 << 4,
         UploadFile = 1 << 5,
         Markdown = 1 << 6,
+        PinMessage = 1 << 7,
     };
     Q_ENUM(Capability)
     Q_DECLARE_FLAGS(Capabilities, Capability)
@@ -59,6 +60,10 @@ public:
     QString id() const { return m_settingsGroup; }
     bool isConnected() const { return m_isConnected; }
     qsizetype unreadNotificationsCount() const { return m_unreadNotificationsCount; }
+
+    /// The limit (in bytes) for media/files that can be sent. A value ≤ 0 means that files
+    /// uploading is n/a. If the limit is arbitrary, it should return the data types max value.
+    virtual qint64 mediaSizeLimit() const = 0;
 
     virtual QString ownUserId() const = 0;
     virtual QString displayName() = 0;
@@ -143,8 +148,8 @@ public:
     Q_INVOKABLE virtual void requestUser(const QString &userId) = 0;
 
     /// Request to delete the message with the given id.
-    Q_INVOKABLE virtual void requestRemoveMessage(const QString &roomId,
-                                                  const QString &messageId) = 0;
+    Q_INVOKABLE virtual void requestRemoveMessage(const QString &roomId, const QString &messageId,
+                                                  const QString &reason = QString()) = 0;
 
     /// Retry sending a message that has previously failed.
     Q_INVOKABLE virtual void retrySendMessage(const QString &roomId,

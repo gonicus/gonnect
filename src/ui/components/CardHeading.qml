@@ -8,14 +8,20 @@ import base
 Item {
     id: control
     implicitWidth: control.leftPadding + headingLoader.implicitWidth + control.rightPadding
-    height: 46
+    height: Math.max(46, 46 * Theme.fontScale)
 
     property int leftPadding: 0
     property int rightPadding: 0
     property string text: ""
+    property alias actions: actionsRow.data
+    readonly property real actionsWidth: actionsRow.width
     property bool showHeading: true
     property bool showDivider: false
     property alias headingMargin: headingLoaderWrapper.implicitWidth
+
+    readonly property real textEndX: headingLoader.item
+            ? headingLoaderWrapper.x + headingLoader.item.headingTextEndX
+            : 0
 
     Accessible.role: Accessible.Heading
     Accessible.name: control.text
@@ -40,7 +46,17 @@ Item {
             sourceComponent: headingComponent
             anchors {
                 left: parent.left
+                right: actionsRow.left
+                rightMargin: actionsRow.width > 0 ? 10 : 0
+            }
+        }
+
+        RowLayout {
+            id: actionsRow
+            spacing: 10
+            anchors {
                 right: parent.right
+                verticalCenter: parent.verticalCenter
             }
         }
 
@@ -54,10 +70,12 @@ Item {
             id: headingLayout
             width: parent?.width ?? headingLayout.implicitWidth
 
+            readonly property real headingTextEndX: headingText.x + Math.min(headingText.width, headingText.implicitWidth)
+
             Label {
                 id: headingText
                 text: control.text
-                font.pixelSize: 16
+                font.pixelSize: Theme.fontSizeMedium
                 font.weight: Font.Medium
                 elide: Text.ElideRight
                 color: Theme.secondaryTextColor
@@ -65,10 +83,9 @@ Item {
             }
 
             Pane {
+                visible: control.showDivider
                 padding: 15
                 background: Rectangle {
-                    id: headingSeparator
-                    visible: control.showDivider
                     height: 30
                     width: 1
                     color: Theme.borderColor

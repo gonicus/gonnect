@@ -14,6 +14,7 @@
 #include "ChatMessageContentFile.h"
 #include "ChatMessageContentAudioFile.h"
 #include "ChatMessageContentVideoFile.h"
+#include "ChatMessageContentRemoved.h"
 #include "ChatMessageContentUserStateChange.h"
 #include "ClipboardHelper.h"
 #include "AppSettings.h"
@@ -231,6 +232,10 @@ IpcDispatcher::IpcDispatcher(const QString &settingsGroup, const IpcConfig &conf
     m_unreadUpdateTimer.setInterval(200);
     m_unreadUpdateTimer.callOnTimeout(this, &IpcDispatcher::updateUnreadNotificationsCountImpl);
 
+    m_reconnectTimer.setSingleShot(true);
+    m_reconnectTimer.setInterval(5s);
+    m_reconnectTimer.callOnTimeout(this, [this]() { sendInitialInitializationRequest(); });
+
     // Setup id conversion
     if (!configInfo.idConvRegexpString.isEmpty() && !configInfo.idConvReplacementString.isEmpty()) {
         m_idConvRegex.setPattern(configInfo.idConvRegexpString);
@@ -260,6 +265,22 @@ IpcDispatcher::IpcDispatcher(const QString &settingsGroup, const IpcConfig &conf
     connect(this, &IChatProvider::chatRoomRemoved, this,
             &IpcDispatcher::updateUnreadNotificationsCount);
 
+    // Link chat users to contacts that appear in the address book after the chat users have
+    // already been received.
+    connect(&AddressBook::instance(), &AddressBook::contactAdded, this, [this](Contact *contact) {
+        if (auto *user = m_userByConvId.value(contact->mail(), nullptr)) {
+            if (m_userContacts.value(user->id()) != contact) {
+                contact->addChatUser(user);
+                m_userContacts.insert(user->id(), contact);
+            }
+        }
+    });
+
+    // The address book re-inserts all contacts after a reset, but the references in this map
+    // have become invalid in the meantime.
+    connect(&AddressBook::instance(), &AddressBook::contactsCleared, this,
+            [this]() { m_userContacts.clear(); });
+
     updateConnected();
 }
 
@@ -287,7 +308,8 @@ IChatProvider::Capabilities IpcDispatcher::capabilities() const
             | CAP::Reactions
             | CAP::UploadFile
             | CAP::UploadMedia
-            | CAP::Markdown;
+            | CAP::Markdown
+            | CAP::PinMessage;
     return s_capabilties;
     // clang-format on
 }
@@ -422,13 +444,7 @@ void IpcDispatcher::sendMessage(const QString &roomId, const QString &text,
 
     if (!sendRequest(req)) {
         m_pendingMessages.remove(tag);
-
-        if (pendingMsg) {
-            auto flags = pendingMsg->flags();
-            flags.setFlag(Flag::Pending, false);
-            flags.setFlag(Flag::Failed, true);
-            ipcRoom->setMessageFlags(tempEventId, flags);
-        }
+        markPendingMessageFailed(roomId, tempEventId);
     }
 }
 
@@ -442,7 +458,7 @@ void IpcDispatcher::sendTypingPing(const QString &roomId)
 }
 
 void IpcDispatcher::sendFile(const QString &roomId, const QString &filePath,
-                             const QString &originalFileName)
+                             const QString &originalFileName, const QString &tempEventId)
 {
     if (!chatRoomByRoomId(roomId)) {
         qCCritical(lcIpcDispatcher) << "Unable to find room with id" << roomId << "- aborting";
@@ -453,6 +469,7 @@ void IpcDispatcher::sendFile(const QString &roomId, const QString &filePath,
     const QFileInfo fileInfo(QUrl(filePath).toLocalFile());
     if (!fileInfo.exists()) {
         qCCritical(lcIpcDispatcher) << "Cannot send file that does not exist:" << filePath;
+        markPendingMessageFailed(roomId, tempEventId);
         return;
     }
     if (m_mediaSizeLimit > 0 && fileInfo.size() > m_mediaSizeLimit) {
@@ -461,6 +478,7 @@ void IpcDispatcher::sendFile(const QString &roomId, const QString &filePath,
                 tr("The file %1 exceeds the file size limit of %2 and cannot be sent.")
                         .arg(originalFileName,
                              TextFormatHelper::instance().formatFileSize(m_mediaSizeLimit)));
+        markPendingMessageFailed(roomId, tempEventId);
         return;
     }
 
@@ -477,7 +495,16 @@ void IpcDispatcher::sendFile(const QString &roomId, const QString &filePath,
 
     msgReq.setFile(content);
     req->setMessageSendRequest(msgReq);
-    sendRequest(req);
+
+    const auto tag = req->tag();
+    if (!tempEventId.isEmpty()) {
+        m_pendingMessages.insert(tag, { roomId, tempEventId });
+    }
+
+    if (!sendRequest(req)) {
+        m_pendingMessages.remove(tag);
+        markPendingMessageFailed(roomId, tempEventId);
+    }
 }
 
 void IpcDispatcher::respondToInvitation(const QString &roomId, bool acceptInvitation)
@@ -566,6 +593,29 @@ void IpcDispatcher::loadSingleMessage(const QString &roomId, const QString &mess
     }
 }
 
+void IpcDispatcher::pinOrUnpinMessage(const QString &roomId, const QString &messageId, bool pin)
+{
+    RoomPinRequest pinRequest;
+    pinRequest.setRoomId(roomId);
+    pinRequest.setMessageId(messageId);
+    pinRequest.setPinned(pin);
+
+    auto req = createRequest();
+    req->setRoomPinRequest(pinRequest);
+    sendRequest(req);
+}
+
+void IpcDispatcher::setConferenceUrl(const QString &roomId, const QString &url)
+{
+    RoomChangeRequest changeRequest;
+    changeRequest.setRoomId(roomId);
+    changeRequest.setConferenceUrl(url);
+
+    auto req = createRequest();
+    req->setRoomChangeRequest(changeRequest);
+    sendRequest(req);
+}
+
 qsizetype IpcDispatcher::chatRoomsCount()
 {
     return m_rooms.length();
@@ -581,11 +631,15 @@ IChatRoom *IpcDispatcher::chatRoomByIndex(qsizetype index)
     return m_rooms.at(index);
 }
 
-void IpcDispatcher::requestRemoveMessage(const QString &roomId, const QString &messageId)
+void IpcDispatcher::requestRemoveMessage(const QString &roomId, const QString &messageId,
+                                         const QString &reason)
 {
     MessageRemoveRequest removeReq;
     removeReq.setRoomId(roomId);
     removeReq.setMessageId(messageId);
+    if (!reason.isEmpty()) {
+        removeReq.setReason(reason);
+    }
 
     auto req = createRequest();
     req->setMessageRemoveRequest(removeReq);
@@ -632,10 +686,26 @@ void IpcDispatcher::retrySendMessage(const QString &roomId, const QString &faile
         return;
     }
 
-    auto textContent = qobject_cast<ChatMessageContentText *>(msg->content());
+    // Retry image/file
+    QString filePath;
+    if (const auto *imageContent = qobject_cast<ChatMessageContentImage *>(msg->content())) {
+        filePath = imageContent->imagePath().toString();
+    } else if (const auto *fileContent = qobject_cast<ChatMessageContentFile *>(msg->content())) {
+        filePath = fileContent->filePath();
+    }
+
+    if (!filePath.isEmpty()) {
+        room->removeMessage(failedMessageId);
+        room->sendFile(filePath);
+        return;
+    }
+
+    // Retry text
+    const auto textContent = qobject_cast<ChatMessageContentText *>(msg->content());
     if (!textContent) {
-        qCCritical(lcIpcDispatcher) << "Retry is only supported for text messages, but message"
-                                    << failedMessageId << "has no text content";
+        qCCritical(lcIpcDispatcher)
+                << "Retry is only supported for text, file and image messages, but message"
+                << failedMessageId << "has no text content";
         return;
     }
 
@@ -847,6 +917,24 @@ void IpcDispatcher::processResponse(
             // received. The error shall not produce an error message visible to the user, thus it
             // is ignored here.
             return;
+        } else if (!m_wasInitializationRequestSuccessful
+                   && err.type() == Error::ErrorType::Network) {
+            if (m_initializationRetryCount > 0) {
+                --m_initializationRetryCount;
+
+                qCWarning(lcIpcDispatcher) << "IPC network error on" << m_settingsGroup << "-"
+                                           << m_initializationRetryCount << "retries left";
+
+                m_reconnectTimer.start();
+            } else {
+                qCCritical(lcIpcDispatcher)
+                        << "IPC network error on" << m_settingsGroup << "- retries exhausted";
+                ErrorBus::instance().addError(
+                        tr("The IPC client of %1 repeatedly reported network errors.")
+                                .arg(m_settingsGroup));
+            }
+
+            return;
         }
 
         qCCritical(lcIpcDispatcher)
@@ -870,14 +958,7 @@ void IpcDispatcher::processResponse(
         // Mark pending message as failed on error
         if (const auto pendingInfo = m_pendingMessages.take(tag);
             !pendingInfo.tempEventId.isEmpty()) {
-            if (auto room = ipcChatRoomById(pendingInfo.roomId)) {
-                if (auto chatMsg = room->chatMessageById(pendingInfo.tempEventId)) {
-                    room->setMessageFlags(
-                            pendingInfo.tempEventId,
-                            (chatMsg->flags() & ~ChatMessage::Flags(ChatMessage::Flag::Pending))
-                                    | ChatMessage::Flag::Failed);
-                }
-            }
+            markPendingMessageFailed(pendingInfo.roomId, pendingInfo.tempEventId);
         }
 
     } else if (rc.hasMultipartEnd()) {
@@ -893,6 +974,7 @@ void IpcDispatcher::processResponse(
         }
 
     } else if (rc.hasStatusUpdate()) {
+        m_wasInitializationRequestSuccessful = true;
         const auto resp = rc.statusUpdate();
         m_connectionState = static_cast<ConnectionState>(static_cast<int>(resp.code()));
         Q_EMIT connectionStateChanged();
@@ -971,17 +1053,20 @@ void IpcDispatcher::processResponse(
         m_supportsDirectRooms = resp.directRooms();
         m_supportsGroupRooms = resp.groupRooms();
         m_supportsSubThreads = resp.subThreads();
+        m_suportsUserPresence = resp.userPresence();
         m_supportedMimeTypes = resp.mimeTypes();
         m_hasDeviceVerification = resp.clientVerification();
 
         // Check size limit (and the value of it)
-        const quint64 mediaSizeLimit = resp.mediaSizeLimit();
-        if (std::in_range<qint64>(mediaSizeLimit)) {
-            m_mediaSizeLimit = static_cast<qint64>(resp.mediaSizeLimit());
-        } else {
-            qCWarning(lcIpcDispatcher)
-                    << "Received file size limit that exceeds our own datatype - using maximum";
-            m_mediaSizeLimit = std::numeric_limits<qint64>::max();
+        if (resp.hasMediaSizeLimit()) {
+            const quint64 mediaSizeLimit = resp.mediaSizeLimit();
+            if (std::in_range<qint64>(mediaSizeLimit)) {
+                m_mediaSizeLimit = mediaSizeLimit;
+            } else {
+                qCWarning(lcIpcDispatcher)
+                        << "Received file size limit that exceeds our own datatype - using maximum";
+                m_mediaSizeLimit = std::numeric_limits<qint64>::max();
+            }
         }
 
         Q_EMIT capabilitiesInitializedChanged();
@@ -1103,6 +1188,7 @@ void IpcDispatcher::processResponse(
             }
 
             if (!conv.isEmpty()) {
+                m_userByConvId.insert(conv, p);
                 auto contact = addrBook.lookupByEmail(conv);
                 if (contact) {
                     contact->addChatUser(p);
@@ -1240,18 +1326,18 @@ void IpcDispatcher::processResponse(
 
         const auto previousFlags = message->flags();
 
-        const bool hasIsPinnedChanged = changeEvent.hasIsPinned()
-                && (static_cast<bool>(message->flags() & ChatMessage::Flag::Pinned)
-                    != changeEvent.isPinned());
-        if (hasIsPinnedChanged) {
-            message->setFlags(message->flags() ^ ChatMessage::Flag::Pinned);
-        }
-
         const bool hasIsEncryptedChanged = changeEvent.hasIsEncrypted()
                 && (static_cast<bool>(message->flags() & ChatMessage::Flag::Encrypted)
                     != changeEvent.isEncrypted());
         if (hasIsEncryptedChanged) {
             message->setFlags(message->flags() ^ ChatMessage::Flag::Encrypted);
+        }
+
+        const bool isEditedChanged = changeEvent.hasEdited()
+                && (static_cast<bool>(message->flags() & ChatMessage::Flag::Edited)
+                    != changeEvent.edited());
+        if (isEditedChanged) {
+            message->setFlags(message->flags() ^ ChatMessage::Flag::Edited);
         }
 
         // Mentioned users
@@ -1293,8 +1379,14 @@ void IpcDispatcher::processResponse(
         } else {
             // Content exists - update
 
-            if (const auto messageStateContent =
-                        qobject_cast<ChatMessageContentUserStateChange *>(content)) {
+            if (changeEvent.hasRemoved() && !qobject_cast<ChatMessageContentRemoved *>(content)) {
+                // The message has been removed - replace the existing content
+                content = createMessageContent(changeEvent);
+                message->setContent(content);
+                hasContentChanged = true;
+
+            } else if (const auto messageStateContent =
+                               qobject_cast<ChatMessageContentUserStateChange *>(content)) {
                 const auto convChange =
                         userStateGrpcToGonnect(changeEvent.membershipChange().change());
                 if (changeEvent.hasMembershipChange()
@@ -1309,6 +1401,14 @@ void IpcDispatcher::processResponse(
                 if (changeEvent.hasText()) {
                     hasContentChanged = true;
                     messageTextContent->setText(changeEvent.text().content());
+                }
+            } else if (const auto messageRemovedContent =
+                               qobject_cast<ChatMessageContentRemoved *>(content)) {
+                if (changeEvent.hasRemoved()) {
+                    hasContentChanged = true;
+                    const auto &removedEvent = changeEvent.removed();
+                    messageRemovedContent->setReason(
+                            removedEvent.hasReason() ? removedEvent.reason() : QString());
                 }
             } else {
                 // File
@@ -1346,7 +1446,7 @@ void IpcDispatcher::processResponse(
             }
         }
 
-        if (hasIsEncryptedChanged || hasIsPinnedChanged) {
+        if (hasIsEncryptedChanged || isEditedChanged) {
             Q_EMIT room->chatMessageFlagsChanged(index, message, previousFlags);
         }
         if (hasContentChanged) {
@@ -1355,7 +1455,6 @@ void IpcDispatcher::processResponse(
         if (hasMentionedUsersChanged) {
             Q_EMIT room->chatMessageMentionedUsersChanged(index, message);
         }
-
     } else if (rc.hasMessageRemoveEvent()) {
         const auto messageId = rc.messageRemoveEvent().messageId();
         IpcChatRoom *foundRoom = nullptr;
@@ -1374,7 +1473,6 @@ void IpcDispatcher::processResponse(
         }
 
         foundRoom->removeMessage(messageId);
-
     } else if (rc.hasReactionCreatedEvent()) {
         const auto reaction = rc.reactionCreatedEvent();
         auto room = m_roomLookup.value(reaction.roomId(), nullptr);
@@ -1396,7 +1494,6 @@ void IpcDispatcher::processResponse(
 
         Q_EMIT room->chatMessageReactionsChanged(room->indexOfMessage(message), message);
         Q_EMIT reactionChanged(reaction.messageId());
-
     } else if (rc.hasReactionRemovedEvent()) {
         const auto reaction = rc.reactionRemovedEvent();
         auto room = m_roomLookup.value(reaction.roomId(), nullptr);
@@ -1418,7 +1515,6 @@ void IpcDispatcher::processResponse(
 
         Q_EMIT room->chatMessageReactionsChanged(room->indexOfMessage(message), message);
         Q_EMIT reactionChanged(reaction.messageId());
-
     } else if (rc.hasUserSearchResponse()) {
         const auto userList = rc.userSearchResponse().userList();
 
@@ -1432,7 +1528,6 @@ void IpcDispatcher::processResponse(
         }
 
         Q_EMIT chatUserSearchResult(QString::number(rc.tag()), users);
-
     } else if (rc.hasInvitedEvent()) {
         const auto invitedEvent = rc.invitedEvent();
         const auto displayName =
@@ -1440,14 +1535,10 @@ void IpcDispatcher::processResponse(
         const auto invitationText =
                 invitedEvent.hasInvitationText() ? invitedEvent.invitationText() : "";
         Q_EMIT roomInviteReceived(invitedEvent.roomId(), displayName, invitationText);
-
     } else if (rc.hasPublicRoomListResponse()) {
 
         auto listResp = rc.publicRoomListResponse();
-        if (listResp.hasNextBatch()) {
-            m_nextPublicRoomListResponseToken = listResp.nextBatch();
-        }
-
+        const QString nextBatchToken = listResp.hasNextBatch() ? listResp.nextBatch() : QString();
         const auto &rooms = listResp.roomList();
 
         QList<QSharedPointer<PublicChatRoom>> publicRooms;
@@ -1480,9 +1571,7 @@ void IpcDispatcher::processResponse(
             publicRooms.append(p);
         }
 
-        Q_EMIT publicRoomSearchResult(QString::number(tag), publicRooms,
-                                      m_nextPublicRoomListResponseToken);
-
+        Q_EMIT publicRoomSearchResult(QString::number(tag), publicRooms, nextBatchToken);
     } else if (rc.hasRoomChangeEvent()) {
         const auto changeEvent = rc.roomChangeEvent();
         const auto &roomId = changeEvent.roomId();
@@ -1540,6 +1629,19 @@ void IpcDispatcher::processResponse(
             room->setAvatarPath(makeDataRootPath(changeEvent.avatarPath()));
         }
 
+        // Pinned messages
+        if (changeEvent.hasPinnedMessagesChanged()) {
+            room->setPinnedMessageIds(changeEvent.pinnedMessages());
+        }
+
+        // Read marker
+        processReadMarkers(room, changeEvent.readMarker());
+
+        // Conference url
+        if (changeEvent.hasConferenceUrl()) {
+            room->setConferenceUrl(changeEvent.conferenceUrl());
+        }
+
         // Update typing users
         if (changeEvent.hasTypingUserIdListChanged()) {
             const auto &typingUserIds = changeEvent.typingUserIdList();
@@ -1587,7 +1689,6 @@ void IpcDispatcher::processResponse(
                 }
             }
         }
-
     } else if (rc.hasRoomLeftEvent()) {
 
         // Notify that user has left the chat room by removing the room from the list
@@ -1617,7 +1718,6 @@ void IpcDispatcher::processResponse(
 
         qCCritical(lcIpcDispatcher) << "IpcDispatcher has been informed that the user left room"
                                     << roomId << "but that room was not found in the model";
-
     } else if (rc.hasVerificationStatusEvent()) {
         GONNECT_ASSERT_HAS_VERIFICATION
 
@@ -1634,7 +1734,6 @@ void IpcDispatcher::processResponse(
             m_isCrossSigningVerificationAvailable = verificationStatus.isCrossSigningAvailable();
             Q_EMIT isCrossSigningVerificationAvailableChanged();
         }
-
     } else if (rc.hasCrossSigningPromptEvent()) {
         GONNECT_ASSERT_HAS_VERIFICATION
         GONNECT_ASSERT_IS_NOT_IN_VERIFICATION_PROCESS
@@ -1642,7 +1741,6 @@ void IpcDispatcher::processResponse(
         m_verificationFlowId = rc.crossSigningPromptEvent().verificationFlowId();
         m_verificationTimeoutTimer.start(10min);
         Q_EMIT crossSigningPrompt();
-
     } else if (rc.hasCrossSigningStartResponse()) {
         GONNECT_ASSERT_HAS_VERIFICATION
         GONNECT_ASSERT_IS_NOT_IN_VERIFICATION_PROCESS
@@ -1651,7 +1749,6 @@ void IpcDispatcher::processResponse(
         const auto verificationFlowId = startResponse.verificationFlowId();
         GONNECT_ASSERT(!verificationFlowId.isEmpty(), "verificationFlowId must not be empty")
         m_verificationFlowId = verificationFlowId;
-
     } else if (rc.hasCrossSigningStartEvent()) {
         GONNECT_ASSERT_HAS_VERIFICATION
         GONNECT_ASSERT_IS_NOT_IN_VERIFICATION_PROCESS
@@ -1677,7 +1774,6 @@ void IpcDispatcher::processResponse(
 
         setIsInVerificationProcess(true);
         Q_EMIT crossSigningMethodSelectRequired(methods);
-
     } else if (rc.hasCrossSigningMethodSelectedEvent()) {
         GONNECT_ASSERT_HAS_VERIFICATION
         const auto selectedEvent = rc.crossSigningMethodSelectedEvent();
@@ -1717,7 +1813,6 @@ void IpcDispatcher::processResponse(
         }
 
         Q_EMIT crossSigningAcceptRequired(secret);
-
     } else if (rc.hasVerificationEndEvent()) {
         GONNECT_ASSERT_HAS_VERIFICATION
         const auto endEvent = rc.verificationEndEvent();
@@ -1738,9 +1833,24 @@ void IpcDispatcher::processResponse(
 
         m_verificationFlowId.clear();
         setIsInVerificationProcess(false);
-
     } else {
         qFatal("Received an unimplemented or empty IPC message");
+    }
+}
+
+void IpcDispatcher::markPendingMessageFailed(const QString &roomId, const QString &tempEventId)
+{
+    if (tempEventId.isEmpty()) {
+        return;
+    }
+
+    if (auto *room = qobject_cast<IpcChatRoom *>(chatRoomByRoomId(roomId))) {
+        if (auto *msg = room->chatMessageById(tempEventId)) {
+            auto flags = msg->flags();
+            flags.setFlag(ChatMessage::Flag::Pending, false);
+            flags.setFlag(ChatMessage::Flag::Failed, true);
+            room->setMessageFlags(tempEventId, flags);
+        }
     }
 }
 
@@ -1797,12 +1907,11 @@ IpcDispatcher::createOrUpdateReceivedChatMessage(const de::gonicus::gonnect::Mes
     if (isUnread && (flags & ChatMessage::Flag::OwnMessage)) {
         isUnread = false;
     }
-
-    if (message.isPinned()) {
-        flags |= ChatMessage::Flag::Pinned;
-    }
     if (message.isEncrypted()) {
         flags |= ChatMessage::Flag::Encrypted;
+    }
+    if (message.edited()) {
+        flags |= ChatMessage::Flag::Edited;
     }
 
     // Add new message
@@ -1811,22 +1920,38 @@ IpcDispatcher::createOrUpdateReceivedChatMessage(const de::gonicus::gonnect::Mes
 
     QObject *content = createMessageContent(message);
 
-    if (chatMessage) {
+    if (chatMessage && !isNew) {
         room->updateMessageEventId(chatMessage->eventId(), message.messageId());
-        chatMessage->setTimestamp(dateTime);
+        const bool hasTimestampChanged = chatMessage->setTimestamp(dateTime);
         room->setMessageFlags(chatMessage->eventId(), flags);
-        chatMessage->setContent(content);
 
-        if (!isNew) {
-            auto idx = room->indexOfMessage(chatMessage);
-            Q_EMIT room->chatMessageContentChanged(idx, chatMessage);
+        if (hasTimestampChanged) {
+            room->resortMessage(chatMessage);
+
+            const auto &messages = room->chatMessages();
+            if (!messages.isEmpty()) {
+                room->setLatestMessageDateTime(messages.last()->timestamp());
+            }
         }
 
+        if (content) {
+            chatMessage->setContent(content);
+        }
+
+        auto idx = room->indexOfMessage(chatMessage);
+        Q_EMIT room->chatMessageContentChanged(idx, chatMessage);
+
     } else {
+        if (chatMessage) {
+            // This can happen when an independently loaded message is now replaced by one that is
+            // loaded via the regular timeline.
+            // In this case, the old "temporary" object becomes obsolete.
+            chatMessage->deleteLater();
+        }
+
         const auto user = m_users.value(message.senderId(), nullptr);
         const auto userDisplayName =
                 (user && !user->displayName().isEmpty()) ? user->displayName() : message.senderId();
-
         chatMessage = new ChatMessage(message.messageId(), message.senderId(), userDisplayName,
                                       content, dateTime, room, flags);
     }
@@ -1892,6 +2017,7 @@ IpcChatRoom *IpcDispatcher::addChatRoom(const de::gonicus::gonnect::Room &room, 
     roomObj->setIsDirect(room.isDirect());
     roomObj->setIsFavorite(room.isFavorite());
     roomObj->setRoomSettings(roomSettingsProtoToIpc(room.roomSettings()));
+    roomObj->setPinnedMessageIds(room.pinnedMessages());
 
     if (room.hasLatestMessageTimestamp()) {
         roomObj->setLatestMessageDateTime(
@@ -1900,6 +2026,14 @@ IpcChatRoom *IpcDispatcher::addChatRoom(const de::gonicus::gonnect::Room &room, 
 
     if (room.hasAvatarPath()) {
         roomObj->setAvatarPath(makeDataRootPath(room.avatarPath()));
+    }
+
+    // Read markers
+    processReadMarkers(roomObj, room.readMarker());
+
+    // Conference url
+    if (room.hasConferenceUrl()) {
+        roomObj->setConferenceUrl(room.conferenceUrl());
     }
 
     roomObj->setInvitationText(room.hasInvitationText() ? room.invitationText() : "");
@@ -2158,6 +2292,9 @@ void IpcDispatcher::makeNotificationNewMessage(ChatMessage *messageObj)
             title = tr("[%1] Message from %2").arg(chatRoom->name(), senderName);
         }
         message = textContent->simpleText();
+    } else if (qobject_cast<ChatMessageContentRemoved *>(messageObj->content())) {
+        // No notification if message has been removed
+        qt_noop();
     }
 
     auto notification =
@@ -2235,6 +2372,43 @@ bool IpcDispatcher::containsRoomTag(const QString &str) const
     return str.contains(regex);
 }
 
+void IpcDispatcher::processReadMarkers(IpcChatRoom *chatRoom,
+                                       const de::gonicus::gonnect::Room::ReadMarkerEntry &entries)
+{
+    if (!chatRoom) {
+        qCWarning(lcIpcDispatcher) << "Cannot process readmarkers for nullptr room";
+        return;
+    }
+    if (entries.isEmpty()) {
+        return;
+    }
+
+    QHash<QString, QDateTime> bulk;
+    bulk.reserve(entries.size());
+
+    const auto ownUserId = this->ownUserId();
+    QDateTime ownRead;
+    bool hasOwnRead = false;
+
+    QHashIterator it(entries);
+    while (it.hasNext()) {
+        it.next();
+        if (it.key() == ownUserId) {
+            ownRead = QDateTime::fromMSecsSinceEpoch(it.value(), QTimeZone::utc());
+            hasOwnRead = true;
+        } else {
+            bulk.insert(it.key(), QDateTime::fromMSecsSinceEpoch(it.value(), QTimeZone::utc()));
+        }
+    }
+
+    if (!bulk.isEmpty()) {
+        chatRoom->setReadTimestamp(bulk);
+    }
+    if (hasOwnRead) {
+        chatRoom->setOwnLastReadTimestamp(ownRead);
+    }
+}
+
 RequestContainer *IpcDispatcher::createRequest(bool withTag)
 {
     auto container = new RequestContainer;
@@ -2292,6 +2466,7 @@ void IpcDispatcher::sendInitialInitializationRequest()
     initReq.setEncryptionSecret(m_configInfo.encryptionSecret);
     initReq.setPersistentStorageSecret(m_configInfo.persistentStorageSecret);
     initReq.setDeviceDisplayName(m_configInfo.displayName);
+    initReq.setVerifyCertificates(m_configInfo.verifyCertificates);
     req->setInitializationRequest(initReq);
     SendPolicy policy;
     policy.allowSendIfLoggedOut = true;
@@ -2323,37 +2498,46 @@ void IpcDispatcher::onLoggedInChanged()
 
 void IpcDispatcher::forwardOwnPresenceState()
 {
-
-    if (isConnected()) {
-        UserStatus statusReq;
-        auto &glob = GlobalStateAggregator::instance();
-
-        if (!glob.statusText().isEmpty()) {
-            statusReq.setStatusMessage(glob.statusText());
-        }
-
-        switch (glob.presenceState()) {
-
-        case PresenceState::State::Unknown:
-        case PresenceState::State::Offline:
-            statusReq.setState(PresenceStateGadget::PresenceState::Offline);
-            break;
-
-        case PresenceState::State::Away:
-        case PresenceState::State::Busy:
-            statusReq.setState(PresenceStateGadget::PresenceState::Away);
-            break;
-
-        case PresenceState::State::Available:
-        case PresenceState::State::Ringing:
-            statusReq.setState(PresenceStateGadget::PresenceState::Online);
-            break;
-        }
-
-        auto req = createRequest();
-        req->setUserStatusSetOwnRequest(statusReq);
-        sendRequest(req);
+    if (!m_suportsUserPresence || !isConnected()) {
+        return;
     }
+
+    UserStatus statusReq;
+    auto &glob = GlobalStateAggregator::instance();
+
+    if (glob.statusText().isEmpty()) {
+        statusReq.setStatusMessage(QString());
+    } else {
+        statusReq.setStatusMessage(glob.statusText());
+    }
+
+    switch (glob.presenceState()) {
+
+    case PresenceState::State::Unknown:
+    case PresenceState::State::Offline:
+        statusReq.setState(PresenceStateGadget::PresenceState::Offline);
+        break;
+
+    case PresenceState::State::Away:
+    case PresenceState::State::Busy:
+        statusReq.setState(PresenceStateGadget::PresenceState::Away);
+        break;
+
+    case PresenceState::State::Available:
+    case PresenceState::State::Ringing:
+        statusReq.setState(PresenceStateGadget::PresenceState::Online);
+        break;
+    }
+
+    auto req = createRequest(false);
+    req->setUserStatusSetOwnRequest(statusReq);
+
+    qCInfo(lcIpcDispatcher) << "Sending IPC request to set presence status" << statusReq.state()
+                            << "with status text" << statusReq.statusMessage();
+
+    SendPolicy policy;
+    policy.timeoutSeconds = 0;
+    sendRequest(req, policy);
 }
 
 void IpcDispatcher::updateUnreadNotificationsCount()
@@ -2515,6 +2699,12 @@ IpcDispatcher::roomPermissionsGrpcToGonnect(const de::gonicus::gonnect::RoomPerm
     if (permissions.canBan()) {
         p |= IChatRoom::Permission::CanBan;
     }
+    if (permissions.canPinMessages()) {
+        p |= IChatRoom::Permission::CanPinMessages;
+    }
+    if (permissions.canEditConferenceUrl()) {
+        p |= IChatRoom::Permission::CanEditConferenceUrl;
+    }
 
     return p;
 }
@@ -2532,6 +2722,12 @@ QObject *IpcDispatcher::createMessageContent(const T &message) const
         content = new ChatMessageContentUserStateChange(
                 userStateGrpcToGonnect(message.membershipChange().change()),
                 message.membershipChange().affectedUserId());
+    } else if (message.hasRemoved()) {
+        auto *removedContent = new ChatMessageContentRemoved;
+        if (message.removed().hasReason()) {
+            removedContent->setReason(message.removed().reason());
+        }
+        content = removedContent;
     } else if (fileType == FileType::Image) {
         content = new ChatMessageContentImage(makeDataRootPath(message.file().filePath()));
     } else if (message.hasText()) {

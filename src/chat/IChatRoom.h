@@ -8,6 +8,8 @@
 #include "NotificationSetting.h"
 #include "ChatMessage.h"
 
+class IChatProvider;
+
 struct RoomSettings
 {
     NotificationSetting::Setting notificationSetting = NotificationSetting::Setting::None;
@@ -42,11 +44,18 @@ class IChatRoom : public QObject
     Q_PROPERTY(IChatRoom::Permissions permissions READ permissions NOTIFY permissionsChanged FINAL)
     Q_PROPERTY(QDateTime latestMessageDateTime READ latestMessageDateTime NOTIFY
                        latestMessageDateTimeChanged FINAL)
+    Q_PROPERTY(ChatUser *otherUser READ otherUser NOTIFY otherUserChanged FINAL)
     Q_PROPERTY(QList<ChatUser *> chatUsers READ chatUsers NOTIFY chatUsersChanged FINAL)
     Q_PROPERTY(QList<ChatUser *> typingUsers READ typingUsers NOTIFY typingUsersChanged FINAL)
     Q_PROPERTY(qsizetype chatUserCount READ chatUserCount NOTIFY chatUsersChanged FINAL)
+    Q_PROPERTY(qsizetype joinedChatUserCount READ joinedChatUserCount NOTIFY
+                       joinedChatUserCountChanged FINAL)
     Q_PROPERTY(qsizetype notificationCount READ notificationCount NOTIFY notificationCountChanged
                        FINAL)
+    Q_PROPERTY(QDateTime ownLastReadTimestamp READ ownLastReadTimestamp NOTIFY
+                       ownLastReadTimestampChanged FINAL)
+
+    Q_PROPERTY(QString conferenceUrl READ conferenceUrl NOTIFY conferenceUrlChanged FINAL)
 
 public:
     enum class UserRoomState { Unjoined, Joined, Invited, Knocked, Banned };
@@ -62,14 +71,18 @@ public:
         CanEdit = 1 << 0,
         CanInvite = 1 << 1,
         CanKick = 1 << 2,
-        CanBan = 1 << 3
+        CanBan = 1 << 3,
+        CanPinMessages = 1 << 4,
+        CanEditConferenceUrl = 1 << 5
     };
     Q_ENUM(Permission)
     Q_DECLARE_FLAGS(Permissions, Permission)
     Q_FLAG(Permissions)
 
-    explicit IChatRoom(QObject *parent = nullptr);
+    explicit IChatRoom(IChatProvider *chatProvider = nullptr, QObject *parent = nullptr);
     virtual ~IChatRoom() { }
+
+    Q_INVOKABLE IChatProvider *chatProvider() const { return m_chatProvider; }
 
     virtual QString id() = 0;
     virtual QString name() = 0;
@@ -80,6 +93,10 @@ public:
     virtual qsizetype notificationCount() = 0;
     virtual IChatRoom::Permissions permissions() = 0;
     Q_INVOKABLE virtual void resetUnreadCount() = 0;
+
+    /// Mark this room as read to control the "unread messages" mark. This is different from
+    /// resetting the unread count.
+    Q_INVOKABLE virtual void markAsRead() = 0;
 
     bool isLoadingMessageHistory() const { return m_isLoadingMessageHistory; }
     void setIsLoadingMessageHistory(bool value);
@@ -93,8 +110,18 @@ public:
     RoomSettings roomSettings() const { return m_roomSettings; }
     void setRoomSettings(const RoomSettings &roomSettings);
 
+    QString conferenceUrl() const { return m_conferenceUrl; }
+    void setConferenceUrl(const QString &url);
+    Q_INVOKABLE virtual void requestSetConferenceUrl(const QString &url) = 0;
+
     /// List of chat messages of this room, sorted by timestamp ascending
     virtual QList<ChatMessage *> chatMessages() const = 0;
+
+    /// List of pinned chat messages of this room, sorted by timestamp ascending
+    virtual QList<ChatMessage *> pinnedChatMessages() const = 0;
+    virtual qsizetype pinnedChatMessageCount() const = 0;
+    virtual ChatMessage *pinnedChatMessageByIndex(qsizetype index) const = 0;
+    virtual qsizetype indexOfPinnedChatMessage(ChatMessage *message) const = 0;
 
     /// Retrieve a specific message by its id or nullptr, if not found.
     Q_INVOKABLE virtual ChatMessage *chatMessageById(const QString &id) const = 0;
@@ -119,6 +146,9 @@ public:
     /// Start the loading of next batch of messages.
     Q_INVOKABLE virtual void loadMessages() = 0;
 
+    /// Toggle whether the message is pinned in this room or not.
+    Q_INVOKABLE virtual void togglePin(const QString &messageId) = 0;
+
     /// Whether this room is a direct chat between two users or a room with several ones.
     virtual bool isDirectChat() = 0;
 
@@ -141,6 +171,9 @@ public:
     /// the chatUsersChanged() and therefore chatUserAdded() or
     /// chatUserRemoved() signals.
     virtual qsizetype chatUserCount() const = 0;
+
+    /// The number of current users of this room that have the state Joined.
+    virtual qsizetype joinedChatUserCount() const = 0;
 
     /// Add the user object to the room with the given state. This does not invoke any change
     /// on the backend; it just informs about this exisiting user to be a member of the room.
@@ -182,14 +215,28 @@ public:
     /// (primarily) or id (secondarily). The list or its content must not be modified.
     virtual const QList<ChatUser *> &typingUsers() const = 0;
 
+    /// Set multiple read markers at once (userId to the timestamp up to which messages have been
+    /// read). Implementations must emit readMarkersChanged() exactly once, if anything has changed.
+    virtual void setReadTimestamp(const QHash<QString, QDateTime> &reads) = 0;
+
+    /// The timestamp up to which the user with the given id has read messages or an invalid
+    /// QDateTime if unknown.
+    virtual QDateTime lastReadTimestamp(const QString &userId) const = 0;
+
+    /// The own readmarker as timestamp.
+    virtual QDateTime ownLastReadTimestamp() const = 0;
+    virtual void setOwnLastReadTimestamp(const QDateTime &timestamp) = 0;
+
     /// Remove all messages. Must invoke chatMessagesReset() afterwards.
     virtual void clear() = 0;
 
 private:
+    IChatProvider *m_chatProvider = nullptr;
     RoomSettings m_roomSettings;
     QDateTime m_latestMessageDateTime;
     bool m_isLoadingMessageHistory = false;
     bool m_isCompletelyLoaded = false;
+    QString m_conferenceUrl;
 
 Q_SIGNALS:
     void roomSettingsChanged();
@@ -209,6 +256,10 @@ Q_SIGNALS:
     void latestMessageDateTimeChanged();
     void ownUserJoinStateChanged();
     void otherUserChanged();
+    void joinedChatUserCountChanged();
+    void readMarkersChanged();
+    void ownLastReadTimestampChanged();
+    void conferenceUrlChanged();
 
     /// Send when a chat message has been added. index is the one in the list returned by
     /// chatMessages(). Ownership remains in this room object.
@@ -222,6 +273,10 @@ Q_SIGNALS:
     /// right after sending the message.
     void chatMessageRemoved(qsizetype index, ChatMessage *chatMessage);
 
+    /// Send when a message has moved inside the chatMessages() list (i.e. when its timestamp has
+    /// changed).
+    void chatMessageMoved(qsizetype oldIndex, qsizetype newIndex, ChatMessage *chatMessage);
+
     void chatMessageContentChanged(qsizetype index, ChatMessage *chatMessage);
     void chatMessageFlagsChanged(qsizetype index, ChatMessage *chatMessage,
                                  ChatMessage::Flags previousFlags);
@@ -232,6 +287,8 @@ Q_SIGNALS:
     /// Send when chat messages have been cleared (i.e. removed and deleted). All objects have been
     /// destroyed at this moment.
     void chatMessagesReset();
+
+    void pinnedMessagesChanged();
 
     /// Meta signal for both chatUserAdded and chatUserRemoved, i.e. send whenever one
     /// of the other two is emitted.

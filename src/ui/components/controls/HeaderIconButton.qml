@@ -28,7 +28,7 @@ Item {
         radius: parent.width / 2
         color: Theme.backgroundHeaderIconHovered
         border.width: 1
-        border.color: Theme.borderHeaderIconHovered
+        border.color: Theme.borderColor
 
         Accessible.ignored: true
     }

@@ -9,7 +9,7 @@ Q_LOGGING_CATEGORY(lcAudioPort, "gonnect.sip.audio")
 
 #define NORMAL_AUDIO_LEVEL 1.6f
 #define SILENCE_BUFFER_MS 1000
-#define SILENCE_PREFILL_MS 1000
+#define SILENCE_TARGET_FILL_MS 80
 
 using namespace std::chrono_literals;
 
@@ -202,6 +202,52 @@ void AudioPort::writeSilenceMS(unsigned milliseconds)
     }
 }
 
+bool AudioPort::isSilence(const void *data, unsigned size) const
+{
+    // ~1% of full scale - comfort noise and DC offsets stay below this
+    static constexpr int threshold = 328;
+
+    const auto *bytes = static_cast<const char *>(data);
+    const unsigned samples = size / sizeof(qint16);
+
+    for (unsigned i = 0; i < samples; ++i) {
+        const auto sample = qFromLittleEndian<qint16>(bytes + i * sizeof(qint16));
+        if (qAbs(static_cast<int>(sample)) > threshold) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+void AudioPort::padSilence()
+{
+    if (m_sink.isNull() || m_io.isNull()) {
+        return;
+    }
+
+    // Note: the fill level has to be computed from the sink format, not from the pjsip
+    // port format - only the sink tells us how many bytes are still queued for playback.
+    const qint64 target = m_audioFormat.bytesForDuration(SILENCE_TARGET_FILL_MS * 1000);
+    const qint64 queued = m_sink->bufferSize() - m_sink->bytesFree();
+    const qint64 missing = target - queued;
+
+    if (missing <= 0) {
+        qCDebug(lcAudioPort).nospace() << "silence pad: nothing written, buffer already holds "
+                                       << (m_audioFormat.durationForBytes(queued) / 1000)
+                                       << "ms of " << SILENCE_TARGET_FILL_MS << "ms target";
+        return;
+    }
+
+    const qint64 written = m_io->write(QByteArray(missing, 0));
+
+    qCDebug(lcAudioPort).nospace()
+            << "silence pad: wrote " << written << " of " << missing << " bytes ("
+            << (m_audioFormat.durationForBytes(written) / 1000) << "ms) to reach the "
+            << SILENCE_TARGET_FILL_MS << "ms target, buffer was at "
+            << (m_audioFormat.durationForBytes(queued) / 1000) << "ms";
+}
+
 void AudioPort::startSinkIO()
 {
     m_idleTimer.stop();
@@ -226,7 +272,7 @@ void AudioPort::startSinkIO()
     m_sink = new QAudioSink(m_device, m_audioFormat);
     m_io = m_sink->start();
 
-    writeSilenceMS(SILENCE_PREFILL_MS);
+    padSilence();
 
     Q_EMIT audioSinkChanged();
 }
@@ -373,6 +419,21 @@ void AudioPort::onFrameReceived(pj::MediaFrame &frame)
     // Register the frame about to be played as the echo reference.
     if (m_audioProcessor) {
         m_audioProcessor->playback(frame.buf.data(), static_cast<unsigned>(frame.size));
+    }
+
+    // Resolve any excess buffering by skipping frames that carry silence anyway
+    const qint64 target = m_audioFormat.bytesForDuration(SILENCE_TARGET_FILL_MS * 1000);
+    if (!m_sink.isNull() && m_sink->bufferSize() - m_sink->bytesFree() > target
+        && isSilence(frame.buf.data(), static_cast<unsigned>(frame.size))) {
+
+        qCDebug(lcAudioPort).nospace()
+                << "playback: dropped a silent frame to drain "
+                << (m_audioFormat.durationForBytes(m_sink->bufferSize() - m_sink->bytesFree())
+                    / 1000)
+                << "ms down to the " << SILENCE_TARGET_FILL_MS << "ms target";
+
+        Q_EMIT startIdleTimer();
+        return;
     }
 
     m_io->write(reinterpret_cast<char *>(frame.buf.data()), frame.size);

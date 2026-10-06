@@ -38,7 +38,7 @@ BaseWindow {
         Label {
             id: keyLabel
             text: delg.key
-            font.pixelSize: 16
+            font.pixelSize: Theme.fontSizeMedium
             font.weight: Font.DemiBold
             anchors {
                 top: parent.top
@@ -86,7 +86,7 @@ BaseWindow {
             Label {
                 id: localShortcutsHeading
                 text: qsTr("Local shortcuts (work only when app is focused)")
-                font.pixelSize: 16
+                font.pixelSize: Theme.fontSizeMedium
                 font.weight: Font.Medium
                 elide: Text.ElideRight
                 color: Theme.secondaryTextColor
@@ -123,7 +123,7 @@ BaseWindow {
             Label {
                 id: globalShortcutsHeading
                 text: qsTr("Global shortcuts (work from anywhere)")
-                font.pixelSize: 16
+                font.pixelSize: Theme.fontSizeMedium
                 font.weight: Font.Medium
                 elide: Text.ElideRight
                 color: Theme.secondaryTextColor

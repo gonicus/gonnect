@@ -254,9 +254,9 @@ QString EnumTranslation::userStateChange(const ChatMessageContentUserStateChange
     case ChatMessageContentUserStateChange::State::Unknown:
         return tr("Unknown state for %1").arg(name);
     case ChatMessageContentUserStateChange::State::Joined:
-        return tr("%1 has joined").arg(name);
+        return tr("%1 has joined the chat").arg(name);
     case ChatMessageContentUserStateChange::State::Left:
-        return tr("%1 has left").arg(name);
+        return tr("%1 has left the chat").arg(name);
     case ChatMessageContentUserStateChange::State::Invited:
         return tr("%1 has been invited").arg(name);
     case ChatMessageContentUserStateChange::State::Knocked:

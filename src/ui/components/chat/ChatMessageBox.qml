@@ -55,6 +55,10 @@ Item {
         messageField.lastCursorPosition = 0
     }
 
+    function positionCursorAtEnd() {
+        messageField.cursorPosition = messageField.text.length
+    }
+
     QtObject {
         id: internal
 
@@ -83,12 +87,40 @@ Item {
             control.sendMessage()
         }
 
+        function exitEditMode() {
+            control.editMessageId = ""
+            messageField.lastCursorPosition = 0
+
+            if (control.chatRoom && internal.savedInput[control.chatRoom.id] !== undefined) {
+                messageField.text = internal.savedInput[control.chatRoom.id]
+                messageField.forceActiveFocus()
+                control.positionCursorAtEnd()
+            } else {
+                messageField.clear()
+            }
+        }
+
         function executePing() {
             if (control.chatRoom) {
                 control.chatRoom.sendTypingPing()
                 internal.lastPingTime = Date.now()
                 internal.hasTypedWhileWaiting = false
                 internal.typingTimer.start()
+            }
+        }
+
+        function ensureCursorVisible() {
+            const flickable = messageFieldScrollView.contentItem
+            const viewportHeight = messageFieldScrollView.height
+            const maxContentY = Math.max(0, flickable.contentHeight - viewportHeight)
+            const scrollMargin = 10
+            const cursorTop = messageField.cursorRectangle.y
+            const cursorBottom = cursorTop + messageField.cursorRectangle.height
+
+            if (cursorBottom + scrollMargin > flickable.contentY + viewportHeight) {
+                flickable.contentY = Util.clamp(cursorBottom + scrollMargin - viewportHeight, 0, maxContentY)
+            } else if (cursorTop - scrollMargin < flickable.contentY) {
+                flickable.contentY = Util.clamp(cursorTop - scrollMargin, 0, maxContentY)
             }
         }
 
@@ -226,8 +258,8 @@ Item {
 
         Label {
             text: qsTr("Edit last message")
-            font.pixelSize: 14
-            color: Theme.foregroundWhiteColor
+            font.pixelSize: Theme.fontSizeNormal
+            color: Theme.whiteColor
             anchors {
                 left: parent.left
                 leftMargin: 10
@@ -251,7 +283,7 @@ Item {
                 width: 14
                 height: 14
                 source: Icons.mobileCloseApp
-                color: Theme.foregroundWhiteColor
+            color: Theme.whiteColor
             }
 
             anchors {
@@ -261,11 +293,7 @@ Item {
                 rightMargin: 5
             }
 
-            onClicked: () => {
-                           control.editMessageId = ""
-                           messageField.clear()
-                           messageField.lastCursorPosition = 0
-                       }
+            onClicked: () => internal.exitEditMode()
 
             Accessible.role: Accessible.Button
             Accessible.name: qsTr("Cancel edit")
@@ -277,6 +305,7 @@ Item {
 
     Label {
         text: qsTr("Enter message...")
+        enabled: false
         color: Theme.secondaryInactiveTextColor
         visible: messageField.text === ""
         anchors {
@@ -289,6 +318,8 @@ Item {
         id: messageFieldScrollView
         clip: true
         padding: 0
+        contentWidth: messageFieldScrollView.availableWidth
+        contentHeight: messageField.height
         anchors {
             top: editBanner.bottom
             left: parent.left
@@ -300,21 +331,12 @@ Item {
         TextEdit {
             id: messageField
             color: Theme.primaryTextColor
-            font.pixelSize: 14
+            font.pixelSize: Theme.fontSizeNormal
             wrapMode: TextEdit.Wrap
             width: messageFieldScrollView.availableWidth
-            height: messageField.contentHeight
+            height: Math.max(messageField.contentHeight, messageFieldScrollView.availableHeight)
 
-            onCursorRectangleChanged: {
-                const view = messageFieldScrollView
-                const cursorBottom = cursorRectangle.y + cursorRectangle.height + 5
-                const viewportBottom = view.contentItem.contentY + view.height
-                if (cursorBottom > viewportBottom) {
-                    view.contentItem.contentY = cursorBottom - view.height + 5
-                } else if (cursorRectangle.y - 5 < view.contentItem.contentY) {
-                    view.contentItem.contentY = Math.max(0, cursorRectangle.y - 5)
-                }
-            }
+            onCursorRectangleChanged: internal.ensureCursorVisible()
 
             property int lastCursorPosition: 0
 
@@ -443,9 +465,7 @@ Item {
                                     messageField.lastCursorPosition = messageField.cursorPosition
 
                                 } else if (keyEvent.key === Qt.Key_Escape && control.editMessageId) {
-                                    control.editMessageId = ""
-                                    messageField.clear()
-                                    messageField.lastCursorPosition = 0
+                                    internal.exitEditMode()
 
                                 } else if (control.hasMessage
                                            && [Qt.Key_Enter, Qt.Key_Return].includes(keyEvent.key)
@@ -552,7 +572,72 @@ Item {
 
                 return [start, end]
             }
+
+            function toggleQuote() {
+                const mf = messageField
+                const fullText = mf.text
+                let start = mf.selectionStart
+                let end = mf.selectionEnd
+                const hasSelection = (start !== end)
+
+                let targetStart = fullText.lastIndexOf('\n', start - 1) + 1
+                let effectiveEnd = hasSelection ? Math.max(end - 1, 0) : end
+                let targetEnd = fullText.indexOf('\n', effectiveEnd)
+                if (targetEnd === -1) {
+                    targetEnd = fullText.length
+                }
+
+                const textToProcess = fullText.substring(targetStart, targetEnd)
+                const lines = textToProcess.split('\n')
+                const quoteRegex = /^(\s*> ?)/
+
+                const isFullyQuoted = lines.every(line => line.trim() === "" || quoteRegex.test(line))
+
+                const transformedLines = lines.map(line => {
+                    if (isFullyQuoted) {
+                        return line.replace(/^(\s*)> ?/, "$1")
+                    } else {
+                        return line.trim() === "" ? ">" : "> " + line
+                    }
+                })
+
+                const resultText = transformedLines.join('\n')
+
+                mf.remove(targetStart, targetEnd)
+                mf.insert(targetStart, resultText)
+
+                if (hasSelection) {
+                    mf.select(targetStart, targetStart + resultText.length)
+                } else {
+                    mf.cursorPosition = targetStart + resultText.length
+                }
+            }
         }
+    }
+
+    MouseArea {
+        id: messageBoxClickForwarder
+        anchors.fill: messageFieldScrollView
+        propagateComposedEvents: true
+        onPressed: mouse => {
+
+                       // Focus messageField when clicked anywhere in the box
+                       const pos = messageField.mapFromItem(messageBoxClickForwarder, mouse.x, mouse.y)
+                       messageField.forceActiveFocus()
+                       if (pos.y > messageField.contentHeight) {
+                           control.positionCursorAtEnd()
+                       }
+                       mouse.accepted = false
+                   }
+
+        onWheel: wheel => {
+                     const flickable = messageFieldScrollView.contentItem
+                     const maxY = Math.max(0, flickable.contentHeight - messageFieldScrollView.height)
+                     if (maxY > 0) {
+                         flickable.contentY = Util.clamp(flickable.contentY - (wheel.pixelDelta.y || wheel.angleDelta.y), 0, maxY)
+                         wheel.accepted = true
+                     }
+                 }
     }
 
     BottomButtonBar {
@@ -563,7 +648,7 @@ Item {
             bottom: parent.bottom
         }
 
-        readonly property bool groupedFormatOptions: buttonBar.width < 370
+        readonly property bool groupedFormatOptions: buttonBar.width < 500
 
 
         BottomButtonBarButton {
@@ -595,7 +680,7 @@ Item {
             }
         }
 
-        BottomButtonBarSeparator {
+        ButtonBarSeparator {
             visible: control.capabilities & IChatProvider.Capability.Markdown
         }
         BottomButtonBarButton {
@@ -628,10 +713,24 @@ Item {
         }
         BottomButtonBarButton {
             id: codeBlockButton
-            icon: Icons.addSubtitle
-            toolTipText: qsTr("Block preformatted/code")
+            icon: Icons.codeBlock
+            toolTipText: qsTr("Code block")
             visible: !buttonBar.groupedFormatOptions && (control.capabilities & IChatProvider.Capability.Markdown)
-            onClicked: () => messageField.insertOrRemove("\n> ", "")
+            onClicked: () => messageField.insertOrRemove("```\n", "\n```")
+        }
+        BottomButtonBarButton {
+            id: preButton
+            icon: Icons.formatTextPre
+            toolTipText: qsTr("Preformatted")
+            visible: !buttonBar.groupedFormatOptions && (control.capabilities & IChatProvider.Capability.Markdown)
+            onClicked: () => messageField.insertOrRemove("<pre>", "</pre>")
+        }
+        BottomButtonBarButton {
+            id: quoteButton
+            icon: Icons.formatTextBlockquote
+            toolTipText: qsTr("Quote")
+            visible: !buttonBar.groupedFormatOptions && (control.capabilities & IChatProvider.Capability.Markdown)
+            onClicked: () => messageField.toggleQuote()
         }
 
         BottomButtonBarButton {
@@ -642,7 +741,7 @@ Item {
             onClicked: () => formatMenuComponent.createObject(formatMenuButton).popup()
         }
 
-        BottomButtonBarSeparator {
+        ButtonBarSeparator {
             visible: control.capabilities & IChatProvider.Capability.Markdown
         }
 
@@ -654,7 +753,7 @@ Item {
             onClicked: () => messageField.insertOrRemove("[", "]()")
         }
 
-        BottomButtonBarSeparator {
+        ButtonBarSeparator {
             visible: addVideoButton.visible || addFileButton.visible
         }
 
@@ -729,8 +828,18 @@ Item {
             }
             MenuItem {
                 text: qsTr("Code block")
-                icon.source: Icons.overflowMenu
-                onTriggered: () => messageField.insertOrRemove("\n> ", "")
+                icon.source: Icons.codeBlock
+                onTriggered: () => messageField.insertOrRemove("```\n", "\n```")
+            }
+            MenuItem {
+                text: qsTr("Preformatted")
+                icon.source: Icons.formatTextPre
+                onTriggered: () => messageField.insertOrRemove("<pre>", "</pre>")
+            }
+            MenuItem {
+                text: qsTr("Quote")
+                icon.source: Icons.formatTextBlockquote
+                onTriggered: () => messageField.toggleQuote()
             }
         }
     }

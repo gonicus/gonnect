@@ -14,6 +14,8 @@ BaseWindow {
     minimumHeight: 600
     title: "GOnnect"
     resizable: true
+    windowHeaderOverlapsContent: true
+    activeSearchBox: controlBar.visible ? controlBar : null
 
     LayoutMirroring.enabled: Qt.application.layoutDirection === Qt.RightToLeft
     LayoutMirroring.childrenInherit: true
@@ -29,7 +31,6 @@ BaseWindow {
     windowHeaderComponent: Component {
         CustomWindowHeader {
             mainBarWidth: mainTabBar.width
-            mainBarColor: mainTabBar.backgroundColor
 
             showSearch: !SM.uiEditMode
 
@@ -92,7 +93,7 @@ BaseWindow {
             const isOnCallPage = SelectionState.selectedPage.type === MainPageSelection.PageType.Call
             const isOnConferencePage = SelectionState.selectedPage.type === MainPageSelection.PageType.Conference
 
-            if (count && isOnCallPage && ViewHelper.isActiveVideoCall) {
+            if (count && isOnCallPage && VideoCallHelper.hasActiveVideoCall) {
                 control.showPage(SelectionState.conferencePageId(),
                                            MainPageSelection.PageType.Conference)
             } else if (count && isOnConferencePage && isConference) {
@@ -113,10 +114,10 @@ BaseWindow {
         }
     }
 
-    function openMeeting(meetingId : string, displayName : string, startFlags : int, callHistoryItem : variant) {
+    function openMeeting(meetingId : string, displayName : string, startFlags : int, callHistoryItem : variant, contact : variant) {
         control.showPage(SelectionState.conferencePageId(),
                                    MainPageSelection.PageType.Conference)
-        conferencePage.startConference(meetingId, displayName, startFlags, callHistoryItem)
+        conferencePage.startConference(meetingId, displayName, startFlags, callHistoryItem, contact)
     }
 
     function updateCallInForeground() {
@@ -175,7 +176,10 @@ BaseWindow {
         id: pages
     }
 
-    property int notifications: pageModel.notifications + ChatConnectorManager.unreadNotificationsCount
+    readonly property int voicemailCount: SIPAccountManager.messagesWaiting && (SIPAccountManager.newVoiceMessageCount + SIPAccountManager.oldVoiceMessageCount) === 0
+                                                                                ? 1
+                                                                                : SIPAccountManager.newVoiceMessageCount + SIPAccountManager.oldVoiceMessageCount
+    property int notifications: SIPCallManager.missedCalls + ChatConnectorManager.unreadNotificationsCount + control.voicemailCount
 
     onNotificationsChanged: () => {
         SystemTrayMenu.setBadgeNumber(control.notifications)
@@ -194,42 +198,55 @@ BaseWindow {
     }
 
     Item {
+        id: shortcutContainer
         anchors.fill: parent
 
-        Keys.onPressed: keyEvent => {
-            if (keyEvent.key === Qt.Key_F11 || (keyEvent.key === Qt.Key_Escape && control.visibility === Window.FullScreen)) {
-
-                // Toggle fullscreen
-                keyEvent.accepted = true
-                ViewHelper.toggleFullscreen()
-
-            } else if ([Qt.Key_F, Qt.Key_K].includes(keyEvent.key) && (keyEvent.modifiers & Qt.ControlModifier)) {
-
-                // Focus search field
-                keyEvent.accepted = true
-                ViewHelper.activateSearch()
-
-            } else if (keyEvent.key === Qt.Key_V && (keyEvent.modifiers & Qt.ControlModifier)) {
-
-                // Paste clipboard image content, if applicable
-                if (!ClipboardHelper.hasImage()) {
-                    return
+        function hasPopupFocus() {
+            let item = control.activeFocusItem
+            while (item) {
+                if (item === control.Overlay.overlay) {
+                    return true
                 }
-
-                const page = control.getPage(SelectionState.selectedPage.id)
-                if (page && page.hasOwnProperty("useImageFromClipboard") && typeof page["useImageFromClipboard"] === "function") {
-                    keyEvent.accepted = true
-                    page.useImageFromClipboard()
-                }
-
-            } else if (keyEvent.key === Qt.Key_M
-                       && (keyEvent.modifiers & Qt.ControlModifier)
-                       && (keyEvent.modifiers & Qt.ShiftModifier)) {
-
-                // Toggle Mute
-                keyEvent.accepted = true
-                GlobalMuteState.toggleMute()
+                item = item.parent
             }
+            return false
+        }
+
+        Shortcut {
+            sequences: ["Ctrl+F", "Ctrl+K"]
+            enabled: !SM.uiEditMode
+            onActivated: () => {
+                             if (!shortcutContainer.hasPopupFocus()) {
+                                 ViewHelper.activateSearch()
+                             }
+                         }
+        }
+        Shortcut {
+            sequence: "Escape"
+            enabled: control.visibility === Window.FullScreen
+            onActivated: () => ViewHelper.toggleFullscreen()
+        }
+        Shortcut {
+            sequence: "F11"
+            onActivated: () => ViewHelper.toggleFullscreen()
+        }
+        Shortcut {
+            sequence: "Ctrl+Shift+M"
+            onActivated: () => GlobalMuteState.toggleMute()
+        }
+        Shortcut {
+            sequence: "Ctrl+V"
+            onActivated: () => {
+                             // Paste clipboard image content, if applicable
+                             if (!ClipboardHelper.hasImage()) {
+                                 return
+                             }
+
+                             const page = control.getPage(SelectionState.selectedPage.id)
+                             if (page && page.hasOwnProperty("useImageFromClipboard") && typeof page["useImageFromClipboard"] === "function") {
+                                 page.useImageFromClipboard()
+                             }
+                         }
         }
 
         Connections {
@@ -344,9 +361,9 @@ BaseWindow {
                 left: mainTabBar.right
                 right: parent.right
                 top: controlBar.visible ? controlBar.bottom : parent.top
-                topMargin: controlBar.visible ? 5 : 0
-                bottom: bottomBar.visible ? bottomBar.top : parent.bottom
-                bottomMargin: Theme.d
+                topMargin: controlBar.visible ? 5 : (Theme.useOwnDecoration ? control.windowHeaderHeight : 0)
+                bottom: togglerList.visible ? togglerList.top : parent.bottom
+                bottomMargin: togglerList.visible ? Theme.d/2 : Theme.d
             }
 
             function getPage(pageId : string) : Item {
@@ -361,6 +378,8 @@ BaseWindow {
                         return conferencePage
                     case SelectionState.settingsPageId():
                         return settingsPage
+                    case SelectionState.emergencyPageId():
+                        return emergencyPage
                     default:
                         return pageStack.pages[pageId]
                 }
@@ -405,45 +424,24 @@ BaseWindow {
                 visible: false
                 anchors.fill: parent
             }
+
+            Emergency {
+                id: emergencyPage
+                visible: false
+                anchors.fill: parent
+            }
         }
 
-        Item {
-            id: bottomBar
-            visible: true
-            height: 30
+        TogglerList {
+            id: togglerList
+            visible: togglerList.count > 0
+            clip: true
+            width: Math.min(togglerList.contentWidth + togglerList.leftMargin + togglerList.rightMargin,
+                            parent.width - mainTabBar.width)
             anchors {
                 right: parent.right
-                left: mainTabBar.right
                 bottom: parent.bottom
                 bottomMargin: Theme.d / 2 - (Theme.useOwnDecoration ? 0 : 3)  // extra padding for window border
-            }
-
-            TogglerList {
-                id: togglerList
-                visible: togglerList.count > 0
-                clip: true
-                anchors {
-                    left: parent.left
-                    right: rightRow.left
-                    rightMargin: Theme.d * 2
-                    verticalCenter: rightRow.verticalCenter
-                }
-            }
-
-            Row {
-                id: rightRow
-                spacing: 10
-                anchors {
-                    right: parent.right
-                    bottom: parent.bottom
-                    rightMargin: 2 * Theme.d
-                }
-
-                FirstAidButton {
-                    id: firstAidButton
-                    height: 42
-                    z: 100000
-                }
             }
         }
     }
@@ -480,12 +478,12 @@ BaseWindow {
         function onUrlCopyDialogRequested(url, text) {
             drawerStackView.push("qrc:/qt/qml/base/ui/components/popups/UrlCopyDialog.qml", { url, text })
         }
+        function onUrlEditDialogRequested(chatRoom : IChatRoom) {
+            drawerStackView.push("qrc:/qt/qml/base/ui/components/popups/EditUrlDialog.qml", { chatRoom })
+        }
         function onShowDialPad() {
             const item = drawerStackView.push("qrc:/qt/qml/base/ui/components/controls/DtmfDialer.qml")
             item.dialed.connect(button => console.log(category, "TODO: DIAL", button))
-        }
-        function onShowFirstAid() {
-            drawerStackView.push("qrc:/qt/qml/base/ui/components/popups/FirstAid.qml")
         }
         function onShowChatUserSearchDialog(chatProvider : IChatProvider) {
             drawerStackView.push("qrc:/qt/qml/base/ui/components/popups/ChatUserSearch.qml", { chatProvider })

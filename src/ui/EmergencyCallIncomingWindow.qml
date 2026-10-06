@@ -12,7 +12,7 @@ BaseWindow {
     height: 400
     visible: true
     resizable: false
-    title: qsTr("Emergency Call")
+    title: qsTr("Emergency call")
 
     minimumWidth: control.width
     minimumHeight: control.height
@@ -93,7 +93,7 @@ BaseWindow {
                 Label {
                     text: control.displayName
                     wrapMode: Label.Wrap
-                    font.pixelSize: 36
+                    font.pixelSize: Theme.fontSizeHuge
                     anchors {
                         left: parent.left
                         right: parent.right
@@ -106,7 +106,7 @@ BaseWindow {
                     id: ongoingCallInfo
                     text: qsTr("Answering the call will automatically terminate all other ongoing calls.")
                     wrapMode: Label.Wrap
-                    font.pixelSize: 14
+                    font.pixelSize: Theme.fontSizeNormal
                     anchors {
                         left: parent.left
                         right: parent.right

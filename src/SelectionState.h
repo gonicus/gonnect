@@ -33,6 +33,7 @@ public:
     Q_INVOKABLE static QString chatsPageId() { return "page_chats"; }
     Q_INVOKABLE static QString conferencePageId() { return "page_conference"; }
     Q_INVOKABLE static QString settingsPageId() { return "page_settings"; }
+    Q_INVOKABLE static QString emergencyPageId() { return "page_emergency"; }
 
     bool isMainWindowActive() const { return m_isMainWindowActive; }
     Q_INVOKABLE void setIsMainWindowActive(bool value);

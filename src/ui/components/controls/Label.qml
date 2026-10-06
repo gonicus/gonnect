@@ -7,7 +7,7 @@ import base
 
 T.Label {
     id: control
-    font.pixelSize: Theme.fontPixelSize
+    font.pixelSize: Theme.fontSizeNormal
     color: control.enabled ? Theme.primaryTextColor : Theme.secondaryTextColor
     linkColor: Material.accentColor
 

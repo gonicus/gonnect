@@ -54,6 +54,8 @@ Item {
         delegate: ChatMessageListItem {
             id: delg
             chatProvider: control.chatProvider
+            chatRoom: control.chatRoom
+            roomPermissions: control.chatRoom?.permissions ?? 0
             anchors {
                 left: parent?.left
                 right: parent?.right
@@ -63,6 +65,7 @@ Item {
 
             onRespondTo: messageId => control.respondTo(messageId)
             onRetryMessage: messageId => control.retryMessage(messageId)
+            onTogglePin: () => control.chatRoom?.togglePin(delg.eventId)
         }
 
         onMovementStarted: () => {
@@ -111,7 +114,7 @@ Item {
         Label {
             text: "↓"
             anchors.centerIn: parent
-            font.pixelSize: 20
+            font.pixelSize: Theme.fontSizeLarge
 
             Accessible.ignored: true
         }

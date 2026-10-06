@@ -1,6 +1,9 @@
 #include "IChatRoom.h"
 
-IChatRoom::IChatRoom(QObject *parent) : QObject{ parent } { }
+IChatRoom::IChatRoom(IChatProvider *chatProvider, QObject *parent)
+    : QObject{ parent }, m_chatProvider{ chatProvider }
+{
+}
 
 void IChatRoom::setIsLoadingMessageHistory(bool value)
 {
@@ -31,5 +34,13 @@ void IChatRoom::setRoomSettings(const RoomSettings &roomSettings)
     if (m_roomSettings != roomSettings) {
         m_roomSettings = roomSettings;
         Q_EMIT roomSettingsChanged();
+    }
+}
+
+void IChatRoom::setConferenceUrl(const QString &url)
+{
+    if (m_conferenceUrl != url) {
+        m_conferenceUrl = url;
+        Q_EMIT conferenceUrlChanged();
     }
 }

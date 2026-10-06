@@ -4,7 +4,6 @@ import QtQuick
 import QtQuick.Dialogs
 import QtQuick.Controls
 import QtQuick.Controls.impl
-import Qt5Compat.GraphicalEffects
 import base
 
 Item {
@@ -29,14 +28,18 @@ Item {
     required property string affectedUserId
     required property var reactions
     required property QtObject content
+    required property var readUsers
 
     required property bool isOwnMessage
     required property bool isPending
     required property bool isFailed
+    required property bool isEdited
     required property bool isStateUpdate
     required property bool isSameUserAsPrevious
     required property bool isSameMinuteAsPrevious
     required property bool isSameDayAsPrevious
+    required property bool isLatestOwnMessage
+    required property bool isFirstUnread
 
     required property bool hasRelatedMessage
     required property string relatedMessageNickName
@@ -46,13 +49,18 @@ Item {
     required property string relatedMessageAffectedUserId
 
     property IChatProvider chatProvider
+    property IChatRoom chatRoom
 
     property string clickedLink
 
     readonly property int capabilities: control.chatProvider?.capabilities ?? 0
+    property int roomPermissions
+
+    readonly property bool isRemoved: control.content instanceof ChatMessageContentRemoved
 
     signal respondTo(string messageId)
     signal retryMessage(string eventId)
+    signal togglePin
 
     states: [
         State {
@@ -141,11 +149,58 @@ Item {
     }
 
     Item {
+        id: unreadSeparator
+        visible: control.isFirstUnread
+        height: unreadSeparator.visible ? (Theme.d * 2) : 0
+        anchors {
+            top: parent.top
+            left: parent.left
+            right: parent.right
+        }
+
+        Rectangle {
+            height: 2
+            color: Theme.accentColor
+            anchors {
+                verticalCenter: parent.verticalCenter
+                left: parent.left
+                right: unreadLabel.left
+                leftMargin: Theme.d
+                rightMargin: Theme.d
+            }
+        }
+
+        Rectangle {
+            height: 2
+            color: Theme.accentColor
+            anchors {
+                verticalCenter: parent.verticalCenter
+                left: unreadLabel.right
+                right: parent.right
+                leftMargin: Theme.d
+                rightMargin: Theme.d
+            }
+        }
+
+        Label {
+            id: unreadLabel
+            text: qsTr("New messages")
+            color: Theme.accentColor
+            font.weight: Font.DemiBold
+            anchors.centerIn: parent
+            background: Rectangle {
+                color: Theme.backgroundColor
+                radius: 4
+            }
+        }
+    }
+
+    Item {
         id: newDaySeparator
         visible: false
         height: 40
         anchors {
-            top: parent.top
+            top: unreadSeparator.bottom
             left: parent.left
             right: parent.right
         }
@@ -169,7 +224,7 @@ Item {
             color: Theme.secondaryTextColor
             font {
                 weight: Font.DemiBold
-                pixelSize: 10
+                pixelSize: Theme.fontSizeSmall
             }
             anchors {
                 centerIn: parent
@@ -201,7 +256,7 @@ Item {
         anchors {
             left: parent.left
             leftMargin: 10
-            top: parent.top
+            top: unreadSeparator.bottom
             topMargin: 15
         }
 
@@ -225,9 +280,9 @@ Item {
         text: control.nickName
         elide: Text.ElideRight
         font.weight: Font.Medium
-        font.pixelSize: 14
+        font.pixelSize: Theme.fontSizeNormal
         anchors {
-            top: parent.top
+            top: unreadSeparator.bottom
             topMargin: 15
 
             left: avatarImage.right
@@ -242,7 +297,7 @@ Item {
         visible: !control.isSameMinuteAsPrevious || nameLabel.visible
         color: Theme.secondaryTextColor
         text: control.timestamp.toLocaleString(Qt.locale(), "hh:mm")
-        font.pixelSize: 12
+        font.pixelSize: Theme.fontSizeSmall
         anchors {
             top: messageContentItem.top
             right: parent.right
@@ -252,17 +307,58 @@ Item {
         Accessible.ignored: true
     }
 
-    IconLabel {
-        visible: control.isFailed
+    Row {
+        id: markerRow
+        spacing: Theme.d / 2
+        height: Math.max(failedIcon.height, editedIcon.height, readMarker.height)
         anchors {
-            right: timestampLabel.left
-            rightMargin: 4
             verticalCenter: timestampLabel.verticalCenter
+            right: timestampLabel.left
+            rightMargin: Theme.d / 2
         }
-        icon.source: Icons.dataError
-        icon.color: Theme.redColor
-        icon.width: 14
-        icon.height: 14
+
+        IconLabel {
+            id: failedIcon
+            visible: control.isFailed
+            anchors.verticalCenter: parent.verticalCenter
+            icon {
+                source: Icons.dataError
+                color: Theme.redColor
+                width: 14
+                height: 14
+            }
+        }
+
+        IconLabel {
+            id: editedIcon
+            visible: control.isEdited
+            anchors.verticalCenter: parent.verticalCenter
+            icon {
+                source: Icons.editor
+                color: Theme.secondaryTextColor
+                width: 14
+                height: 14
+            }
+
+            ToolTip.text: qsTr("This message has been edited afterwards.")
+            ToolTip.visible: editedIconHoverHandler.hovered
+
+            HoverHandler {
+                id: editedIconHoverHandler
+            }
+        }
+
+        ReadMarker {
+            id: readMarker
+            readUsers: control.readUsers
+            allUsersCount: control.chatRoom?.joinedChatUserCount ?? 0
+            visible: control.isOwnMessage
+                     && !control.isPending
+                     && !control.isFailed
+                     && (control.isLatestOwnMessage
+                         || ((control.readUsers?.length ?? 0) > 0))
+            anchors.verticalCenter: parent.verticalCenter
+        }
     }
 
     ChatMessageListItemRelatedContent {
@@ -270,7 +366,7 @@ Item {
         visible: control.hasRelatedMessage
         height: 0
         anchors {
-            top: parent.top
+            top: unreadSeparator.bottom
             topMargin: 10
             left: messageContentItem.left
             right: messageContentItem.right
@@ -291,14 +387,19 @@ Item {
         radius: 6
         anchors {
             fill: messageContentItem
-            leftMargin: (control.content instanceof ChatMessageContentText) ? -4 : 0
-            margins: (control.content instanceof ChatMessageContentImage) ? -4 : 0
+            leftMargin: ((control.content instanceof ChatMessageContentText) || (control.content instanceof ChatMessageContentRemoved))
+                        ? -4
+                        : 0
+            margins: (control.content instanceof ChatMessageContentImage)
+                     ? -4
+                     : 0
         }
     }
 
     ChatMessageListItemContent {
         id: messageContentItem
         isStateUpdate: control.isStateUpdate
+        isPending: control.isPending
         userState : control.userState
         affectedUserName: control.chatProvider?.userById(control.affectedUserId)?.computedName ?? ""
         content: control.content
@@ -320,10 +421,10 @@ Item {
         }
 
         anchors {
-            top: relatedMessageItem.visible ? relatedMessageItem.bottom : parent.top
+            top: relatedMessageItem.visible ? relatedMessageItem.bottom : unreadSeparator.bottom
             left: nameLabel.left
-            right: retryButton.visible ? retryButton.left : timestampLabel.left
-            rightMargin: 10
+            right: markerRow.left
+            rightMargin: Theme.d
         }
     }
 
@@ -335,7 +436,7 @@ Item {
         acceptedButtons: Qt.RightButton
         onTapped: (eventPoint) => {
             eventPoint.accepted = true
-            const p = eventPoint.pressPosition
+            const p = eventPoint.position
             const item = control.childAt(p.x, p.y)
             if (item === messageContentItem) {
                 const q = messageContentItem.messageLabel.mapFromItem(control, p)
@@ -344,8 +445,7 @@ Item {
                 control.clickedLink = ""
             }
 
-            const menuPos = messageContentItem.messageLabel.mapFromItem(control, p)
-            chatRoomMenuComponent.createObject(messageContentItem.messageLabel).popup(menuPos.x, menuPos.y)
+            chatRoomMenuComponent.createObject(control).popup()
         }
     }
 
@@ -366,7 +466,7 @@ Item {
         rightPadding: 0
 
         anchors {
-            right: timestampLabel.left
+            right: markerRow.left
             rightMargin: 10
             bottom: messageContentItem.bottom
         }
@@ -387,7 +487,7 @@ Item {
 
             HideableMenuItem {
                 text: qsTr("Add reaction...")
-                visible: !control.isFailed && !control.isPending && !!(control.capabilities & IChatProvider.Capability.Reactions)
+                visible: !control.isFailed && !control.isRemoved && !control.isPending && !!(control.capabilities & IChatProvider.Capability.Reactions)
                 icon.source: Icons.smileyAdd
                 onTriggered: () => {
                     const menuItem = chatMessageContextMenu.itemAt(0)
@@ -401,7 +501,7 @@ Item {
             HideableMenuItem {
                 text: qsTr("Copy to clipboard")
                 icon.source: Icons.editCopy
-                enabled: control.content instanceof ChatMessageContentText || control.content instanceof ChatMessageContentImage
+                visible: !control.isRemoved && (control.content instanceof ChatMessageContentText || control.content instanceof ChatMessageContentImage)
                 onTriggered: () => {
                     if (control.content instanceof ChatMessageContentImage) {
                         ClipboardHelper.copyImageToClipboard(control.content?.imagePath)
@@ -416,7 +516,7 @@ Item {
             HideableMenuItem {
                 text: qsTr("Copy link to clipboard")
                 icon.source: Icons.editCopy
-                enabled: !!control.clickedLink
+                visible: !!control.clickedLink && !control.isRemoved
                 onTriggered: () => {
                     ClipboardHelper.copyToClipboard(control.clickedLink)
                 }
@@ -425,19 +525,20 @@ Item {
             HideableMenuItem {
                 text: qsTr("Remove message...")
                 icon.source: Icons.editDelete
-                visible: !control.isFailed && !control.isPending && !!(control.capabilities & IChatProvider.Capability.RemoveMessage)
+                visible: !control.isFailed && !control.isRemoved && !control.isPending && !!(control.capabilities & IChatProvider.Capability.RemoveMessage)
                 onTriggered: () => {
-                    const item = DialogFactory.createConfirmDialog({
+                    const item = DialogFactory.createConfirmDialogWithText({
                         title: qsTr("Remove message"),
-                        text: qsTr("Do you really want to remove this message?")
+                        text: qsTr("Do you really want to remove this message?"),
+                        inputLabel: qsTr("Reason (optional, why you removed the message)")
                     })
 
                     const roomId = control.roomId
                     const eventId = control.eventId
                     const chatProvider = control.chatProvider
 
-                    item.accepted.connect(() => {
-                        chatProvider.requestRemoveMessage(roomId, eventId)
+                    item.acceptedWithText.connect(text => {
+                        chatProvider.requestRemoveMessage(roomId, eventId, text)
                     })
                 }
             }
@@ -445,7 +546,7 @@ Item {
             HideableMenuItem {
                 text: qsTr("Edit message...")
                 icon.source: Icons.editor
-                visible: !control.isFailed && !control.isPending && control.isOwnMessage && !!(control.capabilities & IChatProvider.Capability.EditMessage)
+                visible: !control.isFailed && !control.isRemoved && !control.isPending && control.isOwnMessage && !!(control.capabilities & IChatProvider.Capability.EditMessage)
                 onTriggered: () => {
                     ViewHelper.showEditMessageDialog(control.chatProvider, control.roomId, control.eventId, control.content?.simpleText ?? "")
                 }
@@ -456,6 +557,18 @@ Item {
                 text: qsTr("Reply...")
                 icon.source: Icons.mailReplyCustom
                 onTriggered: () => control.respondTo(control.eventId)
+            }
+
+            HideableMenuItem {
+                text: qsTr("Toggle pin")
+                icon.source: Icons.windowPin
+                visible: !control.isFailed
+                         && !control.isRemoved
+                         && !control.isPending
+                         && !!(control.capabilities & IChatProvider.Capability.PinMessage)
+                         && !!((control.roomPermissions ?? 0) & IChatRoom.Permission.CanPinMessages)
+
+                onTriggered: () => control.togglePin()
             }
         }
     }
@@ -476,12 +589,14 @@ Item {
             model: control.reactions
             delegate: Item {
                 id: reactionDelg
+                enabled: !control.isRemoved
                 implicitHeight: 24
                 implicitWidth: reactionCountLabel.x + reactionCountLabel.implicitWidth + 6
 
                 required property int count
                 required property string reaction
                 required property bool isOwnReaction
+                required property list<ChatUser> users
 
                 Rectangle {
                     id: reactionBg
@@ -492,14 +607,12 @@ Item {
                            : (reactionDelgHoverHandler.hovered
                               ? Theme.backgroundOffsetHoveredColor
                               : Theme.backgroundSecondaryColor)
-                    border {
-                        width: 1
-                        color: reactionDelg.isOwnReaction
-                               ? Theme.highlightColor
-                               : (reactionDelgHoverHandler.hovered
-                                  ? Theme.borderHeaderIconHovered
-                                  : Theme.borderColor)
-                    }
+                     border {
+                         width: 1
+                         color: reactionDelg.isOwnReaction
+                                ? Theme.highlightColor
+                                : Theme.borderColor
+                     }
                 }
 
                 Label {
@@ -507,7 +620,7 @@ Item {
                     text: reactionDelg.reaction
                     font {
                         family: "Noto Color Emoji"
-                        pixelSize: 14
+                        pixelSize: Theme.fontSizeNormal
                     }
                     anchors {
                         left: parent.left
@@ -526,6 +639,10 @@ Item {
                         verticalCenter: parent.verticalCenter
                     }
                 }
+
+                ToolTip.text: reactionDelg.users.map(user => user.computedName).join(", ")
+                ToolTip.visible: reactionDelgHoverHandler.hovered
+                ToolTip.toolTip.y: reactionDelg.height + Theme.d
 
                 HoverHandler {
                     id: reactionDelgHoverHandler
@@ -550,6 +667,7 @@ Item {
 
         AddReactionButton {
             id: addReactionButton
+            visible: !control.isRemoved
 
             onClicked: () => {
                 internal.openEmojiPicker(reactionsContainer.mapToItem(addReactionButton.Window.window.contentItem,

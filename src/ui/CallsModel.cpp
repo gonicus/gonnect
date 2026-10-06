@@ -440,7 +440,7 @@ QVariant CallsModel::data(const QModelIndex &index, int role) const
 
     case static_cast<int>(Roles::AvatarPath):
         return callInfo->contactInfo.contact && callInfo->contactInfo.contact->hasAvatar()
-                ? callInfo->contactInfo.contact->avatarPath()
+                ? callInfo->contactInfo.contact->avatarUrl()
                 : "";
 
     case static_cast<int>(Roles::HasIncomingAudioLevel):

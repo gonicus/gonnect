@@ -4,6 +4,7 @@
 
 class SIPCall;
 class CallHistoryItem;
+class Contact;
 
 class IMHandler : public QObject
 {
@@ -31,7 +32,8 @@ public:
     }
 
     void openMeeting(const QString &meetingId, const QString &displayName = "", bool hangup = false,
-                     QPointer<CallHistoryItem> callHistoryItem = QPointer<CallHistoryItem>());
+                     QPointer<CallHistoryItem> callHistoryItem = QPointer<CallHistoryItem>(),
+                     QPointer<Contact> contact = QPointer<Contact>());
 
 Q_SIGNALS:
     void capabilitiesChanged();
@@ -40,7 +42,8 @@ Q_SIGNALS:
 private:
     bool requestMeeting(bool hangup,
                         QPointer<CallHistoryItem> callHistoryItem = QPointer<CallHistoryItem>(),
-                        const QString &displayName = "");
+                        const QString &displayName = "",
+                        QPointer<Contact> contact = QPointer<Contact>());
 
     void migrationHangup();
 

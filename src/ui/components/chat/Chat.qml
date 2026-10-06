@@ -11,7 +11,10 @@ Item {
     property IChatRoom chatRoom
 
     property bool showTitleBar: true
-    readonly property alias isScrolledDown: chatMessageList.isScrolledDown
+    property IChatRoom previousChatRoom
+    property date enteredTimestamp: new Date(NaN)
+    property var roomDwell: ({})
+    property IChatRoom bubbleTargetRoom
 
     readonly property int capabilities: control.chatProvider?.capabilities ?? 0
 
@@ -26,7 +29,31 @@ Item {
         }
     }
 
-    onChatRoomChanged: () => control.loadMessages()
+    onChatRoomChanged: () => {
+                           const newRoom = control.chatRoom
+                           const prevRoom = control.previousChatRoom
+
+                           if (newRoom !== prevRoom && prevRoom !== null && !isNaN(control.enteredTimestamp.getTime())) {
+                               control.roomDwell[prevRoom.id] = Date.now() - control.enteredTimestamp.getTime()
+                           }
+
+                           const priorDwell = (newRoom && control.roomDwell.hasOwnProperty(newRoom.id))
+                                              ? control.roomDwell[newRoom.id]
+                                              : 0
+                           if (priorDwell >= 2000) {
+                               newRoom.markAsRead()
+                           }
+
+                           if (newRoom) {
+                               control.bubbleTargetRoom = newRoom
+                               bubbleTimer.restart()
+                               control.enteredTimestamp = new Date()
+                           }
+
+                           control.previousChatRoom = newRoom
+                           relatedMsg.chatMessage = null
+                           control.loadMessages()
+                       }
 
     Connections {
         target: control.chatRoom
@@ -34,125 +61,71 @@ Item {
         function onOwnUserJoinStateChanged() {
             control.loadMessages()
         }
-    }
 
-    AvatarImage {
-        id: avatarImage
-        visible: control.showTitleBar && !!control.chatRoom
-        size: 30
-        source: control.chatRoom?.avatarPath ?? ""
-        initials: control.chatRoom ? ViewHelper.initials(control.chatRoom.name) : ""
-        showPresenceStatus: !!(control.chatRoom?.hasPresenceState)
-        presenceStatus: control.chatRoom?.presenceState ?? ChatUser.PresenceState.Unknown
-        indicatorComponent: Component { ChatUserPresenceStatusIndicator {} }
-        anchors {
-            left: parent.left
-            leftMargin: 10
-            verticalCenter: messageListCardHeading.verticalCenter
+        function onNotificationCountChanged() {
+            if (SelectionState.isMainWindowActive && control.bubbleTargetRoom) {
+                bubbleTimer.start()
+            }
         }
     }
 
-    CardHeading {
+    Connections {
+        target: SelectionState
+
+        function onIsMainWindowActiveChanged() {
+            if (SelectionState.isMainWindowActive && control.bubbleTargetRoom) {
+                bubbleTimer.start()
+            }
+        }
+    }
+
+    Timer {
+        id: bubbleTimer
+        interval: 2000
+        onTriggered: () => {
+                         const room = control.bubbleTargetRoom
+                         if (room !== null && room === control.chatRoom && SelectionState.isMainWindowActive) {
+                             room.resetUnreadCount()
+                         }
+                     }
+    }
+
+    ChatButtonBar {
         id: messageListCardHeading
-        visible: titleLoadingIndicatorRow.visible || (control.showTitleBar && !!control.chatRoom)
-        leftPadding: avatarImage.x + avatarImage.width - 10
-        rightPadding: titleLoadingIndicatorRow.visible
-                      ? parent.width - titleLoadingIndicatorRow.x
-                      : parent.width - favCardHeadingButton.x
-        text: control.showTitleBar && control.chatRoom
-              ? (control.chatRoom.isDirectChat
-                 ? qsTr("Direct conversation with %1").arg(control.chatRoom.name)
-                 : qsTr("Chat room %1").arg(control.chatRoom.name))
-              : ""
+        height: messageListCardHeading.implicitHeight
+        shallBeVisible: control.showTitleBar && !!control.chatRoom
+        chatProvider: control.chatProvider
+        chatRoom: control.chatRoom
         anchors {
-            top: parent.top
             left: parent.left
             right: parent.right
-        }
-    }
-
-    Row {
-        id: titleLoadingIndicatorRow
-        spacing: 4
-        visible: !!(control.chatRoom?.isLoadingMessageHistory && !bigLoadingItem.visible)
-        anchors {
-            horizontalCenter: !control.showTitleBar ? messageListCardHeading.horizontalCenter : undefined
-            right: control.showTitleBar ? favCardHeadingButton.left : undefined
-            rightMargin: Theme.d
-            top: messageListCardHeading.top
-            bottom: messageListCardHeading.bottom
-        }
-
-        BusyIndicator {
-            id: titleLoadingIndicator
-            running: titleLoadingIndicatorRow.visible
-            width: titleLoadingIndicator.height
-            height: 24
-            circleColor: Theme.secondaryTextColor
-            anchors.verticalCenter: parent.verticalCenter
-        }
-
-        Label {
-            text: qsTr("Messages are loading...")
-            color: Theme.secondaryTextColor
-            anchors.verticalCenter: parent.verticalCenter
-        }
-    }
-
-    FavIcon {
-        id: favCardHeadingButton
-        visible: control.showTitleBar && messageListCardHeading.visible
-        isFavorite: control.chatRoom?.isFavorite ?? false
-        anchors {
-            verticalCenter: messageListCardHeading.verticalCenter
-            right: messageListCardHeadingButton.left
-        }
-
-        onToggled: () => control.chatProvider?.requestToggleRoomFavorite(control.chatRoom)
-    }
-
-    CardHeadingMoreMenuButton {
-        id: messageListCardHeadingButton
-        visible: control.showTitleBar && messageListCardHeading.visible
-        anchors {
             top: parent.top
-            right: parent.right
         }
-
-        onClicked: () => chatRoomMenuComponent.createObject(messageListCardHeadingButton).popup()
     }
 
-    Component {
-        id: chatRoomMenuComponent
+    Rectangle {
+        id: buttonBarBorder
+        height: 1
+        color: Theme.borderColor
+        visible: messageListCardHeading.visible && !pinnedChatMessageList.visible
+        anchors {
+            left: parent.left
+            right: parent.right
+            top: messageListCardHeading.bottom
+        }
+    }
 
-        Menu {
-            id: chatRoomMenu
-            onClosed: () => chatRoomMenu.destroy()
-
-            HideableMenuItem {
-                text: qsTr("Edit room...")
-                icon.source: Icons.editor
-                visible: !!(control.chatRoom?.permissions & IChatRoom.Permission.CanEdit)
-                onTriggered: () => ViewHelper.showEditRoomDialog(control.chatProvider, control.chatRoom.id)
-            }
-            HideableMenuItem {
-                text: qsTr("Invite users...")
-                icon.source: Icons.listAdd
-                visible: !!(control.chatRoom?.permissions & IChatRoom.Permission.CanInvite)
-                onTriggered: () => ViewHelper.showInviteUserToRoomDialog(control.chatProvider, control.chatRoom.id)
-            }
-            HideableMenuItem {
-                text: qsTr("Leave room...")
-                icon.source: Icons.dialogCancel
-                onTriggered: () => {
-                    const item = DialogFactory.createConfirmDialog({
-                                     text: qsTr("Are you sure you really want to leave this chat?")
-                                 })
-                    const roomId = control.chatRoom.id
-                    const chatProvider = control.chatProvider
-                    item.accepted.connect(() => chatProvider.requestRoomLeave(roomId))
-                }
-            }
+    PinnedChatMessagesList {
+        id: pinnedChatMessageList
+        chatRoom: control.chatRoom
+        visible: pinnedChatMessageList.count > 0
+        height: Math.min(pinnedChatMessageList.implicitHeight, Math.floor(parent.height * 0.15))
+        maxContentHeight: Math.floor(parent.height * 0.15)
+        z: chatMessageList.z + 1
+        anchors {
+            top: messageListCardHeading.visible ? messageListCardHeading.bottom : parent.top
+            left: parent.left
+            right: parent.right
         }
     }
 
@@ -165,13 +138,17 @@ Item {
         anchors {
             left: parent.left
             right: parent.right
-            top: messageListCardHeading.visible ? messageListCardHeading.bottom : parent.top
+            top: pinnedChatMessageList.visible
+                 ? pinnedChatMessageList.bottom
+                 : (buttonBarBorder.visible
+                    ? buttonBarBorder.bottom
+                    : parent.top)
             bottom: typingUsersList.visible
                     ? typingUsersList.top
                     : (chatMessageBox.visible
                        ? chatMessageBox.top
                        : parent.bottom)
-            bottomMargin: 20
+            bottomMargin: 2
             leftMargin: 10
             rightMargin: 10
         }
@@ -205,7 +182,7 @@ Item {
             Label {
                 text: qsTr("Messages are loading...")
                 color: Theme.secondaryTextColor
-                font.pixelSize: 22
+                font.pixelSize: Theme.fontSizeLarge
                 anchors.verticalCenter: parent.verticalCenter
             }
         }
@@ -227,7 +204,7 @@ Item {
             text: qsTr("%1 is/are typing", "", typingUsersList.typingUserNames.length).arg(typingUsersList.typingUserNames.join(", "))
             wrapMode: Label.Wrap
             color: Theme.secondaryInactiveTextColor
-            font.pixelSize: 12
+            font.pixelSize: Theme.fontSizeSmall
             visible: typingUsersList.typingUserNames.length > 0
             anchors {
                 left: parent.left
@@ -323,7 +300,7 @@ Item {
                 if (latestMsg) {
                     chatMessageBox.text = latestMsg.content.rawText
                     chatMessageBox.editMessageId = latestMsg.eventId
-                    // ViewHelper.showEditMessageDialog(chatProvider, chatRoom.id, latestMsg.eventId, latestMsg.message)
+                    chatMessageBox.positionCursorAtEnd()
                 }
             }
         }
@@ -338,6 +315,7 @@ Item {
                     // Send new message
                     control.chatRoom.sendMessage(chatMessageBox.text,
                                                          relatedMsg.chatMessage ? relatedMsg.chatMessage.eventId : "")
+                    control.chatRoom.markAsRead()
                 }
 
                 relatedMsg.chatMessage = null
@@ -359,25 +337,6 @@ Item {
             bottom: parent.bottom
             leftMargin: 10
             rightMargin: 10
-        }
-    }
-
-    Timer {
-        id: readTimer
-        interval: 2000
-        onTriggered: () => {
-            if (control.Window.active && control.isScrolledDown && control.chatRoom) {
-                control.chatRoom.resetUnreadCount()
-            }
-        }
-    }
-
-    HoverHandler {
-        id: chatHoverHandler
-        onPointChanged: () => {
-            if (!readTimer.running && control.Window.active) {
-                readTimer.start()
-            }
         }
     }
 

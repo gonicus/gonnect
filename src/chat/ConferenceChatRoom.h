@@ -25,14 +25,20 @@ public:
     virtual void loadMessages() override { }
     virtual qsizetype notificationCount() override;
     virtual void resetUnreadCount() override;
+    virtual void markAsRead() override;
     virtual IChatRoom::JoinRule joinRule() override;
     virtual IChatRoom::Permissions permissions() override;
     virtual QList<ChatMessage *> chatMessages() const override { return m_messages; }
+    virtual QList<ChatMessage *> pinnedChatMessages() const override { return {}; }
+    virtual qsizetype pinnedChatMessageCount() const override { return 0; }
+    virtual ChatMessage *pinnedChatMessageByIndex(qsizetype) const override { return nullptr; }
+    virtual qsizetype indexOfPinnedChatMessage(ChatMessage *) const override { return -1; }
     virtual ChatMessage *chatMessageById(const QString &id) const override;
     virtual ChatMessage *latestOwnTextMessage() const override { return nullptr; }
     virtual void sendMessage(const QString &message, const QString &relatedMessageId = "") override;
     virtual void sendFile(const QString &filePath) override { Q_UNUSED(filePath) }
     virtual void sendTypingPing() override { }
+    virtual void togglePin(const QString &) override { };
     virtual bool isDirectChat() override { return false; }
     virtual bool isFavorite() override { return false; }
     virtual bool hasPresenceState() override { return false; }
@@ -40,6 +46,7 @@ public:
     virtual IChatRoom::UserRoomState ownUserJoinState() const override;
     virtual ChatUser *otherUser() const override { return nullptr; }
     virtual qsizetype chatUserCount() const override { return 0; }
+    virtual qsizetype joinedChatUserCount() const override { return 0; }
     virtual void addUser(ChatUser *user, UserRoomState state) override;
     virtual void removeUser(ChatUser *user) override;
     virtual void setUserRoomState(ChatUser *user, UserRoomState state) override;
@@ -48,9 +55,14 @@ public:
     virtual const QList<ChatUser *> &chatUsers() const override;
     virtual ConferenceChatRoom::UserRoomState chatUserRoomState(ChatUser *user) const override;
     virtual const QList<ChatUser *> &typingUsers() const override;
+    virtual void setReadTimestamp(const QHash<QString, QDateTime> &) override { }
+    virtual QDateTime lastReadTimestamp(const QString &) const override { return {}; }
+    virtual QDateTime ownLastReadTimestamp() const override { return {}; }
+    virtual void setOwnLastReadTimestamp(const QDateTime &) override { }
     virtual bool isUserMemberOfRoom(const QString &userId) const override;
     virtual bool isUserInvitable(ChatUser *user) const override;
     virtual void clear() override;
+    virtual void requestSetConferenceUrl(const QString &) override { }
 
     /// Add a message object to be handled by this room. Takes ownership of that object.
     void addMessage(ChatMessage *chatMessageObj);

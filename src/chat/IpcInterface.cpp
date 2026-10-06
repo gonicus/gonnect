@@ -180,6 +180,7 @@ void IpcInterface::onReadReady()
         const auto numberOfBytesRead =
                 m_socketResponse->read(reinterpret_cast<char *>(&m_sizeBuffer), uintSize);
         Q_ASSERT(numberOfBytesRead == uintSize);
+        Q_UNUSED(numberOfBytesRead)
 
     } else {
         // Read payload

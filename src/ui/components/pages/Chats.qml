@@ -168,7 +168,7 @@ Item {
 
         Label {
             text: qsTr("Connecting...")
-            font.pixelSize: 22
+            font.pixelSize: Theme.fontSizeLarge
             anchors {
                 horizontalCenter: parent.horizontalCenter
                 top: parent.verticalCenter
@@ -455,16 +455,6 @@ Item {
                     }
 
                     onRoomSelected: roomId => chatRoomList.selectRoom(roomId)
-
-                    readonly property Connections selectionStateConnections: Connections {
-                        target: SelectionState
-                        function onSelectedChatRoomChanged() {
-                            const chatRoom = SelectionState.selectedChatRoom
-                            if (chatRoom && (chatRoom.ownUserJoinState === IChatRoom.UserRoomState.Joined)) {
-                                chatRoom.resetUnreadCount()
-                            }
-                        }
-                    }
 
                     function selectRoom(roomId : string) {
 

@@ -169,6 +169,7 @@ Item {
     Rectangle {
         id: filler
         anchors.fill: parent
+        topLeftRadius: Theme.useOwnDecoration ? Theme.d / 2 : 0
         color: control.Window.window?.active ? Theme.backgroundHeader : Theme.backgroundHeaderInactive
     }
 
@@ -350,8 +351,8 @@ Item {
 
                 Label {
                     id: notificationBubbleCount
-                    color: Theme.foregroundWhiteColor
-                    font.pixelSize: 12
+                    color: Theme.whiteColor
+                    font.pixelSize: Theme.fontSizeSmall
                     text: delg.notifications > notificationBubble.maxNotifications
                           ? "99+" : delg.notifications.toString()
                     anchors.centerIn: parent
@@ -449,7 +450,7 @@ Item {
 
     Column {
         id: bottomMenuCol
-        bottomPadding: Theme.d
+        bottomPadding: emergencyTabButton.visible ? 0 : Theme.d
         spacing: Theme.d
         anchors {
             left: parent.left
@@ -472,6 +473,36 @@ Item {
                     attachedData: null
                 }
             ]
+        }
+
+        BarButton {
+            id: emergencyTabButton
+            visible: GlobalInfo.shallShowEmergencyButton && GlobalInfo.hasEmergencyNumbers
+            iconPath: `qrc:/icons/ISO_7010_E004${ViewHelper.culturalSphereExtension}.svg`
+            iconSize: 2 * Theme.d
+            toggledSize: emergencyTabButton.iconSize + 20
+            toggledColor: Theme.emergencyColor
+            toggled: true
+            height: emergencyTabButton.width
+            anchors {
+                horizontalCenter: parent.horizontalCenter
+            }
+            onClicked: () => emergencyTabButton.switchPage()
+
+            Accessible.name: qsTr("Emergency call")
+            Accessible.description: qsTr("Show the emergency call page")
+            Accessible.focusable: true
+            Accessible.onPressAction: () => emergencyTabButton.switchPage()
+
+            function switchPage() {
+                SelectionState.selectedPage = {
+                    id: SelectionState.emergencyPageId(),
+                    type: MainPageSelection.PageType.Emergency,
+                    attachedData: undefined
+                }
+            }
+
+            ToolTip.text: qsTr("Show the emergency call page")
         }
     }
 

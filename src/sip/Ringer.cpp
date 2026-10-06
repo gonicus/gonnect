@@ -28,10 +28,6 @@ void Ringer::start(qreal customVolume)
 
     SystemTrayMenu::instance().setRinging(true);
 
-    // Prefer headset ringer?
-    if (settings.value(QString("audio%1/preferExternalRinger").arg(currentProfile), false)
-                .toBool()) { }
-
     if (!m_player) {
         m_player = new QMediaPlayer(this);
         connect(m_player, &QMediaPlayer::playbackStateChanged, this, &Ringer::playbackStateChanged);

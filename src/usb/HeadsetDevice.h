@@ -46,6 +46,7 @@ public:
     bool getMuteLocked() const { return m_muteLocked; }
 
     void probeMuteLock();
+    void applyInputState(quint8 reportId, unsigned value);
 
     QString path() const { return m_path; }
 
@@ -66,12 +67,19 @@ public:
     void setUsageInfos(const QHash<UsageId, UsageInfo> &infos);
     void setTeamsUsageMapping(QHash<UsageId, quint16> teamsUsageMapping);
 
+    bool hasDeviceConfigurableRinger() const
+    {
+        return m_teamsUsageMapping.contains(UsageId::Teams_DisplayControl);
+    }
+
     ~HeadsetDevice();
 
 Q_SIGNALS:
     void muteLockChanged(bool locked, bool muted);
 
 private:
+    unsigned reportToUnsigned(const unsigned char *data, int len) const;
+
     bool displayFieldSupported(ReportDescriptorEnums::TeamsDisplayFieldSupport field);
     void setDisplayField(ReportDescriptorEnums::TeamsDisplayFieldSupport field,
                          const QString &text);
@@ -129,5 +137,6 @@ private:
     bool m_ringing = false;
     bool m_isOpen = false;
 
+    bool m_hasInputBaseline = false;
     bool m_displaySupported = false;
 };

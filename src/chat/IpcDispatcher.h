@@ -36,6 +36,8 @@ concept MessageDeliverer = requires(T obj) {
     {
         obj.membershipChange()
     } -> std::convertible_to<const de::gonicus::gonnect::MessageContentMembershipChange &>;
+    { obj.hasRemoved() } -> std::same_as<bool>;
+    { obj.removed() } -> std::convertible_to<const de::gonicus::gonnect::MessageContentRemoved &>;
 };
 
 class IpcDispatcher : public IChatProvider
@@ -125,7 +127,7 @@ public:
     /// Send a message in the specified room with the file as an attachment. The file must
     /// have already been uploaded.
     void sendFile(const QString &roomId, const QString &filePath,
-                  const QString &originalFileName = "");
+                  const QString &originalFileName = "", const QString &tempEventId = "");
 
     /// Call to accept or reject a preceeding invitation to a room.
     virtual void respondToInvitation(const QString &roomId, bool acceptInvitation) override;
@@ -139,7 +141,13 @@ public:
     /// Load a single messe. It will be available in lookup, but not in the indexed message list.
     void loadSingleMessage(const QString &roomId, const QString &messageId);
 
+    /// Pin or unpin a message inside the room.
+    void pinOrUnpinMessage(const QString &roomId, const QString &messageId, bool pin);
+
+    void setConferenceUrl(const QString &roomId, const QString &url);
+
     // IChatProvider interface
+    virtual qint64 mediaSizeLimit() const override { return m_mediaSizeLimit; }
     virtual qsizetype chatRoomsCount() override;
     virtual IChatRoom *chatRoomByIndex(qsizetype index) override;
     virtual bool hasFavoriteRooms() const override;
@@ -170,7 +178,8 @@ public:
     virtual void requestRoomLeave(const QString &roomId) override;
     virtual void requestUser(const QString &userId) override;
 
-    virtual void requestRemoveMessage(const QString &roomId, const QString &messageId) override;
+    virtual void requestRemoveMessage(const QString &roomId, const QString &messageId,
+                                      const QString &reason = QString()) override;
     virtual void retrySendMessage(const QString &roomId, const QString &failedMessageId) override;
     virtual void requestEditMessage(const QString &roomId, const QString &messageId,
                                     const QString &newContent) override;
@@ -272,6 +281,8 @@ private:
     /// Dispatch the response container and its content payload.
     void processResponse(const de::gonicus::gonnect::ResponseContainer &responseContainer);
 
+    void markPendingMessageFailed(const QString &roomId, const QString &tempEventId);
+
     bool hasOwnUserMention(const ChatMessage &message) const;
     ChatMessage *createOrUpdateReceivedChatMessage(const de::gonicus::gonnect::Message &message,
                                                    bool isUnread, bool isIndependent,
@@ -304,13 +315,18 @@ private:
 
     bool containsRoomTag(const QString &str) const;
 
+    void processReadMarkers(IpcChatRoom *chatRoom,
+                            const de::gonicus::gonnect::Room::ReadMarkerEntry &entries);
+
     QRegularExpression m_idConvRegex;
+    bool m_wasInitializationRequestSuccessful = false;
     bool m_useIdConversion = false;
     bool m_isInitialized = false;
     bool m_areCapabilitesInitialized = false;
     bool m_supportsDirectRooms = false;
     bool m_supportsGroupRooms = false;
     bool m_supportsSubThreads = false;
+    bool m_suportsUserPresence = false;
     bool m_hasFavoriteRooms = false;
     QStringList m_supportedMimeTypes;
     qint64 m_mediaSizeLimit = 0;
@@ -326,9 +342,10 @@ private:
     ConnectionState m_connectionState = ConnectionState::LoggedOut;
     QList<IpcChatRoom *> m_rooms;
     QHash<QString, IpcChatRoom *> m_roomLookup;
-    QString m_nextPublicRoomListResponseToken;
     QHash<IChatRoom *, QList<Notification *> *> m_chatNotifications;
+    uint m_initializationRetryCount = 10;
     QTimer m_unreadUpdateTimer;
+    QTimer m_reconnectTimer;
 
     bool m_hasDeviceVerification = false;
     bool m_isDeviceVerified = false;
@@ -357,6 +374,10 @@ private:
     /// id might still appear in this map, but the value is a nullptr. The address book retains
     /// ownership over the contact objects themselves.
     QHash<QString, Contact *> m_userContacts;
+
+    /// Map of converted chat user ids to the chat users themselves. Used to match contacts that
+    /// are added to the address book after the chat users have been received.
+    QHash<QString, ChatUser *> m_userByConvId;
 
     /// Hash map of tags (≠ 0) of requests to QTimer objects that will trigger a timeout error.
     /// After receiving a response with a tag, the timer will be destroyed and removed from this

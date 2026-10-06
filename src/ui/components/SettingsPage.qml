@@ -416,7 +416,7 @@ Item {
 
                                 font.family: darkModeComboBox.font.family
                                 font.weight: darkModeComboBox.font.weight
-                                font.pointSize: darkModeComboBox.font.pointSize
+                                font.pixelSize: darkModeComboBox.font.pixelSize
 
                                 Accessible.role: Accessible.ListItem
                                 Accessible.name: darkModeDelg.displayName
@@ -597,7 +597,7 @@ Item {
 
                                 font.family: standardPreferredIdentitySelector.font.family
                                 font.weight: standardPreferredIdentitySelector.font.weight
-                                font.pointSize: standardPreferredIdentitySelector.font.pointSize
+                                font.pixelSize: standardPreferredIdentitySelector.font.pixelSize
 
                                 Accessible.role: Accessible.ListItem
                                 Accessible.name: standardPreferredIdentityDelg.displayName
@@ -826,8 +826,12 @@ Item {
 
                     CheckBox {
                         id: externalRingerCheckbox
+
+                        readonly property HeadsetDeviceProxy headsetProxy: ViewHelper.headsetDeviceProxy()
+
                         text: qsTr('Prefer USB headset ring sound if available')
-                        enabled: headsetCheckBox.checked
+                              + (headsetProxy.hasDeviceConfigurableRinger ? " (" + qsTr("managed by device") + ")" : "")
+                        enabled: headsetCheckBox.checked && !headsetProxy.hasDeviceConfigurableRinger
                         anchors {
                             left: parent.left
                             right: parent.right
@@ -858,8 +862,7 @@ Item {
                             model: AudioManager.devices.filter(device => device.isInput)
 
                             Accessible.role: Accessible.ComboBox
-                            Accessible.name: qsTr("Input device selection")
-                            Accessible.description: qsTr("Select the input device to be used")
+                            Accessible.name: qsTr("Audio input device")
 
                             delegate: ItemDelegate {
                                 id: inputAudioSelectorDelg
@@ -868,11 +871,11 @@ Item {
 
                                 font.family: inputAudioSelector.font.family
                                 font.weight: inputAudioSelector.font.weight
-                                font.pointSize: inputAudioSelector.font.pointSize
+                                font.pixelSize: inputAudioSelector.font.pixelSize
 
                                 Accessible.role: Accessible.ListItem
                                 Accessible.name: inputAudioSelectorDelg.name
-                                Accessible.description: qsTr("Currently selected input option")
+                                Accessible.description: qsTr("Currently selected audio input device")
                                 Accessible.focusable: true
 
                                 required property string name
@@ -923,8 +926,7 @@ Item {
                             model: AudioManager.devices.filter(device => device.isOutput)
 
                             Accessible.role: Accessible.ComboBox
-                            Accessible.name: qsTr("Output device selection")
-                            Accessible.description: qsTr("Select the output device to be used")
+                            Accessible.name: qsTr("Audio output device")
 
                             delegate: ItemDelegate {
                                 id: outputAudioSelectorDelg
@@ -933,11 +935,11 @@ Item {
 
                                 font.family: outputAudioSelector.font.family
                                 font.weight: outputAudioSelector.font.weight
-                                font.pointSize: outputAudioSelector.font.pointSize
+                                font.pixelSize: outputAudioSelector.font.pixelSize
 
                                 Accessible.role: Accessible.ListItem
                                 Accessible.name: outputAudioSelectorDelg.name
-                                Accessible.description: qsTr("Currently selected output option")
+                                Accessible.description: qsTr("Currently selected audio output device")
                                 Accessible.focusable: true
 
                                 required property string name
@@ -988,8 +990,7 @@ Item {
                             model: AudioManager.devices.filter(device => device.isOutput)
 
                             Accessible.role: Accessible.ComboBox
-                            Accessible.name: qsTr("Prefererred identity selection")
-                            Accessible.description: qsTr("Select the preferred identity")
+                            Accessible.name: qsTr("Audio output device for ring tone")
 
                             delegate: ItemDelegate {
                                 id: outputRingAudioSelectorDelg
@@ -998,7 +999,7 @@ Item {
 
                                 font.family: outputRingToneAudioSelector.font.family
                                 font.weight: outputRingToneAudioSelector.font.weight
-                                font.pointSize: outputRingToneAudioSelector.font.pointSize
+                                font.pixelSize: outputRingToneAudioSelector.font.pixelSize
 
                                 Accessible.role: Accessible.ListItem
                                 Accessible.name: outputRingAudioSelectorDelg.name

@@ -1,6 +1,7 @@
 #include "AggregatedDirectRoomsOfContact.h"
 #include "ChatConnectorManager.h"
 #include "FuzzyCompare.h"
+#include "AddressBook.h"
 
 AggregatedDirectRoomsOfContact::AggregatedDirectRoomsOfContact(QObject *parent) : QObject{ parent }
 {
@@ -12,6 +13,15 @@ AggregatedDirectRoomsOfContact::AggregatedDirectRoomsOfContact(QObject *parent) 
     auto &chatMan = ChatConnectorManager::instance();
     connect(&chatMan, &ChatConnectorManager::chatConnectorsChanged, this,
             &AggregatedDirectRoomsOfContact::onContactChanged);
+}
+
+void AggregatedDirectRoomsOfContact::setWrappedContact(QPointer<Contact> contact)
+{
+    Contact *ptr = contact.get();
+    if (m_contact != ptr) {
+        m_contact = ptr;
+        Q_EMIT contactChanged();
+    }
 }
 
 IChatProvider *AggregatedDirectRoomsOfContact::providerOfRoom(IChatRoom *chatRoom) const
@@ -28,6 +38,16 @@ IChatProvider *AggregatedDirectRoomsOfContact::providerOfRoom(IChatRoom *chatRoo
     return nullptr;
 }
 
+void AggregatedDirectRoomsOfContact::setContactById(const QString &contactId)
+{
+    Contact *contact = nullptr;
+    if (!contactId.isEmpty()) {
+        contact = AddressBook::instance().lookupByContactId(contactId);
+    }
+
+    setProperty("contact", QVariant::fromValue<Contact *>(contact));
+}
+
 void AggregatedDirectRoomsOfContact::setChatRooms(const QList<IChatRoom *> chatRooms)
 {
     if (m_chatRooms != chatRooms) {
@@ -38,14 +58,21 @@ void AggregatedDirectRoomsOfContact::setChatRooms(const QList<IChatRoom *> chatR
 
 void AggregatedDirectRoomsOfContact::onContactChanged()
 {
-    if (m_contactConn) {
-        QObject::disconnect(m_contactConn);
-        m_contactConn = QMetaObject::Connection();
+    if (m_contactContext) {
+        m_contactContext->deleteLater();
+        m_contactContext = nullptr;
     }
 
     if (m_contact) {
-        m_contactConn = connect(m_contact, &Contact::chatUsersChanged, this,
-                                &AggregatedDirectRoomsOfContact::updateChatRooms);
+        m_contactContext = new QObject(this);
+        connect(m_contact, &QObject::destroyed, m_contactContext, [this](QObject *obj) {
+            if (m_contact == obj) {
+                m_contact = nullptr;
+                Q_EMIT contactChanged();
+            }
+        });
+        connect(m_contact, &Contact::chatUsersChanged, m_contactContext,
+                [this]() { updateChatRooms(); });
     }
 
     updateChatRooms();

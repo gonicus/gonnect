@@ -3,7 +3,6 @@ find_package(Qt6 REQUIRED COMPONENTS
     CorePrivate
     GuiPrivate
     Concurrent
-    Core5Compat
     Quick
     QuickControls2
     Multimedia
@@ -190,6 +189,7 @@ add_subdirectory(calendar/msgraph)
 find_package(Qt6Keychain REQUIRED)
 
 set_source_files_properties(ui/scripts/util.js PROPERTIES QT_QML_SOURCE_TYPENAME Util)
+set_source_files_properties(ui/scripts/phoneNumberUtil.js PROPERTIES QT_QML_SOURCE_TYPENAME PhoneNumberUtil)
 
 configure_file(MSOAuthManagerConfig.h.in MSOAuthManagerConfig.h)
 
@@ -348,6 +348,7 @@ qt_add_qml_module(gonnect
 
         ui/components/chat/AddReactionButton.qml
         ui/components/chat/Chat.qml
+        ui/components/chat/ChatButtonBar.qml
         ui/components/chat/ChatMessageAttachmentRectangle.qml
         ui/components/chat/ChatMessageBox.qml
         ui/components/chat/ChatMessageList.qml
@@ -355,6 +356,7 @@ qt_add_qml_module(gonnect
         ui/components/chat/ChatMessageListItemContent.qml
         ui/components/chat/ChatMessageListItemRelatedContent.qml
         ui/components/chat/ChatUserPresenceStatusIndicator.qml
+        ui/components/chat/ChatRoomContextMenu.qml
         ui/components/chat/ChatRoomList.qml
         ui/components/chat/ChatRoomListItem.qml
         ui/components/chat/ChatRoomListSectionHeader.qml
@@ -363,6 +365,8 @@ qt_add_qml_module(gonnect
         ui/components/chat/DeviceVerification.qml
         ui/components/chat/FileAttachment.qml
         ui/components/chat/MultiText.qml
+        ui/components/chat/PinnedChatMessagesList.qml
+        ui/components/chat/ReadMarker.qml
 
         ui/components/controls/AudioFileSelector.qml
         ui/components/controls/AudioLevelButton.qml
@@ -370,11 +374,12 @@ qt_add_qml_module(gonnect
         ui/components/controls/BarButton.qml
         ui/components/controls/BottomButtonBar.qml
         ui/components/controls/BottomButtonBarButton.qml
-        ui/components/controls/BottomButtonBarSeparator.qml
         ui/components/controls/BusyIndicator.qml
         ui/components/controls/Button.qml
+        ui/components/controls/ButtonBarSeparator.qml
         ui/components/controls/CheckBox.qml
         ui/components/controls/ClipboardButton.qml
+        ui/components/controls/ComboBox.qml
         ui/components/controls/ControlBar.qml
         ui/components/controls/DtmfDialer.qml
         ui/components/controls/EmojiButton.qml
@@ -382,7 +387,6 @@ qt_add_qml_module(gonnect
         ui/components/controls/FavIcon.qml
         ui/components/controls/FavoriteListItemBig.qml
         ui/components/controls/FileDropArea.qml
-        ui/components/controls/FirstAidButton.qml
         ui/components/controls/HeaderIconButton.qml
         ui/components/controls/HideableMenuItem.qml
         ui/components/controls/JoinRuleComboBox.qml
@@ -402,40 +406,47 @@ qt_add_qml_module(gonnect
         ui/components/dialogs/CredentialsDialog.qml
         ui/components/dialogs/BaseDialog.qml
         ui/components/dialogs/ConfirmDialog.qml
+        ui/components/dialogs/ConfirmDialogWithText.qml
         ui/components/dialogs/InfoDialog.qml
         ui/components/dialogs/OauthLoginDialog.qml
         # Dynamic UI
         ui/components/BaseWidget.qml
+        ui/components/ActivitiesWidget.qml
         ui/components/DateEventsWidget.qml
         ui/components/FavoritesWidget.qml
         ui/components/HistoryWidget.qml
         ui/components/WebViewWidget.qml
+        ui/components/ChatWidget.qml
         ui/components/AdditionalSettings.qml
 
         ui/components/pages/Call.qml
         ui/components/pages/Chats.qml
         ui/components/pages/Conference.qml
+        ui/components/pages/Emergency.qml
         # Dynamic UI
         ui/components/pages/BasePage.qml
 
         ui/components/popups/AudioDeviceMenu.qml
         ui/components/popups/BurgerMenu.qml
+        ui/components/popups/CallMoreMenu.qml
         ui/components/popups/ChatUserSearch.qml
-        ui/components/popups/DialInInfo.qml
+        ui/components/popups/ConferenceMoreMenu.qml
         ui/components/popups/CreateChatRoom.qml
+        ui/components/popups/DialInInfo.qml
         ui/components/popups/EditChatRoom.qml
         ui/components/popups/EditChatMessage.qml
         ui/components/popups/EditStatusText.qml
+        ui/components/popups/EditUrlDialog.qml
         ui/components/popups/EmojiPickerPopup.qml
         ui/components/popups/FileSelectionOverview.qml
         ui/components/popups/FilteredEmojis.qml
-        ui/components/popups/FirstAid.qml
         ui/components/popups/HistoryListContextMenu.qml
         ui/components/popups/ImageSendPreview.qml
         ui/components/popups/InviteChatRoom.qml
         ui/components/popups/InvitedToChatRoom.qml
         ui/components/popups/JitsiHistoryListContextMenu.qml
         ui/components/popups/KnockChatRoom.qml
+        ui/components/popups/KnockedParticipant.qml
         ui/components/popups/LargeImage.qml
         ui/components/popups/LargeVideo.qml
         ui/components/popups/Menu.qml
@@ -475,9 +486,11 @@ qt_add_qml_module(gonnect
         ui/components/CardHeading.qml
         ui/components/CardHeadingMoreMenuButton.qml
         ui/components/CardList.qml
+        ui/components/CardShadow.qml
         ui/components/ChatSideBar.qml
         ui/components/ConferenceButtonBar.qml
         ui/components/CustomWindowHeader.qml
+        ui/components/ActivitiesList.qml
         ui/components/DateEventsList.qml
         ui/components/FavoritesList.qml
         ui/components/HistoryList.qml
@@ -493,6 +506,7 @@ qt_add_qml_module(gonnect
         # Dynamic UI
         ui/components/EditModeOptions.qml
 
+        ui/scripts/phoneNumberUtil.js
         ui/scripts/util.js
 
         ui/AboutWindow.qml
@@ -652,6 +666,8 @@ qt_add_qml_module(gonnect
         chat/ChatMessageContentVideoFile.cpp
         chat/ChatMessageContentPart.h
         chat/ChatMessageContentPart.cpp
+        chat/ChatMessageContentRemoved.h
+        chat/ChatMessageContentRemoved.cpp
         chat/ChatMessageReaction.h
         chat/ChatMessageReaction.cpp
         # FTS5
@@ -690,6 +706,8 @@ qt_add_qml_module(gonnect
         chat/CrossSigningSecret.h
         chat/CrossSigningSymbol.h
         chat/NotificationSetting.h
+        chat/PinnedChatMessages.h
+        chat/PinnedChatMessages.cpp
         chat/PublicChatRoom.h
 
         conference/ConferenceUser.h
@@ -733,18 +751,30 @@ qt_add_qml_module(gonnect
         helper/AggregatedDirectRoomsOfContact.cpp
         helper/AudioHelper.h
         helper/AudioHelper.cpp
+        helper/AvatarPrioHelper.h
+        helper/AvatarPrioHelper.cpp
         helper/ChatMessageTransformer.h
         helper/ChatMessageTransformer.cpp
         helper/CodeHighlighter.h
         helper/CodeHighlighter.cpp
+        helper/ConferenceFavoriteHelper.h
+        helper/ConferenceFavoriteHelper.cpp
+        helper/ContactHelper.h
+        helper/ContactHelper.cpp
         helper/FileContentHelper.h
         helper/FileContentHelper.cpp
+        helper/GenericFavoriteHelper.h
+        helper/GenericFavoriteHelper.cpp
         helper/SecretGenerator.h
         helper/SecretGenerator.cpp
+        helper/SipFavoriteHelper.h
+        helper/SipFavoriteHelper.cpp
         # helper/SpellCheckHighlighter.h
         # helper/SpellCheckHighlighter.cpp
         helper/TextFormatHelper.h
         helper/TextFormatHelper.cpp
+        helper/VideoCallHelper.h
+        helper/VideoCallHelper.cpp
 
         media/AudioManager.h
         media/AudioManager.cpp
@@ -800,6 +830,10 @@ qt_add_qml_module(gonnect
         rtt/RTTModel.h
         rtt/RTTModel.cpp
 
+        ui/ActivitiesModel.h
+        ui/ActivitiesModel.cpp
+        ui/ActivitiesProxyModel.h
+        ui/ActivitiesProxyModel.cpp
         ui/CallsModel.h
         ui/CallsModel.cpp
         ui/CallRoutingHelper.h
@@ -857,6 +891,8 @@ qt_add_qml_module(gonnect
         ui/UsersModel.cpp
         ui/PersonCoinProvider.h
         ui/PersonCoinProvider.cpp
+        ui/PhoneNumbersModel.h
+        ui/PhoneNumbersModel.cpp
         ui/SearchListModel.h
         ui/SearchListModel.cpp
         ui/SearchListProxyModel.h
@@ -879,6 +915,8 @@ qt_add_qml_module(gonnect
         ui/ViewHelper.cpp
         ui/WebEngineKeyEventFilter.h
         ui/WebEngineKeyEventFilter.cpp
+        ui/WindowPixelRatio.h
+        ui/WindowPixelRatio.cpp
 
         usb/IHeadsetDevice.h
         usb/HeadsetDevice.cpp
@@ -950,7 +988,6 @@ target_link_libraries(gonnect
         Qt6::Protobuf
         Qt6::WebEngineCore
         Qt6::WebEngineQuick
-        Qt6::Core5Compat
         GOnnectVersion
         ${PLATFORM_LIBRARIES}
         qt6keychain
@@ -1012,7 +1049,7 @@ target_include_directories(gonnect
 
 target_compile_definitions(gonnect
    PRIVATE
-    QT_DISABLE_DEPRECATED_BEFORE=0x060900
+    QT_DISABLE_DEPRECATED_BEFORE=0x060B00
     QT_NO_KEYWORDS)
 
 # Add hid-rp header only stuff as "isystem" so that we have a chance

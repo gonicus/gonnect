@@ -14,7 +14,7 @@ Item {
     property alias placeHolderText: placeholderLabel.text
 
     function giveFocus() {
-        searchInputField.forceActiveFocus()
+        searchInputField.forceActiveFocus(Qt.ShortcutFocusReason)
     }
 
     Accessible.role: Accessible.Form
@@ -90,7 +90,7 @@ Item {
 
     TextInput {
         id: searchInputField
-        font.pixelSize: 14
+        font.pixelSize: Theme.fontSizeNormal
         color: Theme.primaryTextColor
         focus: true
         focusPolicy: Qt.TabFocus

@@ -152,6 +152,8 @@ modules:
         path: patches/pjproject-site-config.patch
       - type: patch
         path: patches/pjsip-pres-crash.patch
+      - type: patch
+        path: patches/pjsip-mwi-crash.patch
 
   - name: openldap
     config-opts:
@@ -166,8 +168,8 @@ modules:
       - /share/man
     sources:
       - type: archive
-        url: https://www.openldap.org/software/download/OpenLDAP/openldap-release/openldap-2.6.13.tgz
-        sha256: d693b49517a42efb85a1a364a310aed16a53d428d1b46c0d31ef3fba78fcb656
+        url: https://www.openldap.org/software/download/OpenLDAP/openldap-release/openldap-2.7.1.tgz
+        sha256: 253db80f301258ea69cda1184766d57395b836aaabf41157eb0316eb0fac1341
         x-checker-data:
           type: anitya
           stable-only: true
@@ -327,8 +329,6 @@ modules:
       - -DCMAKE_UNITY_BUILD=ON
       - -DCMAKE_OPTIMIZE_DEPENDENCIES=ON
       - -DENABLE_GOW_001=ON
-      - -DENABLE_GOW_002=ON
-      - -DENABLE_GOW_003=ON
       - -DENABLE_PCH=ON
     sources:
       - type: dir

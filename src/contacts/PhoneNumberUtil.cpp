@@ -53,6 +53,42 @@ QString PhoneNumberUtil::cleanPhoneNumber(const QString &number)
     return result;
 }
 
+QString PhoneNumberUtil::normalizeNumber(const QString &number)
+{
+    QString result(number);
+
+    static QString nationalPrefix;
+    static QString regionalPrefix;
+
+    static bool isInitialized = false;
+    if (!isInitialized) {
+        isInitialized = true;
+
+        static ReadOnlyConfdSettings settings;
+        nationalPrefix = settings.value("generic/nationalPrefix").toString();
+        regionalPrefix = settings.value("generic/regionalPrefix").toString();
+    }
+
+    static const QRegularExpression sipNumberRegex("^.*sips?:(.*)@.*$",
+                                                   QRegularExpression::CaseInsensitiveOption);
+    result.replace(sipNumberRegex, "\\1");
+
+    static const QRegularExpression international("^000(.*)$");
+    result.replace(international, "+\\1");
+
+    static const QRegularExpression national("^00(.*)$");
+    if (!nationalPrefix.isEmpty()) {
+        result.replace(national, nationalPrefix + "\\1");
+    }
+
+    static const QRegularExpression regional("^0(.*)$");
+    if (!regionalPrefix.isEmpty()) {
+        result.replace(regional, regionalPrefix + "\\1");
+    }
+
+    return result;
+}
+
 QDebug operator<<(QDebug debug, const ContactInfo &contactInfo)
 {
     QDebugStateSaver saver(debug);
@@ -73,35 +109,15 @@ QDebug operator<<(QDebug debug, const ContactInfo &contactInfo)
 
 ContactInfo PhoneNumberUtil::contactInfoBySipUrl(const QString &sipUrl)
 {
-
     if (m_contactInfoCache.contains(sipUrl)) {
         return m_contactInfoCache.value(sipUrl);
     }
-
-    ReadOnlyConfdSettings settings;
 
     // Extract phone number from sip url
     auto phoneNumber = sipUrl;
 
     if (isSipUri(sipUrl)) {
-        static const QRegularExpression sipNumberRegex("^.*sips?:(.*)@.*$",
-                                                       QRegularExpression::CaseInsensitiveOption);
-        phoneNumber.replace(sipNumberRegex, "\\1");
-
-        static const QRegularExpression international("^000(.*)$");
-        phoneNumber.replace(international, "+\\1");
-
-        static const QRegularExpression national("^00(.*)$");
-        QString nationalPrefix = settings.value("generic/nationalPrefix").toString();
-        if (!nationalPrefix.isEmpty()) {
-            phoneNumber.replace(national, nationalPrefix + "\\1");
-        }
-
-        static const QRegularExpression regional("^0(.*)$");
-        QString regionalPrefix = settings.value("generic/regionalPrefix").toString();
-        if (!regionalPrefix.isEmpty()) {
-            phoneNumber.replace(regional, regionalPrefix + "\\1");
-        }
+        phoneNumber = normalizeNumber(phoneNumber);
     }
 
     ContactInfo info;
@@ -144,6 +160,11 @@ ContactInfo PhoneNumberUtil::contactInfoBySipUrl(const QString &sipUrl)
     m_contactInfoCache.insert(sipUrl, info);
 
     return info;
+}
+
+QString PhoneNumberUtil::canonicalNumber(const QString &number)
+{
+    return normalizeNumber(cleanPhoneNumber(number));
 }
 
 bool PhoneNumberUtil::isSipUri(const QString &str)

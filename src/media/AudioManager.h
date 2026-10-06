@@ -73,7 +73,7 @@ public:
     QString ringDeviceId() const { return m_ringHash; }
 
     void setExternalRinger(bool flag);
-    bool externalRinger() const { return m_externalRinger; }
+    bool externalRinger() const;
 
     QAudioOutput *getQtAudioOutputForHash(const QString &id);
     QAudioInput *getQtAudioInputForHash(const QString &id);
@@ -144,8 +144,6 @@ private:
     QMediaDevices *m_mediaDevices = nullptr;
 
     AppSettings m_settings;
-
-    bool m_externalRinger = false;
 };
 
 class AudioManagerWrapper

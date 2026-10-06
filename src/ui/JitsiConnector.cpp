@@ -234,6 +234,9 @@ QString JitsiConnector::jitsiJavascriptInternal()
     const auto defaultName = tr("Unnamed user");
     auto &authManager = AuthManager::instance();
 
+    AppSettings settings;
+    const bool persistedTileView = settings.value("jitsi/tileView", false).toBool();
+
     return QString(R"""(
 const options = {
     roomName: '%5',
@@ -351,6 +354,10 @@ new QWebChannel(qt.webChannelTransport, function(channel) {
         api.executeCommand("setNoiseSuppressionEnabled", { enabled: value })
     })
 
+    jitsiConn.executeAnswerKnockingParticipant.connect((id, approved) => {
+        api.executeCommand("answerKnockingParticipant", id, approved)
+    })
+
     jitsiConn.executeSetAudioInputDeviceCommand.connect((deviceId) => {
         api.setAudioInputDevice(undefined, deviceId)
     })
@@ -402,6 +409,8 @@ new QWebChannel(qt.webChannelTransport, function(channel) {
 
 api.addListener("videoConferenceJoined", data => {
     jitsiConn.setJitsiId(api._myUserID)
+
+    api.executeCommand("setTileView", %8)
 
     api.getRoomsInfo().then(data => {
         for (const room of data.rooms) {
@@ -469,6 +478,16 @@ api.addListener("passwordRequired", data => {
     jitsiConn.onPasswordRequired()
 })
 
+api.addListener("knockingParticipant", data => {
+    jitsiConn.addKnockingParticipant(data.participant.id, data.participant.name)
+})
+
+api.addListener("raisHandUpdated", data => {
+    if (data.id === api.getMyUserId()) {
+        jitsiConn.setIsHandRaisedInternal(!!data.handRaised)
+    }
+})
+
 )""")
             .arg(GlobalInfo::instance().jitsiUrl(), // %1
                  authManager.isJitsiAuthRequired() ? authManager.jitsiTokenForRoom(m_roomName)
@@ -478,7 +497,8 @@ api.addListener("passwordRequired", data => {
                  m_roomName, // %5
                  defaultName // %6
                  )
-            .arg(!m_startWithVideo); // %7
+            .arg(!m_startWithVideo) // %7
+            .arg(persistedTileView); // %8
 }
 
 void JitsiConnector::toggleMute()
@@ -698,6 +718,14 @@ void JitsiConnector::setIsTileViewInternal(bool value)
     }
 }
 
+void JitsiConnector::setIsHandRaisedInternal(bool value)
+{
+    if (m_isHandRaised != value) {
+        m_isHandRaised = value;
+        Q_EMIT isHandRaisedChanged();
+    }
+}
+
 void JitsiConnector::onPasswordRequired()
 {
     // First password request - check for persisted password
@@ -802,6 +830,10 @@ void JitsiConnector::addUser(const QString &id, const QString &displayName)
         }
     }
 
+    if (m_knockedIds.remove(id)) {
+        Q_EMIT knockAnswered(id);
+    }
+
     auto user = new ConferenceUser(id, displayName, ConferenceUser::Role::User, this);
     m_users.insert(i, user);
     Q_EMIT userAdded(i, user);
@@ -822,6 +854,10 @@ void JitsiConnector::removeUser(const QString &id)
 
             m_users.removeAt(i);
             addRoomMessage(tr("%1 has left the conference").arg(displayName));
+
+            if (m_knockedIds.remove(id)) {
+                Q_EMIT knockAnswered(id);
+            }
 
             Q_EMIT userRemoved(i, user);
             Q_EMIT numberOfUsersChanged();
@@ -918,6 +954,26 @@ void JitsiConnector::setJitsiDevices(const QVariantMap availableDevices)
 
     transferAudioManagerDevicesToJitsi();
     transferVideoManagerDeviceToJitsi();
+}
+
+void JitsiConnector::addKnockingParticipant(QString id, QString name)
+{
+    if (ownRole() != ConferenceUser::Role::Moderator) {
+        return;
+    }
+
+    if (!m_knockedIds.contains(id)) {
+        m_knockedIds.insert(id);
+        Q_EMIT participantKnocked(id, name);
+    }
+}
+
+void JitsiConnector::answerKnockingParticipant(const QString &id, bool approved)
+{
+    if (m_knockedIds.remove(id)) {
+        Q_EMIT executeAnswerKnockingParticipant(id, approved);
+        Q_EMIT knockAnswered(id);
+    }
 }
 
 SIPAudioDevice *JitsiConnector::jitsiToSipDevice(const JitsiMediaDevice *jitsiDevice) const
@@ -1036,11 +1092,8 @@ void JitsiConnector::toggleHoldImpl()
 
 void JitsiConnector::setHandRaised(bool value)
 {
-    if (m_isHandRaised != value) {
-        m_isHandRaised = value;
-        Q_EMIT isHandRaisedChanged();
-        Q_EMIT executeToggleRaiseHandCommand();
-    }
+    Q_UNUSED(value) // iframe API can only toogle
+    Q_EMIT executeToggleRaiseHandCommand();
 }
 
 void JitsiConnector::onHeadsetHookSwitchChanged()
@@ -1140,6 +1193,11 @@ ContactInfo JitsiConnector::remoteContactInfo() const
     ContactInfo contactInfo;
     contactInfo.displayName = m_displayName.isEmpty() ? m_roomName : m_displayName;
     return contactInfo;
+}
+
+QUrl JitsiConnector::baseUrl() const
+{
+    return GlobalInfo::instance().jitsiUrl();
 }
 
 bool JitsiConnector::hasCapability(const Capability capabilityToCheck) const
@@ -1428,6 +1486,8 @@ void JitsiConnector::setTileView(bool showTileView)
 {
     if (m_isTileView != showTileView) {
         setLargeVideoUser(nullptr);
+        AppSettings settings;
+        settings.setValue("jitsi/tileView", showTileView);
         Q_EMIT executeToggleTileViewCommand();
     }
 }

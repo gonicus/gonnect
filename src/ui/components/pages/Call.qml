@@ -154,7 +154,7 @@ Item {
                 CallerBigAvatar {
                     bubbleSize: Math.min(control.maxAvatarSize / 850 * callMainCard.height, control.maxAvatarSize)
                     name: callSideBar.selectedCallItem?.contactName ?? ""
-                    avatarUrl: callSideBar.selectedCallItem?.hasAvatar ? ("file://" + callSideBar.selectedCallItem.avatarPath) : ""
+                    avatarUrl: callSideBar.selectedCallItem?.hasAvatar ? callSideBar.selectedCallItem.avatarPath : ""
                     isIncoming: topBar.isIncoming
                     isEstablished: topBar.isEstablished
                     isInProgress: topBar.isInProgress
@@ -339,7 +339,7 @@ Item {
             Label {
                 id: dtmfFeedbackLabel
                 anchors.centerIn: parent
-                font.pixelSize: 50
+                font.pixelSize: Theme.fontSizeHuge
 
                 Accessible.ignored: true
             }

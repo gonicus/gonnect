@@ -26,6 +26,7 @@ private Q_SLOTS:
 
 private:
     // PulseAudio
+    static void releaseOperation(pa_operation *operation);
     static void subscriptionEventCallback(pa_context *context, pa_subscription_event_type_t type,
                                           uint32_t index, void *userdata);
     static void contextStateCallback(pa_context *context, void *userdata);

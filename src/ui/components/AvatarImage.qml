@@ -2,7 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Controls.Material
-import Qt5Compat.GraphicalEffects
+import QtQuick.Effects
 import base
 
 Item {
@@ -25,6 +25,17 @@ Item {
 
     readonly property bool hasSource: control.source.toString() !== ""  // toString() is necessary, see QTBUG-63629
 
+    function toSourceUrl(path : url) : url {
+        const p = path.toString()
+        if (p === ""
+                || p.startsWith("file://")
+                || p.startsWith("qrc:")
+                || p.startsWith("image://")) {
+            return p
+        }
+        return Qt.url(`file://${path}`)
+    }
+
     Image {
         id: img
         cache: true
@@ -34,7 +45,7 @@ Item {
         sourceSize.width: control.size * Screen.devicePixelRatio
         sourceSize.height: control.size * Screen.devicePixelRatio
         source: control.hasSource
-                ? control.source
+                ? control.toSourceUrl(control.source)
                 : (control.initials
                    ? `image://personcoin/${control.initials}`
                    : "")
@@ -46,15 +57,23 @@ Item {
         color: 'black'
         visible: false
         radius: mask.width / 2
+        antialiasing: true
+        layer {
+            enabled: true
+            smooth: true
+        }
 
         Accessible.ignored: true
     }
 
-    OpacityMask {
+    MultiEffect {
         id: opacityMask
         anchors.fill: parent
         source: img
         maskSource: mask
+        maskEnabled: true
+        maskThresholdMin: 0.5
+        maskSpreadAtMin: 1.0
     }
 
     Rectangle {

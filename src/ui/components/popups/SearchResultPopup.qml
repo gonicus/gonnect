@@ -293,7 +293,7 @@ Popup {
                             }
 
                             readonly property bool shallBeVisible: ViewHelper.isJitsiAvailable
-                                                                   && !ViewHelper.isActiveVideoCall
+                                                                   && !VideoCallHelper.hasActiveVideoCall
                                                                    && ViewHelper.isValidJitsiRoomName(control.immediateSearchPhrase)
 
                             onManuallyHovered: () => {
@@ -320,7 +320,7 @@ Popup {
                             }
 
                             Repeater {
-                                id: phoneNumberRepeater
+                                id: chatRepeater
                                 model: ChatConnectorManager.chatConnectors
                                 delegate: SearchResultNumberItem {
                                     id: chatProviderDelg
@@ -449,7 +449,7 @@ Popup {
                                 onTriggerPrimaryAction: () => {
                                     if (historyDelg.isPhoneNumber) {
                                         SIPCallManager.call("account0", historyDelg.url, "", identitySelector.currentValue);
-                                    } else if (!ViewHelper.isActiveVideoCall) {
+                                    } else if (!VideoCallHelper.hasActiveVideoCall) {
                                         ViewHelper.requestMeeting(historyDelg.url)
                                     }
                                     control.primaryActionTriggered()
@@ -478,7 +478,7 @@ Popup {
                                         onCallClicked: () => {
                                             if (historyDelg.isPhoneNumber) {
                                                 SIPCallManager.call("account0", historyDelg.url, "", identitySelector.currentValue);
-                                            } else if (!ViewHelper.isActiveVideoCall) {
+                                            } else if (!VideoCallHelper.hasActiveVideoCall) {
                                                 ViewHelper.requestMeeting(historyDelg.url)
                                             }
                                             control.primaryActionTriggered()
@@ -510,7 +510,7 @@ Popup {
                                         roomName: historyDelg.url
                                         width: 230
                                         onCallClicked: () => {
-                                            if (!ViewHelper.isActiveVideoCall) {
+                                            if (!VideoCallHelper.hasActiveVideoCall) {
                                                 ViewHelper.requestMeeting(historyDelg.url)
                                             }
                                         }
@@ -599,7 +599,7 @@ Popup {
                                         AvatarImage {
                                             id: avatarImage
                                             initials: ViewHelper.initials(contactDelg.name)
-                                            source: contactDelg.hasAvatar ? ("file://" + contactDelg.avatarPath) : ""
+                                            source: contactDelg.hasAvatar ? contactDelg.avatarPath : ""
                                             showPresenceStatus: contactDelg.subscriptableNumber !== ""
                                             presenceStatus: contactDelg.buddyStatus
                                             indicatorComponent: Component { BuddyStatusIndicator {} }
@@ -688,6 +688,8 @@ Popup {
                                                 if (chatRoomId) {
                                                     console.log(`Request showing chat room ${chatRoomId} of ${chatSourceDelg.modelData.provider?.displayName}`)
                                                     ViewHelper.showChatRoom(chatSourceDelg.modelData.provider, chatRoomId)
+                                                } else {
+                                                    ViewHelper.showCreateRoomDialog(chatSourceDelg.modelData.provider, [ chatSourceDelg.modelData.id ])
                                                 }
 
                                                 control.primaryActionTriggered()

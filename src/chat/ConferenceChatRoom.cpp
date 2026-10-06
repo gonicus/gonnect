@@ -4,11 +4,13 @@
 #include "IConferenceConnector.h"
 #include "ChatUser.h"
 
-ConferenceChatRoom::ConferenceChatRoom(IConferenceConnector *parent) : IChatRoom{ parent } { }
+ConferenceChatRoom::ConferenceChatRoom(IConferenceConnector *parent) : IChatRoom{ nullptr, parent }
+{
+}
 
 ConferenceChatRoom::ConferenceChatRoom(const QString &roomId, const QString &name,
                                        IConferenceConnector *parent)
-    : IChatRoom{ parent }, m_id{ roomId }, m_name{ name }
+    : IChatRoom{ nullptr, parent }, m_id{ roomId }, m_name{ name }
 {
 }
 
@@ -53,6 +55,11 @@ void ConferenceChatRoom::addMessage(ChatMessage *chatMessageObj)
 }
 
 void ConferenceChatRoom::resetUnreadCount()
+{
+    // Unsupported
+}
+
+void ConferenceChatRoom::markAsRead()
 {
     // Unsupported
 }

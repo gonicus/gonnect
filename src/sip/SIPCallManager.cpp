@@ -12,7 +12,6 @@
 #include "DtmfGenerator.h"
 #include "EnumTranslation.h"
 #include "ViewHelper.h"
-#include "AvatarManager.h"
 #include "USBDevices.h"
 #include "HeadsetDeviceProxy.h"
 #include "AddressBook.h"
@@ -228,8 +227,7 @@ void SIPCallManager::onIncomingCall(SIPCall *call)
             n->addButton(tr("Reject"), "reject", "call.decline", {});
         }
 
-        auto &am = AvatarManager::instance();
-        QString avatar = c ? am.avatarPathFor(c->id()) : "";
+        QString avatar = c ? c->avatarPath() : "";
 
         if (avatar.isEmpty()) {
             n->setIcon("call-incoming-symbolic");
@@ -318,7 +316,7 @@ QString SIPCallManager::call(const QString &number, bool silent)
     if (!accounts.isEmpty()) {
         const auto phoneNumber = PhoneNumberUtil::isSipUri(number)
                 ? number
-                : PhoneNumberUtil::cleanPhoneNumber(number);
+                : PhoneNumberUtil::canonicalNumber(number);
         return call(accounts.first()->id(), phoneNumber, "", "", silent);
     }
 
@@ -400,6 +398,16 @@ void SIPCallManager::endCall(QString id)
     if (auto call = findCallById(id)) {
         call->account()->hangup(call->getId());
         GlobalCallState::instance().unholdOtherCall();
+    }
+}
+
+void SIPCallManager::endCallWithContact(Contact *contact)
+{
+    if (!contact) {
+        return;
+    }
+    if (auto *call = findCallByContact(contact)) {
+        endCall(call);
     }
 }
 
@@ -667,6 +675,24 @@ SIPCall *SIPCallManager::findCallById(const QString &id) const
     return nullptr;
 }
 
+SIPCall *SIPCallManager::findCallByContact(const Contact *contact) const
+{
+    if (!contact) {
+        return nullptr;
+    }
+    for (auto *call : std::as_const(m_calls)) {
+        if (call->remoteContactInfo().contact == contact) {
+            return call;
+        }
+    }
+    return nullptr;
+}
+
+bool SIPCallManager::hasCallWithContact(Contact *contact) const
+{
+    return findCallByContact(contact);
+}
+
 void SIPCallManager::triggerCapability(const QString &accountId, const int callId,
                                        const QString &capability) const
 {
@@ -825,8 +851,7 @@ void SIPCallManager::addCall(SIPCall *call)
             auto n = new Notification(title, bodyParts.join("\n"), Notification::Priority::normal,
                                       false, this);
 
-            auto &am = AvatarManager::instance();
-            QString avatar = c ? am.avatarPathFor(c->id()) : "";
+            QString avatar = c ? c->avatarPath() : "";
 
             if (avatar.isEmpty()) {
                 n->setIcon("call-missed-symbolic");

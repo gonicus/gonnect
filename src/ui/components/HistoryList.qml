@@ -20,7 +20,7 @@ Item {
         anchors.centerIn: parent
         visible: !control.hasPastCalls
         color: Theme.secondaryTextColor
-        font.pixelSize: 18
+        font.pixelSize: Theme.fontSizeLarge
         text: "🕓  " + qsTr("No past calls")
 
         Accessible.role: Accessible.StaticText
@@ -82,7 +82,7 @@ Item {
         delegate: Item {
             id: delg
             enabled: ViewHelper.isJitsiAvailable || !delg.isJitsiMeetCall
-            height: 50
+            height: Math.max(50, rowLayout.implicitHeight + Theme.d)
             anchors {
                 left: parent?.left
                 right: parent?.right
@@ -121,7 +121,11 @@ Item {
                 delg.buddyStatus = delg.hasBuddyState ? SIPManager.buddyStatus(delg.remoteUrl) : SIPBuddyState.UNKNOWN
             }
 
-            Component.onCompleted: () => delg.updateBuddyStatus()
+            Component.onCompleted: () => {
+                                       delg.updateBuddyStatus()
+                                       aggregatedRooms.updateContactId()
+                                   }
+            onContactIdChanged: () => aggregatedRooms.updateContactId()
 
             Accessible.role: Accessible.ListItem
             Accessible.name: qsTr("History item")
@@ -136,6 +140,14 @@ Item {
                 }
             }
 
+            AggregatedDirectRoomsOfContact {
+                id: aggregatedRooms
+
+                function updateContactId() {
+                    aggregatedRooms.setContactById(delg.contactId)
+                }
+            }
+
             Rectangle {
                 id: rowBackground
                 anchors.fill: parent
@@ -144,7 +156,8 @@ Item {
             }
 
             RowLayout {
-                height: 40
+                id: rowLayout
+                height: rowLayout.implicitHeight
                 spacing: 0
                 anchors {
                     left: parent.left
@@ -155,7 +168,7 @@ Item {
                 AvatarImage {
                     id: avatarImage
                     initials: ViewHelper.initials(delg.contactName)
-                    source: delg.hasAvatar ? ("file://" + delg.avatarPath) : ""
+                    source: delg.hasAvatar ? delg.avatarPath : ""
                     visible: delg.hasAvatar || delg.name !== ""
                     showPresenceStatus: delg.hasBuddyState || delg.isBlocked
                     presenceStatus: delg.buddyStatus
@@ -174,7 +187,7 @@ Item {
                     id: nameCompanyContainer
                     Layout.preferredWidth: (delg.width - avatarImage.width - typeIcon.width - timesContainer.width - 50) / 2
                     Layout.alignment: Qt.AlignVCenter
-                    implicitHeight: contactNameLabel.implicitHeight
+                    implicitHeight: contactNameLabel.implicitHeight + (companyLabel.visible ? companyLabel.implicitHeight : 0)
                     implicitWidth: Math.max(contactNameLabel.implicitWidth, companyLabel.implicitWidth)
 
                     Label {
@@ -223,7 +236,7 @@ Item {
                     id: phoneNumberLocationContainer
                     Layout.preferredWidth: nameCompanyContainer.Layout.preferredWidth
                     Layout.alignment: Qt.AlignVCenter
-                    implicitHeight: phoneNumberLabel.implicitHeight
+                    implicitHeight: phoneNumberLabel.implicitHeight + (locationLabel.visible ? locationLabel.implicitHeight : 0)
                     implicitWidth: Math.max(phoneNumberLabel.implicitWidth, locationLabel.implicitWidth)
 
                     Label {
@@ -306,10 +319,12 @@ Item {
 
                 Item {
                     id: timesContainer
-                    implicitHeight: timeLabel.implicitHeight
-                    Layout.preferredWidth: 60
-                    Layout.rightMargin: 10
+                    implicitHeight: timeLabel.implicitHeight + (durationLabel.visible ? durationLabel.implicitHeight : 0)
+                    Layout.rightMargin: Theme.d
                     Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
+                    Layout.preferredWidth: Math.max(60,
+                                                    timeTextLabel.implicitWidth + 2 * Theme.d,
+                                                    durationTextLabel.implicitWidth + 2 * Theme.d)
 
                     Item {
                         id: timeLabel
@@ -405,6 +420,14 @@ Item {
                 }
             }
 
+            function removeEntry() {
+                const id = delg.id
+                const item = DialogFactory.createConfirmDialog({
+                                 text: qsTr("Are you sure you really want to remove this entry?")
+                             })
+                item.accepted.connect(() => historyModel.removeEntry(id))
+            }
+
             Component {
                 id: historyListContextMenuComponent
 
@@ -416,11 +439,23 @@ Item {
                     isBlocked: delg.isBlocked
                     isSipSubscriptable: delg.hasBuddyState
                     isReady: delg.isReady
-                    width: 230
+                    isOpenChatAvailable: !!aggregatedRooms.bestMatchingChatRoom
+
                     onCallClicked: () => SIPCallManager.call(delg.account, delg.remoteUrl, delg.contactId)
                     onCallAsClicked: (identityId) => SIPCallManager.call(delg.account, delg.remoteUrl, delg.contactId, identityId)
                     onNotifyWhenAvailableClicked: () => delg.subscribeBuddyStatus()
                     onBlockTemporarilyClicked: () => SIPCallManager.toggleTemporaryBlock(delg.contactId, delg.remotePhoneNumber)
+                    onChatClicked: () => {
+                                       const room = aggregatedRooms.bestMatchingChatRoom
+                                       if (!room) {
+                                           return
+                                       }
+                                       const provider = room.chatProvider()
+                                       if (provider) {
+                                           ViewHelper.showChatRoom(provider, room.id)
+                                       }
+                                   }
+                    onRemoveItem: () => delg.removeEntry()
                 }
             }
 
@@ -433,6 +468,7 @@ Item {
                     roomName: delg.remotePhoneNumber
                     width: 230
                     onCallClicked: () => ViewHelper.requestMeeting(delg.remoteUrl)
+                    onRemoveItem: () => delg.removeEntry()
                 }
             }
 
@@ -445,7 +481,7 @@ Item {
                 onDoubleTapped: () => {
                     if (delg.isSIPCall) {
                         SIPCallManager.call(delg.account, delg.remoteUrl, delg.contactId)
-                    } else if (delg.isJitsiMeetCall && !ViewHelper.isActiveVideoCall) {
+                    } else if (delg.isJitsiMeetCall && !VideoCallHelper.hasActiveVideoCall) {
                         ViewHelper.requestMeeting(delg.remoteUrl)
                     }
                 }

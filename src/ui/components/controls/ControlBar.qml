@@ -97,7 +97,7 @@ Item {
             id: avatarImage
             size: 28
             initials: ViewHelper.initials(ViewHelper.currentUserName)
-            source: ViewHelper.currentUser?.hasAvatar ? ("file://" + ViewHelper.currentUser.avatarPath) : ""
+            source: ViewHelper.currentUser?.hasAvatar ? ViewHelper.currentUser.avatarPath : ""
             showPresenceStatus: !avatarImage.isUnregistered
             presenceStatus: GlobalStateAggregator.presenceState
             isUnregistered: true

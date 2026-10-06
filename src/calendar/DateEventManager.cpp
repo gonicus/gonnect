@@ -110,6 +110,7 @@ void DateEventManager::addDateEvent(const QString &id, const QString &source,
 
         if (isTooOld(*dateEvent)) {
             qCWarning(lcDateEventManager) << "DateEvent is too old and will be ignored";
+            delete dateEvent;
             continue;
         }
 
@@ -122,6 +123,7 @@ void DateEventManager::addDateEvent(const QString &id, const QString &source,
         }
         if (isAdded) {
             qCWarning(lcDateEventManager) << "DateEvent already in list - ignoring";
+            delete dateEvent;
             continue;
         }
 
@@ -392,8 +394,8 @@ void DateEventManager::onTimerTimeout()
                 && !m_alreadyNotifiedDates.contains(eventHash)
                 && !m_notificationIds.contains(eventHash) && start.date() == today
                 && start.time() > now && now.secsTo(start.time()) < 2 * 60) {
-                QString message = isJitsiMeeting ? tr("Conference starting soon")
-                                                 : tr("Appointment starting soon");
+                QString message =
+                        isJitsiMeeting ? tr("Conference starting soon") : tr("Event starting soon");
                 auto notification = new Notification(message, summary, Notification::Priority::high,
                                                      true, &notMan);
 

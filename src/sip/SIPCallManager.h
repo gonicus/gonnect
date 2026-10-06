@@ -8,8 +8,9 @@
 
 #include "AppSettings.h"
 
-class SIPCall;
+class Contact;
 class DtmfGenerator;
+class SIPCall;
 
 class SIPCallManager : public QObject
 {
@@ -60,6 +61,7 @@ public:
     Q_INVOKABLE void endCall(const QString &accountId, const int callId);
     Q_INVOKABLE void endCall(SIPCall *call);
     Q_INVOKABLE void endCall(QString id);
+    Q_INVOKABLE void endCallWithContact(Contact *contact);
     Q_INVOKABLE void endAllCalls();
     void holdOtherCalls(SIPCall *call);
     void holdAllCalls() const;
@@ -80,6 +82,8 @@ public:
     SIPCall *findCall(const QString &accountId, int callId) const;
     SIPCall *findCall(const QString &remoteUri) const;
     SIPCall *findCallById(const QString &id) const;
+    SIPCall *findCallByContact(const Contact *contact) const;
+    Q_INVOKABLE bool hasCallWithContact(Contact *contact) const;
 
     Q_INVOKABLE void triggerCapability(const QString &accountId, const int callId,
                                        const QString &capability) const;

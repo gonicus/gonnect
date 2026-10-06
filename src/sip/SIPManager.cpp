@@ -520,7 +520,10 @@ void SIPManager::recoverFromNetworkChange()
 
     auto accounts = SIPAccountManager::instance().accounts();
 
+    m_recoveryCounts.clear();
+
     for (auto account : std::as_const(accounts)) {
+        m_recoveryCounts.insert(account->id(), account->registrationCount());
         account->setAfterResume();
     }
 
@@ -558,12 +561,15 @@ void SIPManager::checkRecovery()
 
     if (accounts.isEmpty()) {
         m_networkRecoveryAttempts = 0;
+        m_recoveryCounts.clear();
         return;
     }
 
     bool allRegistered = true;
     for (auto account : std::as_const(accounts)) {
-        if (!account->isRegistered()) {
+        const auto previousCount = m_recoveryCounts.value(account->id(), 0);
+
+        if (!account->isRegistered() || account->registrationCount() <= previousCount) {
             allRegistered = false;
             break;
         }
@@ -572,6 +578,7 @@ void SIPManager::checkRecovery()
     if (allRegistered) {
         qCDebug(lcSIPManager) << "SIP recovered successfully";
         m_networkRecoveryAttempts = 0;
+        m_recoveryCounts.clear();
         return;
     }
 

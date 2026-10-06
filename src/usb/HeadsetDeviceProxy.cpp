@@ -319,31 +319,24 @@ QString HeadsetDeviceProxy::name() const
     return "";
 }
 
+bool HeadsetDeviceProxy::hasDeviceConfigurableRinger() const
+{
+    return m_device && m_device->hasDeviceConfigurableRinger();
+}
+
 bool HeadsetDeviceProxy::getBusyLine() const
 {
-    if (m_device) {
-        return m_device->getBusyLine();
-    }
-
-    return false;
+    return m_device && m_device->getBusyLine();
 }
 
 bool HeadsetDeviceProxy::getHookSwitch() const
 {
-    if (m_device) {
-        return m_device->getHookSwitch();
-    }
-
-    return false;
+    return m_device && m_device->getHookSwitch();
 }
 
 bool HeadsetDeviceProxy::getFlash() const
 {
-    if (m_device) {
-        return m_device->getFlash();
-    }
-
-    return false;
+    return m_device && m_device->getFlash();
 }
 
 bool HeadsetDeviceProxy::open()

@@ -21,7 +21,9 @@ public:
     QList<IChatRoom *> chatRooms() const { return m_chatRooms; }
     IChatRoom *bestMatchingChatRoom() const { return m_bestRoom; }
 
+    Q_INVOKABLE void setWrappedContact(QPointer<Contact> contact);
     Q_INVOKABLE IChatProvider *providerOfRoom(IChatRoom *chatRoom) const;
+    Q_INVOKABLE void setContactById(const QString &contactId);
 
 private:
     void setChatRooms(const QList<IChatRoom *> chatRooms);
@@ -36,7 +38,7 @@ private:
     QList<IChatRoom *> m_chatRooms;
     QHash<IChatProvider *, QObject *> m_providerContextObjects;
     QHash<IChatRoom *, QObject *> m_roomContextObjects;
-    QMetaObject::Connection m_contactConn;
+    QObject *m_contactContext = nullptr;
 
 private Q_SLOTS:
     void onContactChanged();

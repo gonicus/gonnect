@@ -32,10 +32,10 @@ public:
         SystemMessage = 1 << 1,
         OwnMessage = 1 << 2,
         Markdown = 1 << 3,
-        Pinned = 1 << 4,
-        Encrypted = 1 << 5,
-        Pending = 1 << 6,
-        Failed = 1 << 7,
+        Encrypted = 1 << 4,
+        Pending = 1 << 5,
+        Failed = 1 << 6,
+        Edited = 1 << 7
     };
     Q_ENUM(Flag)
     Q_DECLARE_FLAGS(Flags, Flag)
@@ -52,7 +52,7 @@ public:
     QString fromId() const { return m_fromId; }
     QString nickName() const { return m_nickName; }
     QDateTime timestamp() const { return m_timestamp; }
-    void setTimestamp(const QDateTime &timestamp);
+    bool setTimestamp(const QDateTime &timestamp);
     Flags flags() const { return m_flags; }
     QObject *content() const { return m_content; }
     IChatRoom *chatRoom() const { return m_chatRoom; }
@@ -84,7 +84,6 @@ public:
 
     /// List of users that have been mentioned in the message.
     QSet<ChatUser *> mentionedUsers() const;
-
     void addMentionendUser(ChatUser *user);
     void addMentionendUsers(const QSet<ChatUser *> users);
     void removeMentionendUser(ChatUser *user);
