@@ -571,14 +571,14 @@ Item {
             HideableMenuItem {
                 visible: !control.isFailed && !control.isPending && !control.isThreadRoot && control.threadId === "" && !!(control.capabilities & IChatProvider.Capability.MessageRelations)
                 text: qsTr("Reply in thread...")
-                icon.source: Icons.dialogMessages
+                icon.source: Icons.messageThread
                 onTriggered: () => control.respondInNewThread(control.eventId)
             }
 
             HideableMenuItem {
                 visible: control.threadId !== ''
                 text: qsTr("Open thread...")
-                icon.source: Icons.dialogMessages
+                icon.source: Icons.messageThread
                 onTriggered: () => control.openThread(control.threadId)
             }
 
