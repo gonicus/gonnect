@@ -625,6 +625,17 @@ void IpcDispatcher::pinOrUnpinMessage(const QString &roomId, const QString &mess
     sendRequest(req);
 }
 
+void IpcDispatcher::setConferenceUrl(const QString &roomId, const QString &url)
+{
+    RoomChangeRequest changeRequest;
+    changeRequest.setRoomId(roomId);
+    changeRequest.setConferenceUrl(url);
+
+    auto req = createRequest();
+    req->setRoomChangeRequest(changeRequest);
+    sendRequest(req);
+}
+
 qsizetype IpcDispatcher::chatRoomsCount()
 {
     return m_rooms.length();
@@ -1647,6 +1658,11 @@ void IpcDispatcher::processResponse(
         // Read marker
         processReadMarkers(room, changeEvent.readMarker());
 
+        // Conference url
+        if (changeEvent.hasConferenceUrl()) {
+            room->setConferenceUrl(changeEvent.conferenceUrl());
+        }
+
         // Update typing users
         if (changeEvent.hasTypingUserIdListChanged()) {
             const auto &typingUserIds = changeEvent.typingUserIdList();
@@ -2041,6 +2057,11 @@ IpcChatRoom *IpcDispatcher::addChatRoom(const de::gonicus::gonnect::Room &room, 
 
     // Read markers
     processReadMarkers(roomObj, room.readMarker());
+
+    // Conference url
+    if (room.hasConferenceUrl()) {
+        roomObj->setConferenceUrl(room.conferenceUrl());
+    }
 
     roomObj->setInvitationText(room.hasInvitationText() ? room.invitationText() : "");
 
@@ -2707,6 +2728,9 @@ IpcDispatcher::roomPermissionsGrpcToGonnect(const de::gonicus::gonnect::RoomPerm
     }
     if (permissions.canPinMessages()) {
         p |= IChatRoom::Permission::CanPinMessages;
+    }
+    if (permissions.canEditConferenceUrl()) {
+        p |= IChatRoom::Permission::CanEditConferenceUrl;
     }
 
     return p;

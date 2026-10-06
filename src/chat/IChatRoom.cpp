@@ -28,3 +28,11 @@ void IChatRoom::setRoomSettings(const RoomSettings &roomSettings)
         Q_EMIT roomSettingsChanged();
     }
 }
+
+void IChatRoom::setConferenceUrl(const QString &url)
+{
+    if (m_conferenceUrl != url) {
+        m_conferenceUrl = url;
+        Q_EMIT conferenceUrlChanged();
+    }
+}

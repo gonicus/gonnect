@@ -33,6 +33,7 @@ public:
     virtual IChatRoom::JoinRule joinRule() override { return m_joinRule; }
     virtual qsizetype notificationCount() override { return m_mainMessageContainer.unreadCount(); }
     virtual IChatRoom::Permissions permissions() override { return m_permissions; }
+    virtual void requestSetConferenceUrl(const QString &url) override;
 
     virtual bool isInitiallyLoaded() const override { return m_isInitiallyLoaded; }
     virtual void loadMessages(const QString &threadId = QString()) override;

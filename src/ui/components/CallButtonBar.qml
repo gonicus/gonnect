@@ -565,7 +565,7 @@ Item {
             text: qsTr("Camera")
             iconPath: Icons.cameraVideo
             enabled: control.areInCallButtonsEnabled
-            visible: ViewHelper.isJitsiAvailable && control.hasCapabilityJitsi && !ViewHelper.isActiveVideoCall
+            visible: ViewHelper.isJitsiAvailable && control.hasCapabilityJitsi && !VideoCallHelper.hasActiveVideoCall
             onClicked: () => {
                 ViewHelper.nextMeetingStartFlags = IConferenceConnector.StartFlag.AudioActive | IConferenceConnector.StartFlag.VideoActive
                 SIPCallManager.triggerCapability(control.accountId, control.callId, "jitsi:hangup")
@@ -577,7 +577,7 @@ Item {
             text: qsTr("Screen")
             iconPath: Icons.inputTouchscreen
             enabled: control.areInCallButtonsEnabled
-            visible: ViewHelper.isJitsiAvailable && control.hasCapabilityJitsi && !ViewHelper.isActiveVideoCall
+            visible: ViewHelper.isJitsiAvailable && control.hasCapabilityJitsi && !VideoCallHelper.hasActiveVideoCall
             onClicked: () => {
                 ViewHelper.nextMeetingStartFlags = IConferenceConnector.StartFlag.AudioActive | IConferenceConnector.StartFlag.ScreenShareActive
                 SIPCallManager.triggerCapability(control.accountId, control.callId, "jitsi:hangup")

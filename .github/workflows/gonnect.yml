@@ -40,6 +40,9 @@ on:
       - release
       - main
 
+  schedule: 
+    - cron: '0 3 * * 1'
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -58,7 +61,7 @@ jobs:
   # Detect changes to allow selecting the jobs to run.
   # If the workflow is triggered manually, the selection comes from the inputs there.
   changes:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     outputs:
       # Job selection comes from inputs, if started manually. No need to use detected changes.
       src: ${{ github.event_name != 'workflow_dispatch' && steps.filter.outputs.src }}
@@ -67,7 +70,6 @@ jobs:
       tests: ${{ github.event_name != 'workflow_dispatch' && steps.filter.outputs.tests }}
       resources: ${{ github.event_name != 'workflow_dispatch' && steps.filter.outputs.resources }}
       resources-windows: ${{ github.event_name != 'workflow_dispatch' && steps.filter.outputs.resources-windows }}
-      resources-macos: ${{ github.event_name != 'workflow_dispatch' && steps.filter.outputs.resources-macos }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
@@ -95,15 +97,14 @@ jobs:
               - 'resources/font/**'
               - 'resources/sounds/**'
               - 'resources/templates/**'
+              - 'resources/roomnames/**'
               - 'migrate/**'
               - 'i18n/**/*.ts'
             resources-windows:
               - 'resources/windows/**'
-            resources-macos:
-              - 'resources/macos/**'
 
   build:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     name: "Build GOnnect (Linux)"
     needs: changes
     if: ${{ inputs.run_build || needs.changes.outputs.src == 'true' || needs.changes.outputs.tests == 'true' || needs.changes.outputs.build == 'true' }}
@@ -247,39 +248,8 @@ jobs:
           compression-level: 0
           path: build/GOnnect*.msix
 
-  build-macos:
-    runs-on: macos-26
-    name: "Build GOnnect (MacOS)"
-    needs: changes
-    if: ${{ inputs.run_build_macos || needs.changes.outputs.src == 'true' || needs.changes.outputs.build == 'true' || needs.changes.outputs.resources == 'true' || needs.changes.outputs.resources-macos == 'true' }}
-
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-        with:
-          lfs: 'true'
-          submodules: 'recursive'
-
-      - name: Prepare
-        uses: ./.github/actions/prepare-macos
-
-      - name: Configure CMake
-        run: cmake --preset conan-release
-
-      - name: Build
-        run: cmake --build --preset conan-release
-
-      - name: Package
-        run: cd build/Release && cpack ${{github.workspace}}
-
-      - name: Save installer
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
-        with:
-          name: mac-installer.dmg
-          compression-level: 0
-          path: build/Release/GOnnect*.dmg
-
   format:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     name: "Code Formatting"
     needs: changes
     if: ${{ inputs.run_format || needs.changes.outputs.src == 'true' }}
@@ -293,7 +263,7 @@ jobs:
           exclude-regex: '^src/platform/windows/EventLog.h$' # generated file
 
   clang:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     name: "Static Code Analyzer"
     needs: changes
     if: ${{ inputs.run_clang || needs.changes.outputs.src == 'true' }}
@@ -326,7 +296,7 @@ jobs:
           path: /tmp/build.log
 
   clazy:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     container: fedora:43
     name: "Qt Semantics"
     needs: changes
@@ -403,9 +373,40 @@ jobs:
         run: |
           scripts/static-clazy-analyzer.sh
 
+  build-macos:
+    runs-on: macos-26
+    name: "Build GOnnect (MacOS)"
+    needs: changes
+    if: ${{ inputs.run_build_macos || github.event_name == 'schedule' }}
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          lfs: 'true'
+          submodules: 'recursive'
+
+      - name: Prepare
+        uses: ./.github/actions/prepare-macos
+
+      - name: Configure CMake
+        run: cmake --preset conan-release
+
+      - name: Build
+        run: cmake --build --preset conan-release
+
+      - name: Package
+        run: cd build/Release && cpack ${{github.workspace}}
+
+      - name: Save installer
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: mac-installer.dmg
+          compression-level: 0
+          path: build/Release/GOnnect*.dmg
+
   flatpak:
     name: "Flatpak"
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     needs: changes
     if: ${{ inputs.run_flatpak || needs.changes.outputs.flatpak == 'true' || needs.changes.outputs.src == 'true' || needs.changes.outputs.build == 'true' || needs.changes.outputs.resources == 'true' }}
     container:
@@ -432,7 +433,7 @@ jobs:
           cache-key: flatpak-builder-${{ steps.var.outputs.gonnect_version }}
 
   tests:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     name: "Unit Tests"
     needs: [changes, build]
     if: ${{ (inputs.run_tests || needs.changes.outputs.src == 'true' || needs.changes.outputs.build == 'true' || needs.changes.outputs.tests == 'true') && needs.build.result == 'success' }}
@@ -465,7 +466,7 @@ jobs:
   ci-status:
     needs: [changes, build, build-windows, build-macos, format, clang, clazy, flatpak, tests]
     if: always() # Ensure this runs even if upstream jobs were skipped
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
       - name: Verify pipeline status
         run: |
