@@ -512,8 +512,19 @@ void JitsiConnector::checkJitsiBackendFeatures()
     auto manager = new QNetworkAccessManager(this);
 
     QNetworkRequest request;
+
+    // SSL config
+    QSslConfiguration sslConfig = QSslConfiguration::defaultConfiguration();
+    ReadOnlyConfdSettings settings;
+    if (!settings.value("generic/verifyServer", true).toBool()) {
+        sslConfig.setPeerVerifyMode(QSslSocket::PeerVerifyMode::VerifyNone);
+    }
+    sslConfig.addCaCertificates(AuthManager::instance().sslCAs());
+    request.setSslConfiguration(sslConfig);
+
     request.setUrl(QUrl(QString("%1/config.js").arg(GlobalInfo::instance().jitsiUrl())));
 
+    // Result handlers
     auto reply = manager->get(request);
     connect(reply, &QNetworkReply::errorOccurred, this, [](QNetworkReply::NetworkError err) {
         qCCritical(lcJitsiConnector) << "Error on fetching config js:" << err;
