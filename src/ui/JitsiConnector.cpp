@@ -187,8 +187,11 @@ void JitsiConnector::addIncomingMessage(QString fromId, QString nickName, QStrin
     AppSettings settings;
     if (settings.value("generic/jitsiChatAsNotifications", true).toBool()
         && !PlatformSession::instance().isScreenShareActive()) {
-        auto notification = new Notification(tr("New chat message"), message,
-                                             Notification::Priority::normal, true, this);
+
+        const QString sender = nickName.isEmpty() ? fromId : nickName;
+        const auto title = tr("[%1] Message from %2").arg(conferenceName(), sender);
+        auto notification =
+                new Notification(title, message, Notification::Priority::normal, true, this);
         notification->setIcon(":/icons/gonnect.svg");
 
         m_chatNotifications.append(notification);
