@@ -187,8 +187,11 @@ void JitsiConnector::addIncomingMessage(QString fromId, QString nickName, QStrin
     AppSettings settings;
     if (settings.value("generic/jitsiChatAsNotifications", true).toBool()
         && !PlatformSession::instance().isScreenShareActive()) {
-        auto notification = new Notification(tr("New chat message"), message,
-                                             Notification::Priority::normal, true, this);
+
+        const QString sender = nickName.isEmpty() ? fromId : nickName;
+        const auto title = tr("[%1] Message from %2").arg(conferenceName(), sender);
+        auto notification =
+                new Notification(title, message, Notification::Priority::normal, true, this);
         notification->setIcon(":/icons/gonnect.svg");
 
         m_chatNotifications.append(notification);
@@ -512,8 +515,19 @@ void JitsiConnector::checkJitsiBackendFeatures()
     auto manager = new QNetworkAccessManager(this);
 
     QNetworkRequest request;
+
+    // SSL config
+    QSslConfiguration sslConfig = QSslConfiguration::defaultConfiguration();
+    ReadOnlyConfdSettings settings;
+    if (!settings.value("generic/verifyServer", true).toBool()) {
+        sslConfig.setPeerVerifyMode(QSslSocket::PeerVerifyMode::VerifyNone);
+    }
+    sslConfig.addCaCertificates(AuthManager::instance().sslCAs());
+    request.setSslConfiguration(sslConfig);
+
     request.setUrl(QUrl(QString("%1/config.js").arg(GlobalInfo::instance().jitsiUrl())));
 
+    // Result handlers
     auto reply = manager->get(request);
     connect(reply, &QNetworkReply::errorOccurred, this, [](QNetworkReply::NetworkError err) {
         qCCritical(lcJitsiConnector) << "Error on fetching config js:" << err;
@@ -1383,7 +1397,7 @@ void JitsiConnector::enterPassword(const QString &password, bool rememberPasswor
     }
 }
 
-void JitsiConnector::leaveConference()
+void JitsiConnector::resetConferenceState()
 {
     if (m_callHistoryItem) {
         m_callHistoryItem->endCall();
@@ -1398,7 +1412,14 @@ void JitsiConnector::leaveConference()
 
     m_chatRoom->clear();
 
-    Q_EMIT executeLeaveRoomCommand();
+    // Reset per-conference toggle state so it doesn't leak into the next conference
+    setIsSharingScreenInternal(false);
+    setVideoMutedInternal(false);
+    if (m_isAudioMuted) {
+        m_isAudioMuted = false;
+        Q_EMIT isAudioMutedChanged();
+    }
+
     setConferenceName("");
     setDisplayName("");
     setIsInConference(false);
@@ -1406,27 +1427,16 @@ void JitsiConnector::leaveConference()
     GlobalCallState::instance().unholdOtherCall();
 }
 
+void JitsiConnector::leaveConference()
+{
+    Q_EMIT executeLeaveRoomCommand();
+    resetConferenceState();
+}
+
 void JitsiConnector::terminateConference()
 {
-    if (m_callHistoryItem) {
-        m_callHistoryItem->endCall();
-        m_callHistoryItem.clear();
-    }
-
-    if (m_inConferenceNotification) {
-        NotificationManager::instance().remove(m_inConferenceNotification->id());
-        m_inConferenceNotification->deleteLater();
-        m_inConferenceNotification = nullptr;
-    }
-
-    m_chatRoom->clear();
-
     Q_EMIT executeEndConferenceCommand();
-    setConferenceName("");
-    setDisplayName("");
-    setIsInConference(false);
-    Q_EMIT GlobalCallState::instance().callEnded(true);
-    GlobalCallState::instance().unholdOtherCall();
+    resetConferenceState();
 }
 
 void JitsiConnector::setOnHold(bool shallHold)
