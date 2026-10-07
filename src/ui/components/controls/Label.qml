@@ -14,9 +14,11 @@ T.Label {
     ToolTip.text: control.text
     ToolTip.visible: hoverHandlerLoader.item?.hovered ?? false
 
+    property bool tooltipsEnabled: true
+
     Loader {
         id: hoverHandlerLoader
-        active: control.truncated
+        active: control.truncated && control.tooltipsEnabled
         sourceComponent: HoverHandler {
             parent: control
         }
