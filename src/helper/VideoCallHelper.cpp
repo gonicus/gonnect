@@ -99,14 +99,18 @@ IConferenceConnector *VideoCallHelper::matchingConferenceConnector(const QString
 
 bool VideoCallHelper::isActiveVideoCallUrl(const QString &url) const
 {
-    if (url.isEmpty() || m_activeVideoCallUrl.isEmpty()) {
+    return urlsEquivalent(url, m_activeVideoCallUrl);
+}
+
+bool VideoCallHelper::urlsEquivalent(const QString &urlA, const QString &urlB) const
+{
+    if (urlA.isEmpty() || urlB.isEmpty()) {
         return false;
     }
 
-    const QUrl candidate(url);
-    const QUrl active(m_activeVideoCallUrl);
-
-    return isPrefix(candidate, active) && isPrefix(active, candidate);
+    const QUrl a(urlA);
+    const QUrl b(urlB);
+    return isPrefix(a, b) && isPrefix(b, a);
 }
 
 void VideoCallHelper::updateActiveVideoCall()

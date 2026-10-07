@@ -1,3 +1,4 @@
+#include <QtEndian>
 #include <QLoggingCategory>
 #include <pjmedia/port.h>
 #include "SIPCall.h"

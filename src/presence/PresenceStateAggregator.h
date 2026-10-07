@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QObject>
+#include <QSet>
 #include "PresenceState.h"
 #include "IPresenceStateProvider.h"
 

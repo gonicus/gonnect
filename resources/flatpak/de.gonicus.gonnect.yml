@@ -100,6 +100,8 @@ modules:
           project-id: 13287
           stable-only: true
           url-template: https://kerberos.org/dist/krb5/${major}.${minor}/krb5-${major}.${minor}.${patch}.tar.gz
+      - type: patch
+        path: patches/krb5-c23-strchr.patch
       - type: file
         path: krb5.conf
 
@@ -333,8 +335,6 @@ modules:
       - -DCMAKE_UNITY_BUILD=ON
       - -DCMAKE_OPTIMIZE_DEPENDENCIES=ON
       - -DENABLE_GOW_001=ON
-      - -DENABLE_GOW_002=ON
-      - -DENABLE_GOW_003=ON
       - -DENABLE_PCH=ON
     sources:
       - type: dir
