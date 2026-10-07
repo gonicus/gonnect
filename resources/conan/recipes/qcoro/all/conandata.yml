@@ -1,0 +1,4 @@
+sources:
+  "0.13.0":
+    url: "https://github.com/qcoro/qcoro/archive/refs/tags/v0.13.0.zip"
+    sha256: "c6c92e836eb7ebc46d1ababc7779088e373ef901b87d8e54d482e35887837067"
