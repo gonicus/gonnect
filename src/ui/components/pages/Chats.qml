@@ -90,12 +90,13 @@ Item {
             item.invitationText = invitationText
         }
 
-        function onClipboardImageUploaded(imageFilePath : url, chatRoom : IChatRoom) {
+        function onClipboardImageUploaded(imageFilePath : url, chatRoom : IChatRoom, threadId : string) {
             ViewHelper.topDrawer.loader.sourceComponent = imagePreviewComponent
 
             const item = ViewHelper.topDrawer.loader.item
             item.source = `file://${imageFilePath}`
             item.chatRoom = chatRoom
+            item.threadId = threadId
         }
     }
 

@@ -128,7 +128,8 @@ public:
     /// Send a message in the specified room with the file as an attachment. The file must
     /// have already been uploaded.
     void sendFile(const QString &roomId, const QString &filePath,
-                  const QString &originalFileName = "", const QString &tempEventId = "");
+                  const QString &originalFileName = "", const QString &tempEventId = "",
+                  const QString &threadId = "");
 
     /// Call to accept or reject a preceeding invitation to a room.
     virtual void respondToInvitation(const QString &roomId, bool acceptInvitation) override;
@@ -193,7 +194,8 @@ public:
                                 const QString &reaction) override;
 
     virtual QString uploadFile(const QString &filePath) override;
-    virtual void uploadImageFromClipboard(const QString &roomId) override;
+    virtual void uploadImageFromClipboard(const QString &roomId,
+                                          const QString &threadId = QString()) override;
 
     virtual bool hasDeviceVerification() const override { return m_hasDeviceVerification; }
     virtual bool isDeviceVerified() const override { return m_isDeviceVerified; }

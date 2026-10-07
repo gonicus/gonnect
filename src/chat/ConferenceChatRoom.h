@@ -38,7 +38,7 @@ public:
     virtual ChatMessage *latestOwnTextMessage() const override { return nullptr; }
     virtual void sendMessage(const QString &message, const QString &relatedMessageId = QString(),
                              const QString &threadId = QString()) override;
-    virtual void sendFile(const QString &filePath) override { Q_UNUSED(filePath) }
+    virtual void sendFile(const QString &filePath, const QString &threadId = QString()) override;
     virtual void sendTypingPing() override { }
     virtual void togglePin(const QString &) override { };
     virtual bool isCompletelyLoaded(const QString &) const override { return false; }

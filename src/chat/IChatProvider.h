@@ -178,7 +178,8 @@ public:
     Q_INVOKABLE virtual QString uploadFile(const QString &filePath) = 0;
 
     /// Receive an image from the clipboard and send it as a message in the given room.
-    Q_INVOKABLE virtual void uploadImageFromClipboard(const QString &roomId) = 0;
+    Q_INVOKABLE virtual void uploadImageFromClipboard(const QString &roomId,
+                                                      const QString &threadId = QString()) = 0;
 
     /// Load n more messages in the given room.
     /// If the optional threadId is set, only messages of that thread must be loaded.
@@ -330,7 +331,7 @@ Q_SIGNALS:
 
     /// An image upload from the clipboard has finished. The image in imageFilePath is ready to be
     /// reviewed and/or sent.
-    void clipboardImageUploaded(QUrl imageFilePath, IChatRoom *chatRoom);
+    void clipboardImageUploaded(QUrl imageFilePath, IChatRoom *chatRoom, QString threadId);
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(IChatProvider::Capabilities)

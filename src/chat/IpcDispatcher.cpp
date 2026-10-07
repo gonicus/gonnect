@@ -462,7 +462,8 @@ void IpcDispatcher::sendTypingPing(const QString &roomId)
 }
 
 void IpcDispatcher::sendFile(const QString &roomId, const QString &filePath,
-                             const QString &originalFileName, const QString &tempEventId)
+                             const QString &originalFileName, const QString &tempEventId,
+                             const QString &threadId)
 {
     if (!chatRoomByRoomId(roomId)) {
         qCCritical(lcIpcDispatcher) << "Unable to find room with id" << roomId << "- aborting";
@@ -498,6 +499,10 @@ void IpcDispatcher::sendFile(const QString &roomId, const QString &filePath,
     }
 
     msgReq.setFile(content);
+    if (!threadId.isEmpty()) {
+        msgReq.setThreadId(threadId);
+    }
+
     req->setMessageSendRequest(msgReq);
 
     const auto tag = req->tag();
@@ -3175,7 +3180,7 @@ QString IpcDispatcher::uploadFile(const QString &filePath)
     return QString("file://%1").arg(newPath);
 }
 
-void IpcDispatcher::uploadImageFromClipboard(const QString &roomId)
+void IpcDispatcher::uploadImageFromClipboard(const QString &roomId, const QString &threadId)
 {
     auto &clippy = ClipboardHelper::instance();
     if (clippy.hasImage()) {
@@ -3201,7 +3206,7 @@ void IpcDispatcher::uploadImageFromClipboard(const QString &roomId)
             return;
         }
 
-        Q_EMIT clipboardImageUploaded(uploadedPath, room);
+        Q_EMIT clipboardImageUploaded(uploadedPath, room, threadId);
     }
 }
 

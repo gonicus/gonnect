@@ -38,6 +38,12 @@ void ConferenceChatRoom::sendMessage(const QString &message, const QString &,
     Q_EMIT sendMessageRequested(message);
 }
 
+void ConferenceChatRoom::sendFile(const QString &filePath, const QString &threadId)
+{
+    Q_UNUSED(filePath)
+    Q_UNUSED(threadId)
+}
+
 ChatUser::PresenceState ConferenceChatRoom::presenceState() const
 {
     return ChatUser::PresenceState::Unknown;

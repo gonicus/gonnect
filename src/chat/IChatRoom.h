@@ -136,7 +136,8 @@ public:
                                          const QString &threadId = QString()) = 0;
 
     /// Given a local file url, send a message with this file as an attachment.
-    Q_INVOKABLE virtual void sendFile(const QString &filePath) = 0;
+    Q_INVOKABLE virtual void sendFile(const QString &filePath,
+                                      const QString &threadId = QString()) = 0;
 
     /// Send that the user is currently typing. Shall be called every 2 seconds as long as the user
     /// is typing.

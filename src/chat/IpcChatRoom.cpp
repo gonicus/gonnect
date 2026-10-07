@@ -188,7 +188,7 @@ void IpcChatRoom::sendMessage(const QString &message, const QString &relatedMess
     ipcDispatcher()->sendMessage(id(), message, relatedMessageId, threadId);
 }
 
-void IpcChatRoom::sendFile(const QString &filePath)
+void IpcChatRoom::sendFile(const QString &filePath, const QString &threadId)
 {
     // Check file size
 
@@ -241,9 +241,9 @@ void IpcChatRoom::sendFile(const QString &filePath)
     } else {
         pendingContent = new ChatMessageContentFile(filePath, originalFileName);
     }
-    auto *pendingMsg = new ChatMessage(tempEventId, ownUserId, nickName, pendingContent,
-                                       QDateTime::currentDateTimeUtc(), this,
-                                       ChatMessage::Flag::OwnMessage | ChatMessage::Flag::Pending);
+    auto *pendingMsg = new ChatMessage(
+            tempEventId, ownUserId, nickName, pendingContent, QDateTime::currentDateTimeUtc(), this,
+            ChatMessage::Flag::OwnMessage | ChatMessage::Flag::Pending, threadId);
     addExistingMessage(pendingMsg, false, false);
 
     // "Upload" file
@@ -252,7 +252,7 @@ void IpcChatRoom::sendFile(const QString &filePath)
     connect(watcher, &QFutureWatcher<QString>::finished, watcher, &QObject::deleteLater);
 
     connect(watcher, &QFutureWatcher<QString>::finished, this,
-            [this, watcher, filePath, originalFileName, tempEventId]() {
+            [this, watcher, filePath, originalFileName, tempEventId, threadId]() {
                 const auto uploadedUrl = watcher->result();
                 if (uploadedUrl.isEmpty()) {
                     qCCritical(lcIpcChatRoom) << "Error on uploading file" << filePath;
@@ -265,7 +265,8 @@ void IpcChatRoom::sendFile(const QString &filePath)
                     return;
                 }
 
-                ipcDispatcher()->sendFile(id(), uploadedUrl, originalFileName, tempEventId);
+                ipcDispatcher()->sendFile(id(), uploadedUrl, originalFileName, tempEventId,
+                                          threadId);
             });
 
     watcher->setFuture(QtConcurrent::run(

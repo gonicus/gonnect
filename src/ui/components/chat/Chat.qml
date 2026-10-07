@@ -309,10 +309,10 @@ Item {
             bottom: parent.bottom
         }
 
-        onSendFile: filePath => control.chatRoom.sendFile(filePath)
+        onSendFile: filePath => control.chatRoom.sendFile(filePath, control.newThreadId || chatMessageList.threadId)
         onImageFromClipboardReceived: () => {
             if (control.chatProvider && control.chatRoom) {
-                control.chatProvider.uploadImageFromClipboard(control.chatRoom.id)
+                control.chatProvider.uploadImageFromClipboard(control.chatRoom.id, control.newThreadId || chatMessageList.threadId)
             }
         }
         onEditLastMessage: () => {
