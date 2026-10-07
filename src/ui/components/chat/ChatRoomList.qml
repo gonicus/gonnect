@@ -71,17 +71,18 @@ Repeater {
 
     delegate: ChatRoomListItem {
         id: delg
-        highlighted: SelectionState.selectedChatRoom?.id === delg.roomId
+        highlighted: SelectionState.selectedChatRoom?.id === delg.roomId && SelectionState.selectedThreadId === ""
+        selected: SelectionState.selectedChatRoom?.id === delg.roomId
         chatRoom: control.chatProvider?.chatRoomByRoomId(delg.roomId) ?? null
         anchors {
             left: parent?.left
             right: parent?.right
         }
 
-        onHighlightedChanged: () => internal.updateSelectedListItem()
+        onSelectedChanged: () => internal.updateSelectedListItem()
 
         onClicked: () => {
-                       if (delg.highlighted) {
+                       if (delg.selected) {
                            SelectionState.selectedThreadId = ""
                        }
                        control.roomSelected(delg.roomId)

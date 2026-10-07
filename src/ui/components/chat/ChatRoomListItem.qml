@@ -31,6 +31,7 @@ Item {
     Accessible.onPressAction: () => control.clicked()
 
     property alias highlighted: selectedBackground.visible
+    property bool selected
 
     signal clicked
     signal favoriteToggled
@@ -174,7 +175,7 @@ Item {
 
     Column {
         id: threadCol
-        visible: control.highlighted && threadRepeater.count > 0
+        visible: control.selected && threadRepeater.count > 0
         anchors {
             left: content.left
             right: content.right
