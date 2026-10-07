@@ -67,6 +67,7 @@ Item {
 
         Label {
             id: titleLabel
+            tooltipsEnabled: false
             font.weight: control.highlighted ? Font.Medium : Font.Normal
             elide: Label.ElideRight
             text: control.lastMessage?.content?.rawText ?? ""
