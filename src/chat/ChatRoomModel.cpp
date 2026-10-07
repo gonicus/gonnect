@@ -25,6 +25,7 @@ QHash<int, QByteArray> ChatRoomModel::roleNames() const
         { static_cast<int>(Roles::Permissions), "permissions" },
         { static_cast<int>(Roles::OwnJoinState), "ownJoinState" },
         { static_cast<int>(Roles::TypingUserNames), "typingUserNames" },
+        { static_cast<int>(Roles::ConferenceUrl), "conferenceUrl" },
     };
 }
 
@@ -114,6 +115,9 @@ void ChatRoomModel::connectChatRoomSignals(IChatRoom *chatRoom)
         emitDataChanged(chatRoom,
                         { static_cast<int>(Roles::HasPresenceState),
                           static_cast<int>(Roles::PresenceState) });
+    });
+    connect(chatRoom, &IChatRoom::conferenceUrlChanged, ctx, [this, chatRoom]() {
+        emitDataChanged(chatRoom, { static_cast<int>(Roles::ConferenceUrl) });
     });
 
     m_chatRoomContextObjects.insert(chatRoom, ctx);
@@ -207,9 +211,11 @@ QVariant ChatRoomModel::data(const QModelIndex &index, int role) const
     case static_cast<int>(Roles::Permissions):
         return QVariant::fromValue(room->permissions());
 
-    case static_cast<int>(Roles::OwnJoinState): {
+    case static_cast<int>(Roles::OwnJoinState):
         return QVariant::fromValue(room->ownUserJoinState());
-    }
+
+    case static_cast<int>(Roles::ConferenceUrl):
+        return room->conferenceUrl();
 
     case static_cast<int>(Roles::TypingUserNames): {
         const auto users = room->typingUsers();
