@@ -5,6 +5,8 @@
 #include "AddressBook.h"
 #include "SIPCallManager.h"
 #include "ChatConnectorManager.h"
+#include "GlobalInfo.h"
+#include "VideoCallHelper.h"
 
 FavoritesModel::FavoritesModel(QObject *parent) : QAbstractListModel{ parent }
 {
@@ -130,6 +132,8 @@ void FavoritesModel::updateModel()
             if (!room->isFavorite()) {
                 continue;
             }
+
+            // Try to find matching contact
             Contact *contact = nullptr;
 
             if (const ChatUser *otherUser = room->otherUser()) {
@@ -141,6 +145,12 @@ void FavoritesModel::updateModel()
                 entry = m_favoriteContactLookup.value(contact, nullptr);
             }
 
+            // Try to find match chat room to conference
+            if (!entry && !room->conferenceUrl().isEmpty()) {
+                entry = findMatchingConferenceFavorite(room->conferenceUrl());
+            }
+
+            // Nothing found
             if (!entry) {
                 auto favEntry = std::make_unique<FavoriteEntry>();
                 favEntry->contact = contact;
@@ -272,6 +282,11 @@ void FavoritesModel::addChatRoomSignals(IChatRoom *chatRoom)
             scheduleModelUpdate();
         }
     });
+    connect(chatRoom, &IChatRoom::conferenceUrlChanged, ctx, [this, chatRoom]() {
+        if (chatRoom->isFavorite()) {
+            scheduleModelUpdate();
+        }
+    });
 
     connect(chatRoom, &IChatRoom::avatarPathChanged, ctx, [this, chatRoom]() {
         if (chatRoom->isFavorite()) {
@@ -291,6 +306,34 @@ void FavoritesModel::addChatRoomSignals(IChatRoom *chatRoom)
     });
 
     m_chatRoomContextObjects.insert(chatRoom, ctx);
+}
+
+FavoriteEntry *FavoritesModel::findMatchingConferenceFavorite(const QString &conferenceUrl) const
+{
+    if (conferenceUrl.isEmpty()) {
+        return nullptr;
+    }
+
+    const auto jitsiBaseUrl = GlobalInfo::instance().jitsiUrl();
+
+    for (const auto &favEntry : std::as_const(m_favorites)) {
+        if (favEntry->contact) {
+            continue;
+        }
+
+        for (const auto &addr : std::as_const(favEntry->addrs)) {
+            if (addr->contactType != NumberStats::ContactType::JitsiMeetUrl) {
+                continue;
+            }
+
+            const auto candidateUrl = jitsiBaseUrl + "/" + addr->addr;
+            if (VideoCallHelper::instance().urlsEquivalent(candidateUrl, conferenceUrl)) {
+                return favEntry.get();
+            }
+        }
+    }
+
+    return nullptr;
 }
 
 int FavoritesModel::rowCount(const QModelIndex &) const

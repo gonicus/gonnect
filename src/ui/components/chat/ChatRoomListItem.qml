@@ -6,7 +6,10 @@ import base
 
 Item {
     id: control
-    implicitHeight: content.y + content.height
+    height: control.implicitHeight
+    implicitHeight: content.y + content.height + (threadCol.visible ? threadCol.implicitHeight : 0)
+
+    property IChatRoom chatRoom: null
 
     required property int index
     required property string roomId
@@ -29,6 +32,7 @@ Item {
     Accessible.onPressAction: () => control.clicked()
 
     property alias highlighted: selectedBackground.visible
+    property bool selected
 
     signal clicked
     signal favoriteToggled
@@ -36,6 +40,7 @@ Item {
     signal editRoomTriggered
     signal inviteUsersTriggered
     signal filesDropped(list<url> urls)
+    signal threadSelected(string threadId)
 
     ChatRoomListSectionHeader {
         id: sectionHeaderItem
@@ -45,8 +50,8 @@ Item {
             top: parent.top
             left: parent.left
             right: parent.right
-            leftMargin: 10
-            rightMargin: 10
+            leftMargin: Theme.d
+            rightMargin: Theme.d
         }
     }
 
@@ -85,7 +90,7 @@ Item {
             indicatorComponent: Component { ChatUserPresenceStatusIndicator {} }
             anchors {
                 left: parent.left
-                leftMargin: 10
+                leftMargin: Theme.d
                 verticalCenter: parent.verticalCenter
             }
 
@@ -100,8 +105,8 @@ Item {
                        ? unreadBubble.left
                        : parent.right
                 verticalCenter: parent.verticalCenter
-                leftMargin: 10
-                rightMargin: 10
+                leftMargin: Theme.d
+                rightMargin: Theme.d
             }
 
             Label {
@@ -120,13 +125,13 @@ Item {
         Rectangle {
             id: unreadBubble
             visible: control.unreadCount > 0 || control.ownJoinState !== IChatRoom.UserRoomState.Joined
-            width: 24
+            width: 2 * Theme.d
             height: unreadBubble.width
             radius: unreadBubble.width / 2
             color: Theme.redColor
             anchors {
                 right: parent.right
-                rightMargin: 10
+                rightMargin: Theme.d
                 verticalCenter: parent.verticalCenter
             }
 
@@ -164,6 +169,34 @@ Item {
                 } else {
                     control.clicked()
                 }
+            }
+        }
+    }
+
+    Column {
+        id: threadCol
+        visible: control.selected && threadRepeater.count > 0
+        anchors {
+            left: content.left
+            right: content.right
+            top: content.bottom
+            leftMargin: 2 * Theme.d
+        }
+
+        Repeater {
+            id: threadRepeater
+            model: ChatThreadModel {
+                chatRoom: control.chatRoom
+            }
+            delegate: ChatRoomListThreadItem {
+                id: threadDelg
+                highlighted: SelectionState.selectedThreadId === threadDelg.threadId
+                anchors {
+                    left: parent?.left
+                    right: parent?.right
+                }
+
+                onClicked: () => control.threadSelected(threadDelg.highlighted ? "" : threadDelg.threadId)
             }
         }
     }

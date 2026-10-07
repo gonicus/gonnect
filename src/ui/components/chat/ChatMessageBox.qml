@@ -316,7 +316,7 @@ Item {
         clip: true
         padding: 0
         contentWidth: messageFieldScrollView.availableWidth
-        contentHeight: messageField.height
+        contentHeight: messageField.contentHeight
         anchors {
             top: editBanner.bottom
             left: parent.left
@@ -331,7 +331,7 @@ Item {
             font.pixelSize: Theme.fontSizeNormal
             wrapMode: TextEdit.Wrap
             width: messageFieldScrollView.availableWidth
-            height: Math.max(messageField.contentHeight, messageFieldScrollView.availableHeight)
+            height: messageField.contentHeight
 
             onCursorRectangleChanged: internal.ensureCursorVisible()
 
