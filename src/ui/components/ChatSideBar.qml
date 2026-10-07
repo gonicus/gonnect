@@ -16,12 +16,13 @@ Item {
 
     Connections {
         target: control.chatProvider
-        function onClipboardImageUploaded(imageFilePath, chatRoom) {
+        function onClipboardImageUploaded(imageFilePath : url, chatRoom : IChatRoom, threadId : string) {
             ViewHelper.topDrawer.loader.sourceComponent = imagePreviewComponent
 
             const item = ViewHelper.topDrawer.loader.item
             item.source = `file://${imageFilePath}`
             item.chatRoom = chatRoom
+            item.threadId = threadId
         }
     }
 
