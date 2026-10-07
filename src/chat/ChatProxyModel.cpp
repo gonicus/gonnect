@@ -213,6 +213,42 @@ bool ChatProxyModel::lessThan(const QModelIndex &sourceLeft, const QModelIndex &
     return leftTime > rightTime;
 }
 
+bool ChatProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const
+{
+    const auto model = sourceModel();
+    if (!model) {
+        return false;
+    }
+
+    if (m_threadId.isEmpty()) {
+        return true;
+    }
+
+    using Roles = ChatModel::Roles;
+    const auto sourceIndex = model->index(sourceRow, 0, sourceParent);
+    if (!sourceIndex.isValid()) {
+        return false;
+    }
+
+    const auto threadId = model->data(sourceIndex, static_cast<int>(Roles::ThreadId)).toString();
+    if (m_threadId == threadId) {
+        return true;
+    }
+
+    const auto eventId = model->data(sourceIndex, static_cast<int>(Roles::EventId)).toString();
+    return m_threadId == eventId;
+}
+
+void ChatProxyModel::setThreadId(const QString &threadId)
+{
+    if (m_threadId != threadId) {
+        beginFilterChange();
+        m_threadId = threadId;
+        Q_EMIT threadIdChanged();
+        endFilterChange();
+    }
+}
+
 void ChatProxyModel::onSourceModelChanged()
 {
     if (m_sourceModelContext) {

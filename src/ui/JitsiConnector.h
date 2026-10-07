@@ -131,6 +131,9 @@ private:
     // instead.
     void toggleMute();
 
+    // Shared teardown logic for leaveConference()/terminateConference()
+    void resetConferenceState();
+
     void checkJitsiBackendFeatures();
     void checkMeetingEstablished();
 

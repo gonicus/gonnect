@@ -30,6 +30,7 @@ public:
         Permissions,
         OwnJoinState,
         TypingUserNames,
+        ConferenceUrl,
 
         // Dummy element such that the enum can be extended in ChatRoomProxyModel; must remain the
         // last/highest value in this enum

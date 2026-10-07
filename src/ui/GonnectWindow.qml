@@ -408,9 +408,14 @@ BaseWindow {
 
             Chats {
                 id: chatsPage
-                attachedData: SelectionState.selectedPage.attachedData as IChatProvider
                 visible: false
                 anchors.fill: parent
+
+                Binding on attachedData {
+                    when: SelectionState.selectedPage.type === MainPageSelection.PageType.Chats
+                    value: SelectionState.selectedPage.attachedData as IChatProvider
+                    restoreMode: Binding.RestoreNone
+                }
             }
 
             Conference {

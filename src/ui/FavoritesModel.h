@@ -65,6 +65,7 @@ private:
     void sortInnerModel();
     void addChatProviderSignals(IChatProvider &provider);
     void addChatRoomSignals(IChatRoom *chatRoom);
+    FavoriteEntry *findMatchingConferenceFavorite(const QString &conferenceUrl) const;
 
     std::vector<std::unique_ptr<FavoriteEntry>> m_favorites;
     QHash<Contact *, FavoriteEntry *> m_favoriteContactLookup;
