@@ -4,7 +4,7 @@
 <context>
     <name>CallSideBar</name>
     <message numerus="yes">
-        <location filename="../src/ui/components/CallSideBar.qml" line="217"/>
+        <location filename="../src/ui/components/CallSideBar.qml" line="231"/>
         <source>Person(s)</source>
         <translation>
             <numerusform>Person</numerusform>
