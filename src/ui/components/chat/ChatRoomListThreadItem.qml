@@ -70,6 +70,7 @@ Item {
             font.weight: control.highlighted ? Font.Medium : Font.Normal
             elide: Label.ElideRight
             text: control.lastMessage?.content?.rawText ?? ""
+            maximumLineCount: 1
             anchors {
                 left: parent.left
                 right: parent.right
