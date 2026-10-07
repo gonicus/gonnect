@@ -7,6 +7,8 @@
 #include "BlinkStick.h"
 #include "GlobalCallState.h"
 #include "GlobalMuteState.h"
+#include "GlobalStateAggregator.h"
+#include "EnumTranslation.h"
 
 #include <QSet>
 
@@ -16,6 +18,8 @@ BusylightDeviceManager::BusylightDeviceManager(QObject *parent) : QObject{ paren
     connect(&GlobalCallState::instance(), &GlobalCallState::globalCallStateChanged, this,
             &BusylightDeviceManager::updateBusylightState);
     connect(&GlobalMuteState::instance(), &GlobalMuteState::isMutedChangedWithTag, this,
+            &BusylightDeviceManager::updateBusylightState);
+    connect(&GlobalStateAggregator::instance(), &GlobalStateAggregator::presenceStateChanged, this,
             &BusylightDeviceManager::updateBusylightState);
     updateBusylightState();
 }
@@ -139,8 +143,15 @@ void BusylightDeviceManager::updateBusylightState()
 
     if (!isCallActive) {
         stopBlinking();
-        switchOff();
         switchStreamlightOff();
+
+        const auto presenceState = GlobalStateAggregator::instance().presenceState();
+        if (presenceState == PresenceState::State::Unknown
+            || presenceState == PresenceState::State::Offline) {
+            switchOff();
+        } else {
+            switchOn(EnumTranslation::instance().presenceStateColor(presenceState));
+        }
         return;
     }
 
