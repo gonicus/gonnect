@@ -610,7 +610,7 @@ Item {
         ReactionButton {
             id: threadBadge
             visible: threadBadge.shallBeVisible
-            emoji: "💬"
+            iconPath: Icons.messageThread
             text: qsTr("Thread")
             highlighted: true
             onClicked: () => control.openThread(control.isThreadRoot ? control.eventId : control.threadId)

@@ -1,19 +1,21 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Controls.impl
 import base
 
 Item {
     id: control
 
     implicitHeight: 24
-    implicitWidth: emojiLabel.implicitWidth
+    implicitWidth: (control.hasIcon ? iconLabel.implicitWidth : emojiLabel.implicitWidth)
                    + textLabel.implicitWidth
                    + control.leftPadding
                    + control.rightPadding
-                   + (emojiLabel.text !== "" && textLabel.text !== "" ? control.spacing : 0)
+                   + ((control.hasIcon || emojiLabel.text !== "") && textLabel.text !== "" ? control.spacing : 0)
 
     property alias emoji: emojiLabel.text
+    property alias iconPath: iconLabel.icon.source
     property alias text: textLabel.text
     property bool highlighted
 
@@ -22,6 +24,8 @@ Item {
     property int spacing: 4
 
     signal clicked
+
+    readonly property bool hasIcon: control.iconPath.toString() !== ""
 
     Rectangle {
         id: background
@@ -44,6 +48,7 @@ Item {
 
     Label {
         id: emojiLabel
+        visible: !control.hasIcon
         font {
             family: "Noto Color Emoji"
             pixelSize: 14
@@ -56,11 +61,28 @@ Item {
         }
     }
 
+    IconLabel {
+        id: iconLabel
+        visible: control.hasIcon
+        icon {
+            width: 16
+            height: 16
+            color: textLabel.color
+        }
+        anchors {
+            left: parent.left
+            leftMargin: control.leftPadding
+            verticalCenter: parent.verticalCenter
+        }
+    }
+
     Label {
         id: textLabel
         anchors {
-            left: emojiLabel.text !== "" ? emojiLabel.right : parent.left
-            leftMargin: emojiLabel.text !== "" ? control.spacing : control.leftPadding
+            left: control.hasIcon
+                  ? iconLabel.right
+                  : (emojiLabel.text !== "" ? emojiLabel.right : parent.left)
+            leftMargin: (control.hasIcon || emojiLabel.text !== "") ? control.spacing : control.leftPadding
             verticalCenter: parent.verticalCenter
         }
     }
