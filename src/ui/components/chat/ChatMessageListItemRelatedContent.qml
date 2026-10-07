@@ -11,6 +11,7 @@ Item {
     property alias content: relatedContent.content
     property alias userState: relatedContent.userState
     property alias affectedUserName: relatedContent.affectedUserName
+    property bool startsNewThread: false
     property string nickName
 
     Rectangle {
@@ -42,7 +43,9 @@ Item {
             color: Theme.secondaryTextColor
             font.weight: Font.DemiBold
             wrapMode: Label.Wrap
-            text: qsTr("Answer to message from %1").arg(control.nickName)
+            text: control.startsNewThread
+                  ? qsTr("Start a new thread with message from %1").arg(control.nickName)
+                  : qsTr("Answer to message from %1").arg(control.nickName)
             anchors {
                 left: parent.left
                 right: parent.right
@@ -54,7 +57,10 @@ Item {
         ChatMessageListItemContent {
             id: relatedContent
             messageLabel.color: Theme.secondaryTextColor
-            width: relatedCol.width
+            anchors {
+                left: parent.left
+                right: parent.right
+            }
         }
     }
 }
