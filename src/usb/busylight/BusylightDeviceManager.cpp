@@ -49,6 +49,7 @@ bool BusylightDeviceManager::createBusylightDevice(const hid_device_info &device
     if (device) {
         device->open();
         m_devices.append(device);
+        updateBusylightState();
     }
     return device;
 }
