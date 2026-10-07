@@ -32,6 +32,7 @@ public:
     void onCallMediaState(pj::OnCallMediaStateParam &prm) override;
     void onInstantMessage(pj::OnInstantMessageParam &prm) override;
     void onInstantMessageStatus(pj::OnInstantMessageStatusParam &prm) override;
+    void onDtmfDigit(pj::OnDtmfDigitParam &prm) override;
     void onCallTsxState(pj::OnCallTsxStateParam &prm) override;
     void onCallRxText(pj::OnCallRxTextParam &prm) override;
 
