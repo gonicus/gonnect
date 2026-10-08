@@ -5,6 +5,15 @@
 #include <QFileInfo>
 #include <QDirIterator>
 #include <QDir>
+#include <QLoggingCategory>
+
+#ifdef Q_OS_FLATPAK
+#include <QDBusConnection>
+#include <QDBusMessage>
+#include <QDBusReply>
+#endif
+
+Q_LOGGING_CATEGORY(lcFileContentHelper, "gonnect.helper.FileContentHelper")
 
 FileContentHelper::FileContentHelper(QObject *parent) : QObject{ parent } { }
 
@@ -95,4 +104,54 @@ QList<QUrl> FileContentHelper::uploadableUrls(const QList<QUrl> &urls) const
     }
 
     return result;
+}
+
+QString FileContentHelper::portalFileTransferMimeType() const
+{
+    static const QString portalMimeType = QStringLiteral("application/vnd.portal.filetransfer");
+    return portalMimeType;
+}
+
+
+QList<QUrl> FileContentHelper::resolvePortalFileToken(const QString &token) const
+{
+#ifdef Q_OS_FLATPAK
+    const QString key = token.trimmed();
+
+    if (key.isEmpty()) {
+        return {};
+    }
+
+    auto message = QDBusMessage::createMethodCall(
+            QStringLiteral("org.freedesktop.portal.Documents"),
+            QStringLiteral("/org/freedesktop/portal/documents"),
+            QStringLiteral("org.freedesktop.portal.FileTransfer"),
+            QStringLiteral("RetrieveFiles"));
+    message.setArguments({ key, QVariantMap{} });
+
+    const QDBusReply<QStringList> reply =
+        QDBusConnection::sessionBus().call(message, QDBus::Block, 5000);
+
+    if (!reply.isValid()) {
+        qCWarning(lcFileContentHelper)
+                << "Could not retrieve files for portal file transfer token:"
+                << reply.error().name() << reply.error().message();
+        return {};
+    }
+
+    const QStringList paths = reply.value();
+    QList<QUrl> urls;
+    urls.reserve(paths.size());
+
+    for (const QString &path : std::as_const(paths)) {
+        urls.append(QUrl::fromLocalFile(path));
+    }
+
+    qCDebug(lcFileContentHelper) << "Portal file transfer resolved to" << urls.size() << "file(s)";
+
+    return urls;
+#else
+    Q_UNUSED(token)
+    return {};
+#endif
 }
