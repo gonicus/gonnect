@@ -9,6 +9,7 @@
 #include "GlobalMuteState.h"
 #include "GlobalStateAggregator.h"
 #include "EnumTranslation.h"
+#include "AppSettings.h"
 
 #include <QSet>
 
@@ -146,13 +147,18 @@ void BusylightDeviceManager::updateBusylightState()
         stopBlinking();
         switchStreamlightOff();
 
+        AppSettings settings;
+        const bool shallMirror =
+                settings.value("generic/busylightMirrorPresenceState", true).toBool();
         const auto presenceState = GlobalStateAggregator::instance().presenceState();
-        if (presenceState == PresenceState::State::Unknown
+
+        if (!shallMirror || presenceState == PresenceState::State::Unknown
             || presenceState == PresenceState::State::Offline) {
             switchOff();
         } else {
             switchOn(EnumTranslation::instance().presenceStateColor(presenceState));
         }
+
         return;
     }
 
