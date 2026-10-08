@@ -41,6 +41,7 @@ Item {
         property alias useHeadset: headsetCheckBox.checked
         property alias noSyncSystemMute: disableSystemMutePropagationCheckBox.checked
         property alias jitsiChatAsNotifications: jitsiChatAsNotificationsCheckBox.checked
+        property alias busylightMirrorPresenceState: busylightCheckBox.checked
         property alias keepHistoryDays: historyDaysToKeepInputField.text
     }
 
@@ -176,6 +177,20 @@ Item {
                                 left: parent.left
                                 right: parent.right
                             }
+                        }
+
+                        CheckBox {
+                            id: busylightCheckBox
+                            text: qsTr('Show presence state on busylight')
+                            checked: true  // default value
+                            anchors {
+                                left: parent.left
+                                right: parent.right
+                            }
+
+                            Accessible.role: Accessible.CheckBox
+                            Accessible.name: busylightCheckBox.text
+                            Accessible.focusable: true
                         }
 
                         CheckBox {
