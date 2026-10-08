@@ -1,113 +1,63 @@
 name: GOnnect Publish
+
+# Builds all packages for a release tag and attaches them to its GitHub release.
+# Called by the release workflow after semantic-release created the tag. It can
+# be dispatched manually to (re-)attach the packages to an existing release.
 on:
+  workflow_call:
+    inputs:
+      tag:
+        description: Release tag to build and publish (e.g. v1.2.3)
+        type: string
+        required: true
   workflow_dispatch:
-  push:
-    tags:
-      - 'v*'
-
-env:
-  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
-  BUILD_TYPE: Release
-  EXT_BASE: ${{github.workspace}}
-
-permissions:
-  contents: write
+    inputs:
+      tag:
+        description: Release tag to build and publish (e.g. v1.2.3)
+        type: string
+        required: true
 
 jobs:
-  flatpak:
-    name: "Release GOnnect (Flatpak)"
+  packages:
+    name: "Build packages"
+    permissions:
+      contents: read
+      id-token: write
+    uses: ./.github/workflows/build-packages.yml
+    secrets: inherit
+    with:
+      ref: ${{ inputs.tag }}
+      windows: true
+      # Do not build the MacOS package for now, as it is not tested.
+      macos: false
+      flatpak: true
+      sign: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/release' }}
+
+  publish:
+    name: "Upload to release"
     runs-on: ubuntu-26.04
-    if: startsWith(github.ref, 'refs/tags/')
-    container:
-      image: ghcr.io/flathub-infra/flatpak-github-actions:kde-6.10
-      options: --privileged
+    needs: packages
+    permissions:
+      contents: write
 
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Download packages
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
-          lfs: 'true'
-          submodules: 'recursive'
-      - name: Reading GOnnect version
+          path: packages
+          merge-multiple: true
+
+      - name: Upload packages to release
         shell: bash
-        id: var
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag }}
         run: |
-          echo "gonnect_version=$(grep -oP 'GOnnect VERSION ([0-9.]+)' CMakeLists.txt | awk '{ print $3 }')" >> $GITHUB_OUTPUT
-
-      - uses: flatpak/flatpak-github-actions/flatpak-builder@79327416609af08178ad73b352877e51450790b3 # v6.8
-        with:
-          bundle: GOnnect.flatpak
-          build-bundle: 'true'
-          upload-artifact: 'false'
-          manifest-path: resources/flatpak/de.gonicus.gonnect.yml
-          cache-key: flatpak-builder-${{ steps.var.outputs.gonnect_version }}
-
-      - name: Upload binaries to release
-        uses: svenstaro/upload-release-action@29e53e917877a24fad85510ded594ab3c9ca12de # v2
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: GOnnect.flatpak
-          asset_name: GOnnect-${{ steps.var.outputs.gonnect_version }}.flatpak
-          overwrite: true
-
-  build-windows:
-    runs-on: windows-2025
-    name: "Release GOnnect (Windows)"
-    if: startsWith(github.ref, 'refs/tags/')
-
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-        with:
-          lfs: 'true'
-          submodules: 'recursive'
-
-      - name: Prepare
-        uses: ./.github/actions/prepare-windows
-
-      - name: Configure CMake
-        shell: cmd
-        run: cmake --preset conan-default
-
-      - name: Build
-        run: cmake --build --preset conan-release
-
-      - name: Package
-        run: cd build && cpack ${{github.workspace}}
-
-      - name: Upload binaries to release
-        uses: svenstaro/upload-release-action@29e53e917877a24fad85510ded594ab3c9ca12de # v2
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: build/GOnnect*.exe
-          file_glob: true
-          overwrite: true
-
-  build-macos:
-    runs-on: macos-26
-    name: "Release GOnnect (MacOS)"
-    if: startsWith(github.ref, 'refs/tags/')
-
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-        with:
-          lfs: 'true'
-          submodules: 'recursive'
-
-      - name: Prepare
-        uses: ./.github/actions/prepare-macos
-
-      - name: Configure CMake
-        run: cmake --preset conan-release
-
-      - name: Build
-        run: cmake --build --preset conan-release
-
-      - name: Package
-        run: cd build/Release && cpack ${{github.workspace}}
-
-      - name: Upload binaries to release
-        uses: svenstaro/upload-release-action@29e53e917877a24fad85510ded594ab3c9ca12de # v2
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: build/Release/GOnnect*.dmg
-          file_glob: true
-          overwrite: true
+          VERSION="${TAG#v}"
+          mkdir release
+          for ext in msix dmg flatpak; do
+            for f in packages/*.$ext; do
+              [ -e "$f" ] && mv "$f" "release/GOnnect-$VERSION.$ext"
+            done
+          done
+          gh release upload "$TAG" release/* --clobber --repo "$GITHUB_REPOSITORY"
