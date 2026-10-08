@@ -55,7 +55,9 @@ jobs:
         run: |
           VERSION="${TAG#v}"
           mkdir release
-          mv packages/*.msix "release/GOnnect-$VERSION.msix"
-          mv packages/*.dmg "release/GOnnect-$VERSION.dmg"
-          mv packages/*.flatpak "release/GOnnect-$VERSION.flatpak"
+          for ext in msix dmg flatpak; do
+            for f in packages/*.$ext; do
+              [ -e "$f" ] && mv "$f" "release/GOnnect-$VERSION.$ext"
+            done
+          done
           gh release upload "$TAG" release/* --clobber --repo "$GITHUB_REPOSITORY"

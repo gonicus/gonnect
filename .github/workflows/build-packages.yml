@@ -23,7 +23,7 @@ on:
         type: boolean
         default: false
       sign:
-        description: Sign the Windows application and create the MSIX package
+        description: Sign the Windows application and the MSIX package
         type: boolean
         default: false
 
@@ -78,7 +78,6 @@ jobs:
           timestamp-digest: SHA256
 
       - name: Build MSIX layout
-        if: ${{ inputs.sign }}
         shell: powershell
         run: |
           $workspace = "${{ github.workspace }}"
@@ -98,7 +97,6 @@ jobs:
           Copy-Item -Recurse "resources/windows/msix/Assets" "$workspace/msix-layout/Assets"
 
       - name: Pack MSIX
-        if: ${{ inputs.sign }}
         shell: powershell
         run: |
           $makeappx = Get-ChildItem `
@@ -120,7 +118,6 @@ jobs:
           timestamp-digest: SHA256
 
       - name: Save MSIX
-        if: ${{ inputs.sign }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: windows-msix
