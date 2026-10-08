@@ -12,11 +12,14 @@ Menu {
     signal editRoomTriggered
     signal inviteUsersTriggered
     signal editConferenceUrlTriggered
+    signal indexingToggled
 
     property bool toggleFavoriteVisible: true
     property bool editRoomVisible: true
     property bool inviteUsersVisible: true
     property bool editConferenceUrlVisible: false
+    property bool toggleIndexingVisible: false
+    property bool indexingEnabled: false
 
     HideableMenuItem {
         visible: control.toggleFavoriteVisible
@@ -50,5 +53,11 @@ Menu {
         text: qsTr("Leave room...")
         icon.source: Icons.dialogCancel
         onTriggered: () => control.leaveRoomTriggered()
+    }
+
+    HideableMenuItem {
+        text: control.indexingEnabled ? qsTr("Disable search index") : qsTr("Enable search index")
+        icon.source: Icons.systemSearch
+        onTriggered: () => control.indexingToggled()
     }
 }

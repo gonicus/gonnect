@@ -44,6 +44,36 @@ ChatMessageSearchProvider::ChatMessageSearchProvider(QObject *parent) : QObject{
     });
 }
 
+QString ChatMessageSearchProvider::indexingSettingsKey(const QString &roomUid) const
+{
+    return QString("chatSearchIndexing/%1").arg(roomUid);
+}
+
+void ChatMessageSearchProvider::indexRoomMessages(IChatRoom &room) const
+{
+    const auto chatMessages = room.chatMessages();
+    QList<ChatMessageSearchIndexer::Message> messages;
+    messages.reserve(chatMessages.size());
+
+    for (auto &chatMessage : chatMessages) {
+        if (chatMessage && chatMessage->content()) {
+            if (const auto textContent =
+                        qobject_cast<ChatMessageContentText *>(chatMessage->content())) {
+                messages.append({ chatMessage->eventId(), room.id(), textContent->rawText(),
+                                  chatMessage->timestamp().toMSecsSinceEpoch() });
+            }
+        }
+    }
+
+    if (!messages.isEmpty()) {
+        if (!m_indexer->addMessages(messages)) {
+            qCWarning(lcChatMessageSearchProvider)
+                    << "Failed to add messages to indexer:" << m_indexer->lastError();
+        };
+        m_indexer->optimize();
+    }
+}
+
 IChatProvider *ChatMessageSearchProvider::getChatProviderByRoom(const QString &roomUid)
 {
     auto rit = m_chatRoomsByUid.find(roomUid);
@@ -161,31 +191,14 @@ void ChatMessageSearchProvider::loadChatRoom(const QString &providerUid, IChatRo
         return;
     }
 
-    QList<ChatMessageSearchIndexer::Message> messages;
-
-    auto chatMessages = room->chatMessages();
-    for (auto &chatMessage : chatMessages) {
-        if (chatMessage && chatMessage->content()) {
-            if (const auto textContent =
-                        qobject_cast<ChatMessageContentText *>(chatMessage->content())) {
-                messages.append({ chatMessage->eventId(), roomUid, textContent->rawText(),
-                                  chatMessage->timestamp().toMSecsSinceEpoch() });
-            }
-        }
-    }
-
-    if (!messages.isEmpty()) {
-        if (!m_indexer->addMessages(messages)) {
-            qCWarning(lcChatMessageSearchProvider)
-                    << "Failed to add messages to indexer:" << m_indexer->lastError();
-        };
-        m_indexer->optimize();
+    if (isRoomIndexingEnabled(roomUid)) {
+        indexRoomMessages(*room);
     }
 
     // Connect to chat room changes as long as the associated context lives
     connect(room, &IChatRoom::chatMessageAdded, context,
             [this, roomUid](qsizetype, ChatMessage *chatMessage) {
-                if (chatMessage && chatMessage->content()) {
+                if (isRoomIndexingEnabled(roomUid) && chatMessage && chatMessage->content()) {
                     if (const auto textContent =
                                 qobject_cast<ChatMessageContentText *>(chatMessage->content())) {
                         m_indexer->addMessage({ chatMessage->eventId(), roomUid,
@@ -202,7 +215,7 @@ void ChatMessageSearchProvider::loadChatRoom(const QString &providerUid, IChatRo
             });
     connect(room, &IChatRoom::chatMessageContentChanged, context,
             [this, roomUid](qsizetype, ChatMessage *chatMessage) {
-                if (chatMessage && chatMessage->content()) {
+                if (isRoomIndexingEnabled(roomUid) && chatMessage && chatMessage->content()) {
                     if (const auto textContent =
                                 qobject_cast<ChatMessageContentText *>(chatMessage->content())) {
                         m_indexer->updateMessage({ chatMessage->eventId(), roomUid,
@@ -271,6 +284,37 @@ QString ChatMessageSearchProvider::getChatMessageText(ChatMessage *message)
     }
 
     return "";
+}
+
+bool ChatMessageSearchProvider::isRoomIndexingEnabled(const QString &roomUid) const
+{
+    if (roomUid.isEmpty()) {
+        return false;
+    }
+    return m_appSettings.value(indexingSettingsKey(roomUid), false).toBool();
+}
+
+void ChatMessageSearchProvider::setRoomIndexingEnabled(const QString &roomUid, bool enabled)
+{
+    if (roomUid.isEmpty()) {
+        return;
+    }
+
+    const bool oldValue = isRoomIndexingEnabled(roomUid);
+    if (oldValue != enabled) {
+        m_appSettings.setValue(indexingSettingsKey(roomUid), enabled);
+
+        if (enabled) {
+            const auto roomConn = m_chatRoomsByUid.value(roomUid);
+            if (roomConn.room) {
+                indexRoomMessages(*roomConn.room);
+            }
+        } else {
+            m_indexer->removeMessagesByRoom(roomUid);
+        }
+
+        Q_EMIT roomIndexingEnabledChanged(roomUid, enabled);
+    }
 }
 
 ChatMessageSearchProvider::~ChatMessageSearchProvider()

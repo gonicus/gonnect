@@ -4,11 +4,10 @@
 
 #include <QObject>
 #include <QQmlEngine>
-
 #include "IChatRoom.h"
-
 #include "ChatMessageSearchIndexer.h"
 #include "ChatMessageSearchModel.h"
+#include "AppSettings.h"
 
 class IChatProvider;
 
@@ -49,11 +48,17 @@ public:
     Q_INVOKABLE ChatMessage *getChatMessage(const QString &roomUid, const QString &messageUid);
     Q_INVOKABLE QString getChatMessageText(ChatMessage *message);
 
+    Q_INVOKABLE bool isRoomIndexingEnabled(const QString &roomUid) const;
+    Q_INVOKABLE void setRoomIndexingEnabled(const QString &roomUid, bool enabled);
+
 private:
     ChatMessageSearchProvider(QObject *parent = nullptr);
+    QString indexingSettingsKey(const QString &roomUid) const;
+    void indexRoomMessages(IChatRoom &room) const;
 
     ChatMessageSearchIndexer *m_indexer = nullptr;
     ChatMessageSearchModel *m_model = nullptr;
+    AppSettings m_appSettings;
 
     QString m_searchPhrase;
 
@@ -90,10 +95,9 @@ private:
 Q_SIGNALS:
     void chatRoomAdded(QString uid);
     void chatRoomDeleted(QString uid);
-
     void chatMessagesChanged();
-
     void searchPhraseChanged();
+    void roomIndexingEnabledChanged(QString roomUid, bool enabled);
 };
 
 class ChatMessageSearchProviderWrapper
