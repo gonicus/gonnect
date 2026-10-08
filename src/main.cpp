@@ -45,6 +45,11 @@ static int setup_unix_signal_handlers()
 int main(int argc, char *argv[])
 {
 #ifdef Q_OS_LINUX
+    // Enforce desktopportal whatever the auto detection says
+    if (QFile::exists("/.flatpak-info")) {
+        qputenv("QT_QPA_PLATFORMTHEME", "xdgdesktopportal");
+    }
+
     // QDate & friends internally use localtime/mktime. Init glibc timezone
     // state while we're single threaded. Later calls only use the cached
     // answer and avoids race conditions.
@@ -82,8 +87,7 @@ int main(int argc, char *argv[])
             chromiumFlags.push_back("--disable-renderer-accessibility");
         }
 
-        chromiumFlags.push_back("--enable-features=WebRtcPipeWireCamera");
-
+        //chromiumFlags.push_back("--enable-features=WebRtcPipeWireCamera");
         if (chromiumFlags.size() > 0) {
             qputenv("QTWEBENGINE_CHROMIUM_FLAGS", chromiumFlags.join(" ").toStdString().c_str());
         }
