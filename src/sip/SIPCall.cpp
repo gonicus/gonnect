@@ -74,13 +74,10 @@ SIPCall::SIPCall(SIPAccount *account, int callId, const QString &contactId, bool
             &SIPCall::updateMutedState);
     updateMutedState();
 
-    if (!silent) {
+    if (!silent && callId < 0) {
         auto &globalCallState = GlobalCallState::instance();
         Q_EMIT globalCallState.callStarted(false);
-
-        if (callId < 0) { // Call is outgoing
-            globalCallState.holdAllCalls(this);
-        }
+        globalCallState.holdAllCalls(this);
     }
 
     AudioManager::instance().acquireDevice();
