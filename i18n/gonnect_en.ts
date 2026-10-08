@@ -15,7 +15,7 @@
 <context>
     <name>Chat</name>
     <message numerus="yes">
-        <location filename="../src/ui/components/chat/Chat.qml" line="204"/>
+        <location filename="../src/ui/components/chat/Chat.qml" line="223"/>
         <source>%1 is/are typing</source>
         <translation type="unfinished">
             <numerusform>%1 is typing</numerusform>
@@ -93,7 +93,7 @@
 <context>
     <name>SettingsPage</name>
     <message numerus="yes">
-        <location filename="../src/ui/components/SettingsPage.qml" line="285"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="300"/>
         <source>day(s) of history</source>
         <translation>
             <numerusform>day of history</numerusform>
