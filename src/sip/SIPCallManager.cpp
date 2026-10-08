@@ -160,6 +160,8 @@ void SIPCallManager::onIncomingCall(SIPCall *call)
         return;
     }
 
+    Q_EMIT GlobalCallState::instance().callStarted(false);
+
     QStringList bodyParts;
     QString displayName = contactInfo.phoneNumber;
     auto numberType = contactInfo.numberType;
