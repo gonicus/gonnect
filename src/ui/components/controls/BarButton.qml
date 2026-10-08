@@ -118,7 +118,6 @@ Item {
             id: buttonIcon
             Accessible.ignored: true
             color: buttonLabel.color
-            width: control.iconSize
             height: control.iconSize
             icon {
                 width: control.iconSize

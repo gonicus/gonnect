@@ -45,6 +45,20 @@ Item {
 
     property AggregatedDirectRoomsOfContact roomsAggregator: null
 
+    // -1 is conference chat, so null required as non-value here
+    property var manualChatSourceIndex: null
+
+    property int linkedRoomsCount: 0
+
+    ConferenceLinkedRoomsProxyModel {
+        id: conferenceRoomsModel
+        conferenceUrl: (control.conferenceMode && (control.conferenceConnector?.isInConference ?? false))
+                       ? (control.conferenceConnector?.conferenceUrl.toString() ?? "")
+                       : ""
+
+        AllChatProvidersRoomProxyModel {}
+    }
+
     function useImageFromClipboard() {
         if (chatSideBar.visible && chatSideBar.chatProvider && chatSideBar.chatRoom) {
             chatSideBar.chatProvider.uploadImageFromClipboard(chatSideBar.chatRoom.id)
@@ -284,7 +298,8 @@ Item {
     ChatSideBar {
         id: chatSideBar
         visible: false
-        chatProvider: control.roomsAggregator?.providerOfRoom(chatSideBar.chatRoom) ?? null
+        conferenceRoomsModel: conferenceRoomsModel
+        showConferenceChatOption: control.conferenceConnector?.hasCapability(IConferenceConnector.Capability.ChatInCall) ?? false
         anchors {
             top: headerBar.bottom
             bottom: parent.bottom
@@ -295,6 +310,11 @@ Item {
         property int lastMessageCount: 0
 
         Component.onCompleted: () => chatSideBar.updateChatRoom()
+
+        onChatSourceSelected: sourceIndex => {
+                                  control.manualChatSourceIndex = sourceIndex
+                                  chatSideBar.updateChatRoom()
+                              }
 
         onVisibleChanged: () => {
             if (chatSideBar.visible) {
@@ -310,6 +330,7 @@ Item {
                 chatSideBar.lastMessageCount = 0
                 if (!control.conferenceConnector.isInConference) {
                     control.conferenceChatInUse = false
+                    control.manualChatSourceIndex = null
                 }
                 chatSideBar.updateChatRoom()
             }
@@ -329,27 +350,69 @@ Item {
             function onBestMatchingChatRoomChanged() { chatSideBar.updateChatRoom() }
         }
 
+        Connections {
+            target: conferenceRoomsModel
+            function onRowsInserted() {
+                control.linkedRoomsCount = conferenceRoomsModel.rowCount()
+                chatSideBar.updateChatRoom()
+            }
+            function onRowsRemoved() {
+                control.linkedRoomsCount = conferenceRoomsModel.rowCount()
+                chatSideBar.updateChatRoom()
+            }
+            function onModelReset() {
+                control.linkedRoomsCount = conferenceRoomsModel.rowCount()
+                chatSideBar.updateChatRoom()
+            }
+        }
+
+
         function updateChatRoom() {
             Qt.callLater(() => {
+                const manualIndex = control.manualChatSourceIndex
+
+                if (manualIndex !== null) {
+                    if (manualIndex >= 0 && manualIndex >= conferenceRoomsModel.rowCount()) {
+                        control.manualChatSourceIndex = null
+                    } else if (manualIndex === -1) {
+                        chatSideBar.chatProvider = null
+                        chatSideBar.chatRoom = control.conferenceConnector?.chatRoom() ?? null
+                    } else {
+                        chatSideBar.chatProvider = conferenceRoomsModel.chatProviderAt(manualIndex)
+                        chatSideBar.chatRoom = conferenceRoomsModel.chatRoomAt(manualIndex)
+                    }
+
+                    return
+                }
 
                 // Override roomsAggregator chat room if more participants joined
                 if (control.conferenceConnector && (control.conferenceChatInUse
                                                     || (control.conferenceConnector && control.conferenceConnector.numberOfUsers > 2))) {
                     control.conferenceChatInUse = true
                     chatSideBar.chatRoom = control.conferenceConnector.chatRoom()
+                    chatSideBar.chatProvider = null
+                    return
+                }
+
+                if (conferenceRoomsModel.rowCount() > 0) {
+                    chatSideBar.chatRoom = conferenceRoomsModel.chatRoomAt(0)
+                    chatSideBar.chatProvider = conferenceRoomsModel.chatProviderAt(0)
                     return
                 }
 
                 const aggr = control.roomsAggregator
                 if (aggr && aggr.bestMatchingChatRoom) {
                     chatSideBar.chatRoom = aggr.bestMatchingChatRoom
+                    chatSideBar.chatProvider = aggr.providerOfRoom(chatSideBar.chatRoom)
                     return
                 }
                 if (control.conferenceConnector) {
                     chatSideBar.chatRoom = control.conferenceConnector.chatRoom()
+                    chatSideBar.chatProvider = null
                     return
                 }
                 chatSideBar.chatRoom = null
+                chatSideBar.chatProvider = null
             })
         }
     }

@@ -16,6 +16,8 @@
 #include "AvatarManager.h"
 #include "SecretResponse.h"
 
+using namespace Qt::StringLiterals;
+
 Q_LOGGING_CATEGORY(lcLDAPAddressBookFeeder, "gonnect.app.feeder.LDAPAddressBookFeeder")
 
 LDAPAddressBookFeeder::LDAPAddressBookFeeder(const QString &group, const int retryCount,
@@ -630,5 +632,10 @@ void LDAPAddressBookFeeder::loadAvatarsForContacts()
 
 QDateTime LDAPAddressBookFeeder::parseLDAPTimestamp(const QString &timestamp) const
 {
-    return QDateTime::fromString(timestamp, "yyyyMMddhhmmsst");
+    // This assumes "Z" - as we're using it for modification timestamps only, there
+    // is not real "damage" to do so. The original Qt Method seems to be broken, so
+    // leave it this way for now.
+    QDateTime dt = QDateTime::fromString(timestamp.left(14), u"yyyyMMddHHmmss"_s);
+    dt.setTimeZone(QTimeZone::UTC);
+    return dt;
 }

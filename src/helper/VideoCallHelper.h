@@ -26,6 +26,9 @@ public:
     Q_INVOKABLE IConferenceConnector *matchingConferenceConnector(const QString &url) const;
     Q_INVOKABLE bool isActiveVideoCallUrl(const QString &url) const;
 
+    /// Check equivalency of urls, being tolerant (e.g. with trainling slashes)
+    Q_INVOKABLE bool urlsEquivalent(const QString &urlA, const QString &urlB) const;
+
 private:
     explicit VideoCallHelper(QObject *parent = nullptr);
 

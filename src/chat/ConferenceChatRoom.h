@@ -22,23 +22,27 @@ public:
     virtual QString avatarPath() override { return ""; }
     virtual QString invitationText() override { return {}; }
     virtual bool isInitiallyLoaded() const override { return true; }
-    virtual void loadMessages() override { }
+    virtual void loadMessages(const QString &) override { }
     virtual qsizetype notificationCount() override;
     virtual void resetUnreadCount() override;
     virtual void markAsRead() override;
     virtual IChatRoom::JoinRule joinRule() override;
     virtual IChatRoom::Permissions permissions() override;
     virtual QList<ChatMessage *> chatMessages() const override { return m_messages; }
+    virtual ChatMessage *messageById(const QString &) const override { return nullptr; }
     virtual QList<ChatMessage *> pinnedChatMessages() const override { return {}; }
     virtual qsizetype pinnedChatMessageCount() const override { return 0; }
     virtual ChatMessage *pinnedChatMessageByIndex(qsizetype) const override { return nullptr; }
     virtual qsizetype indexOfPinnedChatMessage(ChatMessage *) const override { return -1; }
     virtual ChatMessage *chatMessageById(const QString &id) const override;
     virtual ChatMessage *latestOwnTextMessage() const override { return nullptr; }
-    virtual void sendMessage(const QString &message, const QString &relatedMessageId = "") override;
-    virtual void sendFile(const QString &filePath) override { Q_UNUSED(filePath) }
+    virtual void sendMessage(const QString &message, const QString &relatedMessageId = QString(),
+                             const QString &threadId = QString()) override;
+    virtual void sendFile(const QString &filePath, const QString &threadId = QString()) override;
     virtual void sendTypingPing() override { }
     virtual void togglePin(const QString &) override { };
+    virtual bool isCompletelyLoaded(const QString &) const override { return false; }
+    virtual void setIsCompletelyLoaded(bool, const QString &) override { }
     virtual bool isDirectChat() override { return false; }
     virtual bool isFavorite() override { return false; }
     virtual bool hasPresenceState() override { return false; }
