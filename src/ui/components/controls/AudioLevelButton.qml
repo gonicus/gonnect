@@ -24,10 +24,16 @@ Item {
     signal volumeChanged(real volume)
     signal muteToggled
 
+    activeFocusOnTab: control.enabled
+
     Accessible.role: Accessible.Button
     Accessible.name: qsTr("Change volume")
     Accessible.focusable: true
     Accessible.onPressAction: () => control.toggleVolumePopup()
+
+    Keys.onReturnPressed: () => control.toggleVolumePopup()
+    Keys.onEnterPressed: () => control.toggleVolumePopup()
+    Keys.onSpacePressed: () => control.toggleVolumePopup()
 
     Rectangle {
         id: bg
@@ -39,8 +45,6 @@ Item {
         Behavior on opacity {
             NumberAnimation { duration: 300 }
         }
-
-        Accessible.ignored: true
     }
 
     Rectangle {
@@ -49,8 +53,6 @@ Item {
         radius: bg.radius
         color: Theme.backgroundOffsetHoveredColor
         anchors.fill: bg
-
-        Accessible.ignored: true
     }
 
     IconLabel {

@@ -34,11 +34,6 @@ Menu {
             required property string name
 
             onTriggered: () => control.deviceSelected(delg.id)
-
-            Accessible.role: Accessible.MenuItem
-            Accessible.name: delg.text
-            Accessible.focusable: true
-            Accessible.onPressAction: () => control.deviceSelected(delg.id)
         }
 
         onObjectAdded: (index, obj) => {

@@ -68,7 +68,6 @@ BaseWindow {
             id: titleLabel
             text: qsTr("Name")
 
-            Accessible.role: Accessible.StaticText
             Accessible.name: qsTr("Page name")
         }
 
@@ -77,16 +76,13 @@ BaseWindow {
             Layout.fillWidth: true
             onAccepted: () => pageConfirm.click()
 
-            Accessible.role: Accessible.EditableText
             Accessible.name: qsTr("Enter the page name")
-            Accessible.focusable: true
         }
 
         Label {
             id: iconLabel
             text: qsTr("Icon")
 
-            Accessible.role: Accessible.StaticText
             Accessible.name: qsTr("Page icon label")
         }
 
@@ -113,7 +109,6 @@ BaseWindow {
                 ListElement { iconId: "emojiFoodSymbolic" }
             }
 
-            Accessible.role: Accessible.ComboBox
             Accessible.name: qsTr("Page icon selection")
             Accessible.description: qsTr("Select the page icon for the dashboard page")
 
@@ -125,9 +120,7 @@ BaseWindow {
                 font.weight: iconSelection.font.weight
                 font.pixelSize: iconSelection.font.pixelSize
 
-                Accessible.role: Accessible.ListItem
                 Accessible.description: qsTr("Currently selected page icon option")
-                Accessible.focusable: true
 
                 contentItem: RowLayout {
                     spacing: 10
@@ -180,11 +173,8 @@ BaseWindow {
 
                 onClicked: () => control.close()
 
-                Accessible.role: Accessible.Button
                 Accessible.name: qsTr("Cancel page modifcation")
                 Accessible.description: qsTr("Cancel button to exit the page creation/update window")
-                Accessible.focusable: true
-                Accessible.onPressAction: () => pageCancel.click()
             }
 
             Button {
@@ -199,13 +189,10 @@ BaseWindow {
                     control.close()
                 }
 
-                Accessible.role: Accessible.Button
                 Accessible.name: pageConfirm.text + qsTr("page")
                 Accessible.description: control.newPage
                                         ? qsTr("Confirmation button to create the new dashboard page")
                                         : qsTr("Confirmation button to apply changes to the dashboard page")
-                Accessible.focusable: true
-                Accessible.onPressAction: () => pageConfirm.click()
             }
         }
     }

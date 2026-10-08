@@ -7,7 +7,7 @@ Column {
     id: control
     spacing: Theme.d / 2
 
-    Accessible.role: Accessible.Column
+    Accessible.role: Accessible.Grouping
     Accessible.name: itemLabel.text
     Accessible.description: control.description
 
@@ -21,6 +21,7 @@ Column {
             right: parent.right
         }
 
+        Accessible.labelFor: control.children.length > 1 ? control.children[1] : null
         Accessible.ignored: true
     }
 }

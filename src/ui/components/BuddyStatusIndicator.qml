@@ -21,8 +21,6 @@ Rectangle {
     property bool isBlocked: false
     property bool isUnregistered: false
 
-    Accessible.ignored: true
-
     SequentialAnimation {
         id: ringingAnimation
         running: false

@@ -25,11 +25,7 @@ Item {
             enabled: control.tabRoot.dynamicPageCount < control.tabRoot.dynamicPageLimit
             onClicked: () => control.tabRoot.openPageCreationDialog()
 
-            Accessible.role: Accessible.Button
-            Accessible.name: addPageButton.text
             Accessible.description: qsTr("Add a new dashboard page")
-            Accessible.focusable: true
-            Accessible.onPressAction: () => addPageButton.click()
         }
 
         Button {
@@ -45,11 +41,7 @@ Item {
                 }
             }
 
-            Accessible.role: Accessible.Button
-            Accessible.name: addWidgetButton.text
             Accessible.description: qsTr("Add a new widget to the current dashboard page")
-            Accessible.focusable: true
-            Accessible.onPressAction: () => addWidgetButton.click()
         }
 
         Button {
@@ -61,11 +53,7 @@ Item {
             text: qsTr("Finished")
             onClicked: () => SM.uiEditMode = false
 
-            Accessible.role: Accessible.Button
-            Accessible.name: finishEditButton.text
             Accessible.description: qsTr("Finish and save all dashboard and widget changes")
-            Accessible.focusable: true
-            Accessible.onPressAction: () => finishEditButton.click()
         }
     }
 }

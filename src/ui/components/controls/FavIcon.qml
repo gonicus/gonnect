@@ -15,16 +15,13 @@ Item {
     signal toggled
 
     Accessible.role: Accessible.Button
-    Accessible.name: control.isFavorite ? qsTr("Set favorite") : qsTr("Unset favorite")
-    Accessible.focusable: true
+    Accessible.name: control.isFavorite ? qsTr("Unset favorite") : qsTr("Set favorite")
     Accessible.onPressAction: () => control.toggled()
 
     Rectangle {
         anchors.fill: parent
         radius: 4
         color: favHoverHandler.hovered ? Theme.backgroundOffsetHoveredColor : 'transparent'
-
-        Accessible.ignored: true
     }
 
     Label {
