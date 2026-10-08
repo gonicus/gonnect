@@ -103,6 +103,11 @@ BaseWidget {
                     }
                 }
 
+                onPermissionRequested: function(permission) {
+                    console.log("CAMTEST permission:", permission.permissionType, permission.origin)
+                    permission.grant()
+                }
+
                 onLoadingChanged: function(loadRequest) {
                     if (loadRequest.status === WebEngineView.LoadFailedStatus) {
                         console.error("Failed to load page:", loadRequest.url,
