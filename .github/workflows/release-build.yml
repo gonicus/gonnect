@@ -28,9 +28,10 @@ jobs:
     with:
       ref: ${{ inputs.tag }}
       windows: true
+      # Do not build the MacOS package for now, as it is not tested.
       macos: false
       flatpak: true
-      sign: true
+      sign: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/release' }}
 
   publish:
     name: "Upload to release"
