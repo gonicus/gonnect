@@ -125,6 +125,13 @@ void SecretPortal::initialize()
         return;
     }
 
+    // Load the iv of an earlier run, otherwise decrypt() would consider the portal unavailable
+    // as long as encrypt() has not been called in this process.
+    AppSettings settings;
+    if (settings.contains("keychain/iv")) {
+        m_iv = QByteArray::fromHex(settings.value("keychain/iv").toByteArray());
+    }
+
     RetrieveSecret([this](uint code, const QVariantMap &response) {
         m_hasTriedInitialization = true;
 

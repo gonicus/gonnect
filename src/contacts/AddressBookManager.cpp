@@ -204,9 +204,12 @@ void AddressBookManager::acquireSecret(bool forcePrompt, const QString &group,
             secretKey + "/secret",
             [this, forcePrompt, group, secretKey,
              callback](QKeychain::Error error, const QString &secret, const QString &) {
-                if (error == QKeychain::NoError && !forcePrompt) {
+                // Credentials::get() reports a missing entry as NoError with an empty secret,
+                // so an empty secret has to be treated like "not found" and prompt the user.
+                if (error == QKeychain::NoError && !secret.isEmpty() && !forcePrompt) {
                     callback({ secret });
-                } else if (error == QKeychain::EntryNotFound || forcePrompt) {
+                } else if (error == QKeychain::NoError || error == QKeychain::EntryNotFound
+                           || forcePrompt) {
                     auto &viewHelper = ViewHelper::instance();
 
                     disconnect(m_viewHelperConnections.take(group));

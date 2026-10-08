@@ -159,7 +159,8 @@ void Credentials::get(const QString &key, CredentialsResponse callback)
                         auto &sp = SecretPortal::instance();
                         if (sp.isValid()) {
                             const auto encryptedSecret = keychainSettings.value(key, "").toString();
-                            secret = sp.decrypt(encryptedSecret);
+                            secret = encryptedSecret.isEmpty() ? QString()
+                                                               : sp.decrypt(encryptedSecret);
 
                             if (!secret.isEmpty()) {
                                 qCDebug(lcCredentials) << "we have a secret portal, checking if "
