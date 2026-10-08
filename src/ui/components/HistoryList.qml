@@ -23,7 +23,6 @@ Item {
         font.pixelSize: Theme.fontSizeLarge
         text: "🕓  " + qsTr("No past calls")
 
-        Accessible.role: Accessible.StaticText
         Accessible.name: qsTr("No past calls")
     }
 
@@ -128,9 +127,8 @@ Item {
             onContactIdChanged: () => aggregatedRooms.updateContactId()
 
             Accessible.role: Accessible.ListItem
-            Accessible.name: qsTr("History item")
-            Accessible.description: qsTr("Selected history item %1 - company %2, location %3, number %4, time %5, duration %6").arg(delg.contactName).arg(delg.company ?? "-").arg(delg.location ?? "-").arg(delg.remotePhoneNumber).arg(timeTextLabel.text).arg(durationTextLabel.text)
-            Accessible.focusable: true
+            Accessible.name: qsTr("%1, %2, %3").arg(delg.contactName).arg(delg.remotePhoneNumber).arg(timeTextLabel.text)
+            Accessible.description: qsTr("Company %1, location %2, duration %3").arg(delg.company ?? "-").arg(delg.location ?? "-").arg(durationTextLabel.text)
 
             Connections {
                 target: SIPManager
@@ -313,8 +311,6 @@ Item {
                             }
                         }
                     }
-
-                    Accessible.ignored: true
                 }
 
                 Item {

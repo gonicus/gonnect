@@ -86,7 +86,6 @@ BaseWidget {
 
                 popup.width: Math.max(width, Math.round(12 * Theme.fontSizeNormal))
 
-                Accessible.role: Accessible.ComboBox
                 Accessible.name: qsTr("Activity type picker")
                 Accessible.description: qsTr("Select the activity type to filter by")
 
@@ -105,10 +104,8 @@ BaseWidget {
                     font.weight: activitiesFilterMediumSelector.font.weight
                     font.pixelSize: activitiesFilterMediumSelector.font.pixelSize
 
-                    Accessible.role: Accessible.ListItem
                     Accessible.name: activitiesFilterMediumSelectorDelg.label
                     Accessible.description: qsTr("Currently selected activity type")
-                    Accessible.focusable: true
 
                     required property string label
                 }

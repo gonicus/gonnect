@@ -112,9 +112,9 @@ Item {
         readonly property real cellWidth: snapGrid.width / ViewHelper.numberOfGridCells()
         readonly property real cellHeight: snapGrid.height / ViewHelper.numberOfGridCells()
 
-        Accessible.role: Accessible.Canvas
+        Accessible.role: Accessible.Grouping
         Accessible.name: qsTr("Base dashboard page grid")
-        Accessible.description: qsTr("Canvas for editable dashboard pages")
+        Accessible.description: qsTr("Editable dashboard page")
 
         Button {
             id: editShortcut
@@ -124,11 +124,6 @@ Item {
             anchors.centerIn: parent
 
             onClicked: () => SM.uiEditMode = true
-
-            Accessible.role: Accessible.Button
-            Accessible.name: editShortcut.text
-            Accessible.focusable: true
-            Accessible.onPressAction: () => editShortcut.click()
         }
     }
 }

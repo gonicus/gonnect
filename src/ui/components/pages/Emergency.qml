@@ -27,7 +27,7 @@ Card {
             verticalCenter: parent.verticalCenter
         }
 
-        Accessible.role: Accessible.ButtonMenu
+        Accessible.role: Accessible.Grouping
         Accessible.name: firstAidHeader.text
         Accessible.description: firstAidDescription.text
 
@@ -82,11 +82,8 @@ Card {
                     required property string number
                     required property string displayName
 
-                    Accessible.role: Accessible.Button
                     Accessible.name: delg.displayName
                     Accessible.description: qsTr("Tap to call emergency contact: %1 (%2)").arg(delg.displayName).arg(delg.number)
-                    Accessible.focusable: true
-                    Accessible.onPressAction: () => delg.click()
                 }
             }
         }
