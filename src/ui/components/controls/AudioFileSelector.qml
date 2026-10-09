@@ -94,11 +94,8 @@ Rectangle {
 
         onClicked: () => control.fileSelected("")
 
-        Accessible.role: Accessible.Button
         Accessible.name: qsTr("Reset tone")
         Accessible.description: qsTr("Reset the tone to its default option")
-        Accessible.focusable: true
-        Accessible.onPressAction: () => resetToDefaultButton.click()
     }
 
     Button {
@@ -112,11 +109,8 @@ Rectangle {
         }
         onClicked: () => toneFileDialog.open()
 
-        Accessible.role: Accessible.Button
         Accessible.name: qsTr("Pick sound file")
         Accessible.description: qsTr("Select the sound file you want to use")
-        Accessible.focusable: true
-        Accessible.onPressAction: () => pickToneButton.click()
     }
 
     FileDialog {

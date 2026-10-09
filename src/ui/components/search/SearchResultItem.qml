@@ -30,7 +30,7 @@ Item {
             right: parent.right
         }
 
-        Accessible.role: Accessible.Column
+        Accessible.role: Accessible.Grouping
         Accessible.name: qsTr("Search result")
         Accessible.description: qsTr("Currently selected search result")
         Accessible.focusable: true
@@ -86,9 +86,6 @@ Item {
                     rightMargin: 10
                     verticalCenter: parent.verticalCenter
                 }
-
-                Accessible.role: Accessible.StaticText
-                Accessible.name: mainLabel.text
             }
 
             Loader {
@@ -113,9 +110,6 @@ Item {
                     left: mainLabel.left
                     right: mainLabel.right
                 }
-
-                Accessible.role: Accessible.StaticText
-                Accessible.name: secondaryLabel.text
             }
 
             HoverHandler {

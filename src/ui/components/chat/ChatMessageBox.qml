@@ -295,11 +295,8 @@ Item {
 
             onClicked: () => internal.exitEditMode()
 
-            Accessible.role: Accessible.Button
             Accessible.name: qsTr("Cancel edit")
             Accessible.description: qsTr("Discard the current message edit")
-            Accessible.focusable: true
-            Accessible.onPressAction: () => closeEditingButton.clicked()
         }
     }
 
@@ -847,6 +844,5 @@ Item {
     Accessible.role: Accessible.EditableText
     Accessible.name: qsTr("Type message")
     Accessible.description: qsTr("Enter the chat text message")
-    Accessible.focusable: true
 
 }

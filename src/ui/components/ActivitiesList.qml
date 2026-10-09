@@ -26,7 +26,6 @@ Item {
                         ? qsTr("No activities matching the filter")
                         : qsTr("No activities"))
 
-        Accessible.role: Accessible.StaticText
         Accessible.name: control.proxyModel?.isFiltering
                          ? qsTr("No activities matching the filter")
                          : qsTr("No activities")
@@ -155,9 +154,8 @@ Item {
             Component.onCompleted: () => delg.updateBuddyStatus()
 
             Accessible.role: Accessible.ListItem
-            Accessible.name: qsTr("Activities item")
-            Accessible.description: qsTr("Selected activity %1 - %2 - time %3").arg(delg.title).arg(delg.text).arg(timeTextLabel.text)
-            Accessible.focusable: true
+            Accessible.name: qsTr("%1, %2").arg(delg.title).arg(timeTextLabel.text)
+            Accessible.description: delg.text
 
             Connections {
                 target: SIPManager
@@ -337,8 +335,6 @@ Item {
                             }
                         }
                     }
-
-                    Accessible.ignored: true
                 }
 
                 Item {
