@@ -2,6 +2,7 @@
 
 #include "ChatMessageSearchProvider.h"
 #include "ChatMessageSearchIndexer.h"
+#include "IpcChatRoom.h"
 
 #include "ChatConnectorManager.h"
 #include "ChatMessage.h"
@@ -235,6 +236,12 @@ void ChatMessageSearchProvider::loadChatRoom(const QString &providerUid, IChatRo
                     }
                 }
             });
+    connect(room, &IChatRoom::chatMessageOutOfSequenceReceived, context,
+            [this, roomUid](ChatMessage *chatMessage) {
+                if (chatMessage) {
+                    Q_EMIT chatMessageLoaded(roomUid, chatMessage->eventId());
+                }
+            });
     connect(room, &IChatRoom::chatMessagesReset, context,
             [this, roomUid]() { m_indexer->removeMessagesByRoom(roomUid); });
 
@@ -285,7 +292,14 @@ ChatMessage *ChatMessageSearchProvider::getChatMessage(const QString &roomUid,
         return nullptr;
     }
 
-    return room->chatMessageById(messageUid);
+    ChatMessage *chatMessage = room->chatMessageById(messageUid);
+    if (!chatMessage) {
+        if (auto *ipcRoom = qobject_cast<IpcChatRoom *>(room)) {
+            ipcRoom->ensureMessageLoaded(messageUid);
+        }
+    }
+
+    return chatMessage;
 }
 
 QString ChatMessageSearchProvider::getChatMessageText(ChatMessage *message)

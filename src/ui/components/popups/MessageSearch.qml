@@ -113,6 +113,15 @@ Item {
 
             property ChatMessage message: control.searchProvider.getChatMessage(roomUid, messageUid)
 
+            Connections {
+                target: control.searchProvider
+                function onChatMessageLoaded(loadedRoomUid : string, loadedMessageUid : string) {
+                    if (loadedRoomUid === delg.roomUid && loadedMessageUid === delg.messageUid) {
+                        delg.message = control.searchProvider.getChatMessage(delg.roomUid, delg.messageUid)
+                    }
+                }
+            }
+
             Rectangle {
                 id: background
                 visible: internal.selectedItem === delg
@@ -133,18 +142,20 @@ Item {
                 Label {
                     id: messageText
                     width: parent.width
-                    text: control.searchProvider.getChatMessageText(delg.message)
+                    text: delg.message ? control.searchProvider.getChatMessageText(delg.message) : qsTr("Loading...")
                     wrapMode: Text.WordWrap
-                    //maximumLineCount: 10
+                    font.italic: !delg.message
                 }
 
                 Label {
                     id: messageSender
                     width: parent.width
-                    text: qsTr("From: %1 on %2").arg(delg.message?.nickName ?? "")
-                                                .arg(delg.message?.timestamp ?? "")
                     color: Theme.secondaryTextColor
                     elide: Text.ElideRight
+                    font.italic: !delg.message
+                    text: delg.message
+                          ? qsTr("From: %1 on %2").arg(delg.message?.nickName ?? "").arg(delg.message?.timestamp ?? "")
+                          : qsTr("Loading...")
                 }
             }
 

@@ -106,6 +106,7 @@ Q_SIGNALS:
     void chatRoomAdded(QString uid);
     void chatRoomDeleted(QString uid);
     void chatMessagesChanged();
+    void chatMessageLoaded(QString roomUid, QString messageUid);
     void searchPhraseChanged();
     void roomIndexingEnabledChanged(QString roomUid, bool enabled);
 };
