@@ -72,7 +72,7 @@ Item {
                   : control.hasNewVoicemail
                     ? qsTr("%n new voice mail(s)", "", control.newVoicemailCount)
                     : qsTr("%n old voice mail(s)", "", control.oldVoicemailCount)
-            font.pixelSize: 16
+            font.pixelSize: Theme.fontSizeMedium
             font.weight: Font.Medium
             elide: Text.ElideRight
             color: Theme.secondaryTextColor

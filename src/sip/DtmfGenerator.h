@@ -14,6 +14,8 @@ public:
     /// Plays the given key (single digit, *, #, A-D)
     void playDtmf(const QChar &key);
 
+    static bool isValid(const QChar &key);
+
 private:
     pj::ToneGenerator m_toneGen;
     pj::AudioMedia &m_mediaSink;

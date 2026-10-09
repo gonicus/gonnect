@@ -18,7 +18,7 @@ Toggler::Toggler(const QString &id, QObject *parent) : QObject(parent), Account(
     connect(&m_timeoutTimer, &QTimer::timeout, this, [this]() {
         m_busy = false;
 
-        Q_EMIT ErrorBus::instance().error(tr("Failed to toggle the state of %1.").arg(m_id));
+        ErrorBus::instance().addError(tr("Failed to toggle the state of %1.").arg(m_id));
         Q_EMIT busyChanged();
         Q_EMIT activeChanged();
     });

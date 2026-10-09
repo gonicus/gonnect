@@ -1,0 +1,146 @@
+#pragma once
+
+#include "IChatRoom.h"
+#include "ChatMessageContainer.h"
+#include <QHash>
+
+class ChatUser;
+class IpcDispatcher;
+
+class IpcChatRoom : public IChatRoom
+{
+    Q_OBJECT
+
+public:
+    explicit IpcChatRoom(const QString &id, const QString &name,
+                         IChatProvider *chatProvider = nullptr);
+
+    QString customName() const { return m_name; }
+    void setName(const QString &name);
+    void setAvatarPath(const QString &path);
+    void setInvitationText(const QString &invitationText);
+    void setJoinRule(IChatRoom::JoinRule joinRule);
+    void setIsDirect(bool value);
+    void setUnreadCount(qsizetype count);
+    void setPermissions(IChatRoom::Permissions permissions);
+    void setIsFavorite(bool value);
+
+    virtual QString id() override { return m_id; };
+    virtual QString name() override;
+    virtual QString avatarPath() override;
+    virtual QString invitationText() override { return m_invitationText; }
+    virtual bool isFavorite() override { return m_isFavorite; }
+    virtual IChatRoom::JoinRule joinRule() override { return m_joinRule; }
+    virtual qsizetype notificationCount() override { return m_mainMessageContainer.unreadCount(); }
+    virtual IChatRoom::Permissions permissions() override { return m_permissions; }
+    virtual void requestSetConferenceUrl(const QString &url) override;
+
+    virtual bool isInitiallyLoaded() const override { return m_isInitiallyLoaded; }
+    virtual void loadMessages(const QString &threadId = QString()) override;
+
+    virtual void resetUnreadCount() override;
+    virtual QList<ChatMessage *> chatMessages() const override;
+    virtual ChatMessage *messageById(const QString &id) const override;
+    virtual void markAsRead() override;
+    virtual QList<ChatMessage *> pinnedChatMessages() const override { return m_pinnedMessages; }
+    virtual qsizetype pinnedChatMessageCount() const override { return m_pinnedMessages.size(); }
+    virtual ChatMessage *pinnedChatMessageByIndex(qsizetype index) const override;
+    virtual ChatMessage *chatMessageById(const QString &id) const override;
+    virtual qsizetype indexOfPinnedChatMessage(ChatMessage *message) const override;
+    void ensureMessageLoaded(const QString &id);
+    virtual ChatMessage *latestOwnTextMessage() const override;
+    virtual void sendMessage(const QString &message, const QString &relatedMessageId = QString(),
+                             const QString &threadId = QString()) override;
+    virtual void sendFile(const QString &filePath, const QString &threadId = QString()) override;
+    virtual void sendTypingPing() override;
+    virtual void togglePin(const QString &messageId) override;
+    virtual bool isCompletelyLoaded(const QString &threadId = QString()) const override;
+    virtual void setIsCompletelyLoaded(bool value, const QString &threadId = QString()) override;
+
+    /// Add an already existing message to the room; does not send a new message. Takes ownership of
+    /// the object.
+    void addExistingMessage(ChatMessage *message, bool isUnread, bool isIndependent);
+
+    bool hasMessage(const QString &messageId) const;
+    bool hasMessage(const ChatMessage *message) const;
+    qsizetype indexOfMessage(const ChatMessage *message) const;
+
+    void removeMessage(const QString &messageId);
+
+    void setPinnedMessageIds(const QStringList &messageIds);
+
+    void updateMessageEventId(const QString &oldEventId, const QString &newEventId);
+    void setMessageFlags(const QString &eventId, ChatMessage::Flags newFlags);
+
+    virtual bool isDirectChat() override { return m_isDirectChat; }
+    virtual bool hasPresenceState() override;
+    virtual ChatUser::PresenceState presenceState() const override;
+    virtual IChatRoom::UserRoomState ownUserJoinState() const override;
+    virtual ChatUser *otherUser() const override;
+    virtual qsizetype chatUserCount() const override { return m_chatUsers.length(); }
+    virtual qsizetype joinedChatUserCount() const override;
+    virtual void addUser(ChatUser *user, UserRoomState state) override;
+    virtual void removeUser(ChatUser *user) override;
+    virtual void setUserRoomState(ChatUser *user, UserRoomState state) override;
+    virtual void setUserRoomState(qsizetype index, UserRoomState state) override;
+    virtual ChatUser *chatUserById(const QString &userId) const override;
+    virtual bool isUserMemberOfRoom(const QString &userId) const override;
+    virtual bool isUserInvitable(ChatUser *user) const override;
+    virtual const QList<ChatUser *> &chatUsers() const override;
+    virtual UserRoomState chatUserRoomState(ChatUser *user) const override;
+    virtual const QList<ChatUser *> &typingUsers() const override;
+    virtual void setReadTimestamp(const QHash<QString, QDateTime> &reads) override;
+    virtual QDateTime lastReadTimestamp(const QString &userId) const override;
+    virtual QDateTime ownLastReadTimestamp() const override;
+    virtual void setOwnLastReadTimestamp(const QDateTime &timestamp) override;
+    virtual void clear() override;
+
+    void setTypingUsers(const QList<ChatUser *> &users);
+    void resortMessage(ChatMessage *message);
+
+private Q_SLOTS:
+    void updateIsDirectChat();
+    void updateOtherUser();
+    void updateOwnUserJoinState(qsizetype index, ChatUser *user, IChatRoom::UserRoomState state);
+
+private:
+    IpcDispatcher *ipcDispatcher() const;
+    void updatePinnedMessages();
+    void emitJoinedCountIfNeeded(qsizetype previousJoinedCount);
+
+    void registerThreadChild(const QString &childEventId, const QString &threadId);
+    void unregisterThreadChild(const QString &childEventId, const QString &threadId);
+    void recalculateThreadRootFlag(const QString &eventId);
+
+    QString m_id;
+    QString m_name;
+    QString m_avatarPath;
+    QString m_invitationText;
+    IChatRoom::JoinRule m_joinRule = IChatRoom::JoinRule::Unknown;
+    IChatRoom::UserRoomState m_ownUserJoinState = IChatRoom::UserRoomState::Unjoined;
+    IChatRoom::Permissions m_permissions;
+    bool m_isFavorite = false;
+    bool m_isDirectChat = true;
+    bool m_isInitiallyLoaded = false;
+    bool m_isCompletelyLoaded = false;
+
+    QList<ChatUser *> m_chatUsers;
+    QHash<ChatUser *, UserRoomState> m_userRoomStates;
+    QHash<QString, ChatUser *> m_chatUserLookup;
+    QList<ChatUser *> m_typingUsers;
+    ChatUser *m_otherUser = nullptr;
+    QObject *m_otherUserContext = nullptr;
+
+    ChatMessageContainer m_mainMessageContainer;
+    QHash<QString, bool> m_threadCompletelyLoaded;
+    QList<ChatMessage *> m_pinnedMessages;
+    QList<QString> m_pinnedMessageIds;
+    QSet<QString> m_loadRequestedMessageIds;
+    QHash<QString, QSet<QString>> m_threadChildren;
+
+    /// Map of userId to the timestamp up to which messages have been read by this user.
+    QHash<QString, QDateTime> m_readMarkers;
+
+    QDateTime m_ownLastReadTimestamp;
+    bool m_suppressOwnReadMarker = false;
+};

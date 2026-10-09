@@ -13,6 +13,7 @@ class NetworkHelper : public QObject
 public:
     static QFuture<QString> fetchUrlAsString(const QUrl &url);
     static QFuture<QJsonDocument> fetchUrlAsJson(const QUrl &url);
+    static int getStandardPort(const QUrl &url);
 
     explicit NetworkHelper(QObject *parent = nullptr);
 

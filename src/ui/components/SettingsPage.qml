@@ -19,8 +19,6 @@ Item {
     Rectangle {
         anchors.fill: parent
         color: Theme.backgroundSecondaryColor
-
-        Accessible.ignored: true
     }
 
     Timer {
@@ -43,6 +41,7 @@ Item {
         property alias useHeadset: headsetCheckBox.checked
         property alias noSyncSystemMute: disableSystemMutePropagationCheckBox.checked
         property alias jitsiChatAsNotifications: jitsiChatAsNotificationsCheckBox.checked
+        property alias busylightMirrorPresenceState: busylightCheckBox.checked
         property alias keepHistoryDays: historyDaysToKeepInputField.text
     }
 
@@ -50,6 +49,9 @@ Item {
         id: audioSettings
         location: ViewHelper.userConfigPath
         category: "audio" + AudioManager.currentProfile
+
+        property string notificationTone
+        property alias notificationVolume: notificationToneVolumeSlider.value
 
         property string ringtone
         property alias ringtonePause: ringTonePauseSlider.value
@@ -156,10 +158,6 @@ Item {
                                 left: parent.left
                                 right: parent.right
                             }
-
-                            Accessible.role: Accessible.CheckBox
-                            Accessible.name: startInBackgroundCheckBox.text
-                            Accessible.focusable: true
                         }
 
                         CheckBox {
@@ -169,10 +167,6 @@ Item {
                                 left: parent.left
                                 right: parent.right
                             }
-
-                            Accessible.role: Accessible.CheckBox
-                            Accessible.name: inverseAcceptRejectCheckBox.text
-                            Accessible.focusable: true
                         }
 
                         CheckBox {
@@ -183,9 +177,19 @@ Item {
                                 left: parent.left
                                 right: parent.right
                             }
+                        }
+
+                        CheckBox {
+                            id: busylightCheckBox
+                            text: qsTr('Show presence state on busylight')
+                            checked: true  // default value
+                            anchors {
+                                left: parent.left
+                                right: parent.right
+                            }
 
                             Accessible.role: Accessible.CheckBox
-                            Accessible.name: jitsiChatAsNotificationsCheckBox.text
+                            Accessible.name: busylightCheckBox.text
                             Accessible.focusable: true
                         }
 
@@ -199,10 +203,6 @@ Item {
                                 left: parent.left
                                 right: parent.right
                             }
-
-                            Accessible.role: Accessible.CheckBox
-                            Accessible.name: headsetCheckBox.text
-                            Accessible.focusable: true
                         }
 
                         CheckBox {
@@ -213,10 +213,6 @@ Item {
                                 left: parent.left
                                 right: parent.right
                             }
-
-                            Accessible.role: Accessible.CheckBox
-                            Accessible.name: disableMutePropagationCheckBox.text
-                            Accessible.focusable: true
                         }
 
                         CheckBox {
@@ -227,10 +223,6 @@ Item {
                                 left: parent.left
                                 right: parent.right
                             }
-
-                            Accessible.role: Accessible.CheckBox
-                            Accessible.name: disableSystemMutePropagationCheckBox.text
-                            Accessible.focusable: true
                         }
 
                         CheckBox {
@@ -241,10 +233,6 @@ Item {
                                 left: parent.left
                                 right: parent.right
                             }
-
-                            Accessible.role: Accessible.CheckBox
-                            Accessible.name: headsetHookOffCheckBox.text
-                            Accessible.focusable: true
                         }
                     }
                 }
@@ -284,7 +272,7 @@ Item {
                                 left: historyDaysToKeepInputField.right
                                 right: parent.right
                                 verticalCenter: historyDaysToKeepInputField.verticalCenter
-                                leftMargin: 12
+                                leftMargin: Theme.d
                             }
                         }
                     }
@@ -297,7 +285,7 @@ Item {
                             left: parent.left
                             right: parent.right
                         }
-                        text: qsTr("Keep a call history for this number of days (from 1 to 999). Any row before this time span is automatically deleted. Changing this setting has an effect on the next day or a reboot of GOnnect.")
+                        text: qsTr("Keep a call history for this number of days (from 1 to 999). Any entry before this time span is automatically removed. Changing this setting has an effect on the next day or a restart of GOnnect.")
                     }
                 }
 
@@ -319,11 +307,6 @@ Item {
                         }
 
                         onToggled: () => Theme.setUseOwnDecoration(windowDeocorationCheckbox.checked)
-
-                        Accessible.role: Accessible.CheckBox
-                        Accessible.name: windowDeocorationCheckbox.text
-                        Accessible.focusable: true
-                        Accessible.onToggleAction: () => Theme.setUseOwnDecoration(windowDeocorationCheckbox.checked)
 
                         Connections {
                             target: Theme
@@ -355,11 +338,6 @@ Item {
 
                         onToggled: () => trayIconDark.setTrayIconTheme()
 
-                        Accessible.role: Accessible.CheckBox
-                        Accessible.name: trayIconDark.text
-                        Accessible.focusable: true
-                        Accessible.onToggleAction: () => trayIconDark.setTrayIconTheme()
-
                         function setTrayIconTheme() {
                             if (trayIconDark.initialized) {
                                 genericSettings.setValue('trayIconDark', trayIconDark.checked)
@@ -368,25 +346,12 @@ Item {
                         }
                     }
 
-                    Column {
+                    LabeledItem {
                         topPadding: 20
+                        text: qsTr('Color scheme')
                         anchors {
                             left: parent.left
                             right: parent.right
-                        }
-
-                        Accessible.role: Accessible.Column
-                        Accessible.name: themeLabel.text
-
-                        Label {
-                            id: themeLabel
-                            text: qsTr('Color scheme')
-                            anchors {
-                                left: parent.left
-                                right: parent.right
-                            }
-
-                            Accessible.ignored: true
                         }
 
                         ComboBox {
@@ -415,23 +380,24 @@ Item {
                                 }
                             }
 
-                            Accessible.role: Accessible.ComboBox
+                            Accessible.id: "settings.theme.select"
                             Accessible.name: qsTr("Theme selection box")
                             Accessible.description: qsTr("Select the UI theme")
 
                             delegate: ItemDelegate {
                                 id: darkModeDelg
                                 text: darkModeDelg.displayName
+                                width: parent?.width ?? 0
 
                                 font.family: darkModeComboBox.font.family
                                 font.weight: darkModeComboBox.font.weight
-                                font.pointSize: darkModeComboBox.font.pointSize
+                                font.pixelSize: darkModeComboBox.font.pixelSize
 
-                                Accessible.role: Accessible.ListItem
+                                Accessible.id: "settings.theme.select." + darkModeDlg.index
                                 Accessible.name: darkModeDelg.displayName
                                 Accessible.description: qsTr("Currently selected theme option")
-                                Accessible.focusable: true
 
+                                required property int index
                                 required property string displayName
                             }
 
@@ -469,10 +435,6 @@ Item {
                             left: parent.left
                             right: parent.right
                         }
-
-                        Accessible.role: Accessible.CheckBox
-                        Accessible.name: busyOnBusyCheckBox.text
-                        Accessible.focusable: true
                     }
 
                     Repeater {
@@ -494,11 +456,6 @@ Item {
                             }
 
                             onToggled: () => TogglerManager.toggleToggler(togglerDelegate.id)
-
-                            Accessible.role: Accessible.CheckBox
-                            Accessible.name: togglerDelegate.text
-                            Accessible.focusable: true
-                            Accessible.onToggleAction: () => TogglerManager.toggleToggler(togglerDelegate.id)
 
                             required property string id
                             required property string name
@@ -551,8 +508,6 @@ Item {
                                         source: Icons.viewRefresh
                                     }
                                 }
-
-                                Accessible.ignored: true
                             }
                         }
                     }
@@ -568,24 +523,11 @@ Item {
                         margins: 20
                     }
 
-                    Column {
+                    LabeledItem {
+                        text: qsTr('Standard preferred identity')
                         anchors {
                             left: parent.left
                             right: parent.right
-                        }
-
-                        Accessible.role: Accessible.Column
-                        Accessible.name: preferredIdentityHeader.text
-
-                        Label {
-                            id: preferredIdentityHeader
-                            text: qsTr('Standard preferred identity')
-                            anchors {
-                                left: parent.left
-                                right: parent.right
-                            }
-
-                            Accessible.ignored: true
                         }
 
                         ComboBox {
@@ -608,23 +550,24 @@ Item {
                                 }
                             ].concat(SIPManager.preferredIdentities.filter(pi => pi.enabled))
 
-                            Accessible.role: Accessible.ComboBox
+                            Accessible.id: "settings.preferred.identity.select"
                             Accessible.name: qsTr("Prefererred identity selection")
                             Accessible.description: qsTr("Select the preferred identity")
 
                             delegate: ItemDelegate {
                                 id: standardPreferredIdentityDelg
                                 text: standardPreferredIdentityDelg.displayName
+                                width: parent?.width ?? 0
 
                                 font.family: standardPreferredIdentitySelector.font.family
                                 font.weight: standardPreferredIdentitySelector.font.weight
-                                font.pointSize: standardPreferredIdentitySelector.font.pointSize
+                                font.pixelSize: standardPreferredIdentitySelector.font.pixelSize
 
-                                Accessible.role: Accessible.ListItem
+                                Accessible.id: "settings.preferred.identity.select." + standardPreferredIdentityDelg.index
                                 Accessible.name: standardPreferredIdentityDelg.displayName
                                 Accessible.description: qsTr("Currently selected identity option")
-                                Accessible.focusable: true
 
+                                required property int index
                                 required property string displayName
                             }
 
@@ -679,9 +622,6 @@ Item {
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 visible: preferredIdentitiesRepeater.count === 0
                                 text: qsTr("No preferred identities yet.")
-
-                                Accessible.role: Accessible.StaticText
-                                Accessible.name: prefIdentityEmpty.text
                             }
 
                             Repeater {
@@ -698,6 +638,7 @@ Item {
                                     required property int index
                                     required property PreferredIdentity modelData
 
+                                    Accessible.id: "settings.identity.select." + preferredIdentityDelegate.index
                                     Accessible.role: Accessible.StaticText
                                     Accessible.name: preferredIdentityLabel.text
                                     Accessible.description: qsTr("Currently highlighted preferred identity. Tap to edit.")
@@ -713,8 +654,6 @@ Item {
                                             topMargin: 5
                                             bottomMargin: 5
                                         }
-
-                                        Accessible.ignored: true
                                     }
 
                                     Rectangle {
@@ -727,8 +666,6 @@ Item {
                                             left: parent.left
                                             right: parent.right
                                         }
-
-                                        Accessible.ignored: true
                                     }
 
                                     Label {
@@ -815,11 +752,8 @@ Item {
                                 })
                         }
 
-                        Accessible.role: Accessible.Button
-                        Accessible.name: addIdentityButton.text
+                        Accessible.id: "settings.identity.add"
                         Accessible.description: qsTr("Add a new preferred identity entry")
-                        Accessible.focusable: true
-                        Accessible.onPressAction: () => addIdentityButton.click()
                     }
                 }
             }
@@ -847,36 +781,23 @@ Item {
 
                     CheckBox {
                         id: externalRingerCheckbox
+
+                        readonly property HeadsetDeviceProxy headsetProxy: ViewHelper.headsetDeviceProxy()
+
                         text: qsTr('Prefer USB headset ring sound if available')
-                        enabled: headsetCheckBox.checked
+                              + (headsetProxy.hasDeviceConfigurableRinger ? " (" + qsTr("managed by device") + ")" : "")
+                        enabled: headsetCheckBox.checked && !headsetProxy.hasDeviceConfigurableRinger
                         anchors {
                             left: parent.left
                             right: parent.right
                         }
-
-                        Accessible.role: Accessible.CheckBox
-                        Accessible.name: externalRingerCheckbox.text
-                        Accessible.focusable: true
                     }
 
-                    Column {
+                    LabeledItem {
+                        text: qsTr('Input device')
                         anchors {
                             left: parent.left
                             right: parent.right
-                        }
-
-                        Accessible.role: Accessible.Column
-                        Accessible.name: inputDeviceHeader.text
-
-                        Label {
-                            id: inputDeviceHeader
-                            text: qsTr('Input device')
-                            anchors {
-                                left: parent.left
-                                right: parent.right
-                            }
-
-                            Accessible.ignored: true
                         }
 
                         ComboBox {
@@ -891,24 +812,23 @@ Item {
                             }
                             model: AudioManager.devices.filter(device => device.isInput)
 
-                            Accessible.role: Accessible.ComboBox
-                            Accessible.name: qsTr("Input device selection")
-                            Accessible.description: qsTr("Select the input device to be used")
+                            Accessible.id: "settings.audio.input.device"
+                            Accessible.name: qsTr("Audio input device")
 
                             delegate: ItemDelegate {
                                 id: inputAudioSelectorDelg
                                 text: inputAudioSelectorDelg.name
-                                width: inputAudioSelectorDelg.implicitWidth
+                                width: parent?.width ?? 0
 
                                 font.family: inputAudioSelector.font.family
                                 font.weight: inputAudioSelector.font.weight
-                                font.pointSize: inputAudioSelector.font.pointSize
+                                font.pixelSize: inputAudioSelector.font.pixelSize
 
-                                Accessible.role: Accessible.ListItem
+                                Accessible.id: "settings.audio.input.device." + inputAudioSelectorDelg.index
                                 Accessible.name: inputAudioSelectorDelg.name
-                                Accessible.description: qsTr("Currently selected input option")
-                                Accessible.focusable: true
+                                Accessible.description: qsTr("Currently selected audio input device")
 
+                                required property int index
                                 required property string name
                             }
 
@@ -937,24 +857,11 @@ Item {
                         }
                     }
 
-                    Column {
+                    LabeledItem {
+                        text: qsTr('Output device')
                         anchors {
                             left: parent.left
                             right: parent.right
-                        }
-
-                        Accessible.role: Accessible.Column
-                        Accessible.name: outputDeviceHeader.text
-
-                        Label {
-                            id: outputDeviceHeader
-                            text: qsTr('Output device')
-                            anchors {
-                                left: parent.left
-                                right: parent.right
-                            }
-
-                            Accessible.ignored: true
                         }
 
                         ComboBox {
@@ -969,24 +876,23 @@ Item {
                             }
                             model: AudioManager.devices.filter(device => device.isOutput)
 
-                            Accessible.role: Accessible.ComboBox
-                            Accessible.name: qsTr("Output device selection")
-                            Accessible.description: qsTr("Select the output device to be used")
+                            Accessible.id: "settings.audio.output.device"
+                            Accessible.name: qsTr("Audio output device")
 
                             delegate: ItemDelegate {
                                 id: outputAudioSelectorDelg
                                 text: outputAudioSelectorDelg.name
-                                width: outputAudioSelectorDelg.implicitWidth
+                                width: parent?.width ?? 0
 
                                 font.family: outputAudioSelector.font.family
                                 font.weight: outputAudioSelector.font.weight
-                                font.pointSize: outputAudioSelector.font.pointSize
+                                font.pixelSize: outputAudioSelector.font.pixelSize
 
-                                Accessible.role: Accessible.ListItem
+                                Accessible.id: "settings.audio.output.device." + outputAudioSelectorDelg.index
                                 Accessible.name: outputAudioSelectorDelg.name
-                                Accessible.description: qsTr("Currently selected output option")
-                                Accessible.focusable: true
+                                Accessible.description: qsTr("Currently selected audio output device")
 
+                                required property int index
                                 required property string name
                             }
 
@@ -1015,24 +921,11 @@ Item {
                         }
                     }
 
-                    Column {
+                    LabeledItem {
+                        text: qsTr('Output device for ring tone')
                         anchors {
                             left: parent.left
                             right: parent.right
-                        }
-
-                        Accessible.role: Accessible.Column
-                        Accessible.name: outputRingDeviceHeader.text
-
-                        Label {
-                            id: outputRingDeviceHeader
-                            text: qsTr('Output device for ring tone')
-                            anchors {
-                                left: parent.left
-                                right: parent.right
-                            }
-
-                            Accessible.ignored: true
                         }
 
                         ComboBox {
@@ -1047,24 +940,23 @@ Item {
                             }
                             model: AudioManager.devices.filter(device => device.isOutput)
 
-                            Accessible.role: Accessible.ComboBox
-                            Accessible.name: qsTr("Prefererred identity selection")
-                            Accessible.description: qsTr("Select the preferred identity")
+                            Accessible.id: "settings.audio.ringtone"
+                            Accessible.name: qsTr("Audio output device for ring tone")
 
                             delegate: ItemDelegate {
                                 id: outputRingAudioSelectorDelg
                                 text: outputRingAudioSelectorDelg.name
-                                width: outputRingAudioSelectorDelg.implicitWidth
+                                width: parent?.width ?? 0
 
                                 font.family: outputRingToneAudioSelector.font.family
                                 font.weight: outputRingToneAudioSelector.font.weight
-                                font.pointSize: outputRingToneAudioSelector.font.pointSize
+                                font.pixelSize: outputRingToneAudioSelector.font.pixelSize
 
-                                Accessible.role: Accessible.ListItem
+                                Accessible.id: "settings.audio.ringtone." + outputRingAudioSelectorDelg.id
                                 Accessible.name: outputRingAudioSelectorDelg.name
                                 Accessible.description: qsTr("Currently selected ring output option")
-                                Accessible.focusable: true
 
+                                required property int index
                                 required property string name
                             }
 
@@ -1093,225 +985,52 @@ Item {
                         }
                     }
 
-                    Column {
+                    LabeledItem {
+                        text: qsTr('Ring tone')
                         anchors {
                             left: parent.left
                             right: parent.right
                         }
 
-                        Accessible.role: Accessible.Column
-                        Accessible.name: ringToneHeader.text
-
-                        Label {
-                            id: ringToneHeader
-                            text: qsTr('Ring tone')
+                        AudioFileSelector {
+                            filePath: audioSettings.ringtone
+                            isPlaying: ViewHelper.isPlayingRingTone
                             anchors {
                                 left: parent.left
                                 right: parent.right
                             }
 
-                            Accessible.ignored: true
-                        }
-
-                        Rectangle {
-                            height: outputRingToneAudioSelector.height
-                            radius: 4
-                            color: 'transparent'
-                            border.width: 1
-                            border.color: Theme.borderColor
-                            anchors {
-                                left: parent.left
-                                right: parent.right
-                            }
-
-                            Accessible.role: Accessible.StaticText
-                            Accessible.name: ringToneName.text
-
-                            Label {
-                                id: ringToneName
-                                text: {
-                                    const ringToneFilePath = audioSettings.ringtone
-                                    if (ringToneFilePath) {
-                                        if (ringToneFilePath.startsWith("file://")) {
-                                            return ringToneFilePath.substring(7)
-                                        }
-                                        return ringToneFilePath
-                                    }
-                                    return qsTr('Default')
-                                }
-                                color: audioSettings.ringtone ? Theme.primaryTextColor : Theme.secondaryTextColor
-                                maximumLineCount: 2
-                                wrapMode: Label.Wrap
-                                elide: Label.ElideRight
-                                anchors {
-                                    left: parent.left
-                                    leftMargin: 10
-                                    right: testPlayRingToneButton.visible
-                                           ? testPlayRingToneButton.left
-                                           : (resetToDefaultRingToneButton.visible
-                                              ? resetToDefaultRingToneButton.left
-                                              : pickRingToneButton.left)
-                                    rightMargin: 10
-                                    verticalCenter: parent.verticalCenter
-                                }
-
-                                Accessible.ignored: true
-                            }
-
-                            Button {
-                                id: testPlayRingToneButton
-                                width: resetToDefaultRingToneButton.height
-                                icon.source: ViewHelper.isPlayingRingTone ? Icons.mediaPlaybackPause : Icons.mediaPlaybackStart
-                                anchors {
-                                    right: resetToDefaultRingToneButton.visible ? resetToDefaultRingToneButton.left : pickRingToneButton.left
-                                    rightMargin: 10
-                                    verticalCenter: parent.verticalCenter
-                                }
-
-                                onClicked: () => {
-                                    if (ViewHelper.isPlayingRingTone) {
-                                        ViewHelper.stopTestPlayRingTone()
-                                    } else {
-                                        ViewHelper.testPlayRingTone(ringToneVolumeSlider.value / 100.0)
-                                    }
-                                }
-                            }
-
-                            Button {
-                                id: resetToDefaultRingToneButton
-                                width: resetToDefaultRingToneButton.height
-                                icon.source: Icons.editDelete
-                                visible: !!audioSettings.ringtone
-                                anchors {
-                                    right: pickRingToneButton.left
-                                    rightMargin: 10
-                                    verticalCenter: parent.verticalCenter
-                                }
-
-                                onClicked: () => audioSettings.ringtone = ""
-
-                                Accessible.role: Accessible.Button
-                                Accessible.name: qsTr("Reset ring tone")
-                                Accessible.description: qsTr("Reset the ring tone to its default option")
-                                Accessible.focusable: true
-                                Accessible.onPressAction: () => resetToDefaultRingToneButton.click()
-                            }
-
-                            Button {
-                                id: pickRingToneButton
-                                icon.source: Icons.folderOpen
-                                width: pickRingToneButton.height
-                                anchors {
-                                    right: parent.right
-                                    rightMargin: 10
-                                    verticalCenter: parent.verticalCenter
-                                }
-                                onClicked: () => ringToneFileDialog.open()
-
-                                Accessible.role: Accessible.Button
-                                Accessible.name: qsTr("Pick ring tone")
-                                Accessible.description: qsTr("Select the ring tone you want to use for incoming calls")
-                                Accessible.focusable: true
-                                Accessible.onPressAction: () => pickRingToneButton.click()
-                            }
+                            onStartTestPlay: () => ViewHelper.testPlayRingTone(ringToneVolumeSlider.value / 100.0)
+                            onStopTestPlay: () => ViewHelper.stopTestPlayRingTone()
+                            onFileSelected: newFilePath => audioSettings.ringtone = newFilePath
                         }
                     }
 
-                    Column {
+                    LabeledItem {
+                        text: qsTr('Ring tone volume')
+                        description: qsTr("Currently set to: ") + ringToneVolumeSlider.labelText
                         anchors {
                             left: parent.left
                             right: parent.right
                         }
 
-                        Accessible.role: Accessible.Column
-                        Accessible.name: ringToneVolumeHeader.text
-                        Accessible.description: qsTr("Currently set to: ") + ringToneVolumeSliderLabel.text
-
-                        Label {
-                            id: ringToneVolumeHeader
-                            text: qsTr('Ring tone volume')
+                        VolumeSlider {
+                            id: ringToneVolumeSlider
                             anchors {
                                 left: parent.left
                                 right: parent.right
                             }
 
-                            Accessible.ignored: true
-                        }
-
-                        Item {
-                            height: ringToneVolumeSlider.height
-                            anchors {
-                                left: parent.left
-                                right: parent.right
-                            }
-
-                            Slider {
-                                id: ringToneVolumeSlider
-                                from: 0
-                                to: 100
-                                stepSize: 1
-                                value: 100
-                                anchors {
-                                    left: parent.left
-                                    right: ringToneVolumeSliderLabel.left
-                                    rightMargin: 20
-                                }
-
-                                onMoved: () => {
-                                    ViewHelper.testPlayRingTone(ringToneVolumeSlider.value / 100.0)
-                                }
-
-                                Accessible.role: Accessible.Slider
-                                Accessible.name: qsTr("Adjust %1").arg(ringToneVolumeHeader.text)
-                                Accessible.focusable: true
-                                Accessible.onIncreaseAction: () => {
-                                    if (ringToneVolumeSlider.value < ringToneVolumeSlider.to) {
-                                        ringToneVolumeSlider.value += ringToneVolumeSlider.stepSize
-                                    }
-                                }
-                                Accessible.onDecreaseAction: () => {
-                                    if (ringToneVolumeSlider.value > ringToneVolumeSlider.from) {
-                                        ringToneVolumeSlider.value -= ringToneVolumeSlider.stepSize
-                                    }
-                                }
-                            }
-
-                            Label {
-                                id: ringToneVolumeSliderLabel
-                                //: Label for showing percentage
-                                text: qsTr('%1 %').arg(ringToneVolumeSlider.value.toLocaleString(Qt.locale(), "f", 0))
-                                horizontalAlignment: Label.AlignRight
-                                width: 40
-                                anchors {
-                                    right: parent.right
-                                    verticalCenter: ringToneVolumeSlider.verticalCenter
-                                }
-
-                                Accessible.ignored: true
-                            }
+                            onMoved: () => ViewHelper.testPlayRingTone(ringToneVolumeSlider.value / 100.0)
                         }
                     }
 
-                    Column {
+                    LabeledItem {
+                        text: qsTr('Pause between ring tones [s]')
+                        description: qsTr("Currently set to: ") + ringTonePauseSlider.labelText
                         anchors {
                             left: parent.left
                             right: parent.right
-                        }
-
-
-                        Accessible.role: Accessible.Column
-                        Accessible.name: ringTonePauseHeader.text
-                        Accessible.description: qsTr("Currently set to: ") + ringTonePauseValueLabel.text
-
-                        Label {
-                            id: ringTonePauseHeader
-                            text: qsTr('Pause between ring tones [s]')
-                            anchors {
-                                left: parent.left
-                                right: parent.right
-                            }
-
-                            Accessible.ignored: true
                         }
 
                         Item {
@@ -1333,19 +1052,8 @@ Item {
                                     rightMargin: 20
                                 }
 
-                                Accessible.role: Accessible.Slider
-                                Accessible.name: qsTr("Adjust %1").arg(ringTonePauseHeader.text)
-                                Accessible.focusable: true
-                                Accessible.onIncreaseAction: () => {
-                                    if (ringTonePauseSlider.value < ringTonePauseSlider.to) {
-                                        ringTonePauseSlider.value += ringTonePauseSlider.stepSize
-                                    }
-                                }
-                                Accessible.onDecreaseAction: () => {
-                                    if (ringTonePauseSlider.value > ringTonePauseSlider.from) {
-                                        ringTonePauseSlider.value -= ringTonePauseSlider.stepSize
-                                    }
-                                }
+                                Accessible.id: "settings.audio.ringtone.pause"
+                                Accessible.name: qsTr("Adjust pause between ring tones [s]")
                             }
 
                             Label {
@@ -1361,6 +1069,47 @@ Item {
 
                                 Accessible.ignored: true
                             }
+                        }
+                    }
+
+                    // Notification audio
+                    LabeledItem {
+                        text: qsTr('Notification tone')
+                        anchors {
+                            left: parent.left
+                            right: parent.right
+                        }
+
+                        AudioFileSelector {
+                            filePath: audioSettings.notificationTone
+                            isPlaying: ViewHelper.isPlayingNotificationTone
+                            anchors {
+                                left: parent.left
+                                right: parent.right
+                            }
+
+                            onFileSelected: newFilePath => audioSettings.notificationTone = newFilePath
+                            onStartTestPlay: () => ViewHelper.testPlayNotificationTone(notificationToneVolumeSlider.value / 100.0)
+                            onStopTestPlay: () => ViewHelper.stopTestPlayNotificationTone()
+                        }
+                    }
+
+                    LabeledItem {
+                        text: qsTr('Notification tone volume')
+                        description: qsTr("Currently set to: ") + notificationToneVolumeSlider.labelText
+                        anchors {
+                            left: parent.left
+                            right: parent.right
+                        }
+
+                        VolumeSlider {
+                            id: notificationToneVolumeSlider
+                            anchors {
+                                left: parent.left
+                                right: parent.right
+                            }
+
+                            onMoved: () => ViewHelper.testPlayNotificationTone(notificationToneVolumeSlider.value / 100.0)
                         }
                     }
                 }
@@ -1396,9 +1145,6 @@ Item {
                             left: parent.left
                             right: parent.right
                         }
-
-                        Accessible.role: Accessible.StaticText
-                        Accessible.name: debugRunLabel.text
                     }
 
                     Button {
@@ -1410,11 +1156,6 @@ Item {
                             genericSettings.setValue("nextDebugRun", true)
                             SM.restart()
                         }
-
-                        Accessible.role: Accessible.Button
-                        Accessible.name: debugRunbutton.text
-                        Accessible.focusable: true
-                        Accessible.onPressAction: () => debugRunbutton.click()
                     }
 
                     Button {
@@ -1426,11 +1167,6 @@ Item {
                             ViewHelper.downloadDebugInformation()
                             SM.restart()
                         }
-
-                        Accessible.role: Accessible.Button
-                        Accessible.name: debugInfobutton.text
-                        Accessible.focusable: true
-                        Accessible.onPressAction: () => debugInfobutton.click()
                     }
 
                     Button {
@@ -1438,21 +1174,10 @@ Item {
                         anchors.horizontalCenter: parent.horizontalCenter
                         text: qsTr('Reload contacts')
                         onClicked: () => ViewHelper.reloadAddressBook()
-
-                        Accessible.role: Accessible.Button
-                        Accessible.name: contactReloadButton.text
-                        Accessible.focusable: true
-                        Accessible.onPressAction: () => contactReloadButton.click()
                     }
                 }
             }
         }
-    }
-
-    FileDialog {
-        id: ringToneFileDialog
-        onAccepted: audioSettings.ringtone = ringToneFileDialog.selectedFile
-        nameFilters: ViewHelper.audioFileSelectors()
     }
 
     Component {

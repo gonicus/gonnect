@@ -30,14 +30,15 @@ BaseWindow {
                 rightMargin: 20
             }
 
-            Accessible.role: Accessible.Column
-            Accessible.name: qsTr("Audio environment error")
+            Accessible.id: "audio.env.info"
+            Accessible.role: Accessible.Grouping
+            Accessible.name: qsTr("No known audio environment detected")
             Accessible.description: audioDeviceError.text
 
             Label {
                 id: audioDeviceError
                 text: qsTr("No fitting audio environment could be found. Please select the desired audio devices.")
-                font.pixelSize: 16
+                font.pixelSize: Theme.fontSizeMedium
                 wrapMode: Label.Wrap
                 anchors {
                     left: parent.left
@@ -53,7 +54,8 @@ BaseWindow {
                     right: parent.right
                 }
 
-                Accessible.role: Accessible.Column
+                Accessible.id: "audio.env.input.header"
+                Accessible.role: Accessible.Grouping
                 Accessible.name: qsTr("Input device selection header")
                 Accessible.description: qsTr("Header for the input device selection below")
 
@@ -79,7 +81,7 @@ BaseWindow {
                     }
                     model: AudioManager.devices.filter(device => device.isInput)
 
-                    Accessible.role: Accessible.ComboBox
+                    Accessible.id: "audio.env.input.select"
                     Accessible.name: qsTr("Input device selection box")
                     Accessible.description: qsTr("Select the input device that should be used")
 
@@ -90,15 +92,14 @@ BaseWindow {
 
                         font.family: inputAudioSelector.font.family
                         font.weight: inputAudioSelector.font.weight
-                        font.pointSize: inputAudioSelector.font.pointSize
+                        font.pixelSize: inputAudioSelector.font.pixelSize
 
-                        Accessible.role: Accessible.ListItem
+                        Accessible.id: "audio.env.input." + index
                         Accessible.name: inputAudioSelectorDelg.name
                         Accessible.description: qsTr("Currently selected input device")
-                        Accessible.focusable: true
-                        Accessible.onPressAction: () => inputAudioSelector.setSelectedAudioDevice()
 
                         required property string name
+                        required property int index
                     }
 
                     function updateSelectedAudioDeviceFromModel() {
@@ -135,7 +136,8 @@ BaseWindow {
                     right: parent.right
                 }
 
-                Accessible.role: Accessible.Column
+                Accessible.id: "audio.env.output.header"
+                Accessible.role: Accessible.Grouping
                 Accessible.name: qsTr("Output device selection header")
                 Accessible.description: qsTr("Header for the output device selection below")
 
@@ -160,7 +162,7 @@ BaseWindow {
                     }
                     model: AudioManager.devices.filter(device => device.isOutput)
 
-                    Accessible.role: Accessible.ComboBox
+                    Accessible.id: "audio.env.output.select"
                     Accessible.name: qsTr("Output device selection box")
                     Accessible.description: qsTr("Select the output device that should be used")
 
@@ -171,15 +173,14 @@ BaseWindow {
 
                         font.family: outputAudioSelector.font.family
                         font.weight: outputAudioSelector.font.weight
-                        font.pointSize: outputAudioSelector.font.pointSize
+                        font.pixelSize: outputAudioSelector.font.pixelSize
 
-                        Accessible.role: Accessible.ListItem
+                        Accessible.id: "audio.env.output." + item
                         Accessible.name: outputAudioSelectorDelg.name
                         Accessible.description: qsTr("Currently selected output device")
-                        Accessible.focusable: true
-                        Accessible.onPressAction: () => outputAudioSelector.setSelectedAudioDevice()
 
                         required property string name
+                        required property int index
                     }
 
                     function updateSelectedAudioDeviceFromModel() {
@@ -216,7 +217,8 @@ BaseWindow {
                     right: parent.right
                 }
 
-                Accessible.role: Accessible.Column
+                Accessible.id: "audio.env.ringtone.headline"
+                Accessible.role: Accessible.Grouping
                 Accessible.name: qsTr("Ring tone output device")
                 Accessible.description: outputRingToneAudioLabel.text
 
@@ -242,7 +244,7 @@ BaseWindow {
                     }
                     model: AudioManager.devices.filter(device => device.isOutput)
 
-                    Accessible.role: Accessible.ComboBox
+                    Accessible.id: "audio.env.ringtone.select"
                     Accessible.name: qsTr("Ring tone output device selection box")
                     Accessible.description: qsTr("Select the output device that should be used for playing the ring tone")
 
@@ -253,15 +255,14 @@ BaseWindow {
 
                         font.family: outputRingToneAudioSelector.font.family
                         font.weight: outputRingToneAudioSelector.font.weight
-                        font.pointSize: outputRingToneAudioSelector.font.pointSize
+                        font.pixelSize: outputRingToneAudioSelector.font.pixelSize
 
-                        Accessible.role: Accessible.ListItem
+                        Accessible.id: "audio.env.ringtone." + index
                         Accessible.name: outputRingToneAudioSelectorDelg.name
                         Accessible.description: qsTr("Currently selected ring tone output device")
-                        Accessible.focusable: true
-                        Accessible.onPressAction: () => outputRingToneAudioSelectorDelg.setSelectedAudioDevice()
 
                         required property string name
+                        required property int index
                     }
 
                     function updateSelectedAudioDeviceFromModel() {
@@ -308,11 +309,9 @@ BaseWindow {
 
             onClicked: () => control.close()
 
-            Accessible.role: Accessible.Button
+            Accessible.id: "audio.env.save"
             Accessible.name: qsTr("Close audio environment selection")
             Accessible.description: qsTr("Confirmation button to leave the audio environment selection window")
-            Accessible.focusable: true
-            Accessible.onPressAction: () => saveButton.click()
         }
     }
 }

@@ -15,12 +15,13 @@
 #include "GlobalCallState.h"
 #include "ExternalMediaManager.h"
 #include "NetworkHelper.h"
+#include "ViewHelper.h"
 
 Q_LOGGING_CATEGORY(lcStateHandling, "gonnect.state")
 
 StateManager::StateManager(QObject *parent) : QObject(parent)
 {
-#ifdef Q_OS_LINUX
+#if defined(Q_OS_LINUX) && !defined(MULTI_INSTANCE)
     m_activationAdapter = new DBusActivationAdapter(this);
     m_apiEndpoint = new GOnnectDBusAPI(this);
 
@@ -85,6 +86,7 @@ void StateManager::initialize()
         if (action == "dial") {
             static_cast<Application *>(Application::instance())->rootWindow()->show();
             static_cast<Application *>(Application::instance())->rootWindow()->raise();
+            Q_EMIT ViewHelper::instance().activateSearch();
         } else if (action == "hangup") {
             cm.endAllCalls();
         } else if (action == "redial") {

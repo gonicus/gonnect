@@ -21,6 +21,7 @@ public:
     Q_ENUM(ColorScheme)
 
     virtual ColorScheme colorScheme() const { return m_colorScheme; }
+    virtual qreal fontScale() const { return 1.0; }
     virtual ColorScheme trayColorScheme() const;
     virtual QColor accentColor() const = 0;
     virtual bool highContrast() const = 0;
@@ -38,4 +39,5 @@ Q_SIGNALS:
     void trayColorSchemeChanged();
     void accentColorChanged();
     void highContrastChanged();
+    void fontScaleChanged();
 };

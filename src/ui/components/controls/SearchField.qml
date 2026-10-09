@@ -11,17 +11,15 @@ Item {
     implicitHeight: 30
 
     property alias text: searchInputField.text
+    property alias placeHolderText: placeholderLabel.text
 
     function giveFocus() {
-        searchInputField.forceActiveFocus()
+        searchInputField.forceActiveFocus(Qt.ShortcutFocusReason)
     }
-
-    Accessible.role: Accessible.Form
-    Accessible.name: placeholderLabel.text
 
     states: [
         State {
-            when: !control.activeFocus && searchInputField.text.trim() === ""
+            when: searchInputField.text.trim() === ""
             PropertyChanges {
                 placeholderLabel.visible: true
             }
@@ -39,8 +37,22 @@ Item {
         color: Theme.backgroundSecondaryColor
         radius: 6
         border.width: 1
-        border.color: Theme.borderColor
+        border.color: control.enabled && (searchInputField.activeFocus || hovHandler.hovered)
+                      ? control.Material.primaryTextColor
+                      : control.Material.hintTextColor
         anchors.fill: parent
+    }
+
+    HoverHandler {
+        id: hovHandler
+    }
+
+    TapHandler {
+        onTapped: () => {
+                      if (control.enabled && !searchInputField.activeFocus) {
+                          searchInputField.forceActiveFocus()
+                      }
+                  }
     }
 
     IconLabel {
@@ -75,8 +87,10 @@ Item {
 
     TextInput {
         id: searchInputField
-        font.pixelSize: 14
+        font.pixelSize: Theme.fontSizeNormal
         color: Theme.primaryTextColor
+        focus: true
+        focusPolicy: Qt.TabFocus
         anchors {
             verticalCenter: parent.verticalCenter
             left: searchIcon.right
@@ -85,10 +99,8 @@ Item {
             rightMargin: 10
         }
 
-        Accessible.role: Accessible.EditableText
         Accessible.name: placeholderLabel.text
         Accessible.searchEdit: true
-        Accessible.focusable: true
     }
 
     Item {
@@ -101,10 +113,16 @@ Item {
             right: parent.right
         }
 
+        activeFocusOnTab: clearButton.visible
+
         Accessible.role: Accessible.Button
         Accessible.name: qsTr("Clear search field")
         Accessible.focusable: true
         Accessible.onPressAction: () => searchInputField.clear()
+
+        Keys.onReturnPressed: () => searchInputField.clear()
+        Keys.onEnterPressed: () => searchInputField.clear()
+        Keys.onSpacePressed: () => searchInputField.clear()
 
         IconLabel {
             id: clearIcon

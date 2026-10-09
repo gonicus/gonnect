@@ -11,13 +11,8 @@ public:
 
     QString hashForSettingsGroup(const QString &group);
 
+    static void invalidateCache();
+
 private:
-#ifdef Q_OS_LINUX
-    QString gidToName(gid_t gid);
-    QStringList getUserGroups();
-#endif
-
     void readConfd();
-
-    QString replacePlaceholders(const QString &value) const;
 };

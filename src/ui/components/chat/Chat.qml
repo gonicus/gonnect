@@ -1,0 +1,376 @@
+pragma ComponentBehavior: Bound
+
+import QtQuick
+import QtQuick.Controls.Material
+import base
+
+Item {
+    id: control
+
+    property IChatProvider chatProvider
+    property IChatRoom chatRoom
+
+    property bool showTitleBar: true
+    property IChatRoom previousChatRoom
+    property date enteredTimestamp: new Date(NaN)
+    property var roomDwell: ({})
+    property IChatRoom bubbleTargetRoom
+    property string newThreadId: ""
+
+    readonly property int capabilities: control.chatProvider?.capabilities ?? 0
+    readonly property alias isThreadMode: chatMessageList.isThreadMode
+
+    function giveFocus() {
+        chatMessageBox.giveFocus()
+    }
+
+    function loadMessages(threadId : string) {
+        const room = control.chatRoom
+        if (!room || room.ownUserJoinState !== IChatRoom.UserRoomState.Joined) {
+            return
+        }
+        if (threadId.length > 0) {
+            if (!room.isCompletelyLoaded(threadId)) {
+                room.loadMessages(threadId)
+            }
+        } else if (!room.isInitiallyLoaded) {
+            room.loadMessages(threadId)
+        }
+    }
+
+    onChatRoomChanged: () => {
+                           const newRoom = control.chatRoom
+                           const prevRoom = control.previousChatRoom
+
+                           if (newRoom !== prevRoom && prevRoom !== null && !isNaN(control.enteredTimestamp.getTime())) {
+                               control.roomDwell[prevRoom.id] = Date.now() - control.enteredTimestamp.getTime()
+                           }
+
+                           const priorDwell = (newRoom && control.roomDwell.hasOwnProperty(newRoom.id))
+                                              ? control.roomDwell[newRoom.id]
+                                              : 0
+                           if (priorDwell >= 2000) {
+                               newRoom.markAsRead()
+                           }
+
+                           if (newRoom) {
+                               control.bubbleTargetRoom = newRoom
+                               bubbleTimer.restart()
+                               control.enteredTimestamp = new Date()
+                           }
+
+                           control.previousChatRoom = newRoom
+                           relatedMsg.chatMessage = null
+
+                           control.loadMessages(SelectionState.selectedThreadId)
+                       }
+
+    Connections {
+        target: control.chatRoom
+
+        function onOwnUserJoinStateChanged() {
+            control.loadMessages(SelectionState.selectedThreadId)
+        }
+
+        function onNotificationCountChanged() {
+            if (SelectionState.isMainWindowActive && control.bubbleTargetRoom) {
+                bubbleTimer.start()
+            }
+        }
+    }
+
+    Connections {
+        target: SelectionState
+
+        function onIsMainWindowActiveChanged() {
+            if (SelectionState.isMainWindowActive && control.bubbleTargetRoom) {
+                bubbleTimer.start()
+            }
+        }
+    }
+
+    Timer {
+        id: bubbleTimer
+        interval: 2000
+        onTriggered: () => {
+                         const room = control.bubbleTargetRoom
+                         if (room !== null && room === control.chatRoom && SelectionState.isMainWindowActive) {
+                             room.resetUnreadCount()
+                         }
+                     }
+    }
+
+    ChatButtonBar {
+        id: messageListCardHeading
+        visible: control.showTitleBar && !!control.chatRoom
+        shallBeVisible: control.showTitleBar && !!control.chatRoom
+        chatProvider: control.chatProvider
+        chatRoom: control.chatRoom
+        threadId: SelectionState.selectedThreadId
+        height: messageListCardHeading.implicitHeight
+        anchors {
+            left: parent.left
+            right: parent.right
+            top: parent.top
+        }
+        onCloseThreadRequested: () => SelectionState.selectedThreadId = ""
+    }
+
+    Rectangle {
+        id: buttonBarBorder
+        height: 1
+        color: Theme.borderColor
+        visible: messageListCardHeading.visible && !pinnedChatMessageList.visible
+        anchors {
+            left: parent.left
+            right: parent.right
+            top: messageListCardHeading.bottom
+        }
+    }
+
+    PinnedChatMessagesList {
+        id: pinnedChatMessageList
+        chatRoom: control.chatRoom
+        visible: pinnedChatMessageList.count > 0
+        height: Math.min(pinnedChatMessageList.implicitHeight, Math.floor(parent.height * 0.15))
+        maxContentHeight: Math.floor(parent.height * 0.15)
+        z: chatMessageList.z + 1
+        anchors {
+            top: messageListCardHeading.visible ? messageListCardHeading.bottom : parent.top
+            left: parent.left
+            right: parent.right
+        }
+    }
+
+    ChatMessageList {
+        id: chatMessageList
+        chatProvider: control.chatProvider
+        chatRoom: control.chatRoom
+        clip: true
+        visible: control.chatRoom?.ownUserJoinState === IChatRoom.UserRoomState.Joined ?? false
+        anchors {
+            left: parent.left
+            right: parent.right
+            top: pinnedChatMessageList.visible
+                 ? pinnedChatMessageList.bottom
+                 : (buttonBarBorder.visible
+                    ? buttonBarBorder.bottom
+                    : parent.top)
+            bottom: typingUsersList.visible
+                    ? typingUsersList.top
+                    : (chatMessageBox.visible
+                       ? chatMessageBox.top
+                       : parent.bottom)
+            bottomMargin: 2
+            leftMargin: 10
+            rightMargin: 10
+        }
+
+        onRespondTo: messageId => {
+                         relatedMsg.chatMessage = control.chatRoom?.chatMessageById(messageId) ?? null
+                         chatMessageBox.giveFocus()
+                     }
+        onRespondInNewThread: threadId => {
+                                  relatedMsg.chatMessage = control.chatRoom?.chatMessageById(threadId) ?? null
+                                  control.newThreadId = threadId
+                                  chatMessageBox.giveFocus()
+                              }
+
+        onRetryMessage: messageId => {
+                            if (control.chatProvider) {
+                                control.chatProvider.retrySendMessage(control.chatRoom.id, messageId)
+                            }
+                        }
+    }
+
+    Item {
+        id: bigLoadingItem
+        visible: !!(control.chatRoom?.isLoadingMessageHistory && !chatMessageList.count)
+        anchors.fill: chatMessageList
+
+        Row {
+            spacing: 20
+            anchors.centerIn: parent
+
+            BusyIndicator {
+                running: bigLoadingItem.visible
+                circleColor: Theme.secondaryTextColor
+                contentItem.antialiasing: true
+            }
+
+            Label {
+                text: qsTr("Messages are loading...")
+                color: Theme.secondaryTextColor
+                font.pixelSize: Theme.fontSizeLarge
+                anchors.verticalCenter: parent.verticalCenter
+            }
+        }
+    }
+
+    Item {
+        id: typingUsersList
+        height: 20
+        anchors  {
+            left: parent.left
+            right: parent.right
+            bottom: chatMessageBox.visible ? chatMessageBox.top : parent.bottom
+        }
+
+        readonly property list<string> typingUserNames: control.chatRoom?.typingUsers.map(user => user.computedName) ?? []
+
+        Label {
+            id: typingUsersLabel
+            text: qsTr("%1 is/are typing", "", typingUsersList.typingUserNames.length).arg(typingUsersList.typingUserNames.join(", "))
+            wrapMode: Label.Wrap
+            color: Theme.secondaryInactiveTextColor
+            font.pixelSize: Theme.fontSizeSmall
+            visible: typingUsersList.typingUserNames.length > 0
+            anchors {
+                left: parent.left
+                right: parent.right
+                leftMargin: 10
+                rightMargin: 10
+                verticalCenter: parent.verticalCenter
+            }
+        }
+    }
+
+    Rectangle {
+        id: replyBg
+        color: Theme.backgroundColor
+        height: relatedMsg.height
+        visible: relatedMsg.visible
+        topLeftRadius: 8
+        topRightRadius: 8
+        anchors {
+            top: relatedMsg.top
+            left: chatMessageBox.left
+            right: chatMessageBox.right
+            bottom: chatMessageBox.top
+            topMargin: -10
+        }
+
+        Rectangle {
+            height: 1
+            color: Theme.borderColor
+            anchors {
+                left: parent.left
+                right: parent.right
+                top: parent.top
+            }
+        }
+    }
+
+    ChatMessageListItemRelatedContent {
+        id: relatedMsg
+        visible: !!relatedMsg.chatMessage
+        nickName: relatedMsg.chatMessage?.nickName ?? ""
+        isStateUpdate: relatedMsg.chatMessage?.isStateUpdate?? false
+        content: relatedMsg.chatMessage?.content ?? null
+        userState: relatedMsg.chatMessage?.state ?? ChatMessageContentUserStateChange.State.Unknown
+        affectedUserName: control.chatProvider?.userById(relatedMsg.chatMessage?.affectedUserId ?? "")?.computedName ?? ""
+        startsNewThread: control.newThreadId !== ""
+        anchors {
+            left: replyBg.left
+            right: replyBg.right
+            leftMargin: 10
+            bottom: chatMessageBox.top
+            bottomMargin: 10
+        }
+
+        property ChatMessage chatMessage
+    }
+
+    HeaderIconButton {
+        id: closeButton
+        visible: relatedMsg.visible
+        iconSource: Icons.mobileCloseApp
+        anchors {
+            top: replyBg.top
+            right: replyBg.right
+            topMargin: 10
+            rightMargin: 10
+        }
+
+        onClicked: () => {
+                       relatedMsg.chatMessage = null
+                       control.newThreadId = ""
+                   }
+    }
+
+    ChatMessageBox {
+        id: chatMessageBox
+        visible: control.chatRoom?.ownUserJoinState === IChatRoom.UserRoomState.Joined ?? false
+        chatRoom: control.chatRoom
+        capabilities: control.capabilities
+        anchors {
+            left: parent.left
+            right: parent.right
+            bottom: parent.bottom
+        }
+
+        onSendFile: filePath => control.chatRoom.sendFile(filePath, control.newThreadId || chatMessageList.threadId)
+        onImageFromClipboardReceived: () => {
+            if (control.chatProvider && control.chatRoom) {
+                control.chatProvider.uploadImageFromClipboard(control.chatRoom.id, control.newThreadId || chatMessageList.threadId)
+            }
+        }
+        onEditLastMessage: () => {
+            const chatProvider = control.chatProvider
+            const chatRoom = control.chatRoom
+            if (chatRoom && chatProvider) {
+                const latestMsg = control.chatRoom.latestOwnTextMessage()
+                if (latestMsg) {
+                    chatMessageBox.text = latestMsg.content.rawText
+                    chatMessageBox.editMessageId = latestMsg.eventId
+                    chatMessageBox.positionCursorAtEnd()
+                }
+            }
+        }
+        onSendMessage: () => {
+            if (chatMessageBox.hasMessage) {
+
+                if (chatMessageBox.editMessageId) {
+                    // Edit existing message
+                    control.chatProvider.requestEditMessage(control.chatRoom.id, chatMessageBox.editMessageId, chatMessageBox.text)
+                    chatMessageBox.editMessageId = ""
+                } else {
+                    // Send new message
+                    control.chatRoom.sendMessage(chatMessageBox.text,
+                                                 relatedMsg.chatMessage ? relatedMsg.chatMessage.eventId : "",
+                                                 control.newThreadId || chatMessageList.threadId)
+                    control.chatRoom.markAsRead()
+
+                    if (control.newThreadId) {
+                        SelectionState.selectedThreadId = control.newThreadId
+                    }
+                }
+
+                relatedMsg.chatMessage = null
+                control.newThreadId = ""
+                chatMessageBox.clear()
+            }
+        }
+    }
+
+    ChatUnjoinedPage {
+        id: chatUnjoinedPage
+        chatProvider: control.chatProvider
+        chatRoom: control.chatRoom
+        joinState: control.chatRoom?.ownUserJoinState ?? IChatRoom.UserRoomState.Unjoined
+        visible: control.chatRoom?.ownUserJoinState !== IChatRoom.UserRoomState.Joined ?? false
+        anchors {
+            left: parent.left
+            right: parent.right
+            top: messageListCardHeading.visible ? messageListCardHeading.bottom : parent.top
+            bottom: parent.bottom
+            leftMargin: 10
+            rightMargin: 10
+        }
+    }
+
+    FileDropArea {
+        anchors.fill: parent
+        onDropAccepted: urls => ViewHelper.showFileUploadDialog(control.chatRoom, urls)
+    }
+}

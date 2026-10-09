@@ -14,6 +14,8 @@ Item {
 
         property Button authButton
         property bool shareFullScreen
+        property bool chatAutoOpened
+        property bool isWebViewLoaded: false
     }
 
     LoggingCategory {
@@ -44,7 +46,10 @@ Item {
         }
     ]
 
-    function startConference(meetingId : string, displayName : string, startFlags : int, callHistoryItem : variant) {
+    function startConference(meetingId : string, displayName : string, startFlags : int, callHistoryItem : variant, contact : variant) {
+        internal.chatAutoOpened = false
+        upgradeRoomsAggregator.setWrappedContact(contact)
+
         confConn.setCallHistoryItem(callHistoryItem)
 
         if (!AuthManager.isJitsiAuthRequired || AuthManager.isJitsiRoomAuthenticated(meetingId)) {
@@ -74,10 +79,29 @@ Item {
     readonly property IConferenceConnector iConferenceConnector: JitsiConnector {
         id: confConn
         WebChannel.id: "jitsiConn"
+    }
+
+    Connections {
+        target: confConn
 
         function onIsInConferenceChanged() {
-            if (!confConn.isInConference) {
-                internal.authButton.enabled = true
+            if (confConn.isInConference) {
+                webViewShutdownTimer.stop()
+
+                // Toggle flag if we're still loaded to force a fresh view
+                if (internal.isWebViewLoaded) {
+                    internal.isWebViewLoaded = false
+                }
+
+                internal.isWebViewLoaded = true
+            } else {
+                if (internal.authButton) {
+                    internal.authButton.enabled = true
+                }
+
+                if (internal.isWebViewLoaded) {
+                    webViewShutdownTimer.restart()
+                }
             }
         }
     }
@@ -88,7 +112,7 @@ Item {
             if (!AuthManager.isAuthManagerInitialized) {
                 return undefined
             }
-            if (confConn.isInConference) {
+            if (internal.isWebViewLoaded) {
                 return jitsiViewComponent
             }
             if (AuthManager.isJitsiAuthRequired && AuthManager.isWaitingForAuth) {
@@ -105,8 +129,16 @@ Item {
             bottom: parent.bottom
             left: parent.left
             right: callListCard.visible ? verticalDragbarDummy.left : parent.right
-            rightMargin: callListCard.visible ? 0 : 24
+            rightMargin: callListCard.visible ? 0 : Theme.d * 2
         }
+    }
+
+    // This timer delays the disposal of our WebView, as killing it directly
+    // harms existing GPU processes ("eglMakeCurrent failed ... EGL_BAD_DISPLAY")
+    Timer {
+        id: webViewShutdownTimer
+        interval: 1700
+        onTriggered: () => internal.isWebViewLoaded = false
     }
 
     Component {
@@ -126,7 +158,8 @@ Item {
                     height: roomTextField.implicitHeight
                     spacing: 20
 
-                    Accessible.role: Accessible.Row
+                    Accessible.id: "conference.login.room.header"
+                    Accessible.role: Accessible.Grouping
                     Accessible.name: qsTr("Set room name")
 
                     Label {
@@ -141,9 +174,8 @@ Item {
                         width: 300
                         text: RandomRoomNameGenerator.randomJitsiRoomName()
 
-                        Accessible.role: Accessible.EditableText
+                        Accessible.id: "conference.login.room.name"
                         Accessible.name: qsTr("Enter the room name")
-                        Accessible.focusable: true
                     }
                 }
 
@@ -160,10 +192,7 @@ Item {
                         internal.authButton = authButton
                     }
 
-                    Accessible.role: Accessible.Button
-                    Accessible.name: authButton.text
-                    Accessible.focusable: true
-                    Accessible.onPressAction: () => authButton.click()
+                    Accessible.id: "conference.login.room.authenticate"
                 }
             }
         }
@@ -193,7 +222,8 @@ Item {
                     height: roomTextField2.implicitHeight
                     spacing: 20
 
-                    Accessible.role: Accessible.Row
+                    Accessible.id: "conference.room.header"
+                    Accessible.role: Accessible.Grouping
                     Accessible.name: qsTr("Set room name")
 
                     Label {
@@ -208,9 +238,8 @@ Item {
                         width: 300
                         // text: AuthManager.authenticatedJitsiRoom
 
-                        Accessible.role: Accessible.EditableText
+                        Accessible.id: "conference.room.name"
                         Accessible.name: qsTr("Enter the room name")
-                        Accessible.focusable: true
                     }
                 }
 
@@ -221,10 +250,7 @@ Item {
 
                     onClicked: () => control.startConference(roomTextField2.text.trim())
 
-                    Accessible.role: Accessible.Button
-                    Accessible.name: joinRoomButton.text
-                    Accessible.focusable: true
-                    Accessible.onPressAction: () => joinRoomButton.click()
+                    Accessible.id: "conference.room.join"
                 }
             }
         }
@@ -234,6 +260,7 @@ Item {
         id: waitingForAuthComponent
 
         Item {
+            Accessible.id: "conference.auth"
             Accessible.role: Accessible.StaticText
             Accessible.name: authMessage.text
 
@@ -251,23 +278,55 @@ Item {
         id: jitsiViewComponent
 
         Item {
+            id: jitsiViewItem
+
+            property var pendingKnocks: []
+
+            function enqueueKnock(id, name) {
+                if (jitsiViewItem.pendingKnocks.some(e => e.id === id)) {
+                    return
+                }
+                jitsiViewItem.pendingKnocks = [...jitsiViewItem.pendingKnocks, { id, name, }]
+
+                if (ViewHelper.topDrawer.loader.sourceComponent !== knockedParticipantComponent) {
+                    ViewHelper.topDrawer.loader.sourceComponent = knockedParticipantComponent
+                }
+            }
+
+            function dequeueKnock(id) {
+                const rest = jitsiViewItem.pendingKnocks.filter(e => e.id !== id)
+                if (rest.length !== jitsiViewItem.pendingKnocks.length) {
+                    jitsiViewItem.pendingKnocks = rest
+
+                    if (rest.length === 0) {
+                        ViewHelper.topDrawer.loader.sourceComponent = undefined
+                    }
+                }
+            }
+
+            readonly property Connections confConnConnections: Connections {
+                target: confConn
+                function onKnockAnswered(id : string) {
+                    jitsiViewItem.dequeueKnock(id)
+                }
+            }
+
             Card {
                 id: callMainCard
                 anchors {
                     fill: callMainCard.parent
 
-                    leftMargin: 24
+                    leftMargin: Theme.d * 2
                     bottomMargin: 15
                 }
 
                 ConferenceButtonBar {
                     id: topBar
                     height: topBar.implicitHeight
-                    enabled: true
+                    enabled: confConn.isInConference
                     isOnHold: confConn.isOnHold
                     isMuted: confConn.isAudioMuted
                     isVideoMuted: confConn.isVideoMuted
-                    videoMuteButtonVisible: confConn.isVideoAvailable
                     isSharingScreen: confConn.isSharingScreen
                     isTileView: confConn.isTileView
                     isHandRaised: confConn.isHandRaised
@@ -296,6 +355,8 @@ Item {
                         ViewHelper.topDrawer.loader.item.numbers = numbers
                         ViewHelper.topDrawer.loader.item.code = code
                     }
+                    onOpenKnockedParticipantDialog: (id, name) => jitsiViewItem.enqueueKnock(id, name)
+
                     onHangup: () => confConn.leaveConference()
                     onFinishForAll: () => confConn.terminateConference()
                 }
@@ -392,7 +453,8 @@ Item {
                                 verticalCenter: parent.verticalCenter
                             }
 
-                            Accessible.role: Accessible.Column
+                            Accessible.id: "conference.room.password.header"
+                            Accessible.role: Accessible.Grouping
                             Accessible.name: passwordRequired.text
 
                             Label {
@@ -421,9 +483,8 @@ Item {
                                 Keys.onEscapePressed: () => passwordItem.cancel()
                                 Component.onCompleted: () => passwordField.forceActiveFocus()
 
-                                Accessible.role: Accessible.EditableText
+                                Accessible.id: "conference.room.password"
                                 Accessible.name: qsTr("Enter the password")
-                                Accessible.focusable: true
                             }
 
                             CheckBox {
@@ -434,9 +495,7 @@ Item {
                                     right: parent.right
                                 }
 
-                                Accessible.role: Accessible.CheckBox
-                                Accessible.name: rememberCheckBox.text
-                                Accessible.focusable: true
+                                Accessible.id: "conference.room.password.save"
                             }
 
                             Row {
@@ -449,10 +508,7 @@ Item {
 
                                     onClicked: () => passwordItem.cancel()
 
-                                    Accessible.role: Accessible.Button
-                                    Accessible.name: cancelButton.text
-                                    Accessible.focusable: true
-                                    Accessible.onPressAction: () => cancelButton.click()
+                                    Accessible.id: "conference.room.password.cancel"
                                 }
 
                                 Button {
@@ -463,10 +519,7 @@ Item {
 
                                     onClicked: () => passwordItem.respondPassword()
 
-                                    Accessible.role: Accessible.Button
-                                    Accessible.name: joinRoomButton.text
-                                    Accessible.focusable: true
-                                    Accessible.onPressAction: () => joinRoomButton.click()
+                                    Accessible.id: "conference.room.password.join"
                                 }
                             }
                         }
@@ -477,6 +530,17 @@ Item {
                     id: dialInInfoComponent
 
                     DialInInfo {}
+                }
+
+                Component {
+                    id: knockedParticipantComponent
+
+                    KnockedParticipant {
+                        id: knockedParticipantDialog
+                        knockModel: jitsiViewItem.pendingKnocks
+                        onAccepted: id => confConn.answerKnockingParticipant(id, true)
+                        onRejected: id => confConn.answerKnockingParticipant(id, false)
+                    }
                 }
 
                 Component {
@@ -506,7 +570,8 @@ Item {
                                 verticalCenter: parent.verticalCenter
                             }
 
-                            Accessible.role: Accessible.Column
+                            Accessible.id: "conference.room.password.required"
+                            Accessible.role: Accessible.Grouping
                             Accessible.name: qsTr("Password required")
 
                             states: [
@@ -541,29 +606,27 @@ Item {
 
                             Label {
                                 id: newPasswordLabel
-                                text: qsTr("Enter a password to protect this conference room. Other participants must enter it before taking part in the session.")
+                                text: qsTr("Enter a password to protect this conference room. Other users must enter it before taking part in the session.")
                                 wrapMode: Text.Wrap
                                 anchors {
                                     left: parent.left
                                     right: parent.right
                                 }
 
-                                Accessible.role: Accessible.Column
-                                Accessible.name: newPasswordLabel.text
+                                Accessible.id: "conference.room.password-required.header"
                             }
 
                             Label {
                                 id: existingPasswordLabel
                                 visible: false
-                                text: qsTr("This password has been set for the conference room and must be entered by participants before taking part in the session.")
+                                text: qsTr("This password has been set for the conference room and must be entered by users before taking part in the session.")
                                 wrapMode: Text.Wrap
                                 anchors {
                                     left: parent.left
                                     right: parent.right
                                 }
 
-                                Accessible.role: Accessible.Column
-                                Accessible.name: existingPasswordLabel.text
+                                Accessible.id: "conference.room.existing-password"
                             }
 
                             Label {
@@ -576,8 +639,7 @@ Item {
                                     right: parent.right
                                 }
 
-                                Accessible.role: Accessible.Column
-                                Accessible.name: otherSetPasswordLabel.text
+                                Accessible.id: "conference.room.password.hint"
                             }
 
                             Item {
@@ -599,9 +661,8 @@ Item {
 
                                     Component.onCompleted: () => passwordField.forceActiveFocus()
 
-                                    Accessible.role: Accessible.EditableText
+                                    Accessible.id: "conference.password"
                                     Accessible.name: qsTr("Enter the password")
-                                    Accessible.focusable: true
                                 }
 
                                 Label {
@@ -640,7 +701,7 @@ Item {
                                     right: parent.right
                                 }
 
-                                Accessible.ignored: true
+                                Accessible.id: "conference.password.show"
                             }
 
                             Row {
@@ -653,10 +714,7 @@ Item {
 
                                     onClicked: () => setPasswordItem.cancel()
 
-                                    Accessible.role: Accessible.Button
-                                    Accessible.name: cancelButton.text
-                                    Accessible.focusable: true
-                                    Accessible.onPressAction: () => cancelButton.click()
+                                    Accessible.id: "conference.password.cancel"
                                 }
 
                                 Button {
@@ -665,10 +723,7 @@ Item {
                                     text: qsTr("Remove")
                                     onClicked: () => setPasswordItem.setPassword("")
 
-                                    Accessible.role: Accessible.Button
-                                    Accessible.name: removePasswordButton.text
-                                    Accessible.focusable: true
-                                    Accessible.onPressAction: () => removePasswordButton.click()
+                                    Accessible.id: "conference.password.remove"
                                 }
 
                                 Button {
@@ -679,10 +734,7 @@ Item {
 
                                     onClicked: () => setPasswordItem.setPassword(passwordField.text)
 
-                                    Accessible.role: Accessible.Button
-                                    Accessible.name: savePasswordButton.text
-                                    Accessible.focusable: true
-                                    Accessible.onPressAction: () => savePasswordButton.click()
+                                    Accessible.id: "conference.password.save"
                                 }
                             }
                         }
@@ -706,7 +758,7 @@ Item {
                                 verticalCenter: parent.verticalCenter
                             }
 
-                            Accessible.role: Accessible.Column
+                            Accessible.role: Accessible.Grouping
                             Accessible.name: qsTr("Video quality")
 
                             component QualityButton : RadioButton {
@@ -721,11 +773,12 @@ Item {
 
                                 onToggled: () => confConn.setVideoQuality(qButton.qualityValue)
 
+                                Accessible.id: "conference.video.quality"
                                 Accessible.role: Accessible.RadioButton
                                 Accessible.name: qButton.text
                                 Accessible.description: qsTr("Change the video quality of this meeting")
                                 Accessible.focusable: true
-                                Accessible.onPressAction: () => onfConn.setVideoQuality(qButton.qualityValue)
+                                Accessible.onPressAction: () => confConn.setVideoQuality(qButton.qualityValue)
                             }
 
                             QualityButton {
@@ -756,10 +809,7 @@ Item {
 
                                 onClicked: () => ViewHelper.topDrawer.loader.sourceComponent = undefined
 
-                                Accessible.role: Accessible.Button
-                                Accessible.name: closeButton.text
-                                Accessible.focusable: true
-                                Accessible.onPressAction: () => closeButton.click()
+                                Accessible.id: "conference.video.close"
                             }
                         }
                     }
@@ -782,9 +832,9 @@ Item {
             right: callListCard.left
         }
 
+        Accessible.id: "conference.dragbar"
         Accessible.role: Accessible.Border
         Accessible.name: qsTr("Drag bar")
-        Accessible.focusable: true
 
         HoverHandler {
             id: verticalDragbarDummyHoverHandler
@@ -820,23 +870,48 @@ Item {
             right: parent.right
             bottom: parent.bottom
 
-            rightMargin: 24
+            rightMargin: Theme.d * 2
             bottomMargin: 15
         }
 
         CallSideBar {
             id: callSideBar
             anchors.fill: parent
+            conferenceMode: true
             chatAvailable: confConn.hasCapability(IConferenceConnector.Capability.ChatInCall)
-            personsAvailable: confConn.hasCapability(IConferenceConnector.Capability.ParticipantRoles)
+                           || upgradeRoomsAggregator.chatRooms.length > 0
+                           || callSideBar.linkedRoomsCount > 0
+            personsAvailable: confConn.hasCapability(IConferenceConnector.Capability.UserRoles)
             conferenceConnector: confConn
+            roomsAggregator: AggregatedDirectRoomsOfContact {
+                id: upgradeRoomsAggregator
+                onBestMatchingChatRoomChanged: () => callSideBar.maybeAutoOpenChat()
+            }
+
+            function maybeAutoOpenChat() {
+                if (internal.chatAutoOpened || !confConn.isInConference) {
+                    return
+                }
+
+                if (upgradeRoomsAggregator.bestMatchingChatRoom && !callSideBar.conferenceChatInUse) {
+                    internal.chatAutoOpened = true
+                    callSideBar.selectedSideBarMode = CallSideBar.Chat
+                }
+            }
 
             Connections {
                 target: confConn
                 function onIsInConferenceChanged() {
-                    if (!confConn.isInConference) {
+                    if (confConn.isInConference) {
+                        callSideBar.maybeAutoOpenChat()
+                    } else {
+                        internal.chatAutoOpened = false
                         callSideBar.selectedSideBarMode = CallSideBar.None
                     }
+                }
+
+                function onNumberOfUsersChanged() {
+                    callSideBar.maybeAutoOpenChat()
                 }
             }
 

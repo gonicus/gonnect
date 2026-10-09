@@ -58,6 +58,7 @@ public:
         AccountId,
         RemoteUri,
         PhoneNumber,
+        Contact,
         ContactName,
         IsIncoming,
         City,

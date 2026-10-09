@@ -12,12 +12,39 @@ Rectangle {
 
     property string text
 
+    activeFocusOnTab: control.enabled
+
     Accessible.role: Accessible.Button
     Accessible.name: qsTr("Copy to clipboard: %1").arg(control.text)
     Accessible.focusable: true
-    Accessible.onPressAction: () => ViewHelper.copyToClipboard(control.text)
+    Accessible.onPressAction: () => control.copy()
+
+    Keys.onReturnPressed: () => control.copy()
+    Keys.onEnterPressed: () => control.copy()
+    Keys.onSpacesPressed: () => control.copy()
+
+    function copy() {
+        ClipboardHelper.copyToClipboard(control.text)
+        internal.showFeedback()
+    }
+
+    QtObject {
+        id: internal
+
+        readonly property Timer feedbackTimer: Timer {
+            repeat: false
+            interval: Theme.feedbackTimeout
+            onTriggered: () => iconLabel.icon.source = Icons.editCopy
+        }
+
+        function showFeedback() {
+            iconLabel.icon.source = Icons.checkbox
+            internal.feedbackTimer.start()
+        }
+    }
 
     IconLabel {
+        id: iconLabel
         anchors.centerIn: parent
         icon {
             width: 16
@@ -29,7 +56,7 @@ Rectangle {
     }
 
     TapHandler {
-        onTapped: () => ViewHelper.copyToClipboard(control.text)
+        onTapped: () => control.copy()
     }
 
     HoverHandler {

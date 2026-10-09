@@ -1,4 +1,4 @@
-#include "GlobalCallState.h"
+#include "SelectionState.h"
 #include "SIPCallManager.h"
 
 #include "RTTProvider.h"
@@ -14,67 +14,66 @@ RTTProvider::RTTProvider(QObject *parent) : QObject(parent)
     connect(m_model, &RTTModel::rowsRemoved, this, &RTTProvider::hasMessagesChanged);
     connect(m_model, &RTTModel::modelReset, this, &RTTProvider::hasMessagesChanged);
 
-    connect(&GlobalCallState::instance(), &GlobalCallState::callInForegroundChanged, this,
-            [this]() {
-                // Disconnect from signals of the old call
-                if (m_establishedCall) {
-                    disconnect(m_establishedCall);
-                    m_establishedCall = QMetaObject::Connection();
-                }
-                if (m_rttCall) {
-                    disconnect(m_rttCall);
-                    m_rttCall = QMetaObject::Connection();
-                }
-                if (m_rttBubbleChanged) {
-                    disconnect(m_rttBubbleChanged);
-                    m_rttBubbleChanged = QMetaObject::Connection();
-                }
-                if (m_rttBubbleCommitted) {
-                    disconnect(m_rttBubbleCommitted);
-                    m_rttBubbleCommitted = QMetaObject::Connection();
-                }
-                m_call = nullptr;
+    connect(&SelectionState::instance(), &SelectionState::callInForegroundChanged, this, [this]() {
+        // Disconnect from signals of the old call
+        if (m_establishedCall) {
+            disconnect(m_establishedCall);
+            m_establishedCall = QMetaObject::Connection();
+        }
+        if (m_rttCall) {
+            disconnect(m_rttCall);
+            m_rttCall = QMetaObject::Connection();
+        }
+        if (m_rttBubbleChanged) {
+            disconnect(m_rttBubbleChanged);
+            m_rttBubbleChanged = QMetaObject::Connection();
+        }
+        if (m_rttBubbleCommitted) {
+            disconnect(m_rttBubbleCommitted);
+            m_rttBubbleCommitted = QMetaObject::Connection();
+        }
+        m_call = nullptr;
 
-                // Clear model containing the RTT messages
-                m_model->reset();
-                m_newMessage = true;
+        // Clear model containing the RTT messages
+        m_model->reset();
+        m_newMessage = true;
 
-                // Connect to signals of the new call
-                m_state = GlobalCallState::instance().callInForeground();
-                if (m_state) {
-                    m_call = SIPCallManager::instance().findCallById(m_state->uuid());
-                }
+        // Connect to signals of the new call
+        m_state = SelectionState::instance().callInForeground();
+        if (m_state) {
+            m_call = SIPCallManager::instance().findCallById(m_state->uuid());
+        }
 
-                if (m_call) {
-                    m_establishedCall =
-                            connect(m_call, &SIPCall::establishedChanged, this,
-                                    &RTTProvider::isEstablishedCallChanged, Qt::QueuedConnection);
+        if (m_call) {
+            m_establishedCall =
+                    connect(m_call, &SIPCall::establishedChanged, this,
+                            &RTTProvider::isEstablishedCallChanged, Qt::QueuedConnection);
 
-                    m_rttCall = connect(m_call, &SIPCall::hasRttChanged, this,
-                                        &RTTProvider::isRttCallChanged, Qt::QueuedConnection);
+            m_rttCall = connect(m_call, &SIPCall::hasRttChanged, this,
+                                &RTTProvider::isRttCallChanged, Qt::QueuedConnection);
 
-                    m_rttBubbleChanged = connect(
-                            m_call, &SIPCall::rttBubbleChanged, this,
-                            [this](QString message) {
-                                if (m_newMessage) {
-                                    m_model->addMessage(QDateTime::currentMSecsSinceEpoch(),
-                                                        message, false);
-                                    m_newMessage = false;
-                                } else {
-                                    m_model->updateMessage(message, false, false);
-                                }
-                            },
-                            Qt::QueuedConnection);
+            m_rttBubbleChanged = connect(
+                    m_call, &SIPCall::rttBubbleChanged, this,
+                    [this](QString message) {
+                        if (m_newMessage) {
+                            m_model->addMessage(QDateTime::currentMSecsSinceEpoch(), message,
+                                                false);
+                            m_newMessage = false;
+                        } else {
+                            m_model->updateMessage(message, false, false);
+                        }
+                    },
+                    Qt::QueuedConnection);
 
-                    m_rttBubbleCommitted = connect(
-                            m_call, &SIPCall::rttBubbleCommitted, this,
-                            [this](QString message) {
-                                m_model->updateMessage(message, false, true);
-                                m_newMessage = true;
-                            },
-                            Qt::QueuedConnection);
-                }
-            });
+            m_rttBubbleCommitted = connect(
+                    m_call, &SIPCall::rttBubbleCommitted, this,
+                    [this](QString message) {
+                        m_model->updateMessage(message, false, true);
+                        m_newMessage = true;
+                    },
+                    Qt::QueuedConnection);
+        }
+    });
 }
 
 RTTProvider::~RTTProvider()

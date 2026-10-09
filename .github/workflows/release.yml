@@ -16,7 +16,7 @@ env:
 
 jobs:
   semantic-release:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     name: Semantic Release
     # A release will only be triggered on the release, freeze and hotfix branches.
     if: github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/heads/freeze') || startsWith(github.ref, 'refs/heads/hotfix')
@@ -32,12 +32,12 @@ jobs:
           client-id: ${{ secrets.RELEASE_APP_ID }}
           private-key: ${{ secrets.RELEASE_APP_KEY }}
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
           token: ${{ steps.get_token.outputs.token }}
       - name: Setup Node.js
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: "lts/*"
       - name: Install dependencies

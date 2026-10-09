@@ -44,9 +44,6 @@ Item {
             verticalCenter: parent.verticalCenter
             verticalCenterOffset: callListView.contentHeight / 2
         }
-
-        Accessible.role: Accessible.StaticText
-        Accessible.name: dragCallLabel.text
     }
 
     ListView {
@@ -54,7 +51,7 @@ Item {
         model: CallsProxyModel {
             hideIncomingSecondaryCallOnBusy: true
 
-            CallsModel { }
+            CallsModel { id: callsModel }
         }
         anchors {
             top: parent.top
@@ -79,7 +76,9 @@ Item {
 
             onClicked: () => control.selectedItem = callDelegate
 
-            Component.onCompleted: () => control.selectedItem = callDelegate
+            Component.onCompleted: () => {
+                control.selectedItem = callDelegate
+            }
         }
     }
 
@@ -106,8 +105,6 @@ Item {
                 right: parent.right
                 top: parent.top
             }
-
-            Accessible.ignored: true
         }
 
         IconLabel {

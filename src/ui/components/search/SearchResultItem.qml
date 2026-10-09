@@ -22,15 +22,15 @@ Item {
 
     Column {
         id: delegateColumn
-        topPadding: 12
-        bottomPadding: 12
+        topPadding: Theme.d
+        bottomPadding: Theme.d
         spacing: 4
         anchors {
             left: parent.left
             right: parent.right
         }
 
-        Accessible.role: Accessible.Column
+        Accessible.role: Accessible.Grouping
         Accessible.name: qsTr("Search result")
         Accessible.description: qsTr("Currently selected search result")
         Accessible.focusable: true
@@ -86,9 +86,6 @@ Item {
                     rightMargin: 10
                     verticalCenter: parent.verticalCenter
                 }
-
-                Accessible.role: Accessible.StaticText
-                Accessible.name: mainLabel.text
             }
 
             Loader {
@@ -105,7 +102,7 @@ Item {
             Label {
                 id: secondaryLabel
                 elide: Label.ElideRight
-                font.pixelSize: mainLabel.font.pixelSize - 2
+                font.pixelSize: Theme.fontSizeSmall
                 color: Theme.secondaryTextColor
                 visible: false
                 anchors {
@@ -113,9 +110,6 @@ Item {
                     left: mainLabel.left
                     right: mainLabel.right
                 }
-
-                Accessible.role: Accessible.StaticText
-                Accessible.name: secondaryLabel.text
             }
 
             HoverHandler {

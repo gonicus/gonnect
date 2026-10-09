@@ -47,8 +47,13 @@ public:
     QList<Contact *> search(const QString &searchString, bool includeBlocked = false) const;
     Contact *lookupBySipUrl(const QString &sipUrl) const;
     Contact *lookupByNumber(const QString &number) const;
+    Contact *lookupByEmail(const QString &emailAddr) const;
     Contact *lookupByContactId(const QString &contactId) const;
     Contact *lookupBySourceUid(const QString &sourceUid) const;
+
+#ifndef APP_TESTS
+    Contact *lookupByChatUser(const ChatUser *chatUser) const;
+#endif
 
     QString hashifyCn(const QString &cn) const;
 
@@ -60,8 +65,15 @@ public:
 private:
     explicit AddressBook(QObject *parent = nullptr);
 
+#ifndef APP_TESTS
+    void initContactSignals(Contact *contact);
+    void addChatUserMapping(ChatUser *chatUser, Contact *contact);
+    void removeChatUserMapping(const ChatUser *chatUser);
+#endif
+
     QHash<QString, Contact *> m_contacts;
     QHash<QString, Contact *> m_contactsBySourceId;
+    QHash<const ChatUser *, Contact *> m_contactsByChatUser;
     QList<Contact::ContactSourceInfo> m_contactSourceInfos;
 
     QMutex m_feederMutex;
@@ -72,8 +84,13 @@ private Q_SLOTS:
 Q_SIGNALS:
     void contactAdded(Contact *contact);
     void contactModified(Contact *contact);
-    void contactRemoved(QString sourceUid);
+    void contactRemoved(QString contactId);
     void contactsCleared();
     void contactsReady();
     void contactSourceInfosChanged();
+
+#ifndef APP_TESTS
+    void chatUserMappingAdded(ChatUser *chatUser, Contact *contact);
+    void chatUserAvatarChanged(ChatUser *chatUser);
+#endif
 };

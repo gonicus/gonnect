@@ -77,7 +77,7 @@ void SIPManager::initialize()
     // Initial configuration
     pj::EpConfig epConfig;
 
-    auto app = qobject_cast<Application *>(Application::instance());
+    auto app = static_cast<Application *>(Application::instance());
     if (app->isDebugRun()) {
         epConfig.logConfig.level = 6;
     } else {
@@ -199,6 +199,10 @@ void SIPManager::setPreferredCodecs()
         const QString &preferredCodec = preferredCodecs.at(i);
         const int priority = codecPriorities.at(qMin(i, codecPriorities.count() - 1));
         const QString prefix = preferredCodec + "/";
+
+        if (preferredCodec.isEmpty()) {
+            continue;
+        }
 
         bool matched = false;
         for (const QString &registered : std::as_const(registeredCodecs)) {
@@ -383,13 +387,26 @@ SIPBuddy *SIPManager::getBuddy(const QString &var)
     QString uri = account->toSipUri(var);
 
     for (SIPBuddy *buddy : std::as_const(buddies)) {
-        if (buddy->uri() == uri) {
+        if (buddy->uri().compare(uri, Qt::CaseInsensitive) == 0) {
             return buddy;
         }
     }
 
     qCDebug(lcSIPManager) << "could not find the corresponding buddy";
     return nullptr;
+}
+
+QString SIPManager::toSipUri(const QString &var) const
+{
+    const auto accounts = SIPAccountManager::instance().accounts();
+    if (!accounts.count()) {
+        qCDebug(lcSIPManager) << "could not retrieve accounts";
+        return "";
+    }
+
+    // There is only one account as of now
+    const SIPAccount *account = accounts.first();
+    return account->toSipUri(var);
 }
 
 void SIPManager::suspend()
@@ -503,7 +520,10 @@ void SIPManager::recoverFromNetworkChange()
 
     auto accounts = SIPAccountManager::instance().accounts();
 
+    m_recoveryCounts.clear();
+
     for (auto account : std::as_const(accounts)) {
+        m_recoveryCounts.insert(account->id(), account->registrationCount());
         account->setAfterResume();
     }
 
@@ -541,12 +561,15 @@ void SIPManager::checkRecovery()
 
     if (accounts.isEmpty()) {
         m_networkRecoveryAttempts = 0;
+        m_recoveryCounts.clear();
         return;
     }
 
     bool allRegistered = true;
     for (auto account : std::as_const(accounts)) {
-        if (!account->isRegistered()) {
+        const auto previousCount = m_recoveryCounts.value(account->id(), 0);
+
+        if (!account->isRegistered() || account->registrationCount() <= previousCount) {
             allRegistered = false;
             break;
         }
@@ -555,6 +578,7 @@ void SIPManager::checkRecovery()
     if (allRegistered) {
         qCDebug(lcSIPManager) << "SIP recovered successfully";
         m_networkRecoveryAttempts = 0;
+        m_recoveryCounts.clear();
         return;
     }
 

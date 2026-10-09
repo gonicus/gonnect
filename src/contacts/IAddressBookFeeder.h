@@ -1,4 +1,5 @@
 #pragma once
+#include <atomic>
 #include <QString>
 #include <QUrl>
 
@@ -13,5 +14,5 @@ public:
 protected:
     QString m_displayName;
     unsigned m_priority = 0;
-    bool m_isProcessing = false;
+    std::atomic<bool> m_isProcessing = false;
 };

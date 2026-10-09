@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.26)
-project(GOnnect VERSION 2.4.1 LANGUAGES CXX)
+project(GOnnect VERSION 2.5.0.8 LANGUAGES CXX)
 include(cmake/CCache.cmake)
 include(cmake/Workarounds.cmake)
 include(cmake/Versioning.cmake)
@@ -21,6 +21,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE TRUE)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_UNITY_BUILD_BATCH_SIZE 10)
+set(CMAKE_CXX_VISIBILITY_PRESET_RELEASE hidden)
+set(CMAKE_VISIBILITY_INLINES_HIDDEN_RELEASE ON)
 set(QT_NO_PRIVATE_MODULE_WARNING ON)
 
 list(PREPEND CMAKE_MODULE_PATH "${PROJECT_BINARY_DIR}/generators" "${PROJECT_BINARY_DIR}/resources/windows")
@@ -31,9 +33,14 @@ set(FLATPAK $ENV{FLATPAK_ID})
 
 # Basic settings
 option(CMAKE_UNITY_BUILD "Enable unity builds" OFF)
-option(ENABLE_PCH "Enable precompiled headers" OFF)
+option(ENABLE_PCH "Enable precompiled headers" ON)
 option(BUILD_TESTING "Build tests" OFF)
 option(BUILD_TOOLS "Build tools" OFF)
+option(ENABLE_MULTI_INSTANCE "Allow multiple GOnnect instances" OFF)
+option(ENABLE_LTO "Enable link time optimization for release builds" ON)
+if(ENABLE_LTO)
+    set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
+ENDIF()
 
 # Contacts / Calendar plugins
 option(ENABLE_AKONADI "Enable Akonadi plugins" OFF)
@@ -49,6 +56,10 @@ if(FLATPAK)
     add_definitions(-DQ_OS_FLATPAK)
 endif()
 
+if(ENABLE_MULTI_INSTANCE)
+    add_definitions(-DMULTI_INSTANCE)
+endif()
+
 if(LINUX)
     if(NOT FLATPAK_APP_ID)
         set(FLATPAK_APP_ID "de.gonicus.gonnect")
@@ -56,6 +67,11 @@ if(LINUX)
     string(REPLACE "." "/" FLATPAK_APP_PATH ${FLATPAK_APP_ID})
     add_definitions(-DFLATPAK_APP_ID="${FLATPAK_APP_ID}")
     add_definitions(-DFLATPAK_APP_PATH="/${FLATPAK_APP_PATH}")
+
+    find_program(MOLD_EXECUTABLE mold)
+    if(MOLD_EXECUTABLE AND NOT CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE)
+        add_link_options("-fuse-ld=mold")
+    endif()
 
     add_compile_options(-Wall -Wextra -Wpedantic -Werror -Wno-gnu-zero-variadic-macro-arguments)
     set(PLATFORM_QT_MODULES DBus)
@@ -65,6 +81,9 @@ else()
 endif()
 if(WIN32)
     add_definitions(-DNOMINMAX)
+    add_definitions(-D_WIN32_WINNT=0x0A00 -DWINVER=0x0A00 -DNTDDI_VERSION=0x0A000000)
+    add_definitions(-DWIN32_LEAN_AND_MEAN)
+    add_compile_options($<$<CXX_COMPILER_ID:MSVC>:/MP>)
 endif()
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
@@ -101,6 +120,11 @@ if(BUILD_TOOLS)
     add_subdirectory(emoji)
 endif()
 
+configure_file(
+    ${PROJECT_SOURCE_DIR}/resources/templates/templates.qrc.in
+    ${PROJECT_BINARY_DIR}/resources/templates/templates.qrc @ONLY
+)
+
 add_subdirectory(src)
 add_subdirectory(external/hid-rp)
 
@@ -110,11 +134,14 @@ if(BUILD_TESTING)
 endif()
 
 if(LINUX)
+    file(READ "resources/flatpak/de.gonicus.gonnect.releases.xml" RELEASES)
+    string(REGEX REPLACE "^[^<]*<\\?xml[^>]*>[ \t\r\n]*" "" RELEASES "${RELEASES}")
+    configure_file(resources/flatpak/de.gonicus.gonnect.metainfo.xml.in resources/flatpak/de.gonicus.gonnect.metainfo.xml @ONLY)
+
     install(FILES resources/flatpak/de.gonicus.gonnect.svg DESTINATION share/icons/hicolor/scalable/apps)
     install(FILES resources/flatpak/de.gonicus.gonnect.desktop DESTINATION share/applications)
     install(FILES resources/flatpak/de.gonicus.gonnect.krunner.desktop DESTINATION share/krunner/dbusplugins)
-    install(FILES resources/flatpak/de.gonicus.gonnect.metainfo.xml DESTINATION share/metainfo)
-    install(FILES resources/flatpak/de.gonicus.gonnect.releases.xml DESTINATION share/metainfo/releases)
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/resources/flatpak/de.gonicus.gonnect.metainfo.xml DESTINATION share/metainfo)
     install(FILES resources/flatpak/de.gonicus.gonnect.service DESTINATION share/dbus-1/services)
     install(FILES resources/flatpak/de.gonicus.gonnect.search-provider.ini DESTINATION share/gnome-shell/search-providers)
 endif()

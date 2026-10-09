@@ -1,4 +1,5 @@
 #include "GlobalCallState.h"
+#include "SelectionState.h"
 #include "Ringer.h"
 
 #include <QLoggingCategory>
@@ -8,9 +9,7 @@ Q_LOGGING_CATEGORY(lcGlobalCallState, "gonnect.callstate")
 GlobalCallState::GlobalCallState(QObject *parent) : QObject{ parent }
 {
     connect(this, &GlobalCallState::globalCallStateChanged, this, &GlobalCallState::updateRinger);
-    connect(this, &GlobalCallState::callInForegroundChanged, this,
-            &GlobalCallState::onCallInForegroundChanged);
-    connect(this, &GlobalCallState::callInForegroundChanged, this,
+    connect(&SelectionState::instance(), &SelectionState::callInForegroundChanged, this,
             &GlobalCallState::updateRemoteContactInfo);
 }
 
@@ -76,7 +75,7 @@ bool GlobalCallState::unregisterCallStateObject(ICallState *callStateObject)
 
     const bool wasRegistered = m_globalCallStateObjects.remove(callStateObject);
     if (wasRegistered) {
-        disconnect(callStateObject);
+        disconnect(callStateObject, nullptr, this, nullptr);
         updateGlobalCallState();
         Q_EMIT globalCallStateObjectsChanged();
     }
@@ -139,14 +138,6 @@ qsizetype GlobalCallState::nonIdleCallsCount() const
     return count;
 }
 
-void GlobalCallState::setCallInForeground(ICallState *call)
-{
-    if (m_callInForeground != call) {
-        m_callInForeground = call;
-        Q_EMIT callInForegroundChanged();
-    }
-}
-
 void GlobalCallState::setRemoteContactInfo(const ContactInfo &info)
 {
     if (m_remoteContactInfo != info) {
@@ -157,10 +148,11 @@ void GlobalCallState::setRemoteContactInfo(const ContactInfo &info)
 
 void GlobalCallState::triggerHold()
 {
-    if (m_callInForeground) {
-        if (m_callInForeground->callState() & ICallState::State::OnHold) {
-            holdAllCalls(m_callInForeground);
-            m_callInForeground->toggleHold();
+    auto *callInForeground = SelectionState::instance().callInForeground();
+    if (callInForeground) {
+        if (callInForeground->callState() & ICallState::State::OnHold) {
+            holdAllCalls(callInForeground);
+            callInForeground->toggleHold();
         } else {
             holdAllCalls();
         }
@@ -179,9 +171,11 @@ void GlobalCallState::holdAllCalls(const ICallState *stateObjectToSkip) const
 
 void GlobalCallState::unholdOtherCall() const
 {
-    if (m_callInForeground) {
-        if (m_callInForeground->callState() & ICallState::State::OnHold) {
-            m_callInForeground->toggleHold();
+    auto *callInForeground = SelectionState::instance().callInForeground();
+
+    if (callInForeground) {
+        if (callInForeground->callState() & ICallState::State::OnHold) {
+            callInForeground->toggleHold();
         }
     } else {
         for (auto callObj : std::as_const(m_globalCallStateObjects)) {
@@ -216,26 +210,14 @@ void GlobalCallState::updateRinger()
     }
 }
 
-void GlobalCallState::onCallInForegroundChanged()
-{
-    if (m_foregroundCallContext) {
-        m_foregroundCallContext->deleteLater();
-        m_foregroundCallContext = nullptr;
-    }
-
-    if (m_callInForeground) {
-        m_foregroundCallContext = new QObject(this);
-        connect(m_callInForeground, &QObject::destroyed, m_foregroundCallContext,
-                [this]() { setProperty("callInForeground", QVariant::fromValue(nullptr)); });
-    }
-}
-
 void GlobalCallState::updateRemoteContactInfo()
 {
     using State = ICallState::State;
     using States = ICallState::States;
 
     ICallState *callObj = nullptr;
+
+    auto *callInForeground = SelectionState::instance().callInForeground();
 
     const auto ringingCalls = filteredCallStateObjected(
             States::fromInt(0),
@@ -247,32 +229,32 @@ void GlobalCallState::updateRemoteContactInfo()
     const auto reallyActiveCalls = activeCalls - activeCallsOnHold;
 
     if (!callObj && !ringingCalls.isEmpty()) {
-        if (m_callInForeground && ringingCalls.contains(m_callInForeground)) {
-            callObj = m_callInForeground;
+        if (callInForeground && ringingCalls.contains(callInForeground)) {
+            callObj = callInForeground;
         } else {
             callObj = *ringingCalls.constBegin();
         }
     }
 
     if (!callObj && !reallyActiveCalls.isEmpty()) {
-        if (m_callInForeground && reallyActiveCalls.contains(m_callInForeground)) {
-            callObj = m_callInForeground;
+        if (callInForeground && reallyActiveCalls.contains(callInForeground)) {
+            callObj = callInForeground;
         } else {
             callObj = *reallyActiveCalls.constBegin();
         }
     }
 
     if (!callObj && !activeCallsWithAudio.isEmpty()) {
-        if (m_callInForeground && activeCallsWithAudio.contains(m_callInForeground)) {
-            callObj = m_callInForeground;
+        if (callInForeground && activeCallsWithAudio.contains(callInForeground)) {
+            callObj = callInForeground;
         } else {
             callObj = *activeCallsWithAudio.constBegin();
         }
     }
 
     if (!callObj && !activeCalls.isEmpty()) {
-        if (m_callInForeground && activeCalls.contains(m_callInForeground)) {
-            callObj = m_callInForeground;
+        if (callInForeground && activeCalls.contains(callInForeground)) {
+            callObj = callInForeground;
         } else {
             callObj = *activeCalls.constBegin();
         }
