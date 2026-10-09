@@ -1,6 +1,7 @@
 #pragma once
 #include <QObject>
 #include <QPointer>
+#include <QRegularExpression>
 
 class SIPCall;
 class CallHistoryItem;
@@ -26,24 +27,36 @@ public:
     bool triggerCapability(const QString &capability,
                            QPointer<CallHistoryItem> callHistoryItem = QPointer<CallHistoryItem>());
 
-    bool hasCapability(const QString &capability) const
-    {
-        return m_capabilities.contains(capability) && m_ownCapabilities.contains(capability);
-    }
+    bool hasCapability(const QString &capability) const;
 
     void openMeeting(const QString &meetingId, const QString &displayName = "", bool hangup = false,
                      QPointer<CallHistoryItem> callHistoryItem = QPointer<CallHistoryItem>(),
                      QPointer<Contact> contact = QPointer<Contact>());
+
+    void handleDtmfDigit(const QString &digit);
 
 Q_SIGNALS:
     void capabilitiesChanged();
     void meetingRequested(const QString &accountId, int callId);
 
 private:
+    struct ForcedUpgradeRequest
+    {
+        bool hangup = false;
+        QPointer<CallHistoryItem> callHistoryItem;
+        QString displayName;
+        QPointer<Contact> contact;
+    };
+
     bool requestMeeting(bool hangup,
                         QPointer<CallHistoryItem> callHistoryItem = QPointer<CallHistoryItem>(),
                         const QString &displayName = "",
                         QPointer<Contact> contact = QPointer<Contact>());
+
+    bool requestForcedUpgrade(bool hangup, QPointer<CallHistoryItem> callHistoryItem,
+                              const QString &displayName, QPointer<Contact> contact);
+    bool forcedUpgradeEnabled() const;
+    QString forcedUpgradeRoomName() const;
 
     void migrationHangup();
 
@@ -62,4 +75,7 @@ private:
 
     bool m_capabilitiesSent = false;
     bool m_jitsiPreconfig = false;
+
+    QRegularExpression m_forcedUpgradeNumberPattern;
+    std::optional<ForcedUpgradeRequest> m_pendingForcedUpgrade;
 };

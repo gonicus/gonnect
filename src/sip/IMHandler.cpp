@@ -3,6 +3,7 @@
 #include <QUrl>
 #include <QUuid>
 #include <QDesktopServices>
+#include <QCryptographicHash>
 #include <pjsua-lib/pjsua.h>
 #include <qurlquery.h>
 
@@ -10,6 +11,7 @@
 #include "SIPAccount.h"
 #include "IMHandler.h"
 #include "ViewHelper.h"
+#include "PhoneNumberUtil.h"
 
 using namespace std::chrono_literals;
 
@@ -24,6 +26,11 @@ IMHandler::IMHandler(SIPCall *parent) : QObject(parent), m_call(parent)
         settings.beginGroup("jitsi");
         m_jitsiBaseURL = settings.value("url", "").toString();
         m_jitsiPreconfig = settings.value("preconfig", false).toBool();
+
+        const auto pattern = settings.value("forceUpgradeNumberPattern", "").toString();
+        if (!pattern.isEmpty()) {
+            m_forcedUpgradeNumberPattern = QRegularExpression(pattern);
+        }
 
         settings.endGroup();
     }
@@ -118,6 +125,40 @@ void IMHandler::openMeeting(const QString &meetingId, const QString &displayName
     });
 }
 
+void IMHandler::handleDtmfDigit(const QString &digit)
+{
+
+    if (!forcedUpgradeEnabled()) {
+        return;
+    }
+
+    const auto normalized = digit.trimmed().toUpper();
+    if (normalized == "A") {
+        if (m_pendingForcedUpgrade) {
+            qCWarning(lcIMHandler)
+                    << "Received forced upgrade trigger while waiting for it by ourself - ignoring";
+            return;
+        }
+
+        // Other participant triggered forced upgrade process
+        try {
+            m_call->dialDtmf("B");
+        } catch (pj::Error &err) {
+            qCWarning(lcIMHandler) << "Failed to send DTMF upgrade request:" << err.info();
+            return;
+        }
+
+        openMeeting(forcedUpgradeRoomName(), tr("Ad hoc conference"), false,
+                    QPointer<CallHistoryItem>(), m_call->remoteContactInfo().contact);
+
+    } else if (normalized == "B" && m_pendingForcedUpgrade) {
+        const auto request = *m_pendingForcedUpgrade;
+        m_pendingForcedUpgrade.reset();
+        openMeeting(forcedUpgradeRoomName(), request.displayName, request.hangup,
+                    request.callHistoryItem, request.contact);
+    }
+}
+
 void IMHandler::migrationHangup()
 {
     if (m_migrationHangupDone) {
@@ -135,6 +176,10 @@ void IMHandler::migrationHangup()
 bool IMHandler::requestMeeting(bool hangup, QPointer<CallHistoryItem> callHistoryItem,
                                const QString &displayName, QPointer<Contact> contact)
 {
+    if (forcedUpgradeEnabled()) {
+        return requestForcedUpgrade(hangup, callHistoryItem, displayName, contact);
+    }
+
     if (!m_capabilities.contains("jitsi")) {
         return false;
     }
@@ -162,6 +207,49 @@ bool IMHandler::requestMeeting(bool hangup, QPointer<CallHistoryItem> callHistor
     openMeeting(meetingId, displayName, hangup, callHistoryItem, contact);
 
     return true;
+}
+
+bool IMHandler::requestForcedUpgrade(bool hangup, QPointer<CallHistoryItem> callHistoryItem,
+                                     const QString &displayName, QPointer<Contact> contact)
+{
+    try {
+        m_call->dialDtmf("A");
+    } catch (pj::Error &err) {
+        qCWarning(lcIMHandler) << "Failed to send DTMF upgrade request:" << err.info();
+        return false;
+    }
+
+    m_pendingForcedUpgrade = { hangup, callHistoryItem, displayName, contact };
+
+    QTimer::singleShot(5s, this, [this]() {
+        if (m_pendingForcedUpgrade) {
+            qCWarning(lcIMHandler) << "Timeout: no DTMF upgrade confirmation received";
+            m_pendingForcedUpgrade.reset();
+        }
+    });
+
+    return true;
+}
+
+bool IMHandler::forcedUpgradeEnabled() const
+{
+
+    if (m_jitsiBaseURL.isEmpty() || m_forcedUpgradeNumberPattern.pattern().isEmpty()) {
+        return false;
+    }
+    return m_forcedUpgradeNumberPattern.match(m_call->remoteContactInfo().phoneNumber).hasMatch();
+}
+
+QString IMHandler::forcedUpgradeRoomName() const
+{
+    QStringList numbers{ PhoneNumberUtil::canonicalNumber(m_call->account()->ownNumber()),
+                         PhoneNumberUtil::canonicalNumber(
+                                 m_call->remoteContactInfo().phoneNumber) };
+    numbers.sort();
+
+    const auto hash =
+            QCryptographicHash::hash(numbers.join('|').toUtf8(), QCryptographicHash::Sha256);
+    return QString("gonnect-%1").arg(QString::fromLatin1(hash.toHex().left(16)));
 }
 
 bool IMHandler::sendCapabilities()
@@ -217,6 +305,14 @@ bool IMHandler::triggerCapability(const QString &capability,
     }
 
     return false;
+}
+
+bool IMHandler::hasCapability(const QString &capability) const
+{
+    if (capability == "jitsi" && forcedUpgradeEnabled()) {
+        return true;
+    }
+    return m_capabilities.contains(capability) && m_ownCapabilities.contains(capability);
 }
 
 IMHandler::~IMHandler() { }
