@@ -332,6 +332,89 @@ QString ChatMessageSearchIndexer::getLatestMessageUidByRoom(const QString &roomU
     return "";
 }
 
+QString ChatMessageSearchIndexer::oldestIndexedMessageUid(const QString &roomUid)
+{
+    if (roomUid.isEmpty()) {
+        return "";
+    }
+    if (!m_db) {
+        qCWarning(lcChatMessageSearchIndexer) << "DB is not initialized";
+        return "";
+    }
+
+    const QString query("SELECT message_uid FROM messages_map WHERE room_uid = ? ORDER BY "
+                        "timestamp ASC LIMIT 1");
+
+    Statement stm;
+    if (sqlite3_prepare_v2(m_db, query.toUtf8(), -1, &stm.statement, nullptr) != SQLITE_OK) {
+        m_error = QString::fromUtf8(sqlite3_errmsg(m_db));
+        return "";
+    }
+    sqlite3_bind_text(stm.statement, 1, roomUid.toUtf8(), -1, SQLITE_STATIC);
+
+    if (sqlite3_step(stm.statement) == SQLITE_ROW) {
+        const auto *latestMessageUid = sqlite3_column_text(stm.statement, 0);
+        if (latestMessageUid) {
+            return QString::fromUtf8(reinterpret_cast<const char *>(latestMessageUid));
+        }
+    }
+
+    return "";
+}
+
+qsizetype ChatMessageSearchIndexer::indexedMessageCountForRoom(const QString &roomUid)
+{
+    if (roomUid.isEmpty()) {
+        return -1;
+    }
+    if (!m_db) {
+        qCWarning(lcChatMessageSearchIndexer) << "DB is not initialized";
+        return -1;
+    }
+
+    const QString query("SELECT COUNT(*) FROM messages_map WHERE room_uid = ?");
+
+    Statement stm;
+    if (sqlite3_prepare_v2(m_db, query.toUtf8(), -1, &stm.statement, nullptr) != SQLITE_OK) {
+        m_error = QString::fromUtf8(sqlite3_errmsg(m_db));
+        return -1;
+    }
+    sqlite3_bind_text(stm.statement, 1, roomUid.toUtf8(), -1, SQLITE_STATIC);
+
+    if (sqlite3_step(stm.statement) == SQLITE_ROW) {
+        return sqlite3_column_int64(stm.statement, 0);
+    }
+
+    return -1;
+}
+
+qint64 ChatMessageSearchIndexer::oldestIndexedTimestampForRoom(const QString &roomUid)
+{
+    if (roomUid.isEmpty()) {
+        return -1;
+    }
+    if (!m_db) {
+        qCWarning(lcChatMessageSearchIndexer) << "DB is not initialized";
+        return -1;
+    }
+
+    const QString query(
+            "SELECT timestamp FROM messages_map WHERE room_uid = ? ORDER BY timestamp ASC LIMIT 1");
+
+    Statement stm;
+    if (sqlite3_prepare_v2(m_db, query.toUtf8(), -1, &stm.statement, nullptr) != SQLITE_OK) {
+        m_error = QString::fromUtf8(sqlite3_errmsg(m_db));
+        return -1;
+    }
+    sqlite3_bind_text(stm.statement, 1, roomUid.toUtf8(), -1, SQLITE_STATIC);
+
+    if (sqlite3_step(stm.statement) == SQLITE_ROW) {
+        return sqlite3_column_int64(stm.statement, 0);
+    }
+
+    return -1;
+}
+
 QList<ChatMessageSearchIndexer::SearchResult> ChatMessageSearchIndexer::search(const QString &query,
                                                                                int limit)
 {

@@ -8,8 +8,14 @@
 
 Q_LOGGING_CATEGORY(lcChatMessageSearchProvider, "gonnect.chat.message.search.provider")
 
+using namespace std::chrono_literals;
+
 ChatMessageSearchProvider::ChatMessageSearchProvider(QObject *parent) : QObject{ parent }
 {
+    m_backfillTimer.setSingleShot(false);
+    m_backfillTimer.setInterval(10s);
+    m_backfillTimer.callOnTimeout(this, &ChatMessageSearchProvider::onBackfillTick);
+
     m_model = new ChatMessageSearchModel(this);
     if (!m_model) {
         return;
@@ -47,6 +53,11 @@ ChatMessageSearchProvider::ChatMessageSearchProvider(QObject *parent) : QObject{
 QString ChatMessageSearchProvider::indexingSettingsKey(const QString &roomUid) const
 {
     return QString("chatSearchIndexing/%1").arg(roomUid);
+}
+
+QString ChatMessageSearchProvider::backfillSettingsKey(const QString &roomUid) const
+{
+    return QString("chatSearchBackfillComplete/%1").arg(roomUid);
 }
 
 void ChatMessageSearchProvider::indexRoomMessages(IChatRoom &room) const
@@ -226,6 +237,10 @@ void ChatMessageSearchProvider::loadChatRoom(const QString &providerUid, IChatRo
             });
     connect(room, &IChatRoom::chatMessagesReset, context,
             [this, roomUid]() { m_indexer->removeMessagesByRoom(roomUid); });
+
+    if (!m_backfillTimer.isActive()) {
+        m_backfillTimer.start();
+    }
 }
 
 void ChatMessageSearchProvider::removeChatRoom(IChatRoom *room)
@@ -309,11 +324,99 @@ void ChatMessageSearchProvider::setRoomIndexingEnabled(const QString &roomUid, b
             if (roomConn.room) {
                 indexRoomMessages(*roomConn.room);
             }
+            if (!m_backfillTimer.isActive()) {
+                m_backfillTimer.start();
+            }
         } else {
             m_indexer->removeMessagesByRoom(roomUid);
         }
 
         Q_EMIT roomIndexingEnabledChanged(roomUid, enabled);
+    }
+}
+
+bool ChatMessageSearchProvider::isRoomBackfillComplete(const QString &roomUid) const
+{
+    if (roomUid.isEmpty()) {
+        return false;
+    }
+    return m_appSettings.value(backfillSettingsKey(roomUid), false).toBool();
+}
+
+void ChatMessageSearchProvider::setRoomBackfillComplete(const QString &roomUid, bool isComplete)
+{
+    qCInfo(lcChatMessageSearchProvider).noquote().nospace()
+            << "setRoomBackfillComplete(" << roomUid << ", " << isComplete << ")";
+
+    if (roomUid.isEmpty()) {
+        qCWarning(lcChatMessageSearchProvider) << "roomUid is empty";
+        return;
+    }
+
+    const bool oldValue = isRoomBackfillComplete(roomUid);
+    if (oldValue != isComplete) {
+        m_appSettings.setValue(backfillSettingsKey(roomUid), isComplete);
+    }
+}
+
+static constexpr qsizetype MAX_BACKFILL_MESSAGE_COUNT = 100000;
+static constexpr auto MAX_BACKFILL_AGE = std::chrono::days(365);
+static constexpr quint32 BACKFILL_PAGE_SIZE = 500;
+
+void ChatMessageSearchProvider::onBackfillTick()
+{
+    IChatRoom *candidate = nullptr;
+
+    // Set room states and find backfill candidate
+    for (const auto &roomConn : std::as_const(m_chatRoomsByUid)) {
+        if (auto *room = roomConn.room) {
+            const auto &roomId = room->id();
+
+            if (isRoomIndexingEnabled(roomId) && !isRoomBackfillComplete(roomId)) {
+                const auto oldestTimestamp = m_indexer->oldestIndexedTimestampForRoom(roomId);
+                const auto cutoff = QDateTime::currentDateTime()
+                                            .addDays(-MAX_BACKFILL_AGE.count())
+                                            .toMSecsSinceEpoch();
+
+                if (room->isCompletelyLoaded()
+                    || m_indexer->indexedMessageCountForRoom(roomId) >= MAX_BACKFILL_MESSAGE_COUNT
+                    || (oldestTimestamp > 0 && oldestTimestamp < cutoff)) {
+
+                    if (room->isCompletelyLoaded()) {
+                        qCInfo(lcChatMessageSearchProvider)
+                                << "Backfill complete (end of history) for" << roomId;
+                    } else if (m_indexer->indexedMessageCountForRoom(roomId)
+                               >= MAX_BACKFILL_MESSAGE_COUNT) {
+                        qCInfo(lcChatMessageSearchProvider)
+                                << "Backfill complete (count cap) for" << roomId;
+                    } else if (oldestTimestamp > 0 && oldestTimestamp < cutoff) {
+                        qCInfo(lcChatMessageSearchProvider)
+                                << "Backfill complete (age cap) for" << roomId;
+                    }
+                    setRoomBackfillComplete(roomId, true);
+
+                } else if (!candidate && !room->isLoadingMessageHistory()
+                           && room->ownUserJoinState() == IChatRoom::UserRoomState::Joined) {
+                    candidate = room;
+                }
+            }
+        }
+    }
+
+    // New backfill
+    if (candidate) {
+        QString anchor;
+        if (candidate->chatMessages().isEmpty()) {
+            anchor = m_indexer->oldestIndexedMessageUid(candidate->id());
+        }
+
+        qCInfo(lcChatMessageSearchProvider)
+                << "Backfill: requesting page for room" << candidate->id() << candidate->name()
+                << "and anchor" << anchor;
+        candidate->loadMessages(QString(), anchor, BACKFILL_PAGE_SIZE);
+
+    } else {
+        m_backfillTimer.stop();
     }
 }
 

@@ -537,9 +537,14 @@ void IpcDispatcher::markAsRead(const QString &roomId)
     sendRequest(req);
 }
 
-void IpcDispatcher::loadMessages(IChatRoom *chatRoom, quint32 n, const QString &threadId)
+void IpcDispatcher::loadMessages(IChatRoom *chatRoom, quint32 n, const QString &threadId,
+                                 const QString &beforeMessageId)
 {
     Q_CHECK_PTR(chatRoom);
+
+    qCInfo(lcIpcDispatcher).noquote().nospace()
+            << "loadMessages(IChatRoom(id=" << chatRoom->id() << ",name=" << chatRoom->name()
+            << "), " << n << ", " << threadId << ", " << beforeMessageId << ")";
 
     if (chatRoom->isLoadingMessageHistory()) {
         return;
@@ -563,15 +568,22 @@ void IpcDispatcher::loadMessages(IChatRoom *chatRoom, quint32 n, const QString &
         msgReq.setThreadId(threadId);
     }
 
-    const auto &existingMessages = chatRoom->chatMessages();
-    if (!existingMessages.isEmpty()) {
-        if (threadId.isEmpty()) {
-            msgReq.setFromMessageId(existingMessages.first()->eventId());
-        } else {
-            for (auto *msg : existingMessages) {
-                if (msg->threadId() == threadId || msg->eventId() == threadId) {
-                    msgReq.setFromMessageId(msg->eventId());
-                    break;
+    if (!beforeMessageId.isEmpty()) {
+        msgReq.setFromMessageId(beforeMessageId);
+
+    } else {
+        const auto &existingMessages = chatRoom->chatMessages();
+        if (!existingMessages.isEmpty()) {
+            if (threadId.isEmpty()) {
+                msgReq.setFromMessageId(existingMessages.first()->eventId());
+            } else {
+                for (auto *msg : existingMessages) {
+                    if (msg->threadId() == threadId || msg->eventId() == threadId) {
+                        msgReq.setFromMessageId(msg->eventId());
+                        qCInfo(lcIpcDispatcher) << "RoomMessagesRequest for" << chatRoom->id()
+                                                << "fromMessageId:" << msgReq.fromMessageId();
+                        break;
+                    }
                 }
             }
         }
@@ -866,6 +878,13 @@ bool IpcDispatcher::sendRequest(RequestContainer *requestContainer, const SendPo
         timer->setInterval(policy.timeoutSeconds * 1000);
         timer->callOnTimeout(this, [timer, tag, timeoutSeconds = policy.timeoutSeconds, this]() {
             m_timeoutTimers.remove(tag);
+
+            const auto roomTagInfo = m_roomListTags.take(tag);
+            if (!roomTagInfo.roomId.isEmpty()) {
+                if (auto *room = m_roomLookup.value(roomTagInfo.roomId)) {
+                    room->setIsLoadingMessageHistory(false);
+                }
+            }
 
             const auto messageId = m_singleMessageTags.take(tag);
             if (!messageId.isEmpty()) {

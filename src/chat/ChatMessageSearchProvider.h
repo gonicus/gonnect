@@ -1,13 +1,15 @@
 #pragma once
 
-#include <memory>
-
-#include <QObject>
-#include <QQmlEngine>
 #include "IChatRoom.h"
 #include "ChatMessageSearchIndexer.h"
 #include "ChatMessageSearchModel.h"
 #include "AppSettings.h"
+
+#include <memory>
+
+#include <QObject>
+#include <QQmlEngine>
+#include <QTimer>
 
 class IChatProvider;
 
@@ -51,14 +53,22 @@ public:
     Q_INVOKABLE bool isRoomIndexingEnabled(const QString &roomUid) const;
     Q_INVOKABLE void setRoomIndexingEnabled(const QString &roomUid, bool enabled);
 
+    bool isRoomBackfillComplete(const QString &roomUid) const;
+    void setRoomBackfillComplete(const QString &roomUid, bool isComplete);
+
+private Q_SLOTS:
+    void onBackfillTick();
+
 private:
     ChatMessageSearchProvider(QObject *parent = nullptr);
     QString indexingSettingsKey(const QString &roomUid) const;
+    QString backfillSettingsKey(const QString &roomUid) const;
     void indexRoomMessages(IChatRoom &room) const;
 
     ChatMessageSearchIndexer *m_indexer = nullptr;
     ChatMessageSearchModel *m_model = nullptr;
     AppSettings m_appSettings;
+    QTimer m_backfillTimer;
 
     QString m_searchPhrase;
 

@@ -533,13 +533,14 @@ void IpcChatRoom::requestSetConferenceUrl(const QString &url)
     ipcDispatcher()->setConferenceUrl(id(), url);
 }
 
-void IpcChatRoom::loadMessages(const QString &threadId)
+void IpcChatRoom::loadMessages(const QString &threadId, const QString &beforeMessageId,
+                               quint32 limit)
 {
     if (isLoadingMessageHistory() || isCompletelyLoaded(threadId)) {
         return;
     }
 
-    ipcDispatcher()->loadMessages(this, IChatProvider::defaultMessageLimit, threadId);
+    ipcDispatcher()->loadMessages(this, limit, threadId, beforeMessageId);
 
     if (!m_isInitiallyLoaded) {
         m_isInitiallyLoaded = true;

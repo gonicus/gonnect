@@ -22,7 +22,9 @@ public:
     virtual QString avatarPath() override { return ""; }
     virtual QString invitationText() override { return {}; }
     virtual bool isInitiallyLoaded() const override { return true; }
-    virtual void loadMessages(const QString &) override { }
+    virtual void loadMessages(const QString &, const QString & = QString(), quint32 = 100) override
+    {
+    }
     virtual qsizetype notificationCount() override;
     virtual void resetUnreadCount() override;
     virtual void markAsRead() override;

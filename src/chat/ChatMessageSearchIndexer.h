@@ -60,6 +60,9 @@ public:
 
     // TODO: Return Message {}
     QString getLatestMessageUidByRoom(const QString &roomUid);
+    QString oldestIndexedMessageUid(const QString &roomUid);
+    qsizetype indexedMessageCountForRoom(const QString &roomUid);
+    qint64 oldestIndexedTimestampForRoom(const QString &roomUid);
 
     QList<SearchResult> search(const QString &query, int limit = 20);
 

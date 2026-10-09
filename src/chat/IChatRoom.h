@@ -147,7 +147,9 @@ public:
     virtual bool isInitiallyLoaded() const = 0;
 
     /// Start the loading of next batch of messages.
-    Q_INVOKABLE virtual void loadMessages(const QString &threadId = QString()) = 0;
+    Q_INVOKABLE virtual void loadMessages(const QString &threadId = QString(),
+                                          const QString &beforeMessageId = QString(),
+                                          quint32 limit = 100) = 0;
 
     /// Toggle whether the message is pinned in this room or not.
     Q_INVOKABLE virtual void togglePin(const QString &messageId) = 0;

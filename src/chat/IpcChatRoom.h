@@ -36,7 +36,9 @@ public:
     virtual void requestSetConferenceUrl(const QString &url) override;
 
     virtual bool isInitiallyLoaded() const override { return m_isInitiallyLoaded; }
-    virtual void loadMessages(const QString &threadId = QString()) override;
+    virtual void loadMessages(const QString &threadId = QString(),
+                              const QString &beforeMessageId = QString(),
+                              quint32 limit = 100) override;
 
     virtual void resetUnreadCount() override;
     virtual QList<ChatMessage *> chatMessages() const override;
