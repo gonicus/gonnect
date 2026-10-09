@@ -1,3 +1,26 @@
+# [2.5.0-beta.8](https://github.com/gonicus/gonnect/compare/v2.5.0-beta.7...v2.5.0-beta.8) (2026-10-09)
+
+
+### Bug Fixes
+
+* favorite handling of conference rooms ([#737](https://github.com/gonicus/gonnect/issues/737)) ([1ad2718](https://github.com/gonicus/gonnect/commit/1ad27189a75ed88765b253b96f7585da989783e4))
+* reduced read time out ([#725](https://github.com/gonicus/gonnect/issues/725)) ([5cf8805](https://github.com/gonicus/gonnect/commit/5cf8805b17bcea92946d07ea6a875d8719886049))
+* **ui:** fixed larger numbers on BarButton's count label ([#749](https://github.com/gonicus/gonnect/issues/749)) ([3d783ae](https://github.com/gonicus/gonnect/commit/3d783ae6c0852330141062cf26637ba230bd8fcc))
+* **ui:** fixed tooltip position so button remains clickable ([#728](https://github.com/gonicus/gonnect/issues/728)) ([06f5709](https://github.com/gonicus/gonnect/commit/06f5709c8305ab6e1f4ea6b2bf0ed90113f7f339))
+* webwidget url fallback ([#726](https://github.com/gonicus/gonnect/issues/726)) ([23881c0](https://github.com/gonicus/gonnect/commit/23881c01b726632497013b45c2c3c47385a395b4))
+
+
+### Features
+
+* accessibility ([#743](https://github.com/gonicus/gonnect/issues/743)) ([387edf2](https://github.com/gonicus/gonnect/commit/387edf200bb0140fbd6d2dc24d50f8621f298e08))
+* conference link in chat room ([#738](https://github.com/gonicus/gonnect/issues/738)) ([f4f0465](https://github.com/gonicus/gonnect/commit/f4f046525970461c2f5e75545d56c9de3c7eaf05))
+* marker for edited messages ([#723](https://github.com/gonicus/gonnect/issues/723)) ([0b4aa44](https://github.com/gonicus/gonnect/commit/0b4aa446c67f1dd1176e504c593b13a6aca25fbc))
+* save/restore filter value of activities widget ([#734](https://github.com/gonicus/gonnect/issues/734)) ([09f6ee5](https://github.com/gonicus/gonnect/commit/09f6ee532c5a3699deb7902922c2c3ef3e624704))
+* show attached chat rooms in conference ([#751](https://github.com/gonicus/gonnect/issues/751)) ([1fef225](https://github.com/gonicus/gonnect/commit/1fef2252988320f21e097599ad4c7abaeaa2cd76))
+* show unread marker in chat message list ([#722](https://github.com/gonicus/gonnect/issues/722)) ([cb84f49](https://github.com/gonicus/gonnect/commit/cb84f49dbc938f2d45537c625bca9ace19d9d479))
+* show uploading state while larger message is pending ([#731](https://github.com/gonicus/gonnect/issues/731)) ([d3737f7](https://github.com/gonicus/gonnect/commit/d3737f77ddddcc1818897ca76a0177c5543b0277))
+* threads ([#660](https://github.com/gonicus/gonnect/issues/660)) ([07ad1f6](https://github.com/gonicus/gonnect/commit/07ad1f68481e1f3643a83a83fd5570d23f63b62f))
+
 # [2.5.0-beta.7](https://github.com/gonicus/gonnect/compare/v2.5.0-beta.6...v2.5.0-beta.7) (2026-09-17)
 
 
