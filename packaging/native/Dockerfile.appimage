@@ -30,11 +30,12 @@ ENV PKG_CONFIG_PATH="${QT_ROOT}/lib/pkgconfig:/usr/lib/x86_64-linux-gnu/pkgconfi
 
 FROM sdk AS builder
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libxfixes3 libxi6 libwayland-cursor0 && rm -rf /var/lib/apt/lists/*
+    libxfixes3 libxi6 libwayland-cursor0 ccache && rm -rf /var/lib/apt/lists/*
 WORKDIR /src
 COPY . .
 ARG BUILD_JOBS=4
 RUN --mount=type=cache,id=gonnect-appimage-noble-qt6103-v1,target=/root/.conan2 \
+    --mount=type=cache,id=gonnect-appimage-noble-ccache-v1,target=/root/.cache/ccache \
     BUILD_JOBS=${BUILD_JOBS} bash packaging/native/build-appimage.sh
 
 FROM scratch AS artifacts
