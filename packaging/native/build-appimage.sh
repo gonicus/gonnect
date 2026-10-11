@@ -6,6 +6,7 @@ test -f .native-source-manifest.json || {
     echo 'Use the tracked-source build-container.sh wrapper.' >&2; exit 1;
 }
 unset FLATPAK_ID
+bash packaging/native/test-apprun.sh
 conan profile detect --force
 conan config install resources/conan
 conan export-dependencies .

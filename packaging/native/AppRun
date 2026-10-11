@@ -8,4 +8,7 @@ unset QML_IMPORT_PATH QML2_IMPORT_PATH
 unset QTWEBENGINEPROCESS_PATH QTWEBENGINE_RESOURCES_PATH QTWEBENGINE_LOCALES_PATH
 export GSETTINGS_SCHEMA_DIR="$here/usr/share/glib-2.0/schemas"
 export QT_QPA_PLATFORM="${QT_QPA_PLATFORM:-xcb}"
+# Qt 6.10.3 compatibility default validated on Ubuntu 24.04. This uses the
+# host's PulseAudio interface (also provided by pipewire-pulse); keep overrides.
+export QT_AUDIO_BACKEND="${QT_AUDIO_BACKEND:-pulseaudio}"
 exec "$here/usr/bin/gonnect" "$@"
