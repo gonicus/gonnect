@@ -86,6 +86,13 @@ rm -f AppDir/usr/share/dbus-1/services/de.gonicus.gonnect.service
 find AppDir -name '*.desktop' -type f -exec sed -i \
     's/^DBusActivatable=true$/DBusActivatable=false/' '{}' +
 
+# EDS-linked libraries require their schemas even on non-GNOME desktops.
+# Keep schema lookup private to AppRun; never install data on the host.
+mkdir -p AppDir/usr/share/glib-2.0/schemas
+cp /usr/share/glib-2.0/schemas/*.xml /usr/share/glib-2.0/schemas/*.override \
+    AppDir/usr/share/glib-2.0/schemas/
+glib-compile-schemas --strict AppDir/usr/share/glib-2.0/schemas
+
 # Retain SDK license notices where provided, plus installed Ubuntu package notices.
 mkdir -p AppDir/usr/share/licenses/gonnect/qt-sdk AppDir/usr/share/licenses/gonnect/ubuntu
 find /opt/Qt -type f \( -iname 'LICENSE*' -o -iname 'COPYING*' -o -iname 'NOTICE*' \) \

@@ -2,6 +2,7 @@
 set -eu
 here=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)
 export LD_LIBRARY_PATH="$here/usr/lib"
+export GSETTINGS_SCHEMA_DIR="$here/usr/share/glib-2.0/schemas"
 export QT_PLUGIN_PATH="$here/usr/plugins"
 unset QT_QPA_PLATFORM_PLUGIN_PATH
 export QML_IMPORT_PATH="$here/usr/qml"
