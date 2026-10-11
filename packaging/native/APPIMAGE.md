@@ -37,7 +37,9 @@ chmod +x GOnnect-2.4.1-ubuntu24.04-x86_64.AppImage
 
 Do not disable the Chromium sandbox on your desktop. Ubuntu's AppArmor/user
 namespace policy may require a separate narrowly scoped integration decision;
-headless container tests cannot validate the host policy. Do not weaken the
+WebEngine/Jitsi is unvalidated and must not be considered functional until
+separately tested with the sandbox enabled. Headless container tests cannot
+validate the host policy. Do not weaken the
 system-wide policy just to launch an application.
 
 Provisioning uses `~/.config/gonnect/99-user.conf`, like the native build. To

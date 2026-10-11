@@ -1,14 +1,11 @@
 #!/bin/sh
 set -eu
 here=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)
-export LD_LIBRARY_PATH="$here/usr/lib"
+# linuxdeploy sets origin-relative ELF RUNPATHs and qt.conf. Do not export
+# bundled Qt/library paths into unrelated host applications opened by links.
+unset LD_LIBRARY_PATH QT_PLUGIN_PATH QT_QPA_PLATFORM_PLUGIN_PATH
+unset QML_IMPORT_PATH QML2_IMPORT_PATH
+unset QTWEBENGINEPROCESS_PATH QTWEBENGINE_RESOURCES_PATH QTWEBENGINE_LOCALES_PATH
 export GSETTINGS_SCHEMA_DIR="$here/usr/share/glib-2.0/schemas"
-export QT_PLUGIN_PATH="$here/usr/plugins"
-unset QT_QPA_PLATFORM_PLUGIN_PATH
-export QML_IMPORT_PATH="$here/usr/qml"
-export QML2_IMPORT_PATH="$here/usr/qml"
-export QTWEBENGINEPROCESS_PATH="$here/usr/libexec/QtWebEngineProcess"
-export QTWEBENGINE_RESOURCES_PATH="$here/usr/resources"
-export QTWEBENGINE_LOCALES_PATH="$here/usr/translations/qtwebengine_locales"
 export QT_QPA_PLATFORM="${QT_QPA_PLATFORM:-xcb}"
 exec "$here/usr/bin/gonnect" "$@"

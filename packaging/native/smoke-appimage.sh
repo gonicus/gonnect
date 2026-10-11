@@ -26,7 +26,9 @@ dbus-run-session -- xvfb-run -a bash -c '
         sleep 1
     done
     [[ "$found" == 1 ]] || { echo "No visible GOnnect window" >&2; exit 1; }
-    readlink /proc/"$app"/exe
+    executable=$(readlink /proc/"$app"/exe)
+    case "$executable" in */appimage_extracted_*/usr/bin/gonnect) ;; *) echo "Unexpected GUI executable" >&2; exit 1 ;; esac
+    printf "%s\n" "$executable"
     sleep 10
     kill -0 "$app" 2>/dev/null || exit 1
     kill -TERM "$app" || exit 1
