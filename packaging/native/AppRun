@@ -1,0 +1,13 @@
+#!/bin/sh
+set -eu
+here=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)
+export LD_LIBRARY_PATH="$here/usr/lib"
+export QT_PLUGIN_PATH="$here/usr/plugins"
+unset QT_QPA_PLATFORM_PLUGIN_PATH
+export QML_IMPORT_PATH="$here/usr/qml"
+export QML2_IMPORT_PATH="$here/usr/qml"
+export QTWEBENGINEPROCESS_PATH="$here/usr/libexec/QtWebEngineProcess"
+export QTWEBENGINE_RESOURCES_PATH="$here/usr/resources"
+export QTWEBENGINE_LOCALES_PATH="$here/usr/translations/qtwebengine_locales"
+export QT_QPA_PLATFORM="${QT_QPA_PLATFORM:-xcb}"
+exec "$here/usr/bin/gonnect" "$@"

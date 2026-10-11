@@ -61,12 +61,25 @@ export PATH="/opt/deploy/bin:$PATH"
 export QMAKE="$QT_ROOT/bin/qmake"
 export QML_SOURCES_PATHS=/src/src
 export EXTRA_QT_MODULES=svg
-export EXTRA_PLATFORM_PLUGINS='libqwayland-egl.so;libqwayland-generic.so'
+export EXTRA_PLATFORM_PLUGINS=libqwayland.so
 export LD_LIBRARY_PATH="$QT_ROOT/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 linuxdeploy --appdir AppDir --executable AppDir/usr/bin/gonnect \
     --desktop-file AppDir/usr/share/applications/de.gonicus.gonnect.desktop \
     --icon-file AppDir/usr/share/icons/hicolor/scalable/apps/de.gonicus.gonnect.svg \
-    --plugin qt > /out/deployment.log 2>&1
+    --library /usr/lib/x86_64-linux-gnu/libsoftokn3.so \
+    --library /usr/lib/x86_64-linux-gnu/libfreebl3.so \
+    --library /usr/lib/x86_64-linux-gnu/libfreeblpriv3.so \
+    --library /usr/lib/x86_64-linux-gnu/libnssckbi.so \
+    --plugin qt > /out/deployment.log 2>&1 || { tail -150 /out/deployment.log; exit 1; }
+
+# Use an explicit portable entry point. Default to the X11/XWayland path tested
+# below rather than silently selecting an untested native Wayland integration.
+rm -f AppDir/AppRun
+cp packaging/native/AppRun AppDir/AppRun
+chmod +x AppDir/AppRun
+rm -f AppDir/usr/share/dbus-1/services/de.gonicus.gonnect.service
+find AppDir -name '*.desktop' -type f -exec sed -i \
+    's/^DBusActivatable=true$/DBusActivatable=false/' '{}' +
 
 # Retain SDK license notices where provided, plus installed Ubuntu package notices.
 mkdir -p AppDir/usr/share/licenses/gonnect/qt-sdk AppDir/usr/share/licenses/gonnect/ubuntu
@@ -87,7 +100,7 @@ grep -q GNU_RELRO /out/elf-audit.txt
 grep -Eq 'BIND_NOW|FLAGS_1.*NOW' /out/elf-audit.txt
 ARCH=x86_64 appimagetool --no-appstream --runtime-file /opt/deploy/runtime-x86_64 \
     AppDir /out/GOnnect-2.4.1-ubuntu24.04-x86_64.AppImage \
-    > /out/appimagetool.log 2>&1
+    > /out/appimagetool.log 2>&1 || { tail -100 /out/appimagetool.log; exit 1; }
 cp packaging/native/smoke-appimage.sh /out/
 # SHA256SUMS is excluded from the input list.
 # shellcheck disable=SC2094

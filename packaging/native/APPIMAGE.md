@@ -4,6 +4,9 @@ This separate build targets Ubuntu 24.04 x86_64 with glibc 2.39. It does not
 convert the Ubuntu 26.04 package: it rebuilds GOnnect v2.4.1 on Ubuntu 24.04 and
 bundles the official Qt 6.10.3 SDK runtime. The host's Qt packages are untouched.
 It is not a claim of compatibility with older Ubuntu or every Linux distribution.
+The launcher defaults to X11/XWayland (`xcb`), including on GNOME Wayland
+sessions. Native Wayland is not yet validated; overriding `QT_QPA_PLATFORM` is
+experimental.
 
 ```sh
 bash packaging/native/build-container.sh appimage --build-arg BUILD_JOBS=4
@@ -48,14 +51,14 @@ and static Conan libraries require AppImage rebuilds for security updates.
 
 This is a local experimental build, not an official upstream binary release.
 `gonnect-conan-source.tar.gz` covers the application and Conan dependencies,
-**not the bundled Qt SDK or all bundled distro libraries**. Qt SDK notices and
-Ubuntu package copyright files are retained inside the image, and builder
+**not the bundled Qt SDK or all bundled distro libraries**. Available SDK notice
+files and Ubuntu package copyright files are retained inside the image, and builder
 package versions are exported. Before redistributing binaries, audit all
 licenses, Qt WebEngine's third-party notices and provide exact corresponding
 sources for bundled Qt/distro libraries as required. Do not treat this initial
 source archive as a complete compliance bundle.
 
-Qt's official SDK binaries are built on Ubuntu 24.04:
+Qt 6.10 supported Linux configurations (including Ubuntu 24.04):
 https://doc.qt.io/qt-6.10/linux.html
 SDK source archives:
 https://download.qt.io/archive/qt/6.10/6.10.3/submodules/

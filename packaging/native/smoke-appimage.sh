@@ -16,8 +16,8 @@ dbus-run-session -- xvfb-run -a bash -c '
     trap "kill -KILL \${app:-$launcher} 2>/dev/null || true; wait $launcher 2>/dev/null || true" EXIT
     found=0
     for attempt in {1..20}; do
-        if xdotool search --onlyvisible --class "[Gg][Oo]nnect" >/dev/null 2>&1; then
-            app=$(pgrep -x gonnect)
+        if window=$(xdotool search --onlyvisible --class "[Gg][Oo]nnect" 2>/dev/null | head -n1) && [[ -n "$window" ]]; then
+            app=$(xdotool getwindowpid "$window")
             [[ "$app" =~ ^[0-9]+$ ]] || exit 1
             found=1
             break
