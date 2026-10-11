@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-format=${1:?Usage: build-container.sh deb|rpm [docker build arguments...]}
+format=${1:?Usage: build-container.sh deb|rpm|appimage [docker build arguments...]}
 shift
-case "$format" in deb|rpm) ;; *) echo 'Expected deb or rpm' >&2; exit 2 ;; esac
+case "$format" in deb|rpm|appimage) ;; *) echo 'Expected deb, rpm or appimage' >&2; exit 2 ;; esac
 root=$(git rev-parse --show-toplevel)
 cd "$root"
 if [[ -n $(git status --porcelain --untracked-files=no) ]]; then

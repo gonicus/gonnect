@@ -1,0 +1,8 @@
+.git
+build
+repo
+.flatpak-builder
+CMakeUserPresets.json
+build-dependencies.json
+dist
+**/__pycache__

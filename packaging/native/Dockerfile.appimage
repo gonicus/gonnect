@@ -1,0 +1,39 @@
+# syntax=docker/dockerfile:1
+FROM ubuntu:24.04 AS tools
+ENV DEBIAN_FRONTEND=noninteractive CC=clang CXX=clang++
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates curl git build-essential clang cmake ninja-build pkg-config \
+    python3-venv autoconf automake libtool perl nasm groff-base uuid-dev \
+    libgl1-mesa-dev libopengl-dev libxkbcommon-dev libxkbcommon-x11-dev \
+    libxcb-cursor0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-render-util0 \
+    libxcb-xinerama0 libxcb-xkb1 libxcb-shape0 libxcb-randr0 libxcb-sync1 \
+    libudev-dev libusb-1.0-0-dev libsecret-1-dev libnotify-dev libpulse-dev \
+    libpipewire-0.3-dev libebook-contacts1.2-dev libebook1.2-dev libecal2.0-dev \
+    libedata-cal2.0-dev libedata-book1.2-dev libsasl2-dev libnss3 libnspr4 \
+    libasound2t64 libxcomposite1 libxdamage1 libxrandr2 libxtst6 libdrm2 \
+    libgbm1 libxshmfence1 libxkbfile1 libfontconfig1 libfreetype6 \
+    patchelf file squashfs-tools desktop-file-utils zsync \
+    && rm -rf /var/lib/apt/lists/*
+ARG CONAN_VERSION=2.33.0
+ARG AQT_VERSION=3.3.0
+RUN python3 -m venv /opt/tools && /opt/tools/bin/pip install --no-cache-dir \
+    "conan==${CONAN_VERSION}" "aqtinstall==${AQT_VERSION}"
+ENV PATH="/opt/tools/bin:${PATH}"
+
+FROM tools AS sdk
+ARG QT_VERSION=6.10.3
+RUN aqt install-qt linux desktop "${QT_VERSION}" linux_gcc_64 -O /opt/Qt \
+    -m qt5compat qtmultimedia qtnetworkauth qtwebengine qtwebchannel qtpositioning qtgrpc qtshadertools
+ENV QT_ROOT=/opt/Qt/6.10.3/gcc_64
+ENV PATH="${QT_ROOT}/bin:${PATH}" CMAKE_PREFIX_PATH="${QT_ROOT}"
+ENV PKG_CONFIG_PATH="${QT_ROOT}/lib/pkgconfig:/usr/lib/x86_64-linux-gnu/pkgconfig:/usr/share/pkgconfig"
+
+FROM sdk AS builder
+WORKDIR /src
+COPY . .
+ARG BUILD_JOBS=4
+RUN --mount=type=cache,id=gonnect-appimage-noble-qt6103-v1,target=/root/.conan2 \
+    BUILD_JOBS=${BUILD_JOBS} bash packaging/native/build-appimage.sh
+
+FROM scratch AS artifacts
+COPY --from=builder /out/ /
