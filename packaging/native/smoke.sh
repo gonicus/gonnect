@@ -34,8 +34,9 @@ set +e
 # Variables below are expanded by the child shell inside the virtual display.
 # shellcheck disable=SC2016
 dbus-run-session -- xvfb-run -a bash -c '
-    timeout --foreground --signal=TERM --kill-after=5s 20s gonnect > /tmp/gonnect-startup.log 2>&1 &
+    gonnect > /tmp/gonnect-startup.log 2>&1 &
     app=$!
+    trap "kill -KILL \"$app\" 2>/dev/null || true; wait \"$app\" 2>/dev/null || true" EXIT
     found=0
     for attempt in {1..10}; do
         if xdotool search --onlyvisible --class "[Gg][Oo]nnect" >/dev/null 2>&1; then
@@ -45,18 +46,37 @@ dbus-run-session -- xvfb-run -a bash -c '
         sleep 1
     done
     if [[ "$found" != 1 ]]; then
-        kill "$app" 2>/dev/null || true
-        wait "$app" || true
         echo "No visible GOnnect window appeared" >&2
         exit 1
     fi
+    sleep 10
+    if ! kill -0 "$app" 2>/dev/null; then
+        wait "$app"
+        echo "GOnnect exited before the shutdown test" >&2
+        exit 1
+    fi
+    kill -TERM "$app" || exit 1
+    for attempt in {1..10}; do
+        kill -0 "$app" 2>/dev/null || break
+        sleep 1
+    done
+    if kill -0 "$app" 2>/dev/null; then
+        echo "GOnnect did not shut down after SIGTERM" >&2
+        exit 1
+    fi
     wait "$app"
-' 
+    status=$?
+    if [[ "$status" != 0 ]]; then
+        echo "GOnnect shutdown failed: $status" >&2
+        exit 1
+    fi
+'
+
 result=$?
 set -e
 cat /tmp/gonnect-startup.log
-if [[ "$result" != 124 ]]; then
-    echo "Expected the application to stay running until timeout; got $result" >&2
+if [[ "$result" != 0 ]]; then
+    echo "GUI startup/shutdown test failed: $result" >&2
     exit 1
 fi
 if grep -Ei 'failed to load component|module .* is not installed|cannot load library|error while loading shared libraries|segmentation fault|dumped core|aborted|fatal|unavailable|is not a type|qrc:.*Error' /tmp/gonnect-startup.log; then

@@ -16,7 +16,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          submodules: recursive
+          persist-credentials: false
       - name: Build and run unit tests
         run: |
           bash packaging/native/build-container.sh ${{ matrix.format }} --build-arg BUILD_JOBS=2

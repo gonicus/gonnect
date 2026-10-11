@@ -43,7 +43,8 @@ cmake --preset conan-release . -DCMAKE_INSTALL_PREFIX=/usr \
     -DENABLE_NATIVE_PACKAGING=ON -DBUILD_TESTING=ON -DENABLE_LTO=OFF \
     -D "${dependency_key}=${abi_dependency}"
 cmake --build --preset conan-release --parallel "$jobs"
-QT_QPA_PLATFORM=offscreen ctest --test-dir build/Release/tests --output-on-failure --no-tests=error
+QT_QPA_PLATFORM=offscreen ctest --test-dir build/Release/tests --output-on-failure --no-tests=error --output-log /out/ctest.log
+cp build/Release/tests/Testing/Temporary/LastTest.log /out/ctest-details.log
 # Resolve all QML imports, not only the modules loaded by the startup smoke test.
 "$(qtpaths6 --query QT_INSTALL_LIBEXECS)/qmlimportscanner" \
     -rootPath src -importPath build/Release/src \
@@ -61,6 +62,9 @@ if grep -Eq ' (SSL|EVP|CRYPTO|ldap|ber)_' /out/exported-symbols.txt; then
     exit 1
 fi
 readelf -h -l -d build/Release/src/gonnect > /out/elf-audit.txt
+grep -q 'Type:.*DYN' /out/elf-audit.txt
+grep -q GNU_RELRO /out/elf-audit.txt
+grep -Eq 'BIND_NOW|FLAGS_1.*NOW' /out/elf-audit.txt
 cp build-dependencies.json /out/
 cp packaging/native/smoke.sh /out/
 (cd build/Release && cpack -G "$format" -B /out)

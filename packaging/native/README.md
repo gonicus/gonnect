@@ -1,6 +1,6 @@
 # Experimental native Linux packages
 
-These opt-in container builds create native packages from **the current source
+These opt-in container builds create native packages from **the committed source
 checkout**. They do not convert a Flatpak, bundle Qt, install anything on the
 host, or change the official Flatpak distribution channel.
 
@@ -30,7 +30,9 @@ bash packaging/native/build-container.sh rpm --build-arg BUILD_JOBS=4
 
 The wrapper uses `git archive HEAD` plus a source manifest, so untracked files,
 ignored local secrets and generated presets cannot enter the source archive.
-Direct builds from an arbitrary working-directory context are rejected.
+Direct builds from an arbitrary working-directory context are rejected. The
+Flatpak-only `resources/flatpak/shared-modules` submodule is not exported; it is
+not used by the native build on the release branch.
 
 Each build uses the upstream Conan recipes for non-Qt dependencies, builds the
 application and its test target(s), runs CTest with `--no-tests=error`, then
@@ -123,7 +125,8 @@ network-disabled test container**, because ordinary Docker user-namespace
 restrictions can prevent it from starting. Do not use that setting on a real
 desktop. No SIP credentials, home directory, audio, host sockets or GUI session
 are passed into these test containers. This validates package installation and
-GUI startup, not calls, headsets, Jitsi or credential storage.
+GUI startup and clean SIGTERM shutdown, not calls, headsets, Jitsi or credential
+storage. A visible window and exit status 0 are both required.
 
 A manual-only `Experimental native packages` GitHub Actions workflow builds both
 targets and runs these same smoke tests. It does not publish releases or change

@@ -39,6 +39,6 @@ endif()
 
 if(TARGET gonnect)
     # Bundled static OpenLDAP/OpenSSL must not interpose on system library symbols.
-    target_compile_options(gonnect PRIVATE -fPIE -fstack-protector-strong -D_FORTIFY_SOURCE=3)
+    target_compile_options(gonnect PRIVATE -fstack-protector-strong -D_FORTIFY_SOURCE=3)
     target_link_options(gonnect PRIVATE -pie "LINKER:--exclude-libs,ALL" "LINKER:-z,relro,-z,now")
 endif()
