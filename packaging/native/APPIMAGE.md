@@ -2,7 +2,9 @@
 
 This separate build targets Ubuntu 24.04 x86_64 with glibc 2.39. It does not
 convert the Ubuntu 26.04 package: it rebuilds GOnnect v2.4.1 on Ubuntu 24.04 and
-bundles the official Qt 6.10.3 SDK runtime. The host's Qt packages are untouched.
+bundles the official Qt 6.10.3 SDK runtime. The host's Qt packages are untouched. A graphical desktop with system GL/EGL/OpenGL
+libraries (including Ubuntu's `libopengl0`) and drivers is required; graphics
+driver libraries are intentionally not bundled.
 It is not a claim of compatibility with older Ubuntu or every Linux distribution.
 Only the SQLite SQL driver is bundled; serial/NMEA positioning is omitted.
 The launcher defaults to X11/XWayland (`xcb`), including on GNOME Wayland

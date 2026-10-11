@@ -2,7 +2,7 @@ FROM ubuntu:24.04
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates dbus-x11 xvfb xauth xdotool procps file \
-    libgl1 libegl1 libgl1-mesa-dri libstdc++6 libfontconfig1 fonts-dejavu-core \
+    libgl1 libopengl0 libegl1 libgl1-mesa-dri libstdc++6 libfontconfig1 fonts-dejavu-core \
     && rm -rf /var/lib/apt/lists/* && useradd --create-home tester
 COPY *.AppImage /opt/gonnect/GOnnect.AppImage
 COPY smoke-appimage.sh /usr/local/bin/gonnect-smoke
