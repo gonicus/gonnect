@@ -115,7 +115,15 @@ if(LINUX)
     install(FILES resources/flatpak/de.gonicus.gonnect.krunner.desktop DESTINATION share/krunner/dbusplugins)
     install(FILES resources/flatpak/de.gonicus.gonnect.metainfo.xml DESTINATION share/metainfo)
     install(FILES resources/flatpak/de.gonicus.gonnect.releases.xml DESTINATION share/metainfo/releases)
-    install(FILES resources/flatpak/de.gonicus.gonnect.service DESTINATION share/dbus-1/services)
+    if(FLATPAK)
+        install(FILES resources/flatpak/de.gonicus.gonnect.service DESTINATION share/dbus-1/services)
+    else()
+        include(GNUInstallDirs)
+        configure_file(resources/linux/de.gonicus.gonnect.service.in
+            resources/linux/de.gonicus.gonnect.service @ONLY)
+        install(FILES ${PROJECT_BINARY_DIR}/resources/linux/de.gonicus.gonnect.service
+            DESTINATION share/dbus-1/services)
+    endif()
     install(FILES resources/flatpak/de.gonicus.gonnect.search-provider.ini DESTINATION share/gnome-shell/search-providers)
 endif()
 

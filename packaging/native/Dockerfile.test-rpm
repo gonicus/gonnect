@@ -1,0 +1,10 @@
+FROM fedora:43
+COPY *.rpm /packages/
+RUN dnf --setopt=install_weak_deps=False install -y /packages/*.rpm dbus-daemon xorg-x11-server-Xvfb xorg-x11-xauth desktop-file-utils xdotool python3 \
+    && dnf clean all && rm -rf /packages \
+    && useradd --create-home tester
+COPY qml-runtime.json /usr/local/share/gonnect-qml-runtime.json
+COPY smoke.sh /usr/local/bin/gonnect-smoke
+USER tester
+WORKDIR /home/tester
+CMD ["bash", "/usr/local/bin/gonnect-smoke"]

@@ -29,7 +29,7 @@ if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
 endif()
 
 # Fall back to project version
-if(VERSION STREQUAL "")
+if("${VERSION}" STREQUAL "")
     set(VERSION ${GOnnect_VERSION})
 endif()
 

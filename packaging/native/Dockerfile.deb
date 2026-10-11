@@ -1,0 +1,30 @@
+# syntax=docker/dockerfile:1
+ARG BASE_IMAGE=ubuntu:26.04
+FROM ${BASE_IMAGE} AS builder
+ENV DEBIAN_FRONTEND=noninteractive CC=clang CXX=clang++
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates git build-essential clang cmake ninja-build pkg-config \
+    python3-venv autoconf automake libtool perl nasm dpkg-dev \
+    qt6-base-dev qt6-base-private-dev qt6-declarative-dev qt6-declarative-private-dev \
+    qt6-tools-dev qt6-tools-dev-tools qt6-5compat-dev qt6-multimedia-dev \
+    qt6-networkauth-dev qt6-webengine-dev qt6-webchannel-dev qt6-grpc-dev \
+    libgl1-mesa-dev libopengl-dev libxkbcommon-dev libudev-dev libusb-1.0-0-dev \
+    libsecret-1-dev libnotify-dev libpulse-dev libpipewire-0.3-dev \
+    libebook-contacts1.2-dev libebook1.2-dev libecal2.0-dev \
+    libedata-cal2.0-dev libedata-book1.2-dev libsasl2-dev \
+    && rm -rf /var/lib/apt/lists/*
+# OpenLDAP's documentation build needs soelim; PJSIP needs system UUID headers.
+RUN apt-get update && apt-get install -y --no-install-recommends groff-base uuid-dev qt6-svg-plugins \
+    && rm -rf /var/lib/apt/lists/*
+ARG CONAN_VERSION=2.33.0
+RUN python3 -m venv /opt/conan && /opt/conan/bin/pip install --no-cache-dir "conan==${CONAN_VERSION}"
+ENV PATH="/opt/conan/bin:${PATH}"
+ENV PKG_CONFIG_PATH="/usr/lib/x86_64-linux-gnu/pkgconfig:/usr/share/pkgconfig"
+WORKDIR /src
+COPY . .
+ARG CONAN_CACHE_ID=gonnect-native-deb-hardened-v1
+ARG BUILD_JOBS=4
+RUN --mount=type=cache,id=${CONAN_CACHE_ID},target=/root/.conan2 BUILD_JOBS=${BUILD_JOBS} bash packaging/native/build.sh DEB
+
+FROM scratch AS artifacts
+COPY --from=builder /out/ /

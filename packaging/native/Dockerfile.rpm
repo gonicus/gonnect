@@ -1,0 +1,27 @@
+# syntax=docker/dockerfile:1
+ARG BASE_IMAGE=fedora:43
+FROM ${BASE_IMAGE} AS builder
+ENV CC=clang CXX=clang++
+RUN dnf --setopt=install_weak_deps=False install -y \
+    ca-certificates git gcc gcc-c++ clang cmake ninja-build pkgconf-pkg-config \
+    python3 python3-pip autoconf automake libtool make perl nasm rpm-build \
+    qt6-qtbase-devel qt6-qtbase-private-devel qt6-qtdeclarative-devel \
+    qt6-qtdeclarative-private-devel qt6-qttools-devel qt6-qt5compat-devel \
+    qt6-qtmultimedia-devel qt6-qtnetworkauth-devel qt6-qtwebengine-devel \
+    qt6-qtwebchannel-devel qt6-qtgrpc-devel mesa-libGL-devel mesa-libEGL-devel \
+    libxkbcommon-devel systemd-devel libusb1-devel libsecret-devel libnotify-devel \
+    pulseaudio-libs-devel pipewire-devel evolution-data-server-devel \
+    cyrus-sasl-devel libuuid-devel groff-base hostname perl-IPC-Cmd perl-FindBin perl-Digest-SHA perl-Time-Piece \
+    && dnf clean all
+ARG CONAN_VERSION=2.33.0
+RUN python3 -m venv /opt/conan && /opt/conan/bin/pip install --no-cache-dir "conan==${CONAN_VERSION}"
+ENV PATH="/opt/conan/bin:${PATH}"
+ENV PKG_CONFIG_PATH="/usr/lib64/pkgconfig:/usr/share/pkgconfig"
+WORKDIR /src
+COPY . .
+ARG CONAN_CACHE_ID=gonnect-native-rpm-hardened-v1
+ARG BUILD_JOBS=4
+RUN --mount=type=cache,id=${CONAN_CACHE_ID},target=/root/.conan2 BUILD_JOBS=${BUILD_JOBS} bash packaging/native/build.sh RPM
+
+FROM scratch AS artifacts
+COPY --from=builder /out/ /

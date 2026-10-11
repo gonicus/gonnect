@@ -66,3 +66,6 @@ tags
 updater.sqlite
 __pycache__
 tmp/
+
+# Native package export artifacts
+dist/

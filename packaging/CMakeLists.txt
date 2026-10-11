@@ -87,4 +87,9 @@ elseif(APPLE)
     set(CPACK_DMG_DS_STORE "${PROJECT_SOURCE_DIR}/resources/macos/DS_Store")
 endif()
 
+option(ENABLE_NATIVE_PACKAGING "Enable experimental native Linux packages" OFF)
+if(ENABLE_NATIVE_PACKAGING)
+    include(${CMAKE_CURRENT_LIST_DIR}/native/CPack.cmake)
+endif()
+
 include(CPack)

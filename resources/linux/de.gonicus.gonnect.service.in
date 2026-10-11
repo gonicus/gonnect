@@ -1,0 +1,3 @@
+[D-BUS Service]
+Name=de.gonicus.gonnect
+Exec=@CMAKE_INSTALL_FULL_BINDIR@/gonnect

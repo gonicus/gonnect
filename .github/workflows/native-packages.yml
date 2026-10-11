@@ -1,0 +1,32 @@
+name: Experimental native packages
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  native:
+    runs-on: ubuntu-26.04
+    strategy:
+      fail-fast: false
+      matrix:
+        format: [deb, rpm]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          submodules: recursive
+      - name: Build and run unit tests
+        run: |
+          bash packaging/native/build-container.sh ${{ matrix.format }} --build-arg BUILD_JOBS=2
+      - name: Install and smoke-test in a clean runtime
+        run: |
+          docker build -f packaging/native/Dockerfile.test-${{ matrix.format }} \
+            -t gonnect-native-test dist/${{ matrix.format }}
+          docker run --rm --name gonnect-native-test --network none \
+            --memory 2g --cpus 2 --ulimit core=0 gonnect-native-test
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: gonnect-native-${{ matrix.format }}-x86_64
+          path: dist/${{ matrix.format }}/
