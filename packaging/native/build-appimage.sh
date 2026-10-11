@@ -66,6 +66,8 @@ export LD_LIBRARY_PATH="$QT_ROOT/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 # GOnnect only opens SQLite databases. Do not bundle unused SDK SQL drivers
 # (PostgreSQL, ODBC, etc.) or introduce their unrelated runtime dependencies.
 find "$QT_ROOT/plugins/sqldrivers" -type f ! -name libqsqlite.so -delete
+# Serial/NMEA positioning is unused and requires the optional SerialPort SDK.
+rm -f "$QT_ROOT/plugins/position/libqtposition_nmea.so"
 linuxdeploy --appdir AppDir --executable AppDir/usr/bin/gonnect \
     --desktop-file AppDir/usr/share/applications/de.gonicus.gonnect.desktop \
     --icon-file AppDir/usr/share/icons/hicolor/scalable/apps/de.gonicus.gonnect.svg \
