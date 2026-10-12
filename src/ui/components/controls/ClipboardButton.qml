@@ -21,7 +21,7 @@ Rectangle {
 
     Keys.onReturnPressed: () => control.copy()
     Keys.onEnterPressed: () => control.copy()
-    Keys.onSpacesPressed: () => control.copy()
+    Keys.onSpacePressed: () => control.copy()
 
     function copy() {
         ClipboardHelper.copyToClipboard(control.text)
