@@ -126,7 +126,8 @@ Window {
                 shadowHorizontalOffset: 0
                 shadowVerticalOffset: 3
                 shadowBlur: 0.5
-                shadowOpacity: 0.8
+                blurMax: 16
+                shadowOpacity: 1.0
                 shadowScale: 1.0
             }
 
