@@ -41,8 +41,6 @@ finish-args:
   - --talk-name=org.gnome.evolution.dataserver.Calendar8
   - --talk-name=org.gnome.evolution.dataserver.Sources5
   - --talk-name=org.gnome.evolution.dataserver.Subprocess.Backend.*
-  # Real time priority for SIP audio processing thread
-  - --system-talk-name=org.freedesktop.RealtimeKit1
   # Access for evolution-data-server avatars
   - --filesystem=xdg-data/evolution/addressbook/system/photos:ro
   # Kerberos socket
