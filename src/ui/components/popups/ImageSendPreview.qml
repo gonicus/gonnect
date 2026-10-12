@@ -11,6 +11,7 @@ Item {
 
     property alias source: imageItem.source
     property IChatRoom chatRoom
+    property string threadId
 
     function close() {
         ViewHelper.topDrawer.loader.sourceComponent = undefined
@@ -77,7 +78,7 @@ Item {
                 highlighted: true
                 text: qsTr("Send")
                 onClicked: () => {
-                    control.chatRoom.sendFile(control.source)
+                    control.chatRoom.sendFile(control.source, control.threadId)
                     control.close()
                 }
             }

@@ -12,10 +12,21 @@ Rectangle {
 
     property string text
 
+    activeFocusOnTab: control.enabled
+
     Accessible.role: Accessible.Button
     Accessible.name: qsTr("Copy to clipboard: %1").arg(control.text)
     Accessible.focusable: true
-    Accessible.onPressAction: () => ClipboardHelper.copyToClipboard(control.text)
+    Accessible.onPressAction: () => control.copy()
+
+    Keys.onReturnPressed: () => control.copy()
+    Keys.onEnterPressed: () => control.copy()
+    Keys.onSpacesPressed: () => control.copy()
+
+    function copy() {
+        ClipboardHelper.copyToClipboard(control.text)
+        internal.showFeedback()
+    }
 
     QtObject {
         id: internal
@@ -45,10 +56,7 @@ Rectangle {
     }
 
     TapHandler {
-        onTapped: () => {
-                      ClipboardHelper.copyToClipboard(control.text)
-                      internal.showFeedback()
-                  }
+        onTapped: () => control.copy()
     }
 
     HoverHandler {
