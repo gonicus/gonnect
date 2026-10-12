@@ -125,6 +125,8 @@ Item {
                                        aggregatedRooms.updateContactId()
                                    }
             onContactIdChanged: () => aggregatedRooms.updateContactId()
+            onRemoteUrlChanged: () => delg.updateBuddyStatus()
+            onHasBuddyStateChanged: () => delg.updateBuddyStatus()
 
             Accessible.role: Accessible.ListItem
             Accessible.name: qsTr("%1, %2, %3").arg(delg.contactName).arg(delg.remotePhoneNumber).arg(timeTextLabel.text)
