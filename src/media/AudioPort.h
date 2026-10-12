@@ -49,6 +49,8 @@ Q_SIGNALS:
     void sourceLevelChanged(qreal level);
 
 private:
+    void requestStartIO();
+
     void startIO();
     void stopIO();
 
@@ -78,6 +80,8 @@ private:
     QPointer<QIODevice> m_io;
     QPointer<QAudioSink> m_sink;
     QPointer<QAudioSource> m_source;
+
+    std::atomic<bool> m_ioStartRequested = false;
 
     QTimer m_idleTimer;
     qreal m_sourceAudioLevel = 0.0;
