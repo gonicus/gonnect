@@ -42,7 +42,6 @@ Q_SIGNALS:
 private:
     struct ForcedUpgradeRequest
     {
-        bool hangup = false;
         QPointer<CallHistoryItem> callHistoryItem;
         QString displayName;
         QPointer<Contact> contact;
@@ -53,8 +52,8 @@ private:
                         const QString &displayName = "",
                         QPointer<Contact> contact = QPointer<Contact>());
 
-    bool requestForcedUpgrade(bool hangup, QPointer<CallHistoryItem> callHistoryItem,
-                              const QString &displayName, QPointer<Contact> contact);
+    bool requestForcedUpgrade(QPointer<CallHistoryItem> callHistoryItem, const QString &displayName,
+                              QPointer<Contact> contact);
     bool forcedUpgradeEnabled() const;
     QString forcedUpgradeRoomName() const;
 

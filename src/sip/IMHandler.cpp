@@ -148,14 +148,14 @@ void IMHandler::handleDtmfDigit(const QString &digit)
             return;
         }
 
-        openMeeting(forcedUpgradeRoomName(), tr("Ad hoc conference"), false,
+        openMeeting(forcedUpgradeRoomName(), tr("Ad hoc conference"), true,
                     QPointer<CallHistoryItem>(), m_call->remoteContactInfo().contact);
 
     } else if (normalized == "B" && m_pendingForcedUpgrade) {
         const auto request = *m_pendingForcedUpgrade;
         m_pendingForcedUpgrade.reset();
-        openMeeting(forcedUpgradeRoomName(), request.displayName, request.hangup,
-                    request.callHistoryItem, request.contact);
+        openMeeting(forcedUpgradeRoomName(), request.displayName, true, request.callHistoryItem,
+                    request.contact);
     }
 }
 
@@ -177,7 +177,7 @@ bool IMHandler::requestMeeting(bool hangup, QPointer<CallHistoryItem> callHistor
                                const QString &displayName, QPointer<Contact> contact)
 {
     if (forcedUpgradeEnabled()) {
-        return requestForcedUpgrade(hangup, callHistoryItem, displayName, contact);
+        return requestForcedUpgrade(callHistoryItem, displayName, contact);
     }
 
     if (!m_capabilities.contains("jitsi")) {
@@ -209,7 +209,7 @@ bool IMHandler::requestMeeting(bool hangup, QPointer<CallHistoryItem> callHistor
     return true;
 }
 
-bool IMHandler::requestForcedUpgrade(bool hangup, QPointer<CallHistoryItem> callHistoryItem,
+bool IMHandler::requestForcedUpgrade(QPointer<CallHistoryItem> callHistoryItem,
                                      const QString &displayName, QPointer<Contact> contact)
 {
     try {
@@ -219,7 +219,7 @@ bool IMHandler::requestForcedUpgrade(bool hangup, QPointer<CallHistoryItem> call
         return false;
     }
 
-    m_pendingForcedUpgrade = { hangup, callHistoryItem, displayName, contact };
+    m_pendingForcedUpgrade = { callHistoryItem, displayName, contact };
 
     QTimer::singleShot(5s, this, [this]() {
         if (m_pendingForcedUpgrade) {
