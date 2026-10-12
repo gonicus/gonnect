@@ -31,7 +31,7 @@ jobs:
       # Do not build the MacOS package for now, as it is not tested.
       macos: false
       flatpak: true
-      sign: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/release' }}
+      sign: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/release' || github.ref == 'refs/heads/freeze/beta' }}
 
   publish:
     name: "Upload to release"
@@ -55,6 +55,7 @@ jobs:
         run: |
           VERSION="${TAG#v}"
           mkdir release
+          # Copy the created files. Which files were created depends on the parameters given to the build packages job.
           for ext in msix dmg flatpak; do
             for f in packages/*.$ext; do
               [ -e "$f" ] && mv "$f" "release/GOnnect-$VERSION.$ext"
