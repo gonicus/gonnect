@@ -18,6 +18,8 @@ Item {
         property bool isWebViewLoaded: false
     }
 
+    Component.onCompleted: () => VideoManager.acquireCameras()
+
     LoggingCategory {
         id: category
         name: "gonnect.qml.Conference"

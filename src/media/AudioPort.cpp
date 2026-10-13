@@ -42,7 +42,9 @@ std::optional<RealtimeEndpoint> findRealTimeEndpoint()
     // Try portal first...
     QDBusConnection sessionBus = QDBusConnection::sessionBus();
     if (sessionBus.isConnected()
-        && sessionBus.interface()->isServiceRegistered(QStringLiteral("org.freedesktop.portal.Desktop")).value()) {
+        && sessionBus.interface()
+                   ->isServiceRegistered(QStringLiteral("org.freedesktop.portal.Desktop"))
+                   .value()) {
         qCDebug(lcAudioPort()) << "realtime endpoint: picking org.freedesktop.portal.Desktop";
         return RealtimeEndpoint{ sessionBus, QStringLiteral("org.freedesktop.portal.Desktop"),
                                  QStringLiteral("/org/freedesktop/portal/desktop"),
@@ -52,7 +54,9 @@ std::optional<RealtimeEndpoint> findRealTimeEndpoint()
     // ... then the system bus as a fallback
     QDBusConnection systemBus = QDBusConnection::systemBus();
     if (systemBus.isConnected()
-        && systemBus.interface()->isServiceRegistered(QStringLiteral("org.freedesktop.RealtimeKit1")).value()) {
+        && systemBus.interface()
+                   ->isServiceRegistered(QStringLiteral("org.freedesktop.RealtimeKit1"))
+                   .value()) {
         qCDebug(lcAudioPort()) << "realtime endpoint: picking org.freedesktop.RealtimeKit1";
         return RealtimeEndpoint{ systemBus, QStringLiteral("org.freedesktop.RealtimeKit1"),
                                  QStringLiteral("/org/freedesktop/RealtimeKit1"),
@@ -61,7 +65,6 @@ std::optional<RealtimeEndpoint> findRealTimeEndpoint()
 
     return std::nullopt;
 }
-
 
 bool rtkitRequestRealtime()
 {
@@ -75,7 +78,8 @@ bool rtkitRequestRealtime()
                          QStringLiteral("org.freedesktop.DBus.Properties"), endpoint->bus);
 
     const auto readProperty = [&props, &endpoint](const char *name, qlonglong fallback) {
-        const QDBusReply<QDBusVariant> reply = props.call(QStringLiteral("Get"), endpoint->interface, QString::fromLatin1(name));
+        const QDBusReply<QDBusVariant> reply =
+                props.call(QStringLiteral("Get"), endpoint->interface, QString::fromLatin1(name));
         return reply.isValid() ? reply.value().variant().toLongLong() : fallback;
     };
 
@@ -87,26 +91,27 @@ bool rtkitRequestRealtime()
         return false;
     }
 
-    const rlim_t rtTime = static_cast<rlim_t>(std::min<qlonglong>(maxRtTime, MEDIA_THREAD_RTTIME_USEC));
+    const rlim_t rtTime =
+            static_cast<rlim_t>(std::min<qlonglong>(maxRtTime, MEDIA_THREAD_RTTIME_USEC));
     struct rlimit limit = { rtTime, rtTime };
     if (setrlimit(RLIMIT_RTTIME, &limit) != 0) {
         qCWarning(lcAudioPort) << "unable to set RLIMIT_RTTIME, skipping realtime priority";
         return false;
     }
 
-    const auto priority = static_cast<quint32>(std::min<qlonglong>(maxPriority, MEDIA_THREAD_RT_PRIORITY));
+    const auto priority =
+            static_cast<quint32>(std::min<qlonglong>(maxPriority, MEDIA_THREAD_RT_PRIORITY));
     const auto pid = static_cast<quint64>(getpid());
     const auto tid = static_cast<quint64>(syscall(SYS_gettid));
 
     QDBusInterface rtkit(endpoint->service, endpoint->path, endpoint->interface, endpoint->bus);
 
-    const QDBusReply<void> reply = rtkit.call(QStringLiteral("MakeThreadRealtimeWithPID"),
-                                              QVariant::fromValue(pid),
-                                              QVariant::fromValue(tid),
-                                              QVariant::fromValue(priority));
+    const QDBusReply<void> reply =
+            rtkit.call(QStringLiteral("MakeThreadRealtimeWithPID"), QVariant::fromValue(pid),
+                       QVariant::fromValue(tid), QVariant::fromValue(priority));
     if (!reply.isValid()) {
-        qCDebug(lcAudioPort).nospace() << "RealtimeKit refused thread " << tid << " of process " << pid << ": "
-                                       << reply.error().message();
+        qCDebug(lcAudioPort).nospace() << "RealtimeKit refused thread " << tid << " of process "
+                                       << pid << ": " << reply.error().message();
         return false;
     }
 
@@ -149,7 +154,7 @@ void ensureMediaThreadPriority()
     }
 }
 
-}
+} // namespace
 
 AudioPort::AudioPort(QAudioDevice device) : m_device(device)
 {
@@ -297,10 +302,13 @@ void AudioPort::requestStartIO()
         return;
     }
 
-    QMetaObject::invokeMethod(this, [this]() {
-        startIO();
-        m_ioStartRequested = false;
-    }, Qt::QueuedConnection);
+    QMetaObject::invokeMethod(
+            this,
+            [this]() {
+                startIO();
+                m_ioStartRequested = false;
+            },
+            Qt::QueuedConnection);
 }
 
 void AudioPort::startIO()

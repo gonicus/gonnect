@@ -8,9 +8,9 @@
 #include <QLoggingCategory>
 
 #ifdef Q_OS_FLATPAK
-#include <QDBusConnection>
-#include <QDBusMessage>
-#include <QDBusReply>
+#  include <QDBusConnection>
+#  include <QDBusMessage>
+#  include <QDBusReply>
 #endif
 
 Q_LOGGING_CATEGORY(lcFileContentHelper, "gonnect.helper.FileContentHelper")
@@ -112,7 +112,6 @@ QString FileContentHelper::portalFileTransferMimeType() const
     return portalMimeType;
 }
 
-
 QList<QUrl> FileContentHelper::resolvePortalFileToken(const QString &token) const
 {
 #ifdef Q_OS_FLATPAK
@@ -125,17 +124,15 @@ QList<QUrl> FileContentHelper::resolvePortalFileToken(const QString &token) cons
     auto message = QDBusMessage::createMethodCall(
             QStringLiteral("org.freedesktop.portal.Documents"),
             QStringLiteral("/org/freedesktop/portal/documents"),
-            QStringLiteral("org.freedesktop.portal.FileTransfer"),
-            QStringLiteral("RetrieveFiles"));
+            QStringLiteral("org.freedesktop.portal.FileTransfer"), QStringLiteral("RetrieveFiles"));
     message.setArguments({ key, QVariantMap{} });
 
     const QDBusReply<QStringList> reply =
-        QDBusConnection::sessionBus().call(message, QDBus::Block, 5000);
+            QDBusConnection::sessionBus().call(message, QDBus::Block, 5000);
 
     if (!reply.isValid()) {
-        qCWarning(lcFileContentHelper)
-                << "Could not retrieve files for portal file transfer token:"
-                << reply.error().name() << reply.error().message();
+        qCWarning(lcFileContentHelper) << "Could not retrieve files for portal file transfer token:"
+                                       << reply.error().name() << reply.error().message();
         return {};
     }
 

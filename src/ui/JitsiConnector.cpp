@@ -235,7 +235,9 @@ QString JitsiConnector::jitsiHtmlInternal()
   <div id="meet"></div>
 </body>
 </html>
-)""").arg(qwebchannelJs).arg(GlobalInfo::instance().jitsiUrl());
+)""")
+            .arg(qwebchannelJs)
+            .arg(GlobalInfo::instance().jitsiUrl());
 }
 
 QString JitsiConnector::jitsiJavascriptInternal()
@@ -1175,7 +1177,7 @@ void JitsiConnector::transferVideoManagerDeviceToJitsi()
     }
 
     // Find correct Jitsi device id for QCameraDevice
-    const auto deviceName = videoDevice.description();
+    const auto deviceName = videoDevice.description;
     JitsiMediaDevice *bestMatchingDevice = nullptr;
     qreal maxD = 0.0;
 
@@ -1526,9 +1528,8 @@ void JitsiConnector::setSubtitlesEnabled(bool enabled)
 
 void JitsiConnector::setSharingScreen(bool shareScreen)
 {
-      qCInfo(lcJitsiConnector) << "setSharingScreen" << shareScreen
-                               << "current:" << m_isSharingScreen
-                               << "pending:" << m_isToggleScreenSharePending;
+    qCInfo(lcJitsiConnector) << "setSharingScreen" << shareScreen << "current:" << m_isSharingScreen
+                             << "pending:" << m_isToggleScreenSharePending;
 
     if (m_isSharingScreen != shareScreen) {
         Q_EMIT executeToggleShareScreenCommand();
