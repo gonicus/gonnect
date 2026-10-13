@@ -8,9 +8,17 @@ import base
 
 Item {
     id: control
-    implicitHeight: reactionsContainer.visible
-                    ? (reactionsContainer.y + reactionsContainer.implicitHeight)
-                    : (messageContentItem.y + messageContentItem.height)
+    implicitHeight: {
+        let h = 0
+        if (reactionsContainer.visible) {
+            h = reactionsContainer.y + reactionsContainer.implicitHeight
+        } else {
+            h = messageContentItem.y + messageContentItem.height
+        }
+
+        const avatarHeight = avatarImage.visible ? (avatarImage.y + avatarImage.height) : 0
+        return Math.max(h, avatarHeight)
+    }
 
     LoggingCategory {
         id: category
