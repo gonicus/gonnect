@@ -512,6 +512,7 @@ Item {
             anchors.fill: parent
             chatProvider: control.attachedData
             chatRoom: SelectionState.selectedChatRoom
+            isVisibleForUser: control.isSelectedPage
         }
     }
 }
