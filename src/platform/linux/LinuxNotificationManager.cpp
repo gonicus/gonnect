@@ -150,6 +150,10 @@ QString LinuxNotificationManager::add(Notification *notification)
 
 bool LinuxNotificationManager::remove(const QString &id)
 {
+    if (m_isShuttingDown) {
+        return false;
+    }
+
     if (m_notifications.contains(id)) {
         m_notifications.value(id)->deleteLater();
         notify_notification_close(m_internalNotifications.value(id), NULL);
@@ -162,6 +166,8 @@ bool LinuxNotificationManager::remove(const QString &id)
 
 void LinuxNotificationManager::shutdown()
 {
+    m_isShuttingDown = true;
+
     // Close notifications
     for (auto iter = m_internalNotifications.constBegin();
          iter != m_internalNotifications.constEnd(); ++iter) {
