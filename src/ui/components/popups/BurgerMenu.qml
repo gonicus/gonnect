@@ -9,7 +9,7 @@ Menu {
 
     // INFO: Togglers will be inserted here by instantiator
 
-    MenuSeparator {
+    HideableMenuSeparator {
         visible: burgerMenuTogglerInstantiator.count > 0
     }
 
