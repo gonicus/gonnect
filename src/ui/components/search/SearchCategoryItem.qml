@@ -15,7 +15,8 @@ Item {
     property alias name: buttonLabel.text
     property bool highlighted
 
-    Accessible.role: Accessible.ColumnHeader
+    Accessible.role: Accessible.Button
+    Accessible.selected: control.highlighted
     Accessible.name: qsTr("Search result category filter %1").arg(control.name)
     Accessible.description: qsTr("Filter for the individual search result items by category")
     Accessible.focusable: true
@@ -31,8 +32,6 @@ Item {
             width: 1
             color: Theme.secondaryTextColor
         }
-
-        Accessible.ignored: true
     }
 
     IconLabel {

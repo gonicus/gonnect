@@ -100,7 +100,6 @@ Item {
                 highlighted: true
                 Material.accent: Theme.redColor
 
-                Accessible.role: Accessible.Button
                 Accessible.name: text
 
                 onClicked: () => internal.answer(false)
@@ -112,9 +111,6 @@ Item {
                 icon.source: Icons.objectSelectSymbolic
                 highlighted: true
                 Material.accent: Theme.greenColor
-
-                Accessible.role: Accessible.Button
-                Accessible.name: text
 
                 onClicked: () => internal.answer(true)
             }
