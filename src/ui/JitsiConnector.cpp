@@ -236,8 +236,7 @@ QString JitsiConnector::jitsiHtmlInternal()
 </body>
 </html>
 )""")
-            .arg(qwebchannelJs)
-            .arg(GlobalInfo::instance().jitsiUrl());
+            .arg(qwebchannelJs, GlobalInfo::instance().jitsiUrl());
 }
 
 QString JitsiConnector::jitsiJavascriptInternal()

@@ -14,7 +14,7 @@ CameraPortal::CameraPortal(QObject *parent)
 {
     m_isCameraPresent = m_interface->property("IsCameraPresent").toBool();
     qCInfo(lcCameraPortal) << "portal valid:" << isValid()
-                        << "camera present:" << m_isCameraPresent;
+                           << "camera present:" << m_isCameraPresent;
 
     QDBusConnection::sessionBus().connect(
             FREEDESKTOP_DBUS_PORTAL_SERVICE, FREEDESKTOP_DBUS_PORTAL_PATH,
