@@ -614,8 +614,7 @@ Item {
             onClicked: () => control.openThread(control.isThreadRoot ? control.eventId : control.threadId)
 
             readonly property bool shallBeVisible: SelectionState.selectedThreadId === ""
-                                                   && (control.isThreadRoot || control.threadId !== "")
-        }
+                                                   && (control.isThreadRoot || control.threadId !== "") }
 
         Repeater {
             id: reactionRepeater
