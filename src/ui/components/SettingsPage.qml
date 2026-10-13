@@ -51,9 +51,11 @@ Item {
         category: "audio" + AudioManager.currentProfile
 
         property string notificationTone
+        property string notificationToneName
         property alias notificationVolume: notificationToneVolumeSlider.value
 
         property string ringtone
+        property string ringtoneName
         property alias ringtonePause: ringTonePauseSlider.value
         property alias ringtoneVolume: ringToneVolumeSlider.value
         property alias preferExternalRinger: externalRingerCheckbox.checked
@@ -993,6 +995,8 @@ Item {
                         }
 
                         AudioFileSelector {
+                            storageKey: "ringtone"
+                            displayName: audioSettings.ringtoneName
                             filePath: audioSettings.ringtone
                             isPlaying: ViewHelper.isPlayingRingTone
                             anchors {
@@ -1002,7 +1006,10 @@ Item {
 
                             onStartTestPlay: () => ViewHelper.testPlayRingTone(ringToneVolumeSlider.value / 100.0)
                             onStopTestPlay: () => ViewHelper.stopTestPlayRingTone()
-                            onFileSelected: newFilePath => audioSettings.ringtone = newFilePath
+                            onFileSelected: (newFilePath, newDisplayName) => {
+                                                audioSettings.ringtone = newFilePath
+                                                audioSettings.ringtoneName = newDisplayName
+                                            }
                         }
                     }
 
@@ -1081,6 +1088,8 @@ Item {
                         }
 
                         AudioFileSelector {
+                            storageKey: "notification-tone"
+                            displayName: audioSettings.notificationToneName
                             filePath: audioSettings.notificationTone
                             isPlaying: ViewHelper.isPlayingNotificationTone
                             anchors {
@@ -1088,9 +1097,12 @@ Item {
                                 right: parent.right
                             }
 
-                            onFileSelected: newFilePath => audioSettings.notificationTone = newFilePath
                             onStartTestPlay: () => ViewHelper.testPlayNotificationTone(notificationToneVolumeSlider.value / 100.0)
                             onStopTestPlay: () => ViewHelper.stopTestPlayNotificationTone()
+                            onFileSelected: (newFilePath, newDisplayName) => {
+                                                audioSettings.notificationTone = newFilePath
+                                                audioSettings.notificationToneName = newDisplayName
+                                            }
                         }
                     }
 

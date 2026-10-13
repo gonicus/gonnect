@@ -22,25 +22,23 @@ Rectangle {
     Accessible.name: toneName.text
 
     property string filePath
+    property string displayName
+    property string storageKey
     property string placeholderText: qsTr('Default')
     property bool isPlaying
     property bool showPlayOnEmptyFile: true
 
-    signal fileSelected(string newFilePath)
+    signal fileSelected(string newFilePath, string newDisplayName)
     signal startTestPlay
     signal stopTestPlay
 
     Label {
         id: toneName
         text: {
-            const path = control.filePath
-            if (path) {
-                if (path.startsWith("file://")) {
-                    return path.substring(7)
-                }
-                return path
+            if (!control.filePath) {
+                return control.placeholderText
             }
-            return control.placeholderText
+            return control.displayName || qsTr("Custom")
         }
         color: control.filePath ? Theme.primaryTextColor : Theme.secondaryTextColor
         maximumLineCount: 2
@@ -92,7 +90,7 @@ Rectangle {
             verticalCenter: parent.verticalCenter
         }
 
-        onClicked: () => control.fileSelected("")
+        onClicked: () => control.fileSelected("", "")
 
         Accessible.name: qsTr("Reset tone")
         Accessible.description: qsTr("Reset the tone to its default option")
@@ -115,7 +113,12 @@ Rectangle {
 
     FileDialog {
         id: toneFileDialog
-        onAccepted: control.fileSelected(toneFileDialog.selectedFile)
+        onAccepted: () => {
+                        const persistedPath = FileHelper.persistFile(toneFileDialog.selectedFile, "sounds", control.storageKey)
+                        if (persistedPath) {
+                            control.fileSelected(persistedPath, FileHelper.fileNameFromPath(toneFileDialog.selectedFile))
+                        }
+                    }
         nameFilters: FileHelper.mediaFileSelectors(false)
     }
 }
