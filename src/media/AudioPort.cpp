@@ -3,6 +3,7 @@
 #include <QMediaDevices>
 #include <SIPAudioDevice.h>
 #include <pjmedia/port.h>
+#include <mutex>
 #include "AudioPort.h"
 #include "AudioProcessor.h"
 
@@ -313,23 +314,35 @@ void AudioPort::requestStartIO()
 
 void AudioPort::startIO()
 {
+    const QMutexLocker locker(&m_ioMutex);
+    startIONoLock();
+}
+
+void AudioPort::startIONoLock()
+{
     if (m_device.mode() == QAudioDevice::Mode::Input) {
-        startSourceIO();
+        startSourceIONoLock();
     } else {
-        startSinkIO();
+        startSinkIONoLock();
     }
 }
 
 void AudioPort::stopIO()
 {
+    const QMutexLocker locker(&m_ioMutex);
+    stopIONoLock();
+}
+
+void AudioPort::stopIONoLock()
+{
     if (m_device.mode() == QAudioDevice::Mode::Input) {
-        stopSourceIO();
+        stopSourceIONoLock();
     } else {
-        stopSinkIO();
+        stopSinkIONoLock();
     }
 }
 
-void AudioPort::writeSilenceMS(unsigned milliseconds)
+void AudioPort::writeSilenceMSNoLock(unsigned milliseconds)
 {
     if (m_sink) {
         if (!m_io.isNull()) {
@@ -380,6 +393,12 @@ bool AudioPort::isSilence(const void *data, unsigned size) const
 
 void AudioPort::padSilence()
 {
+    const QMutexLocker locker(&m_ioMutex);
+    padSilenceNoLock();
+}
+
+void AudioPort::padSilenceNoLock()
+{
     if (m_sink.isNull() || m_io.isNull()) {
         return;
     }
@@ -406,7 +425,7 @@ void AudioPort::padSilence()
             << (m_audioFormat.durationForBytes(queued) / 1000) << "ms";
 }
 
-void AudioPort::startSinkIO()
+void AudioPort::startSinkIONoLock()
 {
     m_idleTimer.stop();
 
@@ -416,7 +435,7 @@ void AudioPort::startSinkIO()
     }
 
     if (!m_sink.isNull()) {
-        stopSinkIO();
+        stopSinkIONoLock();
     }
 
     qCInfo(lcAudioPort).noquote().nospace()
@@ -430,41 +449,44 @@ void AudioPort::startSinkIO()
     m_sink = new QAudioSink(m_device, m_audioFormat);
     m_io = m_sink->start();
 
-    padSilence();
+    padSilenceNoLock();
 
     Q_EMIT audioSinkChanged();
 }
 
-void AudioPort::stopSinkIO()
+void AudioPort::stopSinkIONoLock()
 {
     m_idleTimer.stop();
     if (m_sink.isNull() || m_isDraining) {
         return;
     }
 
-    writeSilenceMS(SILENCE_BUFFER_MS);
+    writeSilenceMSNoLock(SILENCE_BUFFER_MS);
 
     m_isDraining = true;
     QTimer::singleShot(SILENCE_BUFFER_MS, this, [this]() {
-        m_isDraining = false;
+        {
+            const QMutexLocker locker(&m_ioMutex);
 
-        if (m_sink) {
-            m_sink->stop();
-            m_sink->deleteLater();
-            m_sink = nullptr;
-            m_io = nullptr;
+            m_isDraining = false;
+
+            if (m_sink) {
+                m_sink->stop();
+                m_sink->deleteLater();
+                m_sink = nullptr;
+                m_io = nullptr;
+            }
         }
-
         Q_EMIT audioSinkChanged();
     });
 }
 
-void AudioPort::startSourceIO()
+void AudioPort::startSourceIONoLock()
 {
     m_idleTimer.stop();
 
     if (!m_source.isNull()) {
-        stopSourceIO();
+        stopSourceIONoLock();
         delete m_source;
         m_source = nullptr;
     }
@@ -483,7 +505,7 @@ void AudioPort::startSourceIO()
     Q_EMIT audioSourceChanged();
 }
 
-void AudioPort::stopSourceIO()
+void AudioPort::stopSourceIONoLock()
 {
     m_idleTimer.stop();
     if (m_source) {
@@ -511,6 +533,12 @@ void AudioPort::onFrameRequested(pj::MediaFrame &frame)
     ensureMediaThreadPriority();
 
     if (m_device.mode() != QAudioDevice::Mode::Input) {
+        return;
+    }
+
+    // Skip when locked
+    std::unique_lock<QMutex> locker(m_ioMutex, std::try_to_lock);
+    if (!locker.owns_lock()) {
         return;
     }
 
@@ -566,6 +594,12 @@ void AudioPort::onFrameReceived(pj::MediaFrame &frame)
         return;
     }
 
+    // Skip when locked
+    std::unique_lock<QMutex> locker(m_ioMutex, std::try_to_lock);
+    if (!locker.owns_lock()) {
+        return;
+    }
+
     // Create sink on the fly if needed
     if (m_sink.isNull()) {
         requestStartIO();
@@ -606,13 +640,15 @@ void AudioPort::onFrameReceived(pj::MediaFrame &frame)
 
 void AudioPort::acquire()
 {
+    const QMutexLocker locker(&m_ioMutex);
+
     if (m_device.mode() == QAudioDevice::Mode::Input) {
         if (m_source.isNull()) {
-            startSourceIO();
+            startSourceIONoLock();
         }
     } else {
         if (m_sink.isNull()) {
-            startSinkIO();
+            startSinkIONoLock();
         }
     }
 
