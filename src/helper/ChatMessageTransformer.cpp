@@ -64,13 +64,14 @@ QString markdownToHtml(const QString &orig)
 
 QString sanitizeHtml(const QString &orig)
 {
-    static const QSet<QString> allowedTags = {
-        QStringLiteral("a"),          QStringLiteral("b"),      QStringLiteral("i"),
-        QStringLiteral("em"),         QStringLiteral("strong"), QStringLiteral("code"),
-        QStringLiteral("pre"),        QStringLiteral("ul"),     QStringLiteral("ol"),
-        QStringLiteral("li"),         QStringLiteral("br"),     QStringLiteral("p"),
-        QStringLiteral("blockquote"), QStringLiteral("span"),
-    };
+    static const QSet<QString> allowedTags = { QStringLiteral("a"),          QStringLiteral("b"),
+                                               QStringLiteral("i"),          QStringLiteral("em"),
+                                               QStringLiteral("strong"),     QStringLiteral("code"),
+                                               QStringLiteral("pre"),        QStringLiteral("ul"),
+                                               QStringLiteral("ol"),         QStringLiteral("li"),
+                                               QStringLiteral("br"),         QStringLiteral("p"),
+                                               QStringLiteral("blockquote"), QStringLiteral("span"),
+                                               QStringLiteral("del"),        QStringLiteral("s") };
     static const QRegularExpression tagRe(R"(<(/?)([a-zA-Z0-9]+)([^<>]*)>)");
     static const QRegularExpression hrefRe(R"(href\s*=\s*(\"([^\"]*)\"|'([^']*)'|([^\s\"'>]+)))",
                                            QRegularExpression::CaseInsensitiveOption);
@@ -93,7 +94,8 @@ QString sanitizeHtml(const QString &orig)
         }
 
         if (isClose) {
-            result.append(QStringLiteral("</%1>").arg(tag));
+            const QString outputTag = tag == QStringLiteral("del") ? QStringLiteral("s") : tag;
+            result.append(QStringLiteral("</%1>").arg(outputTag));
         } else if (tag == QStringLiteral("a")) {
             QString href;
             const auto hrefMatch = hrefRe.match(match.captured(3));
@@ -113,6 +115,8 @@ QString sanitizeHtml(const QString &orig)
             }
         } else if (tag == QStringLiteral("br")) {
             result.append(QStringLiteral("<br />"));
+        } else if (tag == QStringLiteral("del")) {
+            result.append(QStringLiteral("<s>"));
         } else {
             result.append(QStringLiteral("<%1>").arg(tag));
         }

@@ -164,7 +164,11 @@ Item {
                 if (mouseButton === Qt.RightButton) {
                     contextMenuComponent.createObject(control, {
                                                           editRoomVisible: !!(Number(control.permissions ?? 0) & IChatRoom.Permission.CanEdit),
-                                                          inviteUsersVisible: !!(Number(control.permissions ?? 0) & IChatRoom.Permission.CanInvite)
+                                                          inviteUsersVisible: !!(Number(control.permissions ?? 0) & IChatRoom.Permission.CanInvite),
+                                                          conferenceUrl: control.chatRoom?.conferenceUrl ?? "",
+                                                          contact: control.chatRoom?.isDirectChat
+                                                                   ? ContactHelper.lookupByChatUser(control.chatRoom.otherUser)
+                                                                   : null
                                                       }).popup()
                 } else {
                     control.clicked()
