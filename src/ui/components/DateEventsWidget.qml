@@ -60,7 +60,6 @@ BaseWidget {
                 centerIn: dateList
             }
 
-            Accessible.role: Accessible.StaticText
             Accessible.name: qsTr("Event widget status")
             Accessible.description: qsTr("Displays the current status of the widget: %1").arg(dateInfo.text)
         }

@@ -37,8 +37,6 @@ Item {
         Behavior on opacity {
             NumberAnimation { duration: 300 }
         }
-
-        Accessible.ignored: true
     }
 
     AvatarImage {

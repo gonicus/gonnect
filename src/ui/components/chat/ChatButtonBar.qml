@@ -317,11 +317,7 @@ Item {
                                                      contactType: NumberStats.ContactType.PhoneNumber
                                                  })
 
-                    Accessible.role: Accessible.Button
-                    Accessible.name: qsTr("Call contact button")
-                    Accessible.description: qsTr("Selected number %1").arg(menuDelg.number)
-                    Accessible.focusable: true
-                    Accessible.onPressAction: () => PhoneNumberUtil.startMeetingOrCall(menuDelg.addr)
+                    Accessible.name: qsTr("Call %1").arg(menuDelg.number)
 
                     onTriggered: () => SIPCallManager.call(menuDelg.number)
                 }

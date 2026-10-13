@@ -25,8 +25,9 @@ Item {
     required property string sectionHeader
 
     Accessible.role: Accessible.ListItem
-    Accessible.name: qsTr("Chat room")
-    Accessible.description: qsTr("Selected chat room %1: %2 unread messages").arg(control.name).arg(control.unreadCount)
+    Accessible.name: control.name
+    Accessible.description: qsTr("%n unread message(s)", "", control.unreadCount)
+    Accessible.selected: control.highlighted
     Accessible.focusable: true
     Accessible.onPressAction: () => control.clicked()
 
@@ -69,8 +70,6 @@ Item {
             color: Theme.backgroundOffsetHoveredColor
             radius: 4
             anchors.fill: parent
-
-            Accessible.ignored: true
         }
 
         Rectangle {
@@ -146,9 +145,10 @@ Item {
                          ? ">9"
                          : control.unreadCount)
                       : "1"
-            }
 
-            Accessible.ignored: true
+                // The row already reports the unread count in its description
+                Accessible.ignored: true
+            }
         }
 
         HoverHandler {

@@ -135,8 +135,6 @@ Item {
             anchors.fill: parent
             radius: parent.width / 2
             color: autoScrollHoverHandler.hovered ? Theme.backgroundOffsetHoveredColor : Theme.backgroundOffsetColor
-
-            Accessible.ignored: true
         }
 
         Label {
