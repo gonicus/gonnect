@@ -8,11 +8,16 @@
 #include <qqmlintegration.h>
 
 #include "AppSettings.h"
+#include "VideoDevice.h"
+
+#ifdef Q_OS_FLATPAK
+#  include "linux/PipeWireCameraDevices.h"
+#endif
 
 class VideoManager : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(QList<QCameraDevice> devices READ devices NOTIFY devicesChanged FINAL)
+    Q_PROPERTY(QList<VideoDevice> devices READ devices NOTIFY devicesChanged FINAL)
     Q_PROPERTY(
             QString selectedDeviceId MEMBER m_selectedDeviceId NOTIFY selectedDeviceIdChanged FINAL)
 
@@ -26,8 +31,10 @@ public:
         return *_instance;
     };
 
-    QList<QCameraDevice> devices() const { return m_devices; }
-    QCameraDevice selectedDevice() const;
+    QList<VideoDevice> devices() const { return m_devices; }
+    VideoDevice selectedDevice() const;
+
+    Q_INVOKABLE void acquireCameras();
 
 public Q_SLOTS:
     void updateDevices();
@@ -38,14 +45,22 @@ private Q_SLOTS:
 private:
     explicit VideoManager(QObject *parent = nullptr);
     bool isDeviceAvailable(const QString &deviceId) const;
-    QCameraDevice deviceById(const QString &deviceId) const;
+    VideoDevice deviceById(const QString &deviceId) const;
+    QList<VideoDevice> devicesFromMediaDevices() const;
 
     QTimer m_debounceUpdateTimer;
     QMediaDevices m_mediaDevices;
-    QList<QCameraDevice> m_devices;
+
+    QList<VideoDevice> m_devices;
+#ifdef Q_OS_FLATPAK
+    PipeWireCameraDevices m_pipewireCameras;
+#endif
+
     QString m_selectedDeviceId;
     std::unique_ptr<AppSettings> m_settings = nullptr;
     unsigned m_currentProfile = 0;
+
+    bool m_portalPending = false;
 
 Q_SIGNALS:
     void devicesChanged();
