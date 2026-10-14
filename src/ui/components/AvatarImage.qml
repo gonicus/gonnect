@@ -62,8 +62,6 @@ Item {
             enabled: true
             smooth: true
         }
-
-        Accessible.ignored: true
     }
 
     MultiEffect {
@@ -114,8 +112,6 @@ Item {
                 }
             }
         }
-
-        Accessible.ignored: true
     }
 
     TapHandler {

@@ -158,7 +158,8 @@ Item {
                     height: roomTextField.implicitHeight
                     spacing: 20
 
-                    Accessible.role: Accessible.Row
+                    Accessible.id: "conference.login.room.header"
+                    Accessible.role: Accessible.Grouping
                     Accessible.name: qsTr("Set room name")
 
                     Label {
@@ -173,9 +174,8 @@ Item {
                         width: 300
                         text: RandomRoomNameGenerator.randomJitsiRoomName()
 
-                        Accessible.role: Accessible.EditableText
+                        Accessible.id: "conference.login.room.name"
                         Accessible.name: qsTr("Enter the room name")
-                        Accessible.focusable: true
                     }
                 }
 
@@ -192,10 +192,7 @@ Item {
                         internal.authButton = authButton
                     }
 
-                    Accessible.role: Accessible.Button
-                    Accessible.name: authButton.text
-                    Accessible.focusable: true
-                    Accessible.onPressAction: () => authButton.click()
+                    Accessible.id: "conference.login.room.authenticate"
                 }
             }
         }
@@ -225,7 +222,8 @@ Item {
                     height: roomTextField2.implicitHeight
                     spacing: 20
 
-                    Accessible.role: Accessible.Row
+                    Accessible.id: "conference.room.header"
+                    Accessible.role: Accessible.Grouping
                     Accessible.name: qsTr("Set room name")
 
                     Label {
@@ -240,9 +238,8 @@ Item {
                         width: 300
                         // text: AuthManager.authenticatedJitsiRoom
 
-                        Accessible.role: Accessible.EditableText
+                        Accessible.id: "conference.room.name"
                         Accessible.name: qsTr("Enter the room name")
-                        Accessible.focusable: true
                     }
                 }
 
@@ -253,10 +250,7 @@ Item {
 
                     onClicked: () => control.startConference(roomTextField2.text.trim())
 
-                    Accessible.role: Accessible.Button
-                    Accessible.name: joinRoomButton.text
-                    Accessible.focusable: true
-                    Accessible.onPressAction: () => joinRoomButton.click()
+                    Accessible.id: "conference.room.join"
                 }
             }
         }
@@ -266,6 +260,7 @@ Item {
         id: waitingForAuthComponent
 
         Item {
+            Accessible.id: "conference.auth"
             Accessible.role: Accessible.StaticText
             Accessible.name: authMessage.text
 
@@ -458,7 +453,8 @@ Item {
                                 verticalCenter: parent.verticalCenter
                             }
 
-                            Accessible.role: Accessible.Column
+                            Accessible.id: "conference.room.password.header"
+                            Accessible.role: Accessible.Grouping
                             Accessible.name: passwordRequired.text
 
                             Label {
@@ -487,9 +483,8 @@ Item {
                                 Keys.onEscapePressed: () => passwordItem.cancel()
                                 Component.onCompleted: () => passwordField.forceActiveFocus()
 
-                                Accessible.role: Accessible.EditableText
+                                Accessible.id: "conference.room.password"
                                 Accessible.name: qsTr("Enter the password")
-                                Accessible.focusable: true
                             }
 
                             CheckBox {
@@ -500,9 +495,7 @@ Item {
                                     right: parent.right
                                 }
 
-                                Accessible.role: Accessible.CheckBox
-                                Accessible.name: rememberCheckBox.text
-                                Accessible.focusable: true
+                                Accessible.id: "conference.room.password.save"
                             }
 
                             Row {
@@ -515,10 +508,7 @@ Item {
 
                                     onClicked: () => passwordItem.cancel()
 
-                                    Accessible.role: Accessible.Button
-                                    Accessible.name: cancelButton.text
-                                    Accessible.focusable: true
-                                    Accessible.onPressAction: () => cancelButton.click()
+                                    Accessible.id: "conference.room.password.cancel"
                                 }
 
                                 Button {
@@ -529,10 +519,7 @@ Item {
 
                                     onClicked: () => passwordItem.respondPassword()
 
-                                    Accessible.role: Accessible.Button
-                                    Accessible.name: joinRoomButton.text
-                                    Accessible.focusable: true
-                                    Accessible.onPressAction: () => joinRoomButton.click()
+                                    Accessible.id: "conference.room.password.join"
                                 }
                             }
                         }
@@ -583,7 +570,8 @@ Item {
                                 verticalCenter: parent.verticalCenter
                             }
 
-                            Accessible.role: Accessible.Column
+                            Accessible.id: "conference.room.password.required"
+                            Accessible.role: Accessible.Grouping
                             Accessible.name: qsTr("Password required")
 
                             states: [
@@ -625,8 +613,7 @@ Item {
                                     right: parent.right
                                 }
 
-                                Accessible.role: Accessible.Column
-                                Accessible.name: newPasswordLabel.text
+                                Accessible.id: "conference.room.password-required.header"
                             }
 
                             Label {
@@ -639,8 +626,7 @@ Item {
                                     right: parent.right
                                 }
 
-                                Accessible.role: Accessible.Column
-                                Accessible.name: existingPasswordLabel.text
+                                Accessible.id: "conference.room.existing-password"
                             }
 
                             Label {
@@ -653,8 +639,7 @@ Item {
                                     right: parent.right
                                 }
 
-                                Accessible.role: Accessible.Column
-                                Accessible.name: otherSetPasswordLabel.text
+                                Accessible.id: "conference.room.password.hint"
                             }
 
                             Item {
@@ -676,9 +661,8 @@ Item {
 
                                     Component.onCompleted: () => passwordField.forceActiveFocus()
 
-                                    Accessible.role: Accessible.EditableText
+                                    Accessible.id: "conference.password"
                                     Accessible.name: qsTr("Enter the password")
-                                    Accessible.focusable: true
                                 }
 
                                 Label {
@@ -717,7 +701,7 @@ Item {
                                     right: parent.right
                                 }
 
-                                Accessible.ignored: true
+                                Accessible.id: "conference.password.show"
                             }
 
                             Row {
@@ -730,10 +714,7 @@ Item {
 
                                     onClicked: () => setPasswordItem.cancel()
 
-                                    Accessible.role: Accessible.Button
-                                    Accessible.name: cancelButton.text
-                                    Accessible.focusable: true
-                                    Accessible.onPressAction: () => cancelButton.click()
+                                    Accessible.id: "conference.password.cancel"
                                 }
 
                                 Button {
@@ -742,10 +723,7 @@ Item {
                                     text: qsTr("Remove")
                                     onClicked: () => setPasswordItem.setPassword("")
 
-                                    Accessible.role: Accessible.Button
-                                    Accessible.name: removePasswordButton.text
-                                    Accessible.focusable: true
-                                    Accessible.onPressAction: () => removePasswordButton.click()
+                                    Accessible.id: "conference.password.remove"
                                 }
 
                                 Button {
@@ -756,10 +734,7 @@ Item {
 
                                     onClicked: () => setPasswordItem.setPassword(passwordField.text)
 
-                                    Accessible.role: Accessible.Button
-                                    Accessible.name: savePasswordButton.text
-                                    Accessible.focusable: true
-                                    Accessible.onPressAction: () => savePasswordButton.click()
+                                    Accessible.id: "conference.password.save"
                                 }
                             }
                         }
@@ -783,7 +758,7 @@ Item {
                                 verticalCenter: parent.verticalCenter
                             }
 
-                            Accessible.role: Accessible.Column
+                            Accessible.role: Accessible.Grouping
                             Accessible.name: qsTr("Video quality")
 
                             component QualityButton : RadioButton {
@@ -798,6 +773,7 @@ Item {
 
                                 onToggled: () => confConn.setVideoQuality(qButton.qualityValue)
 
+                                Accessible.id: "conference.video.quality"
                                 Accessible.role: Accessible.RadioButton
                                 Accessible.name: qButton.text
                                 Accessible.description: qsTr("Change the video quality of this meeting")
@@ -833,10 +809,7 @@ Item {
 
                                 onClicked: () => ViewHelper.topDrawer.loader.sourceComponent = undefined
 
-                                Accessible.role: Accessible.Button
-                                Accessible.name: closeButton.text
-                                Accessible.focusable: true
-                                Accessible.onPressAction: () => closeButton.click()
+                                Accessible.id: "conference.video.close"
                             }
                         }
                     }
@@ -859,9 +832,9 @@ Item {
             right: callListCard.left
         }
 
+        Accessible.id: "conference.dragbar"
         Accessible.role: Accessible.Border
         Accessible.name: qsTr("Drag bar")
-        Accessible.focusable: true
 
         HoverHandler {
             id: verticalDragbarDummyHoverHandler

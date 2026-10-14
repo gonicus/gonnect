@@ -415,14 +415,18 @@ void IpcChatRoom::updateMessageEventId(const QString &oldEventId, const QString 
 
         Q_EMIT chatMessageEventIdChanged(indexOfMessage(msg), msg);
 
-        const auto value = m_threadChildren.take(oldEventId);
-        m_threadChildren.insert(newEventId, value);
+        if (const auto it = m_threadChildren.find(oldEventId); it != m_threadChildren.end()) {
+            const auto value = *it;
+            m_threadChildren.erase(it);
+            m_threadChildren.insert(newEventId, value);
 
-        for (const auto &childEventId : value) {
-            if (auto *childMessage = m_mainMessageContainer.messageById(childEventId)) {
-                if (childMessage->threadId() == oldEventId) {
-                    childMessage->setEventId(newEventId);
-                    Q_EMIT chatMessageThreadIdChanged(indexOfMessage(childMessage), childMessage);
+            for (const auto &childEventId : value) {
+                if (auto *childMessage = m_mainMessageContainer.messageById(childEventId)) {
+                    if (childMessage->threadId() == oldEventId) {
+                        childMessage->setEventId(newEventId);
+                        Q_EMIT chatMessageThreadIdChanged(indexOfMessage(childMessage),
+                                                          childMessage);
+                    }
                 }
             }
         }
