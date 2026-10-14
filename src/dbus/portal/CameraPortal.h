@@ -52,11 +52,12 @@ Q_SIGNALS:
     void isCameraPresentChanged();
     void hasAccessChanged();
 
-private:
-    explicit CameraPortal(QObject *parent = nullptr);
-
+private Q_SLOTS:
     void propertiesChanged(const QString &interfaceName, const QVariantMap &changed,
                            const QStringList &invalidated);
+
+private:
+    explicit CameraPortal(QObject *parent = nullptr);
 
     bool m_isCameraPresent = false;
     bool m_hasAccess = false;

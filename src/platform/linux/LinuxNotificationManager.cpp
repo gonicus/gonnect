@@ -181,7 +181,6 @@ void LinuxNotificationManager::shutdown()
     for (auto *notification : std::as_const(m_internalNotifications)) {
         g_object_unref(notification);
     }
-    m_internalNotifications.clear();
 
     m_notifications.clear();
     m_internalNotifications.clear();

@@ -22,9 +22,12 @@ bool PipeWireCameraDevices::start(int fd)
         return false;
     }
 
-    stop();
+    if (m_alreadyStarted) {
+        stop();
+    }
 
     pw_init(nullptr, nullptr);
+    m_alreadyStarted = true;
 
     m_fd = fd;
     m_mainLoop = pw_main_loop_new(nullptr);
@@ -106,6 +109,8 @@ void PipeWireCameraDevices::stop()
     }
 
     pw_deinit();
+
+    m_alreadyStarted = false;
 }
 
 void PipeWireCameraDevices::registryGlobal(void *data, uint32_t id, uint32_t permissions,

@@ -282,7 +282,7 @@ Item {
                         control.setScreenShare(false, false)
                     } else {
                         if (GlobalInfo.useNewScreenSharingAPI()) {
-                            screenShareMenu.popup(screenShareButton, -screenShareButton.width + screenShareButton.width, screenShareButton.height)
+                            screenShareMenu.popup(screenShareButton, 0, screenShareButton.height)
                         } else {
                             control.setScreenShare(true, true)
                         }

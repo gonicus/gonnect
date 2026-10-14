@@ -50,6 +50,8 @@ private:
     struct pw_registry *m_registry = nullptr;
     struct spa_hook m_registryListener;
 
+    bool m_alreadyStarted = false;
+
     QTimer m_iterateTimer;
     QList<PipeWireCameraDevice> m_devices;
 };
