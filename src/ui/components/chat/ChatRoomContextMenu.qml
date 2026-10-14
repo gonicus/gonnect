@@ -78,6 +78,7 @@ Menu {
     HideableMenuItem {
         text: control.indexingEnabled ? qsTr("Disable search index") : qsTr("Enable search index")
         icon.source: Icons.systemSearch
+        visible: control.toggleIndexingVisible
         onTriggered: () => control.indexingToggled()
     }
 
