@@ -16,6 +16,7 @@ Item {
     property var roomDwell: ({})
     property IChatRoom bubbleTargetRoom
     property string newThreadId: ""
+    property bool isVisibleForUser: true
 
     readonly property int capabilities: control.chatProvider?.capabilities ?? 0
     readonly property alias isThreadMode: chatMessageList.isThreadMode
@@ -73,7 +74,7 @@ Item {
         }
 
         function onNotificationCountChanged() {
-            if (SelectionState.isMainWindowActive && control.bubbleTargetRoom) {
+            if (control.isVisibleForUser && SelectionState.isMainWindowActive && control.bubbleTargetRoom) {
                 bubbleTimer.start()
             }
         }
@@ -83,7 +84,7 @@ Item {
         target: SelectionState
 
         function onIsMainWindowActiveChanged() {
-            if (SelectionState.isMainWindowActive && control.bubbleTargetRoom) {
+            if (control.isVisibleForUser && SelectionState.isMainWindowActive && control.bubbleTargetRoom) {
                 bubbleTimer.start()
             }
         }
@@ -94,7 +95,7 @@ Item {
         interval: 2000
         onTriggered: () => {
                          const room = control.bubbleTargetRoom
-                         if (room !== null && room === control.chatRoom && SelectionState.isMainWindowActive) {
+                         if (room !== null && room === control.chatRoom && control.isVisibleForUser && SelectionState.isMainWindowActive) {
                              room.resetUnreadCount()
                          }
                      }

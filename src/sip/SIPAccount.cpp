@@ -1079,6 +1079,11 @@ void SIPAccount::reinitBuddies()
     m_buddies.clear();
     qDeleteAll(savedBuddies);
 
+    // Reset state while re-subscribing buddies
+    for (const auto &uri : std::as_const(uris)) {
+        Q_EMIT SIPManager::instance().buddyStateChanged(uri, SIPBuddyState::UNKNOWN);
+    }
+
     for (const auto &uri : std::as_const(uris)) {
         auto buddy = new SIPBuddy(this, uri);
         m_buddies.push_back(buddy);
