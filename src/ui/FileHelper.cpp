@@ -91,6 +91,57 @@ QString FileHelper::fileNameFromPath(const QString &path) const
     return QFileInfo(url.toLocalFile()).fileName();
 }
 
+QString FileHelper::persistentFolderPath(const QString &subFolder) const
+{
+    const auto path = QString("%1/%2").arg(
+            QStandardPaths::writableLocation(QStandardPaths::AppDataLocation), subFolder);
+
+    QDir dir(path);
+    dir.mkpath(".");
+
+    return path;
+}
+
+QString FileHelper::persistFile(const QUrl &source, const QString &subFolder,
+                                const QString &storageKey) const
+{
+    if (!source.isValid()) {
+        qCWarning(lcFileHelper) << "source is not valid:" << source;
+        return QString();
+    }
+    if (subFolder.isEmpty()) {
+        qCWarning(lcFileHelper) << "subFolder must not be empty";
+        return QString();
+    }
+    if (storageKey.isEmpty()) {
+        qCWarning(lcFileHelper) << "storageKey must not be empty";
+        return QString();
+    }
+
+    const auto sourcePath = source.isLocalFile() ? source.toLocalFile() : source.toString();
+    QFile sourceFile(sourcePath);
+
+    if (!sourceFile.exists()) {
+        qCWarning(lcFileHelper) << "Source file does not exist:" << sourcePath;
+        return QString();
+    }
+    if (!QFileInfo(sourcePath).isReadable()) {
+        qCWarning(lcFileHelper) << "Source file cannot be read:" << sourcePath;
+        return QString();
+    }
+
+    const auto targetPath = QString("%1/%2").arg(persistentFolderPath(subFolder), storageKey);
+
+    QFile::remove(targetPath);
+
+    if (!QFile::copy(sourcePath, targetPath)) {
+        qCWarning(lcFileHelper) << "File could not be copied:" << sourcePath;
+        return QString();
+    }
+
+    return QString("file://%1").arg(targetPath);
+}
+
 QString FileHelper::downloadFolderPath() const
 {
     return QStandardPaths::writableLocation(QStandardPaths::DownloadLocation);

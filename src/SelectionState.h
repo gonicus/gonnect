@@ -3,6 +3,7 @@
 #include <QObject>
 #include <QQmlEngine>
 #include "MainPageSelection.h"
+#include "MessageJumpInfo.h"
 #include "IChatRoom.h"
 
 class ICallState;
@@ -20,6 +21,13 @@ class SelectionState : public QObject
                        selectedChatRoomChanged FINAL)
     Q_PROPERTY(ICallState *callInForeground READ callInForeground WRITE setCallInForeground NOTIFY
                        callInForegroundChanged FINAL)
+    Q_PROPERTY(
+            QString selectedThreadId MEMBER m_selectedThreadId NOTIFY selectedThreadIdChanged FINAL)
+
+    Q_PROPERTY(MessageJumpInfo messageJumpInfo MEMBER m_messageJumpInfo NOTIFY
+                       messageJumpInfoChanged FINAL)
+    Q_PROPERTY(QString highlightedMessageId MEMBER m_highlightedMessageId NOTIFY
+                       highlightedMessageIdChanged FINAL)
 
 public:
     static SelectionState &instance()
@@ -52,6 +60,10 @@ private:
 
     bool m_isMainWindowActive = false;
 
+    MessageJumpInfo m_messageJumpInfo;
+    QString m_highlightedMessageId;
+
+    QString m_selectedThreadId;
     MainPageSelection m_selectedPage;
     IChatRoom *m_selectedChatRoom = nullptr;
     QMetaObject::Connection m_selectedChatRoomDestroyedConnection;
@@ -64,6 +76,9 @@ Q_SIGNALS:
     void selectedPageChanged();
     void selectedChatRoomChanged();
     void callInForegroundChanged();
+    void selectedThreadIdChanged();
+    void messageJumpInfoChanged();
+    void highlightedMessageIdChanged();
 };
 
 class SelectionStateWrapper

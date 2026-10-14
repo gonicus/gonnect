@@ -9,6 +9,7 @@ Item {
     id: control
 
     property IChatProvider attachedData
+    readonly property bool isSelectedPage: SelectionState.selectedPage.type === MainPageSelection.PageType.Chats
 
     function showChatRoom(roomId : string) {
         console.debug(category, `Showing room "${roomId}" on chats page`)
@@ -89,12 +90,13 @@ Item {
             item.invitationText = invitationText
         }
 
-        function onClipboardImageUploaded(imageFilePath : url, chatRoom : IChatRoom) {
+        function onClipboardImageUploaded(imageFilePath : url, chatRoom : IChatRoom, threadId : string) {
             ViewHelper.topDrawer.loader.sourceComponent = imagePreviewComponent
 
             const item = ViewHelper.topDrawer.loader.item
             item.source = `file://${imageFilePath}`
             item.chatRoom = chatRoom
+            item.threadId = threadId
         }
     }
 
@@ -370,11 +372,6 @@ Item {
                     onTriggered: () => ViewHelper.showPublicRoomSearchDialog(control.attachedData)
                 }
                 Action {
-                    text: qsTr("Search messages...")
-                    icon.source: Icons.systemSearch
-                    onTriggered: () => ViewHelper.showMessageSearchDialog()
-                }
-                Action {
                     text: qsTr("Create room...")
                     icon.source: Icons.listAdd
                     onTriggered: () => ViewHelper.showCreateRoomDialog(control.attachedData, [])
@@ -499,6 +496,7 @@ Item {
 
     Card {
         id: chatMainCard
+        highlighted: chat.isThreadMode
         anchors {
             top: parent.top
             right: parent.right
@@ -514,6 +512,7 @@ Item {
             anchors.fill: parent
             chatProvider: control.attachedData
             chatRoom: SelectionState.selectedChatRoom
+            isVisibleForUser: control.isSelectedPage
         }
     }
 }

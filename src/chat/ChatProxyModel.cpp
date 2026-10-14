@@ -93,6 +93,19 @@ QVariant ChatProxyModel::data(const QModelIndex &index, int role) const
     }
 }
 
+qsizetype ChatProxyModel::rowOfMessage(const QString &eventId) const
+{
+    if (eventId.isEmpty()) {
+        return -1;
+    }
+
+    if (const auto *chatModel = qobject_cast<ChatModel *>(sourceModel())) {
+        return mapFromSource(chatModel->index(chatModel->rowOfMessage(eventId))).row();
+    }
+
+    return -1;
+}
+
 ChatMessage *ChatProxyModel::ownMessageAt(qsizetype proxyIndex) const
 {
     const QModelIndex prevSource = mapToSource(this->index(proxyIndex, 0));
@@ -211,6 +224,42 @@ bool ChatProxyModel::lessThan(const QModelIndex &sourceLeft, const QModelIndex &
             model->data(sourceRight, static_cast<int>(Roles::Timestamp)).toDateTime();
 
     return leftTime > rightTime;
+}
+
+bool ChatProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const
+{
+    const auto model = sourceModel();
+    if (!model) {
+        return false;
+    }
+
+    if (m_threadId.isEmpty()) {
+        return true;
+    }
+
+    using Roles = ChatModel::Roles;
+    const auto sourceIndex = model->index(sourceRow, 0, sourceParent);
+    if (!sourceIndex.isValid()) {
+        return false;
+    }
+
+    const auto threadId = model->data(sourceIndex, static_cast<int>(Roles::ThreadId)).toString();
+    if (m_threadId == threadId) {
+        return true;
+    }
+
+    const auto eventId = model->data(sourceIndex, static_cast<int>(Roles::EventId)).toString();
+    return m_threadId == eventId;
+}
+
+void ChatProxyModel::setThreadId(const QString &threadId)
+{
+    if (m_threadId != threadId) {
+        beginFilterChange();
+        m_threadId = threadId;
+        Q_EMIT threadIdChanged();
+        endFilterChange();
+    }
 }
 
 void ChatProxyModel::onSourceModelChanged()

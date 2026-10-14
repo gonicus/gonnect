@@ -212,6 +212,8 @@ if(FLATPAK)
         dbus/portal/AccountPortal.cpp
         dbus/portal/BackgroundPortal.h
         dbus/portal/BackgroundPortal.cpp
+        dbus/portal/CameraPortal.h
+        dbus/portal/CameraPortal.cpp
         dbus/portal/GlobalShortcutPortal.h
         dbus/portal/GlobalShortcutPortal.cpp
         dbus/portal/InhibitPortal.h
@@ -245,7 +247,9 @@ if(FLATPAK)
         platform/linux/LinuxDesktopSearchProvider.h
         platform/linux/LinuxDesktopSearchProvider.cpp
         platform/linux/LinuxPlatformSession.h
-        platform/linux/LinuxPlatformSession.cpp)
+        platform/linux/LinuxPlatformSession.cpp
+        platform/linux/PipeWireCameraDevices.h
+        platform/linux/PipeWireCameraDevices.cpp)
 
 elseif(LINUX)
     set(PLATFORM_SOURCES
@@ -371,12 +375,14 @@ qt_add_qml_module(gonnect
         ui/components/chat/ChatRoomList.qml
         ui/components/chat/ChatRoomListItem.qml
         ui/components/chat/ChatRoomListSectionHeader.qml
+        ui/components/chat/ChatRoomListThreadItem.qml
         ui/components/chat/ChatUnjoinedPage.qml
         ui/components/chat/CodeBlock.qml
         ui/components/chat/DeviceVerification.qml
         ui/components/chat/FileAttachment.qml
         ui/components/chat/MultiText.qml
         ui/components/chat/PinnedChatMessagesList.qml
+        ui/components/chat/ReactionButton.qml
         ui/components/chat/ReadMarker.qml
 
         ui/components/controls/AudioFileSelector.qml
@@ -400,6 +406,7 @@ qt_add_qml_module(gonnect
         ui/components/controls/FileDropArea.qml
         ui/components/controls/HeaderIconButton.qml
         ui/components/controls/HideableMenuItem.qml
+        ui/components/controls/HideableMenuSeparator.qml
         ui/components/controls/JoinRuleComboBox.qml
         ui/components/controls/Label.qml
         ui/components/controls/LabeledItem.qml
@@ -447,6 +454,7 @@ qt_add_qml_module(gonnect
         ui/components/popups/EditChatRoom.qml
         ui/components/popups/EditChatMessage.qml
         ui/components/popups/EditStatusText.qml
+        ui/components/popups/EditUrlDialog.qml
         ui/components/popups/EmojiPickerPopup.qml
         ui/components/popups/FileSelectionOverview.qml
         ui/components/popups/FilteredEmojis.qml
@@ -460,7 +468,6 @@ qt_add_qml_module(gonnect
         ui/components/popups/LargeImage.qml
         ui/components/popups/LargeVideo.qml
         ui/components/popups/Menu.qml
-        ui/components/popups/MessageSearch.qml
         ui/components/popups/OwnAvatarContextMenu.qml
         ui/components/popups/PublicRoomSearch.qml
         ui/components/popups/Popup.qml
@@ -663,6 +670,8 @@ qt_add_qml_module(gonnect
         chat/ChatConnectorManager.cpp
         chat/ChatMessage.h
         chat/ChatMessage.cpp
+        chat/ChatMessageContainer.h
+        chat/ChatMessageContainer.cpp
         chat/ChatMessageContentAudioFile.h
         chat/ChatMessageContentImage.h
         chat/ChatMessageContentImage.cpp
@@ -691,6 +700,8 @@ qt_add_qml_module(gonnect
         chat/ChatMessageSearchProvider.cpp
         chat/ChatModel.h
         chat/ChatModel.cpp
+        chat/ChatThreadModel.h
+        chat/ChatThreadModel.cpp
         chat/ChatUser.h
         chat/ChatUser.cpp
         chat/ChatUsersModel.h
@@ -715,11 +726,14 @@ qt_add_qml_module(gonnect
         chat/ConferenceChatRoom.cpp
         chat/CrossSigningSecret.h
         chat/CrossSigningSymbol.h
+        chat/MessageJumpInfo.h
         chat/NotificationSetting.h
         chat/PinnedChatMessages.h
         chat/PinnedChatMessages.cpp
         chat/PublicChatRoom.h
 
+        conference/ConferenceLinkedRoomsProxyModel.h
+        conference/ConferenceLinkedRoomsProxyModel.cpp
         conference/ConferenceUser.h
         conference/ConferenceUser.cpp
         conference/IConferenceConnector.h
@@ -783,6 +797,8 @@ qt_add_qml_module(gonnect
         # helper/SpellCheckHighlighter.cpp
         helper/TextFormatHelper.h
         helper/TextFormatHelper.cpp
+        helper/VideoCallHelper.h
+        helper/VideoCallHelper.cpp
 
         media/AudioManager.h
         media/AudioManager.cpp
@@ -792,6 +808,7 @@ qt_add_qml_module(gonnect
         media/AudioProcessor.cpp
         media/Sniffer.h
         media/Sniffer.cpp
+        media/VideoDevice.h
         media/VideoManager.h
         media/VideoManager.cpp
 

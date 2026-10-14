@@ -18,6 +18,7 @@ public:
         EventId = Qt::UserRole + 1,
         RoomId,
         FromId,
+        ThreadId,
         AvatarPath,
         Timestamp,
         NickName,
@@ -25,13 +26,8 @@ public:
         AffectedUserId,
         Content,
         Reactions,
+        Flags,
 
-        IsPrivateMessage,
-        IsOwnMessage,
-        IsSystemMessage,
-        IsEncrypted,
-        IsPending,
-        IsFailed,
         IsEdited,
         IsSameUserAsPrevious,
         IsSameMinuteAsPrevious,
@@ -62,6 +58,8 @@ public:
     QVariant data(const QModelIndex &index, int role) const override;
 
     uint realMessagesCount() const { return m_realMessagesCount; }
+
+    Q_INVOKABLE qsizetype rowOfMessage(const QString &eventId) const;
 
 private Q_SLOTS:
     void onChatRoomChanged();

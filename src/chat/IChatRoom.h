@@ -33,8 +33,6 @@ class IChatRoom : public QObject
     Q_PROPERTY(bool isFavorite READ isFavorite NOTIFY isFavoriteChanged FINAL)
     Q_PROPERTY(bool isLoadingMessageHistory READ isLoadingMessageHistory NOTIFY
                        isLoadingMessageHistoryChanged FINAL)
-    Q_PROPERTY(
-            bool isCompletelyLoaded READ isCompletelyLoaded NOTIFY isCompletelyLoadedChanged FINAL)
     Q_PROPERTY(bool hasPresenceState READ hasPresenceState NOTIFY hasPresenceStateChanged FINAL)
     Q_PROPERTY(ChatUser::PresenceState presenceState READ presenceState NOTIFY presenceStateChanged
                        FINAL)
@@ -55,6 +53,8 @@ class IChatRoom : public QObject
     Q_PROPERTY(QDateTime ownLastReadTimestamp READ ownLastReadTimestamp NOTIFY
                        ownLastReadTimestampChanged FINAL)
 
+    Q_PROPERTY(QString conferenceUrl READ conferenceUrl NOTIFY conferenceUrlChanged FINAL)
+
 public:
     enum class UserRoomState { Unjoined, Joined, Invited, Knocked, Banned };
     Q_ENUM(UserRoomState)
@@ -71,6 +71,7 @@ public:
         CanKick = 1 << 2,
         CanBan = 1 << 3,
         CanPinMessages = 1 << 4,
+        CanEditConferenceUrl = 1 << 5
     };
     Q_ENUM(Permission)
     Q_DECLARE_FLAGS(Permissions, Permission)
@@ -91,11 +92,15 @@ public:
     virtual IChatRoom::Permissions permissions() = 0;
     Q_INVOKABLE virtual void resetUnreadCount() = 0;
 
+    /// Mark this room as read to control the "unread messages" mark. This is different from
+    /// resetting the unread count.
+    Q_INVOKABLE virtual void markAsRead() = 0;
+
     bool isLoadingMessageHistory() const { return m_isLoadingMessageHistory; }
     void setIsLoadingMessageHistory(bool value);
 
-    bool isCompletelyLoaded() const { return m_isCompletelyLoaded; }
-    void setIsCompletelyLoaded(bool value);
+    Q_INVOKABLE virtual bool isCompletelyLoaded(const QString &threadId = QString()) const = 0;
+    virtual void setIsCompletelyLoaded(bool value, const QString &threadId = QString()) = 0;
 
     QDateTime latestMessageDateTime() const { return m_latestMessageDateTime; };
     void setLatestMessageDateTime(const QDateTime &dateTime);
@@ -103,8 +108,21 @@ public:
     RoomSettings roomSettings() const { return m_roomSettings; }
     void setRoomSettings(const RoomSettings &roomSettings);
 
+    QString conferenceUrl() const { return m_conferenceUrl; }
+    void setConferenceUrl(const QString &url);
+    Q_INVOKABLE virtual void requestSetConferenceUrl(const QString &url) = 0;
+
     /// List of chat messages of this room, sorted by timestamp ascending
     virtual QList<ChatMessage *> chatMessages() const = 0;
+
+    /// Number of chat messages in this room (i.e. the size of chatMessages())
+    Q_INVOKABLE virtual qsizetype chatMessageCount() const = 0;
+
+    /// Retrieve a message by id lookup or nullptr if not found
+    virtual ChatMessage *messageById(const QString &id) const = 0;
+
+    /// Retrieve a message by its index (as in chatMessages()) or nullptr if out of bounds
+    Q_INVOKABLE virtual ChatMessage *messageByIndex(qsizetype index) const = 0;
 
     /// List of pinned chat messages of this room, sorted by timestamp ascending
     virtual QList<ChatMessage *> pinnedChatMessages() const = 0;
@@ -120,10 +138,12 @@ public:
 
     /// Send a message in this room.
     Q_INVOKABLE virtual void sendMessage(const QString &message,
-                                         const QString &relatedMessageId = "") = 0;
+                                         const QString &relatedMessageId = QString(),
+                                         const QString &threadId = QString()) = 0;
 
     /// Given a local file url, send a message with this file as an attachment.
-    Q_INVOKABLE virtual void sendFile(const QString &filePath) = 0;
+    Q_INVOKABLE virtual void sendFile(const QString &filePath,
+                                      const QString &threadId = QString()) = 0;
 
     /// Send that the user is currently typing. Shall be called every 2 seconds as long as the user
     /// is typing.
@@ -133,7 +153,9 @@ public:
     virtual bool isInitiallyLoaded() const = 0;
 
     /// Start the loading of next batch of messages.
-    Q_INVOKABLE virtual void loadMessages() = 0;
+    Q_INVOKABLE virtual void loadMessages(const QString &threadId = QString(),
+                                          const QString &beforeMessageId = QString(),
+                                          quint32 limit = 100) = 0;
 
     /// Toggle whether the message is pinned in this room or not.
     Q_INVOKABLE virtual void togglePin(const QString &messageId) = 0;
@@ -225,6 +247,7 @@ private:
     QDateTime m_latestMessageDateTime;
     bool m_isLoadingMessageHistory = false;
     bool m_isCompletelyLoaded = false;
+    QString m_conferenceUrl;
 
 Q_SIGNALS:
     void roomSettingsChanged();
@@ -240,13 +263,14 @@ Q_SIGNALS:
     void presenceStateChanged();
     void permissionsChanged();
     void isInitiallyLoadedChanged();
-    void isCompletelyLoadedChanged();
+    void isCompletelyLoadedChanged(QString threadId);
     void latestMessageDateTimeChanged();
     void ownUserJoinStateChanged();
     void otherUserChanged();
     void joinedChatUserCountChanged();
     void readMarkersChanged();
     void ownLastReadTimestampChanged();
+    void conferenceUrlChanged();
 
     /// Send when a chat message has been added. index is the one in the list returned by
     /// chatMessages(). Ownership remains in this room object.
@@ -269,6 +293,7 @@ Q_SIGNALS:
                                  ChatMessage::Flags previousFlags);
     void chatMessageReactionsChanged(qsizetype index, ChatMessage *chatMessage);
     void chatMessageEventIdChanged(qsizetype index, ChatMessage *chatMessage);
+    void chatMessageThreadIdChanged(qsizetype index, ChatMessage *chatMessage);
     void chatMessageMentionedUsersChanged(qsizetype index, ChatMessage *chatMessage);
 
     /// Send when chat messages have been cleared (i.e. removed and deleted). All objects have been

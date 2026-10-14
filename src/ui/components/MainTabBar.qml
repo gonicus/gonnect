@@ -96,7 +96,6 @@ Item {
                                                      labelText: name,
                                                      disabledTooltipText: "",
                                                      isEnabled: true,
-                                                     showActiveBorder: false,
                                                      attachedData: null
                                                  })
         if (tabButton === null) {
@@ -157,6 +156,10 @@ Item {
         }
         newOrder.push(...remaining)
 
+        if (newOrder.every((button, index) => button === tabOrder[index])) {
+            return
+        }
+
         for (const button of newOrder) {
             button.parent = null
             button.visible = false
@@ -188,7 +191,6 @@ Item {
             required property string pageId
             required property int pageType
             required property bool isEnabled
-            required property bool showActiveBorder
             required property string labelText
             required property string disabledTooltipText
             required property string iconSource
@@ -201,9 +203,23 @@ Item {
 
             readonly property bool isSelected: SelectionState.selectedPage.id === delg.pageId
 
+            readonly property bool showActiveBorder: {
+                switch (delg.pageType) {
+                case MainPageSelection.PageType.Conference:
+                    return control.hasActiveConference && !delg.isSelected
+                case MainPageSelection.PageType.Call:
+                    return control.hasActiveUnfinishedCall && !delg.isSelected
+                default:
+                    return false
+                }
+            }
+
             Accessible.role: Accessible.Button
-            Accessible.name: qsTr("Selected tab")
-            Accessible.description: qsTr("The currently selected tab")
+            Accessible.name: delg.labelText
+            Accessible.description: delg.showNotificationBubble
+                                    ? qsTr("Tab %1, %2 unread").arg(delg.labelText).arg(delg.notifications)
+                                    : qsTr("Tab %1").arg(delg.labelText)
+            Accessible.id: `tab.${delg.pageId}`
             Accessible.focusable: true
             Accessible.onPressAction: () => delg.switchTab()
 
@@ -241,9 +257,8 @@ Item {
                     z: 1
 
                     Accessible.role: Accessible.Button
-                    Accessible.name: qsTr("Selected tab options")
-                    Accessible.description: qsTr("The settings of the currently selected tab")
-                    Accessible.focusable: true
+                    Accessible.name: qsTr("Options for %1").arg(delg.labelText)
+                    Accessible.id: `tab.${delg.pageId}.options`
 
                     IconLabel {
                         id: optionIcon
@@ -269,8 +284,6 @@ Item {
                             optionMenu.selectedTabButton = delg
                             optionMenu.open()
                         }
-
-                        Accessible.ignored: true
                     }
                 }
             }
@@ -301,8 +314,6 @@ Item {
                         duration: 2000
                     }
                 }
-
-                Accessible.ignored: true
             }
 
             IconLabel {
@@ -328,8 +339,6 @@ Item {
                 width: notificationBubble.width + 4
                 height: notificationBubbleBackground.width
                 radius: notificationBubbleBackground.width / 2
-
-                Accessible.ignored: true
             }
 
             Rectangle {
@@ -356,9 +365,9 @@ Item {
                     text: delg.notifications > notificationBubble.maxNotifications
                           ? "99+" : delg.notifications.toString()
                     anchors.centerIn: parent
-            }
 
-                Accessible.ignored: true
+                    Accessible.ignored: true
+                }
             }
 
             ToolTip.text: delg.isEnabled ? delg.labelText : delg.disabledTooltipText
@@ -387,7 +396,6 @@ Item {
                 labelText: qsTr("Home"),
                 disabledTooltipText: qsTr("Home"),
                 isEnabled: true,
-                showActiveBorder: false,
                 attachedData: null
             }, {
                 pageId: SelectionState.conferencePageId(),
@@ -396,7 +404,6 @@ Item {
                 labelText: qsTr("Conference"),
                 disabledTooltipText: qsTr("No active conference"),
                 isEnabled: control.hasActiveConference,
-                showActiveBorder: control.hasActiveConference && SelectionState.selectedPage.id !== SelectionState.conferencePageId(),
                 attachedData: null
             }, {
                 pageId: SelectionState.callPageId(),
@@ -405,7 +412,6 @@ Item {
                 labelText: qsTr("Call"),
                 disabledTooltipText: qsTr("No active call"),
                 isEnabled: control.hasActiveCall,
-                showActiveBorder: control.hasActiveUnfinishedCall && SelectionState.selectedPage.id !== SelectionState.callPageId(),
                 attachedData: null
             }
         ].filter(item => ViewHelper.isJitsiAvailable || item.pageType !== MainPageSelection.PageType.Conference)
@@ -469,7 +475,6 @@ Item {
                     labelText: qsTr("Settings"),
                     disabledTooltipText: qsTr("Settings"),
                     isEnabled: true,
-                    showActiveBorder: false,
                     attachedData: null
                 }
             ]
@@ -491,8 +496,6 @@ Item {
 
             Accessible.name: qsTr("Emergency call")
             Accessible.description: qsTr("Show the emergency call page")
-            Accessible.focusable: true
-            Accessible.onPressAction: () => emergencyTabButton.switchPage()
 
             function switchPage() {
                 SelectionState.selectedPage = {
@@ -551,12 +554,6 @@ Item {
 
             onTriggered: () => moveUpAction.moveTabUp()
 
-            Accessible.role: Accessible.Button
-            Accessible.name: qsTr("Move tab up")
-            Accessible.description: qsTr("Moves the currently selected tab up by one")
-            Accessible.focusable: true
-            Accessible.onPressAction: () => moveUpAction.moveTabUp()
-
             function moveTabUp() {
                 if (optionMenu.selectedTabButton !== null) {
                     const newOrder = control.getTabList()
@@ -589,12 +586,6 @@ Item {
 
             onTriggered: () => moveDownAction.moveTabDown()
 
-            Accessible.role: Accessible.Button
-            Accessible.name: qsTr("Move tab down")
-            Accessible.description: qsTr("Moves the currently selected tab down by one")
-            Accessible.focusable: true
-            Accessible.onPressAction: () => moveDownAction.moveTabDown()
-
             function moveTabDown() {
                 if (optionMenu.selectedTabButton !== null) {
                     const newOrder = control.getTabList()
@@ -626,12 +617,6 @@ Item {
             enabled: optionMenu.selectedTabButton?.pageType === MainPageSelection.PageType.Base
                      && optionMenu.selectedTabButton?.pageId !== SelectionState.homePageId()
             onTriggered: () => control.openPageEditDialog(optionMenu.selectedTabButton.pageId, false)
-
-            Accessible.role: Accessible.Button
-            Accessible.name: qsTr("Edit page")
-            Accessible.description: qsTr("Edit the currently selected dashboard page")
-            Accessible.focusable: true
-            Accessible.onPressAction: () => control.openPageEditDialog(optionMenu.selectedTabButton.pageId, false)
         }
 
         Action {
@@ -642,12 +627,6 @@ Item {
                      && optionMenu.selectedTabButton?.pageId !== SelectionState.homePageId()
 
             onTriggered: () => deletePageAction.deletePage()
-
-            Accessible.role: Accessible.Button
-            Accessible.name: qsTr("Delete page")
-            Accessible.description: qsTr("Delete the currently selected dashboard page")
-            Accessible.focusable: true
-            Accessible.onPressAction: () => deletePageAction.deletePage()
 
             function deletePage() {
                 if (optionMenu.selectedTabButton !== null && SelectionState.selectedPage.id === optionMenu.selectedTabButton.pageId) {

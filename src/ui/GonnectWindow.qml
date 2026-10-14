@@ -93,7 +93,7 @@ BaseWindow {
             const isOnCallPage = SelectionState.selectedPage.type === MainPageSelection.PageType.Call
             const isOnConferencePage = SelectionState.selectedPage.type === MainPageSelection.PageType.Conference
 
-            if (count && isOnCallPage && ViewHelper.isActiveVideoCall) {
+            if (count && isOnCallPage && VideoCallHelper.hasActiveVideoCall) {
                 control.showPage(SelectionState.conferencePageId(),
                                            MainPageSelection.PageType.Conference)
             } else if (count && isOnConferencePage && isConference) {
@@ -408,9 +408,14 @@ BaseWindow {
 
             Chats {
                 id: chatsPage
-                attachedData: SelectionState.selectedPage.attachedData as IChatProvider
                 visible: false
                 anchors.fill: parent
+
+                Binding on attachedData {
+                    when: SelectionState.selectedPage.type === MainPageSelection.PageType.Chats
+                    value: SelectionState.selectedPage.attachedData as IChatProvider
+                    restoreMode: Binding.RestoreNone
+                }
             }
 
             Conference {
@@ -478,6 +483,9 @@ BaseWindow {
         function onUrlCopyDialogRequested(url, text) {
             drawerStackView.push("qrc:/qt/qml/base/ui/components/popups/UrlCopyDialog.qml", { url, text })
         }
+        function onUrlEditDialogRequested(chatRoom : IChatRoom) {
+            drawerStackView.push("qrc:/qt/qml/base/ui/components/popups/EditUrlDialog.qml", { chatRoom })
+        }
         function onShowDialPad() {
             const item = drawerStackView.push("qrc:/qt/qml/base/ui/components/controls/DtmfDialer.qml")
             item.dialed.connect(button => console.log(category, "TODO: DIAL", button))
@@ -487,9 +495,6 @@ BaseWindow {
         }
         function onShowPublicRoomSearchDialog(chatProvider : IChatProvider) {
             drawerStackView.push("qrc:/qt/qml/base/ui/components/popups/PublicRoomSearch.qml", { chatProvider })
-        }
-        function onShowMessageSearchDialog() {
-            drawerStackView.push("qrc:/qt/qml/base/ui/components/popups/MessageSearch.qml")
         }
         function onShowKnockRoomDialog(chatProvider : IChatProvider, roomId : string) {
             drawerStackView.push("qrc:/qt/qml/base/ui/components/popups/KnockChatRoom.qml",

@@ -362,7 +362,7 @@ void IpcDispatcher::loginWithSSO(const QString &identityProvider)
 }
 
 void IpcDispatcher::sendMessage(const QString &roomId, const QString &text,
-                                const QString &relatedMessageId)
+                                const QString &relatedMessageId, const QString &threadId)
 {
     const auto *chatRoom = chatRoomByRoomId(roomId);
     if (!chatRoom) {
@@ -410,6 +410,10 @@ void IpcDispatcher::sendMessage(const QString &roomId, const QString &text,
     msgReq.setText(content);
     msgReq.setMentionedUserIds(mentionedUserIds);
 
+    if (!threadId.isEmpty()) {
+        msgReq.setThreadId(threadId);
+    }
+
     // Check for "@room" tag
     msgReq.setRoomMentioned(containsRoomTag(text));
 
@@ -434,7 +438,7 @@ void IpcDispatcher::sendMessage(const QString &roomId, const QString &text,
     auto *pendingContent = new ChatMessageContentText(text);
     pendingMsg = new ChatMessage(tempEventId, ownUserId(), nickName, pendingContent,
                                  QDateTime::currentDateTimeUtc(), ipcRoom,
-                                 Flag::OwnMessage | Flag::Markdown | Flag::Pending);
+                                 Flag::OwnMessage | Flag::Markdown | Flag::Pending, threadId);
     if (!relatedMessageId.isEmpty()) {
         pendingMsg->setRelatedMessageId(relatedMessageId);
     }
@@ -444,13 +448,7 @@ void IpcDispatcher::sendMessage(const QString &roomId, const QString &text,
 
     if (!sendRequest(req)) {
         m_pendingMessages.remove(tag);
-
-        if (pendingMsg) {
-            auto flags = pendingMsg->flags();
-            flags.setFlag(Flag::Pending, false);
-            flags.setFlag(Flag::Failed, true);
-            ipcRoom->setMessageFlags(tempEventId, flags);
-        }
+        markPendingMessageFailed(roomId, tempEventId);
     }
 }
 
@@ -464,7 +462,8 @@ void IpcDispatcher::sendTypingPing(const QString &roomId)
 }
 
 void IpcDispatcher::sendFile(const QString &roomId, const QString &filePath,
-                             const QString &originalFileName)
+                             const QString &originalFileName, const QString &tempEventId,
+                             const QString &threadId)
 {
     if (!chatRoomByRoomId(roomId)) {
         qCCritical(lcIpcDispatcher) << "Unable to find room with id" << roomId << "- aborting";
@@ -475,6 +474,7 @@ void IpcDispatcher::sendFile(const QString &roomId, const QString &filePath,
     const QFileInfo fileInfo(QUrl(filePath).toLocalFile());
     if (!fileInfo.exists()) {
         qCCritical(lcIpcDispatcher) << "Cannot send file that does not exist:" << filePath;
+        markPendingMessageFailed(roomId, tempEventId);
         return;
     }
     if (m_mediaSizeLimit > 0 && fileInfo.size() > m_mediaSizeLimit) {
@@ -483,6 +483,7 @@ void IpcDispatcher::sendFile(const QString &roomId, const QString &filePath,
                 tr("The file %1 exceeds the file size limit of %2 and cannot be sent.")
                         .arg(originalFileName,
                              TextFormatHelper::instance().formatFileSize(m_mediaSizeLimit)));
+        markPendingMessageFailed(roomId, tempEventId);
         return;
     }
 
@@ -498,8 +499,21 @@ void IpcDispatcher::sendFile(const QString &roomId, const QString &filePath,
     }
 
     msgReq.setFile(content);
+    if (!threadId.isEmpty()) {
+        msgReq.setThreadId(threadId);
+    }
+
     req->setMessageSendRequest(msgReq);
-    sendRequest(req);
+
+    const auto tag = req->tag();
+    if (!tempEventId.isEmpty()) {
+        m_pendingMessages.insert(tag, { roomId, tempEventId });
+    }
+
+    if (!sendRequest(req)) {
+        m_pendingMessages.remove(tag);
+        markPendingMessageFailed(roomId, tempEventId);
+    }
 }
 
 void IpcDispatcher::respondToInvitation(const QString &roomId, bool acceptInvitation)
@@ -523,9 +537,14 @@ void IpcDispatcher::markAsRead(const QString &roomId)
     sendRequest(req);
 }
 
-void IpcDispatcher::loadMessages(IChatRoom *chatRoom, quint32 n)
+void IpcDispatcher::loadMessages(IChatRoom *chatRoom, quint32 n, const QString &threadId,
+                                 const QString &beforeMessageId)
 {
     Q_CHECK_PTR(chatRoom);
+
+    qCInfo(lcIpcDispatcher).noquote().nospace()
+            << "loadMessages(IChatRoom(id=" << chatRoom->id() << ",name=" << chatRoom->name()
+            << "), " << n << ", " << threadId << ", " << beforeMessageId << ")";
 
     if (chatRoom->isLoadingMessageHistory()) {
         return;
@@ -535,16 +554,39 @@ void IpcDispatcher::loadMessages(IChatRoom *chatRoom, quint32 n)
 
     auto req = createRequest();
     const auto tag = req->tag();
-    m_roomListTags.insert(tag, chatRoom->id());
+    RoomTagInfo tagInfo;
+    tagInfo.roomId = chatRoom->id();
+    tagInfo.threadId = threadId;
+    m_roomListTags.insert(tag, std::move(tagInfo));
 
     RoomMessagesRequest msgReq;
     msgReq.setRoomId(chatRoom->id());
     msgReq.setLimit(n);
     msgReq.setOrder(MessagesOrderGadget::MessagesOrder::Backward);
 
-    const auto &existingMessages = chatRoom->chatMessages();
-    if (!existingMessages.isEmpty()) {
-        msgReq.setFromMessageId(existingMessages.first()->eventId());
+    if (!threadId.isEmpty()) {
+        msgReq.setThreadId(threadId);
+    }
+
+    if (!beforeMessageId.isEmpty()) {
+        msgReq.setFromMessageId(beforeMessageId);
+
+    } else {
+        const auto &existingMessages = chatRoom->chatMessages();
+        if (!existingMessages.isEmpty()) {
+            if (threadId.isEmpty()) {
+                msgReq.setFromMessageId(existingMessages.first()->eventId());
+            } else {
+                for (auto *msg : existingMessages) {
+                    if (msg->threadId() == threadId || msg->eventId() == threadId) {
+                        msgReq.setFromMessageId(msg->eventId());
+                        qCInfo(lcIpcDispatcher) << "RoomMessagesRequest for" << chatRoom->id()
+                                                << "fromMessageId:" << msgReq.fromMessageId();
+                        break;
+                    }
+                }
+            }
+        }
     }
 
     req->setRoomMessagesRequest(msgReq);
@@ -597,6 +639,17 @@ void IpcDispatcher::pinOrUnpinMessage(const QString &roomId, const QString &mess
 
     auto req = createRequest();
     req->setRoomPinRequest(pinRequest);
+    sendRequest(req);
+}
+
+void IpcDispatcher::setConferenceUrl(const QString &roomId, const QString &url)
+{
+    RoomChangeRequest changeRequest;
+    changeRequest.setRoomId(roomId);
+    changeRequest.setConferenceUrl(url);
+
+    auto req = createRequest();
+    req->setRoomChangeRequest(changeRequest);
     sendRequest(req);
 }
 
@@ -670,18 +723,35 @@ void IpcDispatcher::retrySendMessage(const QString &roomId, const QString &faile
         return;
     }
 
-    auto textContent = qobject_cast<ChatMessageContentText *>(msg->content());
+    // Retry image/file
+    QString filePath;
+    if (const auto *imageContent = qobject_cast<ChatMessageContentImage *>(msg->content())) {
+        filePath = imageContent->imagePath().toString();
+    } else if (const auto *fileContent = qobject_cast<ChatMessageContentFile *>(msg->content())) {
+        filePath = fileContent->filePath();
+    }
+
+    if (!filePath.isEmpty()) {
+        room->removeMessage(failedMessageId);
+        room->sendFile(filePath);
+        return;
+    }
+
+    // Retry text
+    const auto textContent = qobject_cast<ChatMessageContentText *>(msg->content());
     if (!textContent) {
-        qCCritical(lcIpcDispatcher) << "Retry is only supported for text messages, but message"
-                                    << failedMessageId << "has no text content";
+        qCCritical(lcIpcDispatcher)
+                << "Retry is only supported for text, file and image messages, but message"
+                << failedMessageId << "has no text content";
         return;
     }
 
     const auto text = textContent->rawText();
     const auto relatedMessageId = msg->relatedMessageId();
+    const auto threadId = msg->threadId();
 
     room->removeMessage(failedMessageId);
-    sendMessage(roomId, text, relatedMessageId);
+    sendMessage(roomId, text, relatedMessageId, threadId);
 }
 
 void IpcDispatcher::init()
@@ -809,6 +879,13 @@ bool IpcDispatcher::sendRequest(RequestContainer *requestContainer, const SendPo
         timer->callOnTimeout(this, [timer, tag, timeoutSeconds = policy.timeoutSeconds, this]() {
             m_timeoutTimers.remove(tag);
 
+            const auto roomTagInfo = m_roomListTags.take(tag);
+            if (!roomTagInfo.roomId.isEmpty()) {
+                if (auto *room = m_roomLookup.value(roomTagInfo.roomId)) {
+                    room->setIsLoadingMessageHistory(false);
+                }
+            }
+
             const auto messageId = m_singleMessageTags.take(tag);
             if (!messageId.isEmpty()) {
                 m_failedMessageIds.insert(messageId);
@@ -926,24 +1003,18 @@ void IpcDispatcher::processResponse(
         // Mark pending message as failed on error
         if (const auto pendingInfo = m_pendingMessages.take(tag);
             !pendingInfo.tempEventId.isEmpty()) {
-            if (auto room = ipcChatRoomById(pendingInfo.roomId)) {
-                if (auto chatMsg = room->chatMessageById(pendingInfo.tempEventId)) {
-                    room->setMessageFlags(
-                            pendingInfo.tempEventId,
-                            (chatMsg->flags() & ~ChatMessage::Flags(ChatMessage::Flag::Pending))
-                                    | ChatMessage::Flag::Failed);
-                }
-            }
+            markPendingMessageFailed(pendingInfo.roomId, pendingInfo.tempEventId);
         }
 
     } else if (rc.hasMultipartEnd()) {
         const auto count = m_multipartCount.take(tag);
-        const auto roomId = m_roomListTags.take(tag);
-        if (!roomId.isEmpty()) {
-            if (auto room = m_roomLookup.value(roomId, nullptr)) {
+        const auto tagInfo = m_roomListTags.take(tag);
+
+        if (!tagInfo.roomId.isEmpty()) {
+            if (auto room = m_roomLookup.value(tagInfo.roomId, nullptr)) {
                 room->setIsLoadingMessageHistory(false);
                 if (!count) {
-                    room->setIsCompletelyLoaded(true);
+                    room->setIsCompletelyLoaded(true, tagInfo.threadId);
                 }
             }
         }
@@ -1612,6 +1683,11 @@ void IpcDispatcher::processResponse(
         // Read marker
         processReadMarkers(room, changeEvent.readMarker());
 
+        // Conference url
+        if (changeEvent.hasConferenceUrl()) {
+            room->setConferenceUrl(changeEvent.conferenceUrl());
+        }
+
         // Update typing users
         if (changeEvent.hasTypingUserIdListChanged()) {
             const auto &typingUserIds = changeEvent.typingUserIdList();
@@ -1808,6 +1884,22 @@ void IpcDispatcher::processResponse(
     }
 }
 
+void IpcDispatcher::markPendingMessageFailed(const QString &roomId, const QString &tempEventId)
+{
+    if (tempEventId.isEmpty()) {
+        return;
+    }
+
+    if (auto *room = qobject_cast<IpcChatRoom *>(chatRoomByRoomId(roomId))) {
+        if (auto *msg = room->chatMessageById(tempEventId)) {
+            auto flags = msg->flags();
+            flags.setFlag(ChatMessage::Flag::Pending, false);
+            flags.setFlag(ChatMessage::Flag::Failed, true);
+            room->setMessageFlags(tempEventId, flags);
+        }
+    }
+}
+
 bool IpcDispatcher::hasOwnUserMention(const ChatMessage &message) const
 {
     if (const auto *textContent = qobject_cast<const ChatMessageContentText *>(message.content())) {
@@ -1850,7 +1942,7 @@ IpcDispatcher::createOrUpdateReceivedChatMessage(const de::gonicus::gonnect::Mes
         chatMessage = room->chatMessageById(message.messageId());
     }
 
-    const bool isNew = !room->hasMessage(chatMessage);
+    const bool isNew = room->indexOfMessage(chatMessage) < 0;
 
     ChatMessage::Flags flags = m_configInfo.userId == message.senderId()
             ? ChatMessage::Flag::OwnMessage
@@ -1906,8 +1998,14 @@ IpcDispatcher::createOrUpdateReceivedChatMessage(const de::gonicus::gonnect::Mes
         const auto user = m_users.value(message.senderId(), nullptr);
         const auto userDisplayName =
                 (user && !user->displayName().isEmpty()) ? user->displayName() : message.senderId();
+
+        QString messageThreadId;
+        if (message.hasThreadId()) {
+            messageThreadId = message.threadId();
+        }
+
         chatMessage = new ChatMessage(message.messageId(), message.senderId(), userDisplayName,
-                                      content, dateTime, room, flags);
+                                      content, dateTime, room, flags, messageThreadId);
     }
 
     if (message.hasRelatedMessageId()) {
@@ -1984,6 +2082,11 @@ IpcChatRoom *IpcDispatcher::addChatRoom(const de::gonicus::gonnect::Room &room, 
 
     // Read markers
     processReadMarkers(roomObj, room.readMarker());
+
+    // Conference url
+    if (room.hasConferenceUrl()) {
+        roomObj->setConferenceUrl(room.conferenceUrl());
+    }
 
     roomObj->setInvitationText(room.hasInvitationText() ? room.invitationText() : "");
 
@@ -2651,6 +2754,9 @@ IpcDispatcher::roomPermissionsGrpcToGonnect(const de::gonicus::gonnect::RoomPerm
     if (permissions.canPinMessages()) {
         p |= IChatRoom::Permission::CanPinMessages;
     }
+    if (permissions.canEditConferenceUrl()) {
+        p |= IChatRoom::Permission::CanEditConferenceUrl;
+    }
 
     return p;
 }
@@ -3094,7 +3200,7 @@ QString IpcDispatcher::uploadFile(const QString &filePath)
     return QString("file://%1").arg(newPath);
 }
 
-void IpcDispatcher::uploadImageFromClipboard(const QString &roomId)
+void IpcDispatcher::uploadImageFromClipboard(const QString &roomId, const QString &threadId)
 {
     auto &clippy = ClipboardHelper::instance();
     if (clippy.hasImage()) {
@@ -3120,7 +3226,7 @@ void IpcDispatcher::uploadImageFromClipboard(const QString &roomId)
             return;
         }
 
-        Q_EMIT clipboardImageUploaded(uploadedPath, room);
+        Q_EMIT clipboardImageUploaded(uploadedPath, room, threadId);
     }
 }
 

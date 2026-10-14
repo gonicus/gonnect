@@ -120,14 +120,16 @@ public:
 
     /// Send a text message in the specified room.
     void sendMessage(const QString &roomId, const QString &text,
-                     const QString &relatedMessageId = "");
+                     const QString &relatedMessageId = QString(),
+                     const QString &threadId = QString());
 
     void sendTypingPing(const QString &roomId);
 
     /// Send a message in the specified room with the file as an attachment. The file must
     /// have already been uploaded.
     void sendFile(const QString &roomId, const QString &filePath,
-                  const QString &originalFileName = "");
+                  const QString &originalFileName = "", const QString &tempEventId = "",
+                  const QString &threadId = "");
 
     /// Call to accept or reject a preceeding invitation to a room.
     virtual void respondToInvitation(const QString &roomId, bool acceptInvitation) override;
@@ -135,14 +137,17 @@ public:
     /// Mark the given room as read such there are no unread notifications or messages afterwards.
     void markAsRead(const QString &roomId);
 
-    virtual void loadMessages(IChatRoom *chatRoom,
-                              quint32 n = IChatProvider::defaultMessageLimit) override;
+    virtual void loadMessages(IChatRoom *chatRoom, quint32 n = IChatProvider::defaultMessageLimit,
+                              const QString &threadId = QString(),
+                              const QString &beforeMessageId = QString()) override;
 
     /// Load a single messe. It will be available in lookup, but not in the indexed message list.
     void loadSingleMessage(const QString &roomId, const QString &messageId);
 
     /// Pin or unpin a message inside the room.
     void pinOrUnpinMessage(const QString &roomId, const QString &messageId, bool pin);
+
+    void setConferenceUrl(const QString &roomId, const QString &url);
 
     // IChatProvider interface
     virtual qint64 mediaSizeLimit() const override { return m_mediaSizeLimit; }
@@ -190,7 +195,8 @@ public:
                                 const QString &reaction) override;
 
     virtual QString uploadFile(const QString &filePath) override;
-    virtual void uploadImageFromClipboard(const QString &roomId) override;
+    virtual void uploadImageFromClipboard(const QString &roomId,
+                                          const QString &threadId = QString()) override;
 
     virtual bool hasDeviceVerification() const override { return m_hasDeviceVerification; }
     virtual bool isDeviceVerified() const override { return m_isDeviceVerified; }
@@ -278,6 +284,8 @@ private:
 
     /// Dispatch the response container and its content payload.
     void processResponse(const de::gonicus::gonnect::ResponseContainer &responseContainer);
+
+    void markPendingMessageFailed(const QString &roomId, const QString &tempEventId);
 
     bool hasOwnUserMention(const ChatMessage &message) const;
     ChatMessage *createOrUpdateReceivedChatMessage(const de::gonicus::gonnect::Message &message,
@@ -384,9 +392,15 @@ private:
     /// request timeouts.
     QTimer m_verificationTimeoutTimer;
 
+    struct RoomTagInfo
+    {
+        QString roomId;
+        QString threadId;
+    };
+
     /// Map of ipc tag to room id of RoomMessagesRequest objects that have not received an answer
     /// yet.
-    QHash<quint64, QString> m_roomListTags;
+    QHash<quint64, RoomTagInfo> m_roomListTags;
 
     /// Map of chat messages that have been requested indvidually (i.e. not in bulk) and have not
     /// received an answer yet. Key is the request tag, value the message id.

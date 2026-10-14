@@ -11,7 +11,9 @@
 #  include "SIPManager.h"
 #  include "AvatarPrioHelper.h"
 #endif
+
 #include <QMetaEnum>
+#include <QFileInfo>
 
 Contact::Contact(const QString &id, const QString &dn, const QString &sourceUid,
                  const ContactSourceInfo &contactSourceInfo, const QString &name,

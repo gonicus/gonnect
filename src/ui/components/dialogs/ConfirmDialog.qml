@@ -24,10 +24,5 @@ InfoDialog {
             control.rejected()
             control.close()
         }
-
-        Accessible.role: Accessible.Button
-        Accessible.name: cancelButton.text
-        Accessible.focusable: true
-        Accessible.onPressAction: () => cancelButton.click()
     }
 }

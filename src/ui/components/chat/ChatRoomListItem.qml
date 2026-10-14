@@ -6,7 +6,10 @@ import base
 
 Item {
     id: control
-    implicitHeight: content.y + content.height
+    height: control.implicitHeight
+    implicitHeight: content.y + content.height + (threadCol.visible ? threadCol.implicitHeight : 0)
+
+    property IChatRoom chatRoom: null
 
     required property int index
     required property string roomId
@@ -22,12 +25,14 @@ Item {
     required property string sectionHeader
 
     Accessible.role: Accessible.ListItem
-    Accessible.name: qsTr("Chat room")
-    Accessible.description: qsTr("Selected chat room %1: %2 unread messages").arg(control.name).arg(control.unreadCount)
+    Accessible.name: control.name
+    Accessible.description: qsTr("%n unread message(s)", "", control.unreadCount)
+    Accessible.selected: control.highlighted
     Accessible.focusable: true
     Accessible.onPressAction: () => control.clicked()
 
     property alias highlighted: selectedBackground.visible
+    property bool selected
 
     signal clicked
     signal favoriteToggled
@@ -35,6 +40,7 @@ Item {
     signal editRoomTriggered
     signal inviteUsersTriggered
     signal filesDropped(list<url> urls)
+    signal threadSelected(string threadId)
 
     ChatRoomListSectionHeader {
         id: sectionHeaderItem
@@ -44,8 +50,8 @@ Item {
             top: parent.top
             left: parent.left
             right: parent.right
-            leftMargin: 10
-            rightMargin: 10
+            leftMargin: Theme.d
+            rightMargin: Theme.d
         }
     }
 
@@ -64,8 +70,6 @@ Item {
             color: Theme.backgroundOffsetHoveredColor
             radius: 4
             anchors.fill: parent
-
-            Accessible.ignored: true
         }
 
         Rectangle {
@@ -86,7 +90,7 @@ Item {
             indicatorComponent: Component { ChatUserPresenceStatusIndicator {} }
             anchors {
                 left: parent.left
-                leftMargin: 10
+                leftMargin: Theme.d
                 verticalCenter: parent.verticalCenter
             }
 
@@ -101,8 +105,8 @@ Item {
                        ? unreadBubble.left
                        : parent.right
                 verticalCenter: parent.verticalCenter
-                leftMargin: 10
-                rightMargin: 10
+                leftMargin: Theme.d
+                rightMargin: Theme.d
             }
 
             Label {
@@ -121,13 +125,13 @@ Item {
         Rectangle {
             id: unreadBubble
             visible: control.unreadCount > 0 || control.ownJoinState !== IChatRoom.UserRoomState.Joined
-            width: 24
+            width: 2 * Theme.d
             height: unreadBubble.width
             radius: unreadBubble.width / 2
             color: Theme.redColor
             anchors {
                 right: parent.right
-                rightMargin: 10
+                rightMargin: Theme.d
                 verticalCenter: parent.verticalCenter
             }
 
@@ -141,9 +145,10 @@ Item {
                          ? ">9"
                          : control.unreadCount)
                       : "1"
-            }
 
-            Accessible.ignored: true
+                // The row already reports the unread count in its description
+                Accessible.ignored: true
+            }
         }
 
         HoverHandler {
@@ -159,11 +164,43 @@ Item {
                 if (mouseButton === Qt.RightButton) {
                     contextMenuComponent.createObject(control, {
                                                           editRoomVisible: !!(Number(control.permissions ?? 0) & IChatRoom.Permission.CanEdit),
-                                                          inviteUsersVisible: !!(Number(control.permissions ?? 0) & IChatRoom.Permission.CanInvite)
+                                                          inviteUsersVisible: !!(Number(control.permissions ?? 0) & IChatRoom.Permission.CanInvite),
+                                                          conferenceUrl: control.chatRoom?.conferenceUrl ?? "",
+                                                          contact: control.chatRoom?.isDirectChat
+                                                                   ? ContactHelper.lookupByChatUser(control.chatRoom.otherUser)
+                                                                   : null
                                                       }).popup()
                 } else {
                     control.clicked()
                 }
+            }
+        }
+    }
+
+    Column {
+        id: threadCol
+        visible: control.selected && threadRepeater.count > 0
+        anchors {
+            left: content.left
+            right: content.right
+            top: content.bottom
+            leftMargin: 2 * Theme.d
+        }
+
+        Repeater {
+            id: threadRepeater
+            model: ChatThreadModel {
+                chatRoom: control.chatRoom
+            }
+            delegate: ChatRoomListThreadItem {
+                id: threadDelg
+                highlighted: SelectionState.selectedThreadId === threadDelg.threadId
+                anchors {
+                    left: parent?.left
+                    right: parent?.right
+                }
+
+                onClicked: () => control.threadSelected(threadDelg.highlighted ? "" : threadDelg.threadId)
             }
         }
     }
