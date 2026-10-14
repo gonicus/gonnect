@@ -592,13 +592,37 @@ Item {
             enabled: control.areInCallButtonsEnabled
             visible: ViewHelper.isJitsiAvailable && control.hasCapabilityJitsi && !VideoCallHelper.hasActiveVideoCall
             onClicked: () => {
-                ViewHelper.nextMeetingStartFlags = IConferenceConnector.StartFlag.AudioActive | IConferenceConnector.StartFlag.ScreenShareActive
-                SIPCallManager.triggerCapability(control.accountId, control.callId, "jitsi:hangup")
+                if (GlobalInfo.useNewScreenSharingAPI()) {
+                    screenShareMenu.popup(screenShareButton, 0, screenShareButton.height)
+                } else {
+                    ViewHelper.nextMeetingStartFlags = IConferenceConnector.StartFlag.AudioActive | IConferenceConnector.StartFlag.ScreenShareActive
+                    SIPCallManager.triggerCapability(control.accountId, control.callId, "jitsi:hangup")
+                }
             }
 
             Accessible.id: "call.buttonbar.screen"
             Accessible.name: screenShareButton.toggled ? qsTr("Stop sharing the screen") : qsTr("Share the screen")
             Accessible.description: screenShareButton.tooltipText || qsTr("Enable or disable screen sharing")
+
+            Menu {
+                id: screenShareMenu
+                MenuItem {
+                    icon.source: Icons.window
+                    text: qsTr("Share window")
+                    onTriggered: () => {
+                        ViewHelper.nextMeetingStartFlags = IConferenceConnector.StartFlag.AudioActive | IConferenceConnector.StartFlag.WindowShareActive
+                        SIPCallManager.triggerCapability(control.accountId, control.callId, "jitsi:hangup")
+                    }
+                }
+                MenuItem {
+                    icon.source: Icons.screen
+                    text: qsTr("Share screen")
+                    onTriggered: () => {
+                        ViewHelper.nextMeetingStartFlags = IConferenceConnector.StartFlag.AudioActive | IConferenceConnector.StartFlag.ScreenShareActive
+                        SIPCallManager.triggerCapability(control.accountId, control.callId, "jitsi:hangup")
+                    }
+                }
+            }
         }
 
         BarButton {
