@@ -723,6 +723,7 @@ qt_add_qml_module(gonnect
         chat/ConferenceChatRoom.cpp
         chat/CrossSigningSecret.h
         chat/CrossSigningSymbol.h
+        chat/MessageJumpInfo.h
         chat/NotificationSetting.h
         chat/PinnedChatMessages.h
         chat/PinnedChatMessages.cpp

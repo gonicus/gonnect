@@ -28,8 +28,7 @@ Item {
                 const roomUid = internal.selectedItem.roomUid
                 const provider = control.searchProvider.getChatProviderByRoom(roomUid)
                 if (provider) {
-                    // TODO: This only switches to the room, without jumping to the
-                    // concrete message
+                    SelectionState.messageJumpInfo = { roomId: roomUid, messageId: internal.selectedItem.messageUid }
                     ViewHelper.showChatRoom(provider, roomUid)
                 }
 

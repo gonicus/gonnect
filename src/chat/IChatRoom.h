@@ -115,8 +115,14 @@ public:
     /// List of chat messages of this room, sorted by timestamp ascending
     virtual QList<ChatMessage *> chatMessages() const = 0;
 
+    /// Number of chat messages in this room (i.e. the size of chatMessages())
+    Q_INVOKABLE virtual qsizetype chatMessageCount() const = 0;
+
     /// Retrieve a message by id lookup or nullptr if not found
     virtual ChatMessage *messageById(const QString &id) const = 0;
+
+    /// Retrieve a message by its index (as in chatMessages()) or nullptr if out of bounds
+    Q_INVOKABLE virtual ChatMessage *messageByIndex(qsizetype index) const = 0;
 
     /// List of pinned chat messages of this room, sorted by timestamp ascending
     virtual QList<ChatMessage *> pinnedChatMessages() const = 0;

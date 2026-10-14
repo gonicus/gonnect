@@ -1009,6 +1009,7 @@ void IpcDispatcher::processResponse(
     } else if (rc.hasMultipartEnd()) {
         const auto count = m_multipartCount.take(tag);
         const auto tagInfo = m_roomListTags.take(tag);
+
         if (!tagInfo.roomId.isEmpty()) {
             if (auto room = m_roomLookup.value(tagInfo.roomId, nullptr)) {
                 room->setIsLoadingMessageHistory(false);
@@ -1941,7 +1942,7 @@ IpcDispatcher::createOrUpdateReceivedChatMessage(const de::gonicus::gonnect::Mes
         chatMessage = room->chatMessageById(message.messageId());
     }
 
-    const bool isNew = !room->hasMessage(chatMessage);
+    const bool isNew = room->indexOfMessage(chatMessage) < 0;
 
     ChatMessage::Flags flags = m_configInfo.userId == message.senderId()
             ? ChatMessage::Flag::OwnMessage

@@ -105,6 +105,16 @@ QList<ChatMessage *> IpcChatRoom::chatMessages() const
     return m_mainMessageContainer.chatMessages();
 }
 
+qsizetype IpcChatRoom::chatMessageCount() const
+{
+    return m_mainMessageContainer.count();
+}
+
+ChatMessage *IpcChatRoom::messageByIndex(qsizetype index) const
+{
+    return m_mainMessageContainer.at(index);
+}
+
 ChatMessage *IpcChatRoom::messageById(const QString &id) const
 {
     if (id.isEmpty()) {
@@ -318,7 +328,7 @@ void IpcChatRoom::addExistingMessage(ChatMessage *message, bool isUnread, bool i
 {
     Q_CHECK_PTR(message);
 
-    if (m_mainMessageContainer.contains(message)) {
+    if (m_mainMessageContainer.indexOf(message) >= 0) {
         return;
     }
 
