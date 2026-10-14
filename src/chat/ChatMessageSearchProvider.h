@@ -64,6 +64,7 @@ private:
     QString indexingSettingsKey(const QString &roomUid) const;
     QString backfillSettingsKey(const QString &roomUid) const;
     void indexRoomMessages(IChatRoom &room) const;
+    void clearRoomIndex(const QString &roomUid);
 
     ChatMessageSearchIndexer *m_indexer = nullptr;
     ChatMessageSearchModel *m_model = nullptr;

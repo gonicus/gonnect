@@ -86,6 +86,15 @@ void ChatMessageSearchProvider::indexRoomMessages(IChatRoom &room) const
     }
 }
 
+void ChatMessageSearchProvider::clearRoomIndex(const QString &roomUid)
+{
+    if (roomUid.isEmpty()) {
+        return;
+    }
+    m_indexer->removeMessagesByRoom(roomUid);
+    setRoomBackfillComplete(roomUid, false);
+}
+
 IChatProvider *ChatMessageSearchProvider::getChatProviderByRoom(const QString &roomUid)
 {
     auto rit = m_chatRoomsByUid.find(roomUid);
@@ -256,11 +265,11 @@ void ChatMessageSearchProvider::removeChatRoom(IChatRoom *room)
         return;
     }
 
-    QString roomUid = room->id();
+    const QString roomUid = room->id();
 
     m_chatRoomsByUid.remove(roomUid);
 
-    m_indexer->removeMessagesByRoom(roomUid);
+    clearRoomIndex(roomUid);
 }
 
 void ChatMessageSearchProvider::removeChatRoomsByProvider(const QString &providerUid)
@@ -268,12 +277,12 @@ void ChatMessageSearchProvider::removeChatRoomsByProvider(const QString &provide
     QMutableHashIterator<QString, RoomConnection> it(m_chatRoomsByUid);
     while (it.hasNext()) {
         it.next();
-        QString roomUid = it.key();
+        const QString roomUid = it.key();
 
         if (it.value().providerUid == providerUid) {
             it.remove();
 
-            m_indexer->removeMessagesByRoom(roomUid);
+            clearRoomIndex(roomUid);
         }
     }
 }
@@ -342,7 +351,7 @@ void ChatMessageSearchProvider::setRoomIndexingEnabled(const QString &roomUid, b
                 m_backfillTimer.start();
             }
         } else {
-            m_indexer->removeMessagesByRoom(roomUid);
+            clearRoomIndex(roomUid);
         }
 
         Q_EMIT roomIndexingEnabledChanged(roomUid, enabled);
