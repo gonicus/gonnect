@@ -55,6 +55,11 @@ Item {
         confConn.setCallHistoryItem(callHistoryItem)
 
         if (!AuthManager.isJitsiAuthRequired || AuthManager.isJitsiRoomAuthenticated(meetingId)) {
+            if (startFlags & IConferenceConnector.StartFlag.WindowShareActive) {
+                internal.shareFullScreen = false
+            } else if (startFlags & IConferenceConnector.StartFlag.ScreenShareActive) {
+                internal.shareFullScreen = true
+            }
             confConn.joinConference(meetingId, displayName, startFlags)
         } else {
             authConn.enabled = true
