@@ -442,12 +442,21 @@ QList<ChatMessageSearchIndexer::SearchResult> ChatMessageSearchIndexer::search(c
         return results;
     }
 
-    // Strip FTS5 operator characters that would cause query parse errors.
-    static const QRegularExpression ftsSpecial(QStringLiteral(R"([\"*()\^:])"));
-    QString safeQuery = processedQuery.remove(ftsSpecial).simplified();
-    if (safeQuery.isEmpty()) {
+    // Quote terms so punctutation cannot interfere with FTS5 query syntax
+    static const QRegularExpression splitRegex(R"(\s+)");
+    const QStringList terms = processedQuery.split(splitRegex, Qt::SkipEmptyParts);
+
+    if (terms.isEmpty()) {
         return results;
     }
+
+    QStringList quotedTerms;
+    quotedTerms.reserve(terms.length());
+    for (const QString &term : terms) {
+        quotedTerms.append(QStringLiteral("\"%1\"").arg(
+                QString(term).replace(QLatin1Char('"'), QStringLiteral("\"\""))));
+    }
+    const QString safeQuery = quotedTerms.join(QLatin1Char(' '));
 
     // FTS5 rank is a special hidden column; expose it explicitly (unqualified in ORDER BY).
     // Results are ordered ascending by rank (FTS5 BM25 is negative: closer
