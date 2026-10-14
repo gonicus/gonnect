@@ -453,10 +453,17 @@ QList<ChatMessageSearchIndexer::SearchResult> ChatMessageSearchIndexer::search(c
     QStringList quotedTerms;
     quotedTerms.reserve(terms.length());
     for (const QString &term : terms) {
+        if (term.length() < 3) {
+            // Trigram tokenizer cannot match terms shorter than 3 chars
+            continue;
+        }
         quotedTerms.append(QStringLiteral("\"%1\"").arg(
                 QString(term).replace(QLatin1Char('"'), QStringLiteral("\"\""))));
     }
     const QString safeQuery = quotedTerms.join(QLatin1Char(' '));
+    if (safeQuery.isEmpty()) {
+        return results;
+    }
 
     // FTS5 rank is a special hidden column; expose it explicitly (unqualified in ORDER BY).
     // Results are ordered ascending by rank (FTS5 BM25 is negative: closer
