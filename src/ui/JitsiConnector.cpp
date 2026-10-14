@@ -1339,8 +1339,8 @@ void JitsiConnector::joinConference(const QString &conferenceId, const QString &
     setIsInConference(true);
     setVideoMuted(!m_startWithVideo);
 
-    if ((startFlags & IConferenceConnector::StartFlag::ScreenShareActive) ||
-        (startFlags & IConferenceConnector::StartFlag::WindowShareActive)) {
+    if ((startFlags & IConferenceConnector::StartFlag::ScreenShareActive)
+        || (startFlags & IConferenceConnector::StartFlag::WindowShareActive)) {
 
         if (isInitialized()) {
             setSharingScreen(true);

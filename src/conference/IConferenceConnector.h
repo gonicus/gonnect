@@ -77,7 +77,12 @@ public:
     Q_INVOKABLE virtual bool
     hasCapability(const IConferenceConnector::Capability capabilityToCheck) const = 0;
 
-    enum class StartFlag { AudioActive = 1 << 0, VideoActive = 1 << 1, ScreenShareActive = 1 << 2, WindowShareActive = 1 << 3 };
+    enum class StartFlag {
+        AudioActive = 1 << 0,
+        VideoActive = 1 << 1,
+        ScreenShareActive = 1 << 2,
+        WindowShareActive = 1 << 3
+    };
     Q_ENUM(StartFlag)
     Q_DECLARE_FLAGS(StartFlags, StartFlag)
     Q_FLAG(StartFlags)
