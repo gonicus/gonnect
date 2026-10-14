@@ -214,7 +214,9 @@ bool ChatMessageSearchIndexer::removeMessage(const QString &id)
         m_error = QString::fromUtf8(sqlite3_errmsg(m_db));
         return false;
     }
-    sqlite3_bind_text(mapping.statement, 1, id.toUtf8(), -1, SQLITE_STATIC);
+
+    const QByteArray id_utf8 = id.toUtf8();
+    sqlite3_bind_text(mapping.statement, 1, id_utf8.constData(), -1, SQLITE_STATIC);
 
     if (sqlite3_step(mapping.statement) != SQLITE_DONE) {
         m_error = QString::fromUtf8(sqlite3_errmsg(m_db));
@@ -229,7 +231,7 @@ bool ChatMessageSearchIndexer::removeMessage(const QString &id)
         m_error = QString::fromUtf8(sqlite3_errmsg(m_db));
         return false;
     }
-    sqlite3_bind_text(fts.statement, 1, id.toUtf8(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(fts.statement, 1, id_utf8.constData(), -1, SQLITE_STATIC);
 
     if (sqlite3_step(fts.statement) != SQLITE_DONE) {
         m_error = QString::fromUtf8(sqlite3_errmsg(m_db));
@@ -257,7 +259,9 @@ bool ChatMessageSearchIndexer::removeMessagesByRoom(const QString &roomUid, bool
         m_error = QString::fromUtf8(sqlite3_errmsg(m_db));
         return false;
     }
-    sqlite3_bind_text(fts.statement, 1, roomUid.toUtf8(), -1, SQLITE_STATIC);
+
+    const QByteArray roomUid_utf8 = roomUid.toUtf8();
+    sqlite3_bind_text(fts.statement, 1, roomUid_utf8.constData(), -1, SQLITE_STATIC);
     if (byDate) {
         sqlite3_bind_int64(fts.statement, 2, timestamp);
     }
@@ -278,7 +282,7 @@ bool ChatMessageSearchIndexer::removeMessagesByRoom(const QString &roomUid, bool
         m_error = QString::fromUtf8(sqlite3_errmsg(m_db));
         return false;
     }
-    sqlite3_bind_text(mapping.statement, 1, roomUid.toUtf8(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(mapping.statement, 1, roomUid_utf8.constData(), -1, SQLITE_STATIC);
     if (byDate) {
         sqlite3_bind_int64(mapping.statement, 2, timestamp);
     }
@@ -320,7 +324,9 @@ QString ChatMessageSearchIndexer::getLatestMessageUidByRoom(const QString &roomU
         m_error = QString::fromUtf8(sqlite3_errmsg(m_db));
         return "";
     }
-    sqlite3_bind_text(query.statement, 1, roomUid.toUtf8(), -1, SQLITE_STATIC);
+
+    const QByteArray roomUid_utf8 = roomUid.toUtf8();
+    sqlite3_bind_text(query.statement, 1, roomUid_utf8.constData(), -1, SQLITE_STATIC);
 
     if (sqlite3_step(query.statement) == SQLITE_ROW) {
         const auto *latestMessageUid = sqlite3_column_text(query.statement, 0);
@@ -350,7 +356,9 @@ QString ChatMessageSearchIndexer::oldestIndexedMessageUid(const QString &roomUid
         m_error = QString::fromUtf8(sqlite3_errmsg(m_db));
         return "";
     }
-    sqlite3_bind_text(stm.statement, 1, roomUid.toUtf8(), -1, SQLITE_STATIC);
+
+    const QByteArray roomUid_utf8 = roomUid.toUtf8();
+    sqlite3_bind_text(stm.statement, 1, roomUid_utf8.constData(), -1, SQLITE_STATIC);
 
     if (sqlite3_step(stm.statement) == SQLITE_ROW) {
         const auto *latestMessageUid = sqlite3_column_text(stm.statement, 0);
@@ -379,7 +387,8 @@ qsizetype ChatMessageSearchIndexer::indexedMessageCountForRoom(const QString &ro
         m_error = QString::fromUtf8(sqlite3_errmsg(m_db));
         return -1;
     }
-    sqlite3_bind_text(stm.statement, 1, roomUid.toUtf8(), -1, SQLITE_STATIC);
+    const QByteArray roomUid_utf8 = roomUid.toUtf8();
+    sqlite3_bind_text(stm.statement, 1, roomUid_utf8.constData(), -1, SQLITE_STATIC);
 
     if (sqlite3_step(stm.statement) == SQLITE_ROW) {
         return sqlite3_column_int64(stm.statement, 0);
@@ -406,7 +415,9 @@ qint64 ChatMessageSearchIndexer::oldestIndexedTimestampForRoom(const QString &ro
         m_error = QString::fromUtf8(sqlite3_errmsg(m_db));
         return -1;
     }
-    sqlite3_bind_text(stm.statement, 1, roomUid.toUtf8(), -1, SQLITE_STATIC);
+
+    const QByteArray roomUid_utf8 = roomUid.toUtf8();
+    sqlite3_bind_text(stm.statement, 1, roomUid_utf8.constData(), -1, SQLITE_STATIC);
 
     if (sqlite3_step(stm.statement) == SQLITE_ROW) {
         return sqlite3_column_int64(stm.statement, 0);
