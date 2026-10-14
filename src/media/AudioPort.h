@@ -4,6 +4,7 @@
 #include <QAudioSink>
 #include <QAudioSource>
 #include <QAudioFormat>
+#include <QMutex>
 #include <pjsua2.hpp>
 
 class AudioProcessor;
@@ -49,13 +50,19 @@ Q_SIGNALS:
     void sourceLevelChanged(qreal level);
 
 private:
+    void requestStartIO();
+
     void startIO();
     void stopIO();
 
-    void startSinkIO();
-    void stopSinkIO();
-    void startSourceIO();
-    void stopSourceIO();
+    void startIONoLock();
+    void stopIONoLock();
+    void startSinkIONoLock();
+    void stopSinkIONoLock();
+    void startSourceIONoLock();
+    void stopSourceIONoLock();
+    void padSilenceNoLock();
+    void writeSilenceMSNoLock(unsigned milliseconds);
 
     bool initFmt();
 
@@ -64,7 +71,6 @@ private:
     void updateAudioLevel(const char *data, qint64 size);
     void setSourceAudioLevel(qreal level);
 
-    void writeSilenceMS(unsigned milliseconds);
     bool isSilence(const void *data, unsigned size) const;
 
     AudioProcessor *m_audioProcessor = nullptr;
@@ -78,6 +84,9 @@ private:
     QPointer<QIODevice> m_io;
     QPointer<QAudioSink> m_sink;
     QPointer<QAudioSource> m_source;
+
+    QMutex m_ioMutex;
+    std::atomic<bool> m_ioStartRequested = false;
 
     QTimer m_idleTimer;
     qreal m_sourceAudioLevel = 0.0;
