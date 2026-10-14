@@ -212,6 +212,8 @@ if(FLATPAK)
         dbus/portal/AccountPortal.cpp
         dbus/portal/BackgroundPortal.h
         dbus/portal/BackgroundPortal.cpp
+        dbus/portal/CameraPortal.h
+        dbus/portal/CameraPortal.cpp
         dbus/portal/GlobalShortcutPortal.h
         dbus/portal/GlobalShortcutPortal.cpp
         dbus/portal/InhibitPortal.h
@@ -245,7 +247,9 @@ if(FLATPAK)
         platform/linux/LinuxDesktopSearchProvider.h
         platform/linux/LinuxDesktopSearchProvider.cpp
         platform/linux/LinuxPlatformSession.h
-        platform/linux/LinuxPlatformSession.cpp)
+        platform/linux/LinuxPlatformSession.cpp
+        platform/linux/PipeWireCameraDevices.h
+        platform/linux/PipeWireCameraDevices.cpp)
 
 elseif(LINUX)
     set(PLATFORM_SOURCES
@@ -804,6 +808,7 @@ qt_add_qml_module(gonnect
         media/AudioProcessor.cpp
         media/Sniffer.h
         media/Sniffer.cpp
+        media/VideoDevice.h
         media/VideoManager.h
         media/VideoManager.cpp
 

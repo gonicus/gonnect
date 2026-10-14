@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls.Material
 import QtQuick.Dialogs
+import base
 
 Item {
     id: control
@@ -42,6 +43,11 @@ Item {
     FileDialog {
         id: fileDialog
         nameFilters: [ qsTr("Certificate files (%1)").arg(control.fileSuffixes.map(suffix => `*.${suffix}`).join(" ")) ]
-        onAccepted: () => textField.text = fileDialog.selectedFile
+        onAccepted: () => {
+                        const persistedPath = FileHelper.persistFile(fileDialog.selectedFile, "certificates", control.templateFieldName)
+                        if (persistedPath) {
+                            textField.text = persistedPath
+                        }
+                    }
     }
 }

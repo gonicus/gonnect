@@ -18,6 +18,8 @@ Item {
         property bool isWebViewLoaded: false
     }
 
+    Component.onCompleted: () => VideoManager.acquireCameras()
+
     LoggingCategory {
         id: category
         name: "gonnect.qml.Conference"
@@ -53,6 +55,11 @@ Item {
         confConn.setCallHistoryItem(callHistoryItem)
 
         if (!AuthManager.isJitsiAuthRequired || AuthManager.isJitsiRoomAuthenticated(meetingId)) {
+            if (startFlags & IConferenceConnector.StartFlag.WindowShareActive) {
+                internal.shareFullScreen = false
+            } else if (startFlags & IConferenceConnector.StartFlag.ScreenShareActive) {
+                internal.shareFullScreen = true
+            }
             confConn.joinConference(meetingId, displayName, startFlags)
         } else {
             authConn.enabled = true
@@ -396,21 +403,24 @@ Item {
                         permission.grant()
                     }
 
-                    //TODO: this can be re-enabled after QTBUG-142040 / QTBUG-142040 are fixed
-                    //      see ConferenceButtonBar.qml +228
-                    //onDesktopMediaRequested: (request) => {
-                    //    if (internal.shareFullScreen) {
-                    //        request.selectScreen(request.screensModel.index(0, 0))
-                    //    } else {
-                    //        request.selectWindow(request.windowsModel.index(0, 0))
-                    //    }
-                    //}
-
                     onLoadingChanged: (info) => {
                         if (info.status === WebEngineView.LoadSucceededStatus) {
                             jitsiView.runJavaScript(confConn.jitsiJavascriptInternal())
                         } else {
                             console.error(category, `failed to load HTML: ${info.errorString} (domain: ${info.errorDomain}, code: ${info.errorCode}, status: ${info.status}, url: ${info.url})`)
+                        }
+                    }
+
+                    Connections {
+                        target: jitsiView
+                        enabled: GlobalInfo.useNewScreenSharingAPI()
+
+                        function onDesktopMediaRequested(request) {
+                            if (internal.shareFullScreen) {
+                                request.selectScreen(request.screensModel.index(0, 0))
+                            } else {
+                                request.selectWindow(request.windowsModel.index(0, 0))
+                            }
                         }
                     }
 
@@ -816,7 +826,7 @@ Item {
                 }
 
                 Component.onCompleted: {
-                    jitsiView.loadHtml(confConn.jitsiHtmlInternal(), "https://" + GlobalInfo.jitsiUrl())
+                    jitsiView.loadHtml(confConn.jitsiHtmlInternal(), GlobalInfo.jitsiUrl())
                 }
             }
         }
