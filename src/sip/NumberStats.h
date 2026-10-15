@@ -16,7 +16,7 @@ class NumberStats : public QObject
     QML_UNCREATABLE("")
 
 public:
-    enum class ContactType { PhoneNumber, JitsiMeetUrl };
+    enum class ContactType { PhoneNumber, JitsiMeetUrl, ChatRoomId };
     Q_ENUM(ContactType)
 
     virtual ~NumberStats();
@@ -37,7 +37,9 @@ public:
 
     QStringList mostCalled(quint8 limit, bool includeFavorites = true) const;
 
-    bool isFavorite(const QString &phoneNumber) const;
+    bool isFavorite(const QString &phoneNumber,
+                    const NumberStats::ContactType contactType =
+                            NumberStats::ContactType::PhoneNumber) const;
     void toggleFavorite(const QString &phoneNumber, const NumberStats::ContactType contactType);
 
     const NumberStat *numberStat(const QString &phoneNumber) const;
@@ -46,6 +48,7 @@ private:
     explicit NumberStats(QObject *parent = nullptr);
     void initialRead();
     void readNumberOfCalls();
+    void migratePhoneNumberFormatting();
 
     /**
      * @brief ensureFlaggedNumberExists creates a new entry in flagged table in database, if it does
@@ -66,6 +69,7 @@ private:
     QList<PhoneNumberCallCount *> m_callCounts;
     QHash<QString, PhoneNumberCallCount *> m_callCountLookup;
     QTimer m_debounceAddressBookUpdateTimer;
+    bool m_isMigrationDone = false;
 
 Q_SIGNALS:
     void countChanged(qsizetype index);

@@ -30,15 +30,13 @@ BaseWindow {
         required property string key
         required property string description
 
-        Accessible.role: Accessible.HotkeyField
-        Accessible.name: qsTr("Shortcut key: %1").arg(keyLabel.text)
-        Accessible.description: descriptionLabel.text
-        Accessible.focusable: true
+        Accessible.role: Accessible.ListItem
+        Accessible.name: qsTr("%1: %2").arg(descriptionLabel.text).arg(keyLabel.text)
 
         Label {
             id: keyLabel
             text: delg.key
-            font.pixelSize: 16
+            font.pixelSize: Theme.fontSizeMedium
             font.weight: Font.DemiBold
             anchors {
                 top: parent.top
@@ -86,7 +84,7 @@ BaseWindow {
             Label {
                 id: localShortcutsHeading
                 text: qsTr("Local shortcuts (work only when app is focused)")
-                font.pixelSize: 16
+                font.pixelSize: Theme.fontSizeMedium
                 font.weight: Font.Medium
                 elide: Text.ElideRight
                 color: Theme.secondaryTextColor
@@ -96,7 +94,6 @@ BaseWindow {
                     right: parent.right
                 }
 
-                Accessible.role: Accessible.StaticText
                 Accessible.name: qsTr("Local shortcuts")
                 Accessible.description: localShortcutsHeading.text
             }
@@ -123,7 +120,7 @@ BaseWindow {
             Label {
                 id: globalShortcutsHeading
                 text: qsTr("Global shortcuts (work from anywhere)")
-                font.pixelSize: 16
+                font.pixelSize: Theme.fontSizeMedium
                 font.weight: Font.Medium
                 elide: Text.ElideRight
                 color: Theme.secondaryTextColor
@@ -133,7 +130,6 @@ BaseWindow {
                     right: parent.right
                 }
 
-                Accessible.role: Accessible.StaticText
                 Accessible.name: qsTr("Global shortcuts")
                 Accessible.description: globalShortcutsHeading.text
             }

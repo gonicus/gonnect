@@ -1,4 +1,6 @@
 #pragma once
+
+#include <QQmlEngine>
 #include <QObject>
 #include <QTimer>
 #include <QtQml/qqml.h>
@@ -6,8 +8,9 @@
 
 #include "AppSettings.h"
 
-class SIPCall;
+class Contact;
 class DtmfGenerator;
+class SIPCall;
 
 class SIPCallManager : public QObject
 {
@@ -58,8 +61,9 @@ public:
     Q_INVOKABLE void endCall(const QString &accountId, const int callId);
     Q_INVOKABLE void endCall(SIPCall *call);
     Q_INVOKABLE void endCall(QString id);
+    Q_INVOKABLE void endCallWithContact(Contact *contact);
     Q_INVOKABLE void endAllCalls();
-    void holdOtherCalls(const SIPCall *call);
+    void holdOtherCalls(SIPCall *call);
     void holdAllCalls() const;
     void unholdAllCalls() const;
     Q_INVOKABLE void toggleHoldCall(const QString &accountId, const int callId);
@@ -78,6 +82,8 @@ public:
     SIPCall *findCall(const QString &accountId, int callId) const;
     SIPCall *findCall(const QString &remoteUri) const;
     SIPCall *findCallById(const QString &id) const;
+    SIPCall *findCallByContact(const Contact *contact) const;
+    Q_INVOKABLE bool hasCallWithContact(Contact *contact) const;
 
     Q_INVOKABLE void triggerCapability(const QString &accountId, const int callId,
                                        const QString &capability) const;
@@ -175,7 +181,11 @@ class SIPCallManagerWrapper
     QML_SINGLETON
 
 public:
-    static SIPCallManager *create(QQmlEngine *, QJSEngine *) { return &SIPCallManager::instance(); }
+    static SIPCallManager *create(QQmlEngine *, QJSEngine *)
+    {
+        QQmlEngine::setObjectOwnership(&SIPCallManager::instance(), QQmlEngine::CppOwnership);
+        return &SIPCallManager::instance();
+    }
 
 private:
     SIPCallManagerWrapper() = default;

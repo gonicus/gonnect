@@ -67,7 +67,7 @@ void MSOAuthManager::clearRefreshToken()
             [](QKeychain::Error error, const QString &, const QString &message) {
                 if (error != QKeychain::NoError) {
                     ErrorBus::instance().error(
-                            tr("Failed to clear refresh token for Microsoft login: %2")
+                            tr("Failed to clear refresh token for Microsoft login: %1")
                                     .arg(message));
                 }
             });
@@ -102,7 +102,7 @@ void MSOAuthManager::authStatusChanged(QAbstractOAuth::Status status)
     qCDebug(msOAuthManager) << "Microsoft auth status changed:" << static_cast<int>(status);
     if (status == QAbstractOAuth::Status::Granted) {
         m_replyHandler->close();
-        showOauthLoginStatus(tr("Login successful."), false);
+        showOauthLoginStatus(tr("Login successful"), false);
         Q_EMIT loginSuccessful();
     }
 }
@@ -163,9 +163,8 @@ void MSOAuthManager::initAuthCodeFlow()
             qCCritical(msOAuthManager)
                     << "Failed to start QOAuthHttpServerReplyHandler. No port available?";
             showOauthLoginStatus(
-                    tr("Failed to start login, the local system could not be set up to receive a "
-                       "response. Try again later.\nIf the problem persists, try to close running "
-                       "applications that reserve/block network ports."),
+                    tr("Failed to start login. The local system could not be set up to receive a "
+                       "response."),
                     true);
             return;
         }
@@ -186,10 +185,7 @@ void MSOAuthManager::initAuthCodeFlow()
             [&](const QString &error, const QString &errorDescription, const QUrl &uri) {
                 qCInfo(msOAuthManager) << "Microsoft auth serverReportedErrorOccurred:" << error
                                        << "description:" << errorDescription << "uri:" << uri;
-                showOauthLoginStatus(tr("Login failed, the server reported an error:\n%1\nWith "
-                                        "error description: %2")
-                                             .arg(error, errorDescription),
-                                     true);
+                showOauthLoginStatus(tr("Login failed: %1\n%2").arg(error, errorDescription), true);
             });
     connect(m_authCodeFlow, &QOAuth2AuthorizationCodeFlow::requestFailed, this,
             [&](const QAbstractOAuth::Error error) {
@@ -199,37 +195,26 @@ void MSOAuthManager::initAuthCodeFlow()
                 case QAbstractOAuth::Error::NoError:
                     break;
                 case QAbstractOAuth::Error::NetworkError:
-                    showOauthLoginStatus(tr("Login failed due to a network error. Check your "
-                                            "internet connectivity and try again."),
-                                         true);
+                    showOauthLoginStatus(tr("Login failed: network error"), true);
                     break;
                 case QAbstractOAuth::Error::ServerError:
-                    showOauthLoginStatus(
-                            tr("Login failed because the Microsoft server returned an unexpected "
-                               "or incorrect response. Please try again later."),
-                            true);
+                    showOauthLoginStatus(tr("Login failed: unexpected response from server"), true);
                     break;
                 case QAbstractOAuth::Error::OAuthTokenNotFoundError: // fall-through intended
                 case QAbstractOAuth::Error::OAuthTokenSecretNotFoundError:
-                    showOauthLoginStatus(tr("Login failed, no token has been received."), true);
+                    showOauthLoginStatus(tr("Login failed: no token received"), true);
                     break;
                 case QAbstractOAuth::Error::OAuthCallbackNotVerified:
-                    showOauthLoginStatus(
-                            tr("Login failed, possibly due to a server configuration error."),
-                            true);
+                    showOauthLoginStatus(tr("Login failed: server configuration error"), true);
                     break;
                 case QAbstractOAuth::Error::ClientError:
-                    showOauthLoginStatus(tr("Login failed, possibly due to a GOnnect configuration "
-                                            "error."),
-                                         true);
+                    showOauthLoginStatus(tr("Login failed: configuration error"), true);
                     break;
                 case QAbstractOAuth::Error::ExpiredError:
-                    showOauthLoginStatus(tr("Login failed, token expired. Please try again."),
-                                         true);
+                    showOauthLoginStatus(tr("Login failed: token expired"), true);
                     break;
                 default:
-                    showOauthLoginStatus(tr("Login failed, unknown error. Please try again."),
-                                         true);
+                    showOauthLoginStatus(tr("Login failed: unknown error"), true);
                     break;
                 }
             });
@@ -307,7 +292,7 @@ void MSOAuthManager::storeRefreshToken(const QString &token) const
             [](QKeychain::Error error, const QString &, const QString &message) {
                 if (error != QKeychain::NoError) {
                     ErrorBus::instance().error(
-                            tr("Failed to persist refresh token for Microsoft login: %2")
+                            tr("Failed to persist refresh token for Microsoft login: %1")
                                     .arg(message));
                 }
             });

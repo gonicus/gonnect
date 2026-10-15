@@ -19,15 +19,13 @@ Item {
         radius: 4
         border.width: 1
         border.color: control.color
-
-        Accessible.ignored: true
     }
 
     Label {
         id: lbl
         anchors.centerIn: parent
         font.capitalization: Font.AllUppercase
-        font.pixelSize: 9
+        font.pixelSize: Theme.fontSizeExtraSmall
 
         Accessible.ignored: true
     }

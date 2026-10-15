@@ -4,7 +4,10 @@
 #include <QAudioSink>
 #include <QAudioSource>
 #include <QAudioFormat>
+#include <QMutex>
 #include <pjsua2.hpp>
+
+class AudioProcessor;
 
 class AudioPort : public QObject, public pj::AudioMediaPort
 {
@@ -18,11 +21,17 @@ public:
     bool initialize();
     void setMuted(bool value);
 
+    // Optional shared microphone audio processor (AGC/AEC/ANC)
+    void setAudioProcessor(AudioProcessor *audioProcessor);
+
     void onFrameRequested(pj::MediaFrame &frame) override;
     void onFrameReceived(pj::MediaFrame &frame) override;
 
     QString getDeviceID() const;
     QString getSystemDeviceID() const;
+
+    void acquire();
+    void release();
 
     void setAudioDevice(QAudioDevice device);
     QAudioDevice audioDevice() { return m_device; }
@@ -32,6 +41,8 @@ public:
 
     qreal sourceLevel() const { return m_sourceAudioLevel; }
 
+    void padSilence();
+
 Q_SIGNALS:
     void startIdleTimer();
     void audioSourceChanged();
@@ -39,32 +50,51 @@ Q_SIGNALS:
     void sourceLevelChanged(qreal level);
 
 private:
-    void writeSilenceMS(unsigned milliseconds);
+    void requestStartIO();
 
     void startIO();
     void stopIO();
 
-    void startSinkIO();
-    void stopSinkIO();
-    void startSourceIO();
-    void stopSourceIO();
+    void startIONoLock();
+    void stopIONoLock();
+    void startSinkIONoLock();
+    void stopSinkIONoLock();
+    void startSourceIONoLock();
+    void stopSourceIONoLock();
+    void padSilenceNoLock();
+    void writeSilenceMSNoLock(unsigned milliseconds);
 
     bool initFmt();
+
+    float activeTxLevel() const;
 
     void updateAudioLevel(const char *data, qint64 size);
     void setSourceAudioLevel(qreal level);
 
+    bool isSilence(const void *data, unsigned size) const;
+
+    AudioProcessor *m_audioProcessor = nullptr;
+
     bool m_isMuted = false;
+    bool m_isDraining = false;
+    bool m_isWarmingUp = false;
+
     QAudioDevice m_device;
 
     QPointer<QIODevice> m_io;
     QPointer<QAudioSink> m_sink;
     QPointer<QAudioSource> m_source;
 
+    QMutex m_ioMutex;
+    std::atomic<bool> m_ioStartRequested = false;
+
     QTimer m_idleTimer;
     qreal m_sourceAudioLevel = 0.0;
+    quint64 m_captureFrames = 0;
 
     pj::MediaFormatAudio m_pj_fmt;
 
     QAudioFormat m_audioFormat;
+
+    QMetaObject::Connection m_warmUpDrain;
 };

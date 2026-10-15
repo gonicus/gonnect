@@ -12,7 +12,7 @@ BaseWindow {
     height: 400
     visible: true
     resizable: false
-    title: qsTr("Emergency Call")
+    title: qsTr("Emergency call")
 
     minimumWidth: control.width
     minimumHeight: control.height
@@ -27,10 +27,9 @@ BaseWindow {
         id: container
         anchors.fill: parent
 
-        Accessible.role: Accessible.Announcement
+        Accessible.role: Accessible.AlertMessage
         Accessible.name: qsTr("Incoming emergency call from %1").arg(control.displayName)
         Accessible.description: ongoingCallInfo.text
-        Accessible.searchEdit: true
 
         Item {
             id: cross
@@ -51,8 +50,6 @@ BaseWindow {
                     bottom: parent.bottom
                     horizontalCenter: parent.horizontalCenter
                 }
-
-                Accessible.ignored: true
             }
 
             Rectangle {
@@ -64,11 +61,7 @@ BaseWindow {
                     right: parent.right
                     verticalCenter: parent.verticalCenter
                 }
-
-                Accessible.ignored: true
             }
-
-            Accessible.ignored: true
         }
 
         Item {
@@ -93,7 +86,7 @@ BaseWindow {
                 Label {
                     text: control.displayName
                     wrapMode: Label.Wrap
-                    font.pixelSize: 36
+                    font.pixelSize: Theme.fontSizeHuge
                     anchors {
                         left: parent.left
                         right: parent.right
@@ -106,7 +99,7 @@ BaseWindow {
                     id: ongoingCallInfo
                     text: qsTr("Answering the call will automatically terminate all other ongoing calls.")
                     wrapMode: Label.Wrap
-                    font.pixelSize: 14
+                    font.pixelSize: Theme.fontSizeNormal
                     anchors {
                         left: parent.left
                         right: parent.right
@@ -114,11 +107,7 @@ BaseWindow {
 
                     Accessible.ignored: true
                 }
-
-                Accessible.ignored: true
             }
-
-            Accessible.ignored: true
         }
 
         Button {
@@ -138,11 +127,6 @@ BaseWindow {
                 control.close()
                 control.destroy()
             }
-
-            Accessible.role: Accessible.Button
-            Accessible.name: answerCallButton.text
-            Accessible.focusable: true
-            Accessible.onPressAction: () => answerCallButton.click()
         }
     }
 }

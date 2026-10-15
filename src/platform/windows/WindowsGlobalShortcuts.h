@@ -1,6 +1,5 @@
 #pragma once
 #include <QObject>
-#include <QLinkedList>
 #include "../GlobalShortcuts.h"
 
 class QHotkey;
@@ -20,5 +19,5 @@ public:
 private:
     bool m_enabled = false;
     QList<ShortcutItem *> m_currentShortcuts;
-    QLinkedList<QHotkey *> m_hotkeys;
+    QList<QHotkey *> m_hotkeys;
 };

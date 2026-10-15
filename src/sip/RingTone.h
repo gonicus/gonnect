@@ -60,6 +60,8 @@ private Q_SLOTS:
     void playNextTone();
 
 private:
+    void scheduleStop(unsigned delay);
+
     bool m_isPlaying = false;
     pj::ToneGenerator m_toneGen;
     pj::AudioMedia &m_mediaSink;

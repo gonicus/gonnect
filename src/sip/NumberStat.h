@@ -1,5 +1,6 @@
 #pragma once
 #include <QObject>
+#include <QPointer>
 #include "NumberStats.h"
 
 class Contact;
@@ -15,5 +16,5 @@ public:
     bool isFavorite = false;
     bool isBlocked = false;
     NumberStats::ContactType contactType = NumberStats::ContactType::PhoneNumber;
-    Contact *contact = nullptr;
+    QPointer<Contact> contact = nullptr;
 };

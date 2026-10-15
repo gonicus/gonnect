@@ -1,7 +1,13 @@
 #pragma once
 
+#include "ChatModel.h"
+
 #include <QSortFilterProxyModel>
 #include <QQmlEngine>
+
+class IChatRoom;
+class ChatMessage;
+class ChatUser;
 
 class ChatProxyModel : public QSortFilterProxyModel
 {
@@ -9,10 +15,43 @@ class ChatProxyModel : public QSortFilterProxyModel
     QML_ELEMENT
     Q_CLASSINFO("DefaultProperty", "sourceModel")
 
+    Q_PROPERTY(QString threadId READ threadId WRITE setThreadId NOTIFY threadIdChanged FINAL)
+
 public:
+    enum class Roles {
+        ReadUsers = static_cast<int>(ChatModel::Roles::LastRole),
+        IsLatestOwnMessage,
+        IsFirstUnread
+    };
+
     explicit ChatProxyModel(QObject *parent = nullptr);
+    QString threadId() const { return m_threadId; }
+
+    virtual QHash<int, QByteArray> roleNames() const override;
+    virtual QVariant data(const QModelIndex &index, int role) const override;
 
 protected:
     virtual bool lessThan(const QModelIndex &sourceLeft,
                           const QModelIndex &sourceRight) const override;
+    virtual bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const override;
+
+private:
+    void setThreadId(const QString &threadId);
+
+    QObject *m_sourceModelContext = nullptr;
+    QObject *m_chatRoomContext = nullptr;
+    QString m_threadId;
+
+    QList<ChatUser *> readUsersFor(const IChatRoom *chatRoom, const ChatMessage *message) const;
+    bool isValidOwnMessage(const QModelIndex &index) const;
+    ChatMessage *ownMessageAt(qsizetype proxyIndex) const;
+    qsizetype firstUnreadSourceRow() const;
+
+private Q_SLOTS:
+    void onSourceModelChanged();
+    void onChatRoomChanged();
+    void invalidateProxyRoles();
+
+Q_SIGNALS:
+    void threadIdChanged();
 };

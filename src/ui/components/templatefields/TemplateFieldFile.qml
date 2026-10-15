@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls.Material
 import QtQuick.Dialogs
+import base
 
 Item {
     id: control
@@ -22,10 +23,8 @@ Item {
             rightMargin: 20
         }
 
-        Accessible.role: Accessible.EditableText
         Accessible.name: qsTr("File path")
         Accessible.description: qsTr("Enter the file path for %1").arg(control.templateFieldName)
-        Accessible.focusable: true
     }
 
     Button {
@@ -37,16 +36,18 @@ Item {
         }
         onClicked: () => fileDialog.open()
 
-        Accessible.role: Accessible.Button
         Accessible.name: qsTr("Open file picker")
         Accessible.description: qsTr("Select the file that should be used for %1").arg(control.templateFieldName)
-        Accessible.focusable: true
-        Accessible.onPressAction: chooseButton.click()
     }
 
     FileDialog {
         id: fileDialog
         nameFilters: [ qsTr("Certificate files (%1)").arg(control.fileSuffixes.map(suffix => `*.${suffix}`).join(" ")) ]
-        onAccepted: () => textField.text = fileDialog.selectedFile
+        onAccepted: () => {
+                        const persistedPath = FileHelper.persistFile(fileDialog.selectedFile, "certificates", control.templateFieldName)
+                        if (persistedPath) {
+                            textField.text = persistedPath
+                        }
+                    }
     }
 }

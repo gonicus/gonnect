@@ -47,7 +47,7 @@ Item {
                 text: control.code.replace(/(.{3})/g, '$1 ')
                 anchors.centerIn: parent
                 font {
-                    pixelSize: 24
+                    pixelSize: Theme.fontSizeExtraLarge
                     weight: Font.Medium
                     letterSpacing: 1.5
                 }

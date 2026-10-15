@@ -85,7 +85,7 @@ Item {
         id: avatarImage
         size: 120
         initials: ViewHelper.initials(control.contactName)
-        source: control.callItem?.hasAvatar ? ("file://" + control.callItem.avatarPath) : ""
+        source: control.callItem?.hasAvatar ? control.callItem.avatarPath : ""
         anchors {
             centerIn: parent
             verticalCenterOffset: -25
@@ -94,7 +94,7 @@ Item {
 
     Label {
         id: elapsedTimeLabel
-        font.pixelSize: 22
+        font.pixelSize: Theme.fontSizeLarge
         anchors {
             horizontalCenter: parent.horizontalCenter
             top: avatarImage.bottom
@@ -118,7 +118,6 @@ Item {
             horizontalCenter: elapsedTimeLabel.horizontalCenter
         }
 
-        Accessible.role: Accessible.StaticText
         Accessible.name: qsTr("SIP call status code")
         Accessible.description: qsTr("The current status code of the call: %1").arg(statusCodeLabel.text)
     }
@@ -173,10 +172,10 @@ Item {
         Label {
             id: dtmfFeedbackLabel
             anchors.centerIn: parent
-            font.pixelSize: 50
-        }
+            font.pixelSize: Theme.fontSizeHuge
 
-        Accessible.ignored: true
+            Accessible.ignored: true
+        }
     }
 
     Button {
@@ -195,11 +194,7 @@ Item {
         }
         onClicked: () => SIPCallManager.triggerCapability(control.accountId, control.callId, "jitsi")
 
-        Accessible.role: Accessible.Button
-        Accessible.name: jitsiButton.text
         Accessible.description: qsTr("Switch to a Jitsi Meet session")
-        Accessible.focusable: true
-        Accessible.onPressAction: () => jitsiButton.click()
     }
 
     Button {
@@ -221,11 +216,7 @@ Item {
             }
         }
 
-        Accessible.role: Accessible.Button
-        Accessible.name: holdButton.text
         Accessible.description: qsTr("Toggle the hold state to %1").arg(holdButton.text)
-        Accessible.focusable: true
-        Accessible.onPressAction: () => holdButton.click()
     }
 
     Button {
@@ -244,10 +235,7 @@ Item {
 
         onClicked: () => SIPCallManager.acceptCall(control.accountId, control.callId)
 
-        Accessible.role: Accessible.Button
         Accessible.name: qsTr("Accept call")
-        Accessible.focusable: true
-        Accessible.onPressAction: () => acceptButton.click()
     }
 
     Button {
@@ -270,9 +258,6 @@ Item {
             }
         }
 
-        Accessible.role: Accessible.Button
         Accessible.name: qsTr("Hangup call")
-        Accessible.focusable: true
-        Accessible.onPressAction: () => hangupButton.click()
     }
 }

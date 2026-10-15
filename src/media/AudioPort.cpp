@@ -3,17 +3,199 @@
 #include <QMediaDevices>
 #include <SIPAudioDevice.h>
 #include <pjmedia/port.h>
+#include <mutex>
 #include "AudioPort.h"
+#include "AudioProcessor.h"
+
+#ifdef Q_OS_LINUX
+#  include <QDBusConnection>
+#  include <QDBusConnectionInterface>
+#  include <QDBusInterface>
+#  include <QDBusReply>
+#  include <QDir>
+#  include <QFile>
+#  include <sys/resource.h>
+#  include <sys/syscall.h>
+#endif
+
 Q_LOGGING_CATEGORY(lcAudioPort, "gonnect.sip.audio")
 
 #define NORMAL_AUDIO_LEVEL 1.6f
 #define SILENCE_BUFFER_MS 1000
+#define SILENCE_TARGET_FILL_MS 80
+#define MEDIA_CLK_THREAD_RT_PRIORITY 20
+#define MEDIA_RX_THREAT_RT_PRIORITY 15
+#define MEDIA_THREAD_RTTIME_USEC 200000
 
 using namespace std::chrono_literals;
 
+namespace {
+
+#ifdef Q_OS_LINUX
+
+struct RealtimeEndpoint
+{
+    QDBusConnection bus;
+    QString service;
+    QString path;
+    QString interface;
+};
+
+std::optional<RealtimeEndpoint> findRealTimeEndpoint()
+{
+    // Try portal first...
+    QDBusConnection sessionBus = QDBusConnection::sessionBus();
+    if (sessionBus.isConnected()
+        && sessionBus.interface()
+                   ->isServiceRegistered(QStringLiteral("org.freedesktop.portal.Desktop"))
+                   .value()) {
+        qCDebug(lcAudioPort()) << "realtime endpoint: picking org.freedesktop.portal.Desktop";
+        return RealtimeEndpoint{ sessionBus, QStringLiteral("org.freedesktop.portal.Desktop"),
+                                 QStringLiteral("/org/freedesktop/portal/desktop"),
+                                 QStringLiteral("org.freedesktop.portal.Realtime") };
+    }
+
+    // ... then the system bus as a fallback
+    QDBusConnection systemBus = QDBusConnection::systemBus();
+    if (systemBus.isConnected()
+        && systemBus.interface()
+                   ->isServiceRegistered(QStringLiteral("org.freedesktop.RealtimeKit1"))
+                   .value()) {
+        qCDebug(lcAudioPort()) << "realtime endpoint: picking org.freedesktop.RealtimeKit1";
+        return RealtimeEndpoint{ systemBus, QStringLiteral("org.freedesktop.RealtimeKit1"),
+                                 QStringLiteral("/org/freedesktop/RealtimeKit1"),
+                                 QStringLiteral("org.freedesktop.RealtimeKit1") };
+    }
+
+    return std::nullopt;
+}
+
+bool rtkitRequestRealtime(quint64 tid, qlonglong newPriority)
+{
+    const auto endpoint = findRealTimeEndpoint();
+    if (!endpoint) {
+        qCDebug(lcAudioPort) << "failed to acquire real time endpoint";
+        return false;
+    }
+
+    QDBusInterface props(endpoint->service, endpoint->path,
+                         QStringLiteral("org.freedesktop.DBus.Properties"), endpoint->bus);
+
+    const auto readProperty = [&props, &endpoint](const char *name, qlonglong fallback) {
+        const QDBusReply<QDBusVariant> reply =
+                props.call(QStringLiteral("Get"), endpoint->interface, QString::fromLatin1(name));
+        return reply.isValid() ? reply.value().variant().toLongLong() : fallback;
+    };
+
+    const auto maxPriority = readProperty("MaxRealtimePriority", newPriority);
+    const auto maxRtTime = readProperty("RTTimeUSecMax", MEDIA_THREAD_RTTIME_USEC);
+
+    if (maxPriority <= 0) {
+        qCDebug(lcAudioPort) << "no real time priority available thru RealtimeKit";
+        return false;
+    }
+
+    const rlim_t rtTime =
+            static_cast<rlim_t>(std::min<qlonglong>(maxRtTime, MEDIA_THREAD_RTTIME_USEC));
+    struct rlimit limit = { rtTime, rtTime };
+    if (setrlimit(RLIMIT_RTTIME, &limit) != 0) {
+        qCWarning(lcAudioPort) << "unable to set RLIMIT_RTTIME, skipping realtime priority";
+        return false;
+    }
+
+    const auto priority = static_cast<quint32>(std::min<qlonglong>(maxPriority, newPriority));
+    const auto pid = static_cast<quint64>(getpid());
+
+    QDBusInterface rtkit(endpoint->service, endpoint->path, endpoint->interface, endpoint->bus);
+
+    const QDBusReply<void> reply =
+            rtkit.call(QStringLiteral("MakeThreadRealtimeWithPID"), QVariant::fromValue(pid),
+                       QVariant::fromValue(tid), QVariant::fromValue(priority));
+    if (!reply.isValid()) {
+        qCDebug(lcAudioPort).nospace() << "RealtimeKit refused thread " << tid << " of process "
+                                       << pid << ": " << reply.error().message();
+        return false;
+    }
+
+    qCDebug(lcAudioPort) << "thread" << tid << "is now realtime at priority" << priority;
+    return true;
+}
+
+QList<quint64> threadsByName(const QString &name)
+{
+    QList<quint64> tids;
+
+    const QDir tasks("/proc/self/task");
+    const auto entries = tasks.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+
+    for (const auto &entry : std::as_const(entries)) {
+        QFile comm(tasks.filePath(entry + "/comm"));
+
+        if (comm.open(QIODevice::ReadOnly) && QString::fromUtf8(comm.readAll()).trimmed() == name) {
+            tids.append(entry.toLongLong());
+        }
+    }
+
+    return tids;
+}
+
+void raiseMediaThreadPriority()
+{
+    const auto tids = threadsByName("media");
+    if (tids.empty()) {
+        qCDebug(lcAudioPort) << "unable to set media thread realtime priority - no threads found";
+        return;
+    }
+
+    for (const auto tid : std::as_const(tids)) {
+        rtkitRequestRealtime(tid, MEDIA_RX_THREAT_RT_PRIORITY);
+    }
+}
+
+#endif
+
+void raiseCurrentThreadPriority()
+{
+#ifdef Q_OS_LINUX
+    raiseMediaThreadPriority();
+
+    if (rtkitRequestRealtime(static_cast<quint64>(syscall(SYS_gettid)),
+                             +MEDIA_CLK_THREAD_RT_PRIORITY)) {
+        return;
+    }
+#endif
+
+    // Fall back to pjsip mechanism for the current platform
+    pj_thread_t *thisThread = pj_thread_this();
+    if (!thisThread) {
+        return;
+    }
+
+    const int maxPriority = pj_thread_get_prio_max(thisThread);
+    if (maxPriority <= 0) {
+        qCDebug(lcAudioPort) << "no raised priority available for the media thread";
+        return;
+    }
+
+    if (pj_thread_set_prio(thisThread, maxPriority) != PJ_SUCCESS) {
+        qCDebug(lcAudioPort) << "unable to raise media thread priority to" << maxPriority;
+    }
+}
+
+void ensureMediaThreadPriority()
+{
+    static thread_local bool guard = false;
+    if (!guard) {
+        guard = true;
+        raiseCurrentThreadPriority();
+    }
+}
+
+} // namespace
+
 AudioPort::AudioPort(QAudioDevice device) : m_device(device)
 {
-    m_idleTimer.setInterval(1s);
+    m_idleTimer.setInterval(10s);
     connect(&m_idleTimer, &QTimer::timeout, this, &AudioPort::stopIO);
 
     connect(this, &AudioPort::startIdleTimer, this,
@@ -36,7 +218,7 @@ bool AudioPort::initialize()
 
     if (m_device.mode() == QAudioDevice::Mode::Input) {
         try {
-            adjustTxLevel(NORMAL_AUDIO_LEVEL);
+            adjustTxLevel(activeTxLevel());
         } catch (pj::Error &err) {
             qCCritical(lcAudioPort) << "failed to adjust tx level: " << err.info();
         }
@@ -45,12 +227,34 @@ bool AudioPort::initialize()
     return true;
 }
 
+float AudioPort::activeTxLevel() const
+{
+    // Fixed level or AGC?
+    if (m_audioProcessor && m_audioProcessor->hasGainControl()) {
+        return 1.0f;
+    }
+    return NORMAL_AUDIO_LEVEL;
+}
+
+void AudioPort::setAudioProcessor(AudioProcessor *audioProcessor)
+{
+    m_audioProcessor = audioProcessor;
+
+    if (audioProcessor && m_device.mode() == QAudioDevice::Mode::Input && !m_isMuted) {
+        try {
+            adjustTxLevel(activeTxLevel());
+        } catch (pj::Error &err) {
+            qCCritical(lcAudioPort) << "failed to adjust tx level: " << err.info();
+        }
+    }
+}
+
 void AudioPort::setMuted(bool value)
 {
     if (m_isMuted != value) {
         if (m_device.mode() == QAudioDevice::Mode::Input) {
             try {
-                adjustTxLevel(value ? 0.0f : NORMAL_AUDIO_LEVEL);
+                adjustTxLevel(value ? 0.0f : activeTxLevel());
             } catch (pj::Error &err) {
                 qCCritical(lcAudioPort) << "failed to adjust tx level: " << err.info();
             }
@@ -98,16 +302,16 @@ bool AudioPort::initFmt()
 
 void AudioPort::updateAudioLevel(const char *data, qint64 size)
 {
-    qreal max = 0;
+    qreal max = 0.0;
     const qint64 numSamples = size / sizeof(qint16);
 
-    static constexpr qreal positiveRange = std::numeric_limits<qint16>().max();
+    static constexpr qreal positiveRange = std::numeric_limits<qint16>::max();
 
     for (int i = 0; i < numSamples; ++i) { // i is index of sample
-        const auto word = static_cast<qint16>(*data);
-        const qreal realValue = static_cast<qreal>(word) / positiveRange * 100.0;
+        const qint16 sample = qFromLittleEndian<qint16>(data);
+        const qreal level = qAbs(static_cast<qreal>(sample)) / positiveRange;
 
-        max = std::max(max, realValue);
+        max = std::max(max, level);
         data += sizeof(qint16);
     }
 
@@ -129,25 +333,52 @@ void AudioPort::setAudioDevice(QAudioDevice device)
     stopIO();
 }
 
+void AudioPort::requestStartIO()
+{
+    if (m_ioStartRequested.exchange(true)) {
+        return;
+    }
+
+    QMetaObject::invokeMethod(
+            this,
+            [this]() {
+                startIO();
+                m_ioStartRequested = false;
+            },
+            Qt::QueuedConnection);
+}
+
 void AudioPort::startIO()
 {
+    const QMutexLocker locker(&m_ioMutex);
+    startIONoLock();
+}
+
+void AudioPort::startIONoLock()
+{
     if (m_device.mode() == QAudioDevice::Mode::Input) {
-        startSourceIO();
+        startSourceIONoLock();
     } else {
-        startSinkIO();
+        startSinkIONoLock();
     }
 }
 
 void AudioPort::stopIO()
 {
+    const QMutexLocker locker(&m_ioMutex);
+    stopIONoLock();
+}
+
+void AudioPort::stopIONoLock()
+{
     if (m_device.mode() == QAudioDevice::Mode::Input) {
-        stopSourceIO();
+        stopSourceIONoLock();
     } else {
-        stopSinkIO();
+        stopSinkIONoLock();
     }
 }
 
-void AudioPort::writeSilenceMS(unsigned milliseconds)
+void AudioPort::writeSilenceMSNoLock(unsigned milliseconds)
 {
     if (m_sink) {
         if (!m_io.isNull()) {
@@ -166,17 +397,81 @@ void AudioPort::writeSilenceMS(unsigned milliseconds)
             // Write silence to allow USB headsets to switch audio mode without
             // ugly crackling noise.
             QByteArray silence(byteCount, 0);
-            m_io->write(silence);
+            const qint64 written = m_io->write(silence);
+
+            qCDebug(lcAudioPort).nospace()
+                    << "silence write: " << written << " of " << byteCount << " bytes ("
+                    << milliseconds << "ms @ " << fmt.clockRate << "Hz/" << fmt.channelCount
+                    << "ch/" << fmt.bitsPerSample
+                    << "bit), sink bufferSize=" << m_sink->bufferSize()
+                    << ", bytesFree=" << m_sink->bytesFree();
         }
     }
 }
 
-void AudioPort::startSinkIO()
+bool AudioPort::isSilence(const void *data, unsigned size) const
+{
+    // ~1% of full scale - comfort noise and DC offsets stay below this
+    static constexpr int threshold = 328;
+
+    const auto *bytes = static_cast<const char *>(data);
+    const unsigned samples = size / sizeof(qint16);
+
+    for (unsigned i = 0; i < samples; ++i) {
+        const auto sample = qFromLittleEndian<qint16>(bytes + i * sizeof(qint16));
+        if (qAbs(static_cast<int>(sample)) > threshold) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+void AudioPort::padSilence()
+{
+    const QMutexLocker locker(&m_ioMutex);
+    padSilenceNoLock();
+}
+
+void AudioPort::padSilenceNoLock()
+{
+    if (m_sink.isNull() || m_io.isNull()) {
+        return;
+    }
+
+    // Note: the fill level has to be computed from the sink format, not from the pjsip
+    // port format - only the sink tells us how many bytes are still queued for playback.
+    const qint64 target = m_audioFormat.bytesForDuration(SILENCE_TARGET_FILL_MS * 1000);
+    const qint64 queued = m_sink->bufferSize() - m_sink->bytesFree();
+    const qint64 missing = target - queued;
+
+    if (missing <= 0) {
+        qCDebug(lcAudioPort).nospace() << "silence pad: nothing written, buffer already holds "
+                                       << (m_audioFormat.durationForBytes(queued) / 1000)
+                                       << "ms of " << SILENCE_TARGET_FILL_MS << "ms target";
+        return;
+    }
+
+    const qint64 written = m_io->write(QByteArray(missing, 0));
+
+    qCDebug(lcAudioPort).nospace()
+            << "silence pad: wrote " << written << " of " << missing << " bytes ("
+            << (m_audioFormat.durationForBytes(written) / 1000) << "ms) to reach the "
+            << SILENCE_TARGET_FILL_MS << "ms target, buffer was at "
+            << (m_audioFormat.durationForBytes(queued) / 1000) << "ms";
+}
+
+void AudioPort::startSinkIONoLock()
 {
     m_idleTimer.stop();
 
+    if (m_isDraining && !m_sink.isNull()) {
+        m_isDraining = false;
+        return;
+    }
+
     if (!m_sink.isNull()) {
-        stopSinkIO();
+        stopSinkIONoLock();
     }
 
     qCInfo(lcAudioPort).noquote().nospace()
@@ -190,33 +485,44 @@ void AudioPort::startSinkIO()
     m_sink = new QAudioSink(m_device, m_audioFormat);
     m_io = m_sink->start();
 
-    writeSilenceMS(SILENCE_BUFFER_MS);
+    padSilenceNoLock();
 
     Q_EMIT audioSinkChanged();
 }
 
-void AudioPort::stopSinkIO()
+void AudioPort::stopSinkIONoLock()
 {
     m_idleTimer.stop();
-
-    if (m_sink) {
-        writeSilenceMS(SILENCE_BUFFER_MS);
-
-        m_sink->stop();
-        m_sink->deleteLater();
-        m_sink = nullptr;
-        m_io = nullptr;
+    if (m_sink.isNull() || m_isDraining) {
+        return;
     }
 
-    Q_EMIT audioSinkChanged();
+    writeSilenceMSNoLock(SILENCE_BUFFER_MS);
+
+    m_isDraining = true;
+    QTimer::singleShot(SILENCE_BUFFER_MS, this, [this]() {
+        {
+            const QMutexLocker locker(&m_ioMutex);
+
+            m_isDraining = false;
+
+            if (m_sink) {
+                m_sink->stop();
+                m_sink->deleteLater();
+                m_sink = nullptr;
+                m_io = nullptr;
+            }
+        }
+        Q_EMIT audioSinkChanged();
+    });
 }
 
-void AudioPort::startSourceIO()
+void AudioPort::startSourceIONoLock()
 {
     m_idleTimer.stop();
 
     if (!m_source.isNull()) {
-        stopSourceIO();
+        stopSourceIONoLock();
         delete m_source;
         m_source = nullptr;
     }
@@ -235,7 +541,7 @@ void AudioPort::startSourceIO()
     Q_EMIT audioSourceChanged();
 }
 
-void AudioPort::stopSourceIO()
+void AudioPort::stopSourceIONoLock()
 {
     m_idleTimer.stop();
     if (m_source) {
@@ -260,13 +566,21 @@ QString AudioPort::getSystemDeviceID() const
 
 void AudioPort::onFrameRequested(pj::MediaFrame &frame)
 {
+    ensureMediaThreadPriority();
+
     if (m_device.mode() != QAudioDevice::Mode::Input) {
+        return;
+    }
+
+    // Skip when locked
+    std::unique_lock<QMutex> locker(m_ioMutex, std::try_to_lock);
+    if (!locker.owns_lock()) {
         return;
     }
 
     // Create source on the fly if needed
     if (m_source.isNull()) {
-        startIO();
+        requestStartIO();
     }
 
     if (m_io.isNull()) {
@@ -274,12 +588,32 @@ void AudioPort::onFrameRequested(pj::MediaFrame &frame)
         return;
     }
 
+    if (m_isWarmingUp) {
+        m_isWarmingUp = false;
+        QObject::disconnect(m_warmUpDrain);
+    }
+
     auto bytes = m_io->read(frame.size);
+
+    if (++m_captureFrames % 50 == 0 && !m_source.isNull()) {
+        const auto queued = m_source->bytesAvailable();
+        qCDebug(lcAudioPort).nospace()
+                << "capture: read " << bytes.size() << " of " << frame.size
+                << " bytes, source bufferSize=" << m_source->bufferSize() << ", queued=" << queued
+                << " bytes (" << (m_audioFormat.durationForBytes(queued) / 1000)
+                << "ms), processor=" << (m_audioProcessor ? "on" : "off");
+    }
 
     if (!m_isMuted) {
         frame.buf = std::vector<unsigned char>(bytes.constBegin(), bytes.constEnd());
         frame.type = PJMEDIA_FRAME_TYPE_AUDIO;
-        updateAudioLevel(bytes, bytes.size());
+
+        // Optionally apply AGC/ANC/AEC
+        if (m_audioProcessor) {
+            m_audioProcessor->capture(frame.buf.data(), static_cast<unsigned>(frame.buf.size()));
+        }
+
+        updateAudioLevel(reinterpret_cast<const char *>(frame.buf.data()), frame.buf.size());
     } else {
         setSourceAudioLevel(0);
     }
@@ -290,13 +624,21 @@ void AudioPort::onFrameRequested(pj::MediaFrame &frame)
 
 void AudioPort::onFrameReceived(pj::MediaFrame &frame)
 {
+    ensureMediaThreadPriority();
+
     if (m_device.mode() == QAudioDevice::Mode::Input) {
+        return;
+    }
+
+    // Skip when locked
+    std::unique_lock<QMutex> locker(m_ioMutex, std::try_to_lock);
+    if (!locker.owns_lock()) {
         return;
     }
 
     // Create sink on the fly if needed
     if (m_sink.isNull()) {
-        startIO();
+        requestStartIO();
     }
 
     if (m_io.isNull()) {
@@ -304,8 +646,72 @@ void AudioPort::onFrameReceived(pj::MediaFrame &frame)
         return;
     }
 
+    m_isWarmingUp = false;
+
+    // Register the frame about to be played as the echo reference.
+    if (m_audioProcessor) {
+        m_audioProcessor->playback(frame.buf.data(), static_cast<unsigned>(frame.size));
+    }
+
+    // Resolve any excess buffering by skipping frames that carry silence anyway
+    const qint64 target = m_audioFormat.bytesForDuration(SILENCE_TARGET_FILL_MS * 1000);
+    if (!m_sink.isNull() && m_sink->bufferSize() - m_sink->bytesFree() > target
+        && isSilence(frame.buf.data(), static_cast<unsigned>(frame.size))) {
+
+        qCDebug(lcAudioPort).nospace()
+                << "playback: dropped a silent frame to drain "
+                << (m_audioFormat.durationForBytes(m_sink->bufferSize() - m_sink->bytesFree())
+                    / 1000)
+                << "ms down to the " << SILENCE_TARGET_FILL_MS << "ms target";
+
+        Q_EMIT startIdleTimer();
+        return;
+    }
+
     m_io->write(reinterpret_cast<char *>(frame.buf.data()), frame.size);
 
     // Auto destroy sink after timeout
     Q_EMIT startIdleTimer();
+}
+
+void AudioPort::acquire()
+{
+    const QMutexLocker locker(&m_ioMutex);
+
+    if (m_device.mode() == QAudioDevice::Mode::Input) {
+        if (m_source.isNull()) {
+            startSourceIONoLock();
+        }
+    } else {
+        if (m_sink.isNull()) {
+            startSinkIONoLock();
+        }
+    }
+
+    m_isWarmingUp = true;
+
+    if (m_device.mode() == QAudioDevice::Mode::Input && !m_io.isNull()) {
+        QObject::disconnect(m_warmUpDrain);
+
+        m_warmUpDrain = connect(m_io.data(), &QIODevice::readyRead, this, [this]() {
+            if (m_isWarmingUp && !m_io.isNull()) {
+                m_io->readAll();
+            }
+        });
+    }
+}
+
+void AudioPort::release()
+{
+    if (!m_isWarmingUp) {
+        return;
+    }
+
+    m_isWarmingUp = false;
+
+    QObject::disconnect(m_warmUpDrain);
+
+    if (!m_idleTimer.isActive()) {
+        stopIO();
+    }
 }

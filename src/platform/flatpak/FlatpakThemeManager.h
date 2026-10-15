@@ -18,6 +18,7 @@ public:
 
     QColor accentColor() const override { return m_settingsPortal->accentColor(); }
     bool highContrast() const override { return m_settingsPortal->highContrast(); }
+    qreal fontScale() const override { return m_settingsPortal->fontScale(); }
 
     void shutdown() override { };
 

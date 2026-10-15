@@ -14,7 +14,7 @@ QStringList EDSEventFeederFactory::configurations() const
 
     if (groups.contains(groupName)) {
         settings.beginGroup(groupName);
-        const bool enabled = settings.value("enabled", false).toBool();
+        const bool enabled = settings.value("enabled", true).toBool();
         settings.endGroup();
 
         if (!enabled) {

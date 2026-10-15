@@ -464,39 +464,42 @@ void EDSEventFeeder::processEvents(QString clientName, QString clientUid, GSList
 
     QMap<QString, QList<QDateTime>> exdatesById;
 
+    // Register auto-release when leaving this method
+    const std::unique_ptr<GSList, GObjectListFree> componentList(components);
+
     for (GSList *item = components; item != NULL; item = g_slist_next(item)) {
         ICalComponent *component = I_CAL_COMPONENT(item->data);
         if (component && i_cal_component_isa(component) == I_CAL_VEVENT_COMPONENT) {
             QString id = i_cal_component_get_uid(component);
 
-            ICalTime *dtstart = i_cal_component_get_dtstart(component);
-            QDateTime start = createDateTimeFromTimeType(dtstart);
+            const GObjectPtr<ICalTime> dtstart(i_cal_component_get_dtstart(component));
+            QDateTime start = createDateTimeFromTimeType(dtstart.get());
 
-            ICalTime *dtend = i_cal_component_get_dtend(component);
-            QDateTime end = createDateTimeFromTimeType(dtend);
+            const GObjectPtr<ICalTime> dtend(i_cal_component_get_dtend(component));
+            QDateTime end = createDateTimeFromTimeType(dtend.get());
 
             // RRULE
             bool isRecurrent = false;
-            ICalProperty *prop =
-                    i_cal_component_get_first_property(component, I_CAL_RRULE_PROPERTY);
-            ICalRecurrence *rrule = NULL;
-            if (prop) {
+            GObjectPtr<ICalRecurrence> rrule;
+            if (const GObjectPtr<ICalProperty> prop(
+                        i_cal_component_get_first_property(component, I_CAL_RRULE_PROPERTY));
+                prop) {
                 isRecurrent = true;
-                rrule = i_cal_property_get_rrule(prop);
-                g_clear_object(&prop);
+                rrule.reset(i_cal_property_get_rrule(prop.get()));
             }
 
             // RID: The first ever recorded time of a recurrent event instance. We'll use
             // 'UID-UNIX_TIMESTAMP' as ID.
             bool isUpdatedRecurrence = false;
             bool isCancelledRecurrence = false;
-            ICalTime *rid = i_cal_component_get_recurrenceid(component);
-            if (rid && !i_cal_time_is_null_time(rid)) {
+            const GObjectPtr<ICalTime> rid(i_cal_component_get_recurrenceid(component));
+            if (rid && !i_cal_time_is_null_time(rid.get())) {
                 if (exdatesById.value(id).contains(start)) {
                     isCancelledRecurrence = true;
                 } else {
                     isUpdatedRecurrence = true;
-                    id += QString("-%1").arg(createDateTimeFromTimeType(rid).toMSecsSinceEpoch());
+                    id += QString("-%1").arg(
+                            createDateTimeFromTimeType(rid.get()).toMSecsSinceEpoch());
                 }
             }
 
@@ -525,47 +528,45 @@ void EDSEventFeeder::processEvents(QString clientName, QString clientUid, GSList
 
             if (isRecurrent && rrule) { // Recurrent origin event, parsed first
                 // Get EXDATE's
-                ICalTime *exdate = NULL;
                 QList<QDateTime> exdates;
-                for (ICalProperty *prop =
-                             i_cal_component_get_first_property(component, I_CAL_EXDATE_PROPERTY);
-                     prop != NULL;
-                     prop = i_cal_component_get_next_property(component, I_CAL_EXDATE_PROPERTY)) {
-                    exdate = i_cal_property_get_exdate(prop);
-                    exdates.append(createDateTimeFromTimeType(exdate));
+                for (GObjectPtr<ICalProperty> prop(
+                             i_cal_component_get_first_property(component, I_CAL_EXDATE_PROPERTY));
+                     prop; prop.reset(
+                             i_cal_component_get_next_property(component, I_CAL_EXDATE_PROPERTY))) {
+                    const GObjectPtr<ICalTime> exdate(i_cal_property_get_exdate(prop.get()));
+                    exdates.append(createDateTimeFromTimeType(exdate.get()));
                 }
                 exdatesById[id] = exdates;
 
-                ICalTime *recurStartCap = NULL;
-                ICalRecurIterator *recurrenceIter = i_cal_recur_iterator_new(rrule, dtstart);
+                GObjectPtr<ICalTime> recurStartCap;
+                const GObjectPtr<ICalRecurIterator> recurrenceIter(
+                        i_cal_recur_iterator_new(rrule.get(), dtstart.get()));
                 if (recurrenceIter) {
                     // INFO: Since libical-glib v3.0, a start time limit can be specified for
                     // recurrence iterators in order to reduce parsing overhead, i.e. for old
                     // events that are irrelevant to us. This only works for RRULE's that
                     // do not contain COUNT.
                     // https://github.com/libical/libical/blob/3.0/src/libical/icalrecur.h#L291
-                    if (i_cal_recurrence_get_count(rrule) == 0) {
+                    if (i_cal_recurrence_get_count(rrule.get()) == 0) {
                         QDateTime timeRangeStart = m_timeRangeStart.toUTC();
 
-                        recurStartCap = i_cal_time_new();
+                        recurStartCap.reset(i_cal_time_new());
                         if (recurStartCap) {
-                            i_cal_time_set_date(recurStartCap, timeRangeStart.date().year(),
+                            i_cal_time_set_date(recurStartCap.get(), timeRangeStart.date().year(),
                                                 timeRangeStart.date().month(),
                                                 timeRangeStart.date().day());
-                            i_cal_time_set_time(recurStartCap, timeRangeStart.time().hour(),
+                            i_cal_time_set_time(recurStartCap.get(), timeRangeStart.time().hour(),
                                                 timeRangeStart.time().minute(),
                                                 timeRangeStart.time().second());
-                            i_cal_time_set_is_date(recurStartCap, 0);
+                            i_cal_time_set_is_date(recurStartCap.get(), 0);
                         }
 
-                        if (recurStartCap && i_cal_time_is_valid_time(recurStartCap)) {
-                            if (!i_cal_recur_iterator_set_start(recurrenceIter, recurStartCap)) {
+                        if (recurStartCap && i_cal_time_is_valid_time(recurStartCap.get())) {
+                            if (!i_cal_recur_iterator_set_start(recurrenceIter.get(),
+                                                                recurStartCap.get())) {
                                 qCCritical(lcEDSEventFeeder)
                                         << "Failed to set RRULE iterator starting date:"
                                         << i_cal_error_strerror(i_cal_errno_return());
-
-                                g_clear_object(&recurStartCap);
-                                i_cal_recur_iterator_free(recurrenceIter);
 
                                 Q_EMIT feederFailed();
                                 return;
@@ -579,10 +580,10 @@ void EDSEventFeeder::processEvents(QString clientName, QString clientUid, GSList
 
                     qint64 duration = start.secsTo(end);
 
-                    for (ICalTime *next = i_cal_recur_iterator_next(recurrenceIter);
-                         !i_cal_time_is_null_time(next);
-                         next = i_cal_recur_iterator_next(recurrenceIter)) {
-                        QDateTime recurStart = createDateTimeFromTimeType(next);
+                    for (GObjectPtr<ICalTime> next(i_cal_recur_iterator_next(recurrenceIter.get()));
+                         !i_cal_time_is_null_time(next.get());
+                         next.reset(i_cal_recur_iterator_next(recurrenceIter.get()))) {
+                        QDateTime recurStart = createDateTimeFromTimeType(next.get());
                         QDateTime recurEnd = recurStart.addSecs(duration);
                         if (recurStart >= m_timeRangeEnd) {
                             // Recurrence instances outside of date range
@@ -607,11 +608,6 @@ void EDSEventFeeder::processEvents(QString clientName, QString clientUid, GSList
                                                  summary, location, description);
                         }
                     }
-
-                    if (recurStartCap) {
-                        g_clear_object(&recurStartCap);
-                    }
-                    i_cal_recur_iterator_free(recurrenceIter);
                 }
             } else if (isUpdatedRecurrence) { // Updates of a recurrent event instance
                 if ((start < m_timeRangeStart && !isMultiDay) || start >= m_timeRangeEnd
@@ -633,8 +629,6 @@ void EDSEventFeeder::processEvents(QString clientName, QString clientUid, GSList
             }
         }
     }
-
-    g_clear_slist(&components, g_object_unref);
 
     qCInfo(lcEDSEventFeeder) << "Loaded events of source" << clientName << "(" << clientUid << ")";
 }

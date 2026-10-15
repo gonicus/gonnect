@@ -33,4 +33,7 @@ QtObject {
     function createConfirmDialog(args) {
         return createDialog("ConfirmDialog.qml", args)
     }
+    function createConfirmDialogWithText(args) {
+        return createDialog("ConfirmDialogWithText.qml", args)
+    }
 }

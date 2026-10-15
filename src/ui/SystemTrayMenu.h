@@ -1,11 +1,14 @@
 #pragma once
 
+#include <QQmlEngine>
+
 #include <QObject>
 #include <QSystemTrayIcon>
 #include <QMenu>
 
 #include "SIPBuddy.h"
 #include "AppSettings.h"
+#include "PresenceState.h"
 
 struct NumberStat;
 
@@ -31,6 +34,7 @@ public:
 
 private Q_SLOTS:
     void updateMenu();
+    void updateOwnStatus();
     void updateConferences();
     void updateCalls();
     void updateFavorites();
@@ -50,6 +54,9 @@ private:
 
     explicit SystemTrayMenu(QObject *parent = nullptr);
     void initMenu();
+    void requestTrayIcon(const QString &iconPath);
+    void applyTrayIcon();
+    QString charFor(const PresenceState::State state) const;
 
     CallEntry *findCallEntry(const QString &remoteUri);
 
@@ -57,12 +64,15 @@ private:
     QString contactIcon(const NumberStat &numberStat) const;
 
     QTimer m_ringTimer;
+    QTimer m_trayIconUpdateTimer;
 
     QSystemTrayIcon *m_trayIcon = nullptr;
     QMenu *m_trayIconMenu = nullptr;
+    QMenu *m_presenceMenu = nullptr;
 
     QAction *m_mainWindowAction = nullptr;
     QAction *m_settingsWindowAction = nullptr;
+    QAction *m_ownStatusSeparator = nullptr;
     QAction *m_activeConferencesSeparator = nullptr;
     QAction *m_activeCallsSeparator = nullptr;
     QAction *m_mostCalledSeparator = nullptr;
@@ -82,6 +92,10 @@ private:
 
     bool m_ringingState = false;
     bool m_hasEstablishedCalls = false;
+    QString m_lastTrayIconPath;
+    QString m_desiredTrayIconPath;
+
+    QHash<PresenceState::State, QAction *> m_stateActions;
 };
 
 class SystemTrayMenuWrapper
@@ -92,7 +106,11 @@ class SystemTrayMenuWrapper
     QML_SINGLETON
 
 public:
-    static SystemTrayMenu *create(QQmlEngine *, QJSEngine *) { return &SystemTrayMenu::instance(); }
+    static SystemTrayMenu *create(QQmlEngine *, QJSEngine *)
+    {
+        QQmlEngine::setObjectOwnership(&SystemTrayMenu::instance(), QQmlEngine::CppOwnership);
+        return &SystemTrayMenu::instance();
+    }
 
 private:
     SystemTrayMenuWrapper() = default;

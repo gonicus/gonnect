@@ -22,8 +22,8 @@ install(TARGETS update-emojis
 find_program(CURL_EXECUTABLE curl)
 if(CURL_EXECUTABLE)
     add_custom_target(download-emojis
-      COMMAND ${CURL_EXECUTABLE} -sL -o ${CMAKE_CURRENT_SOURCE_DIR}/resources/data.json https://cdn.jsdelivr.net/npm/emojibase-data@16.0.3/en/data.json
-      COMMAND ${CURL_EXECUTABLE} -sL -o ${CMAKE_CURRENT_SOURCE_DIR}/resources/emojibase.json https://cdn.jsdelivr.net/npm/emojibase-data@16.0.3/en/shortcodes/emojibase.json)
+      COMMAND ${CURL_EXECUTABLE} -sL -o ${CMAKE_CURRENT_SOURCE_DIR}/resources/data.json https://cdn.jsdelivr.net/npm/emojibase-data@17.0.0/en/data.json
+      COMMAND ${CURL_EXECUTABLE} -sL -o ${CMAKE_CURRENT_SOURCE_DIR}/resources/emojibase.json https://cdn.jsdelivr.net/npm/emojibase-data@17.0.0/en/shortcodes/emojibase.json)
 
     add_custom_target(gen-emojis-dat
       COMMAND ${CMAKE_CURRENT_BINARY_DIR}/update-emojis ${CMAKE_CURRENT_SOURCE_DIR}/resources/ ${PROJECT_SOURCE_DIR}/resources/emojis/

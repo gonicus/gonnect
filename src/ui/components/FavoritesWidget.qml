@@ -32,7 +32,6 @@ BaseWidget {
             id: favList
             header: null
             visible: true
-            delegate: FavoriteListItemBig {}
             anchors {
                 top: favHeading.bottom
                 left: parent.left
@@ -56,9 +55,6 @@ BaseWidget {
             anchors {
                 centerIn: favList
             }
-
-            Accessible.role: Accessible.StaticText
-            Accessible.name: favInfo.text
         }
     }
 }
