@@ -12,6 +12,8 @@
 #  include <QDBusConnectionInterface>
 #  include <QDBusInterface>
 #  include <QDBusReply>
+#  include <QDir>
+#  include <QFile>
 #  include <sys/resource.h>
 #  include <sys/syscall.h>
 #endif
@@ -21,7 +23,8 @@ Q_LOGGING_CATEGORY(lcAudioPort, "gonnect.sip.audio")
 #define NORMAL_AUDIO_LEVEL 1.6f
 #define SILENCE_BUFFER_MS 1000
 #define SILENCE_TARGET_FILL_MS 80
-#define MEDIA_THREAD_RT_PRIORITY 20
+#define MEDIA_CLK_THREAD_RT_PRIORITY 20
+#define MEDIA_RX_THREAT_RT_PRIORITY 15
 #define MEDIA_THREAD_RTTIME_USEC 200000
 
 using namespace std::chrono_literals;
@@ -67,7 +70,7 @@ std::optional<RealtimeEndpoint> findRealTimeEndpoint()
     return std::nullopt;
 }
 
-bool rtkitRequestRealtime()
+bool rtkitRequestRealtime(quint64 tid, qlonglong newPriority)
 {
     const auto endpoint = findRealTimeEndpoint();
     if (!endpoint) {
@@ -84,7 +87,7 @@ bool rtkitRequestRealtime()
         return reply.isValid() ? reply.value().variant().toLongLong() : fallback;
     };
 
-    const auto maxPriority = readProperty("MaxRealtimePriority", MEDIA_THREAD_RT_PRIORITY);
+    const auto maxPriority = readProperty("MaxRealtimePriority", newPriority);
     const auto maxRtTime = readProperty("RTTimeUSecMax", MEDIA_THREAD_RTTIME_USEC);
 
     if (maxPriority <= 0) {
@@ -100,10 +103,8 @@ bool rtkitRequestRealtime()
         return false;
     }
 
-    const auto priority =
-            static_cast<quint32>(std::min<qlonglong>(maxPriority, MEDIA_THREAD_RT_PRIORITY));
+    const auto priority = static_cast<quint32>(std::min<qlonglong>(maxPriority, newPriority));
     const auto pid = static_cast<quint64>(getpid());
-    const auto tid = static_cast<quint64>(syscall(SYS_gettid));
 
     QDBusInterface rtkit(endpoint->service, endpoint->path, endpoint->interface, endpoint->bus);
 
@@ -116,15 +117,50 @@ bool rtkitRequestRealtime()
         return false;
     }
 
-    qCDebug(lcAudioPort) << "media thread" << tid << "is now realtime at priority" << priority;
+    qCDebug(lcAudioPort) << "thread" << tid << "is now realtime at priority" << priority;
     return true;
 }
+
+QList<quint64> threadsByName(const QString &name)
+{
+    QList<quint64> tids;
+
+    const QDir tasks("/proc/self/task");
+    const auto entries = tasks.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+
+    for (const auto &entry : std::as_const(entries)) {
+        QFile comm(tasks.filePath(entry + "/comm"));
+
+        if (comm.open(QIODevice::ReadOnly) && QString::fromUtf8(comm.readAll()).trimmed() == name) {
+            tids.append(entry.toLongLong());
+        }
+    }
+
+    return tids;
+}
+
+void raiseMediaThreadPriority()
+{
+    const auto tids = threadsByName("media");
+    if (tids.empty()) {
+        qCDebug(lcAudioPort) << "unable to set media thread realtime priority - no threads found";
+        return;
+    }
+
+    for (const auto tid : std::as_const(tids)) {
+        rtkitRequestRealtime(tid, MEDIA_RX_THREAT_RT_PRIORITY);
+    }
+}
+
 #endif
 
 void raiseCurrentThreadPriority()
 {
 #ifdef Q_OS_LINUX
-    if (rtkitRequestRealtime()) {
+    raiseMediaThreadPriority();
+
+    if (rtkitRequestRealtime(static_cast<quint64>(syscall(SYS_gettid)),
+                             +MEDIA_CLK_THREAD_RT_PRIORITY)) {
         return;
     }
 #endif
