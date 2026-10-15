@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QtQml/qqml.h>
 #include <QtQml/qqmlregistration.h>
+#include <QLoggingCategory>
 #include <pjsua2.hpp>
 
 #include "AppSettings.h"
@@ -17,7 +18,8 @@ class SIPEventLoop;
 class SIPLogWriter : public pj::LogWriter
 {
 public:
-    virtual void write(const pj::LogEntry &entry);
+    void write(const pj::LogEntry &entry) override;
+    void writeImpl(const QLoggingCategory &category, int level, const QString &message);
 };
 
 class SIPManager : public QObject
