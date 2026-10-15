@@ -838,6 +838,11 @@ bool SIPCall::triggerCapability(const QString &capability)
     return false;
 }
 
+void SIPCall::markConferenceMigrating()
+{
+    addCallState(ICallState::State::Migrating);
+}
+
 bool SIPCall::isEmergencyCall() const
 {
     return m_isEmergencyCall;

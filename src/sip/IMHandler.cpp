@@ -132,6 +132,8 @@ void IMHandler::handleDtmfDigit(const QString &digit)
         return;
     }
 
+    m_call->markConferenceMigrating();
+
     const auto normalized = digit.trimmed().toUpper();
     if (normalized == "A") {
         if (m_pendingForcedUpgrade) {

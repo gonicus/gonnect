@@ -41,6 +41,7 @@ public:
 
     bool hasCapability(const QString &capability) const;
     bool triggerCapability(const QString &capability);
+    void markConferenceMigrating();
 
     QString notificationRef() { return m_notificationRef; }
     void setNotificationRef(const QString &ref) { m_notificationRef = ref; }
