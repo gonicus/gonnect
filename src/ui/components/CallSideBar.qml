@@ -13,17 +13,21 @@ Item {
     /// Like the implicitWidth, but for extended state only
     readonly property int optimalExtendedWidth: {
         let w = 0
-
         if (chatButton.visible) {
-            w += chatButton.width
+            w += chatButton.width + Theme.d
+        }
+        for (let i = 0; i < roomsRepeater.count; ++i) {
+            const item = roomsRepeater.itemAt(i)
+            if (item && item.visible) {
+                w += item.width + Theme.d
+            }
         }
         if (personCountButton.visible) {
-            w += personCountButton.width
+            w += personCountButton.width + Theme.d
         }
         if (additionalInfoButton.visible) {
-            w += additionalInfoButton.width
+            w += additionalInfoButton.width + Theme.d
         }
-
         return w
     }
 
@@ -127,7 +131,6 @@ Item {
                 when: control.selectedSideBarMode === CallSideBar.Chat
                 PropertyChanges {
                     chatSideBar.visible: true
-                    chatButton.highlighted: true
                 }
             },
             State {
@@ -148,50 +151,6 @@ Item {
     }
 
     Item {
-        id: extendedState
-        states: [
-            State {
-                when: control.extended
-                PropertyChanges {
-                    control.implicitWidth: 300
-                }
-            },
-
-            State {
-                when: !control.extended
-                AnchorChanges {
-                    target: chatButton
-                    anchors {
-                        right: undefined
-                        horizontalCenter: headerBar.horizontalCenter
-                        top: headerBar.top
-                    }
-                }
-                AnchorChanges {
-                    target: personCountButton
-                    anchors {
-                        right: undefined
-                        horizontalCenter: headerBar.horizontalCenter
-                        top: control.chatAvailable ? chatButton.bottom : headerBar.top
-                    }
-                }
-                AnchorChanges {
-                    target: additionalInfoButton
-                    anchors {
-                        right: undefined
-                        horizontalCenter: headerBar.horizontalCenter
-                        top: personCountButton.visible
-                             ? personCountButton.bottom
-                             : (chatButton.visible
-                                ? chatButton.bottom
-                                : headerBar.top)
-                    }
-                }
-            }
-        ]
-    }
-
-    Item {
         id: headerBar
         implicitHeight: personCountButton.implicitHeight
         height: headerBar.implicitHeight
@@ -201,34 +160,127 @@ Item {
             right: parent.right
         }
 
+        // No Row/Column/ParentChange here on purpose: reparenting buttons between a Row and a
+        // Column turned out fragile (binding loops on "extended", stale x/y from the previously
+        // active positioner, and clicks not reliably registering while a reparent was in
+        // flight). Buttons stay permanent children of headerBar; their x/y are computed and
+        // assigned explicitly instead.
+        readonly property int buttonSpacing: Theme.d
+
+        function relayoutButtons() {
+            const items = []
+            if (chatButton.visible) {
+                items.push(chatButton)
+            }
+            for (let i = 0; i < roomsRepeater.count; ++i) {
+                const item = roomsRepeater.itemAt(i)
+                if (item && item.visible) {
+                    items.push(item)
+                }
+            }
+            if (personCountButton.visible) {
+                items.push(personCountButton)
+            }
+            if (additionalInfoButton.visible) {
+                items.push(additionalInfoButton)
+            }
+
+            if (control.extended) {
+                // Right-aligned horizontal row
+                let xPos = headerBar.width - headerBar.buttonSpacing
+                for (let i = items.length - 1; i >= 0; --i) {
+                    const it = items[i]
+                    xPos -= it.width
+                    it.x = xPos
+                    it.y = (headerBar.implicitHeight - it.height) / 2
+                    xPos -= headerBar.buttonSpacing
+                }
+            } else {
+                // Centered vertical column
+                let yPos = 0
+                for (const it of items) {
+                    it.x = (headerBar.width - it.width) / 2
+                    it.y = yPos
+                    yPos += it.height + headerBar.buttonSpacing
+                }
+            }
+        }
+
+        // Single hashed trigger so every relevant change (extended, visibility of the static
+        // buttons, number of room tabs) causes exactly one relayout call.
+        readonly property int layoutTrigger: {
+            let t = control.extended ? 1 : 0
+            t = t * 2 + (chatButton.visible ? 1 : 0)
+            t = t * 2 + (personCountButton.visible ? 1 : 0)
+            t = t * 2 + (additionalInfoButton.visible ? 1 : 0)
+            t = t * 1000 + roomsRepeater.count
+            return t
+        }
+        onLayoutTriggerChanged: headerBar.relayoutButtons()
+        onWidthChanged: headerBar.relayoutButtons()
+        Component.onCompleted: headerBar.relayoutButtons()
+
+        Connections {
+            target: roomsRepeater
+            function onItemAdded() { headerBar.relayoutButtons() }
+            function onItemRemoved() { headerBar.relayoutButtons() }
+        }
+
         BarButton {
             id: chatButton
-            anchors.right: personCountButton.visible
-                           ? personCountButton.left
-                           : (additionalInfoButton.visible
-                              ? additionalInfoButton.left
-                              : parent.right)
-            anchors.rightMargin: 5
             iconPath: Icons.dialogMessages
             visible: !!(control.roomsAggregator?.chatRooms.length)
             text: qsTr("Chat")
-            showIndicatorBadge: !chatSideBar.visible && chatSideBar.lastMessageCount < (chatSideBar.chatRoom?.notificationCount ?? 0)
+            highlighted: control.selectedSideBarMode === CallSideBar.Chat
+                         && control.manualChatSourceIndex === -1
+            showIndicatorBadge: (control.conferenceConnector?.chatRoom()?.notificationCount ?? 0) > 0
+            labelElide: control.extended ? Text.ElideNone : Text.ElideRight
             onClicked: () => {
-                if (control.selectedSideBarMode === CallSideBar.Chat) {
+                if (control.selectedSideBarMode === CallSideBar.Chat && control.manualChatSourceIndex === -1) {
                     control.selectedSideBarMode = CallSideBar.None
                 } else {
                     control.selectedSideBarMode = CallSideBar.Chat
+                    control.manualChatSourceIndex = -1
+                    chatSideBar.updateChatRoomNow()
                 }
+            }
+        }
+
+        Repeater {
+            id: roomsRepeater
+            model: conferenceRoomsModel
+            delegate: BarButton {
+                id: roomDelg
+
+                required property int index
+                required property string roomId
+                required property string name
+                required property int unreadCount
+
+                iconPath: Icons.dialogMessages
+                text: roomDelg.name
+                highlighted: control.selectedSideBarMode === CallSideBar.Chat
+                             && control.manualChatSourceIndex === roomDelg.index
+                showIndicatorBadge: roomDelg.unreadCount > 0
+                labelElide: control.extended ? Text.ElideNone : Text.ElideRight
+                onClicked: () => {
+                               if (control.selectedSideBarMode === CallSideBar.Chat && control.manualChatSourceIndex === roomDelg.index) {
+                                   control.selectedSideBarMode = CallSideBar.None
+                               } else {
+                                   control.selectedSideBarMode = CallSideBar.Chat
+                                   control.manualChatSourceIndex = roomDelg.index
+                                   chatSideBar.updateChatRoomNow()
+                               }
+                           }
             }
         }
 
         BarButton {
             id: personCountButton
-            anchors.right: additionalInfoButton.visible ? additionalInfoButton.left : parent.right
-            anchors.rightMargin: 5
             iconPath: Icons.avatarDefault
             iconText: callList.count + userList.count
             text: qsTr("Person(s)", "", callList.count + userList.count)
+            labelElide: control.extended ? Text.ElideNone : Text.ElideRight
             onClicked: () => {
                 if (control.selectedSideBarMode === CallSideBar.Caller || control.selectedSideBarMode === CallSideBar.Users) {
                     control.selectedSideBarMode = CallSideBar.None
@@ -242,11 +294,10 @@ Item {
 
         BarButton {
             id: additionalInfoButton
-            anchors.right: parent.right
-            anchors.rightMargin: 5
             iconPath: Icons.helpAbout
             visible: control.selectedCallItem?.hasMetadata ?? false
             text: qsTr("Info")
+            labelElide: control.extended ? Text.ElideNone : Text.ElideRight
             onClicked: () => {
                 if (control.selectedSideBarMode === CallSideBar.AdditionalInfo) {
                     control.selectedSideBarMode = CallSideBar.None
@@ -298,8 +349,6 @@ Item {
     ChatSideBar {
         id: chatSideBar
         visible: false
-        conferenceRoomsModel: conferenceRoomsModel
-        showConferenceChatOption: control.conferenceConnector?.hasCapability(IConferenceConnector.Capability.ChatInCall) ?? false
         anchors {
             top: headerBar.bottom
             bottom: parent.bottom
@@ -307,27 +356,17 @@ Item {
             right: parent.right
         }
 
-        property int lastMessageCount: 0
-
         Component.onCompleted: () => chatSideBar.updateChatRoom()
-
-        onChatSourceSelected: sourceIndex => {
-                                  control.manualChatSourceIndex = sourceIndex
-                                  chatSideBar.updateChatRoom()
-                              }
 
         onVisibleChanged: () => {
             if (chatSideBar.visible) {
                 chatSideBar.giveFocus()
-            } else {
-                chatSideBar.lastMessageCount = chatSideBar.chatRoom?.notificationCount ?? 0
             }
         }
 
         Connections {
             target: control.conferenceConnector
             function onIsInConferenceChanged() {
-                chatSideBar.lastMessageCount = 0
                 if (!control.conferenceConnector.isInConference) {
                     control.conferenceChatInUse = false
                     control.manualChatSourceIndex = null
@@ -367,53 +406,60 @@ Item {
         }
 
 
-        function updateChatRoom() {
-            Qt.callLater(() => {
-                const manualIndex = control.manualChatSourceIndex
+        // Synchronous core - call this directly from user-initiated actions (e.g. clicking a
+        // tab) where the result is already known and must apply immediately, so chatSideBar
+        // doesn't briefly become visible with its previous (stale) chatRoom first. Reactive/
+        // automatic triggers (model or connector signals) should go through updateChatRoom()
+        // instead, which defers and coalesces rapid bursts of such signals.
+        function updateChatRoomNow() {
+            const manualIndex = control.manualChatSourceIndex
 
-                if (manualIndex !== null) {
-                    if (manualIndex >= 0 && manualIndex >= conferenceRoomsModel.rowCount()) {
-                        control.manualChatSourceIndex = null
-                    } else if (manualIndex === -1) {
-                        chatSideBar.chatProvider = null
-                        chatSideBar.chatRoom = control.conferenceConnector?.chatRoom() ?? null
-                    } else {
-                        chatSideBar.chatProvider = conferenceRoomsModel.chatProviderAt(manualIndex)
-                        chatSideBar.chatRoom = conferenceRoomsModel.chatRoomAt(manualIndex)
-                    }
-
-                    return
-                }
-
-                // Override roomsAggregator chat room if more participants joined
-                if (control.conferenceConnector && (control.conferenceChatInUse
-                                                    || (control.conferenceConnector && control.conferenceConnector.numberOfUsers > 2))) {
-                    control.conferenceChatInUse = true
-                    chatSideBar.chatRoom = control.conferenceConnector.chatRoom()
+            if (manualIndex !== null) {
+                if (manualIndex >= 0 && manualIndex >= conferenceRoomsModel.rowCount()) {
+                    control.manualChatSourceIndex = null
+                } else if (manualIndex === -1) {
                     chatSideBar.chatProvider = null
-                    return
+                    chatSideBar.chatRoom = control.conferenceConnector?.chatRoom() ?? null
+                } else {
+                    chatSideBar.chatProvider = conferenceRoomsModel.chatProviderAt(manualIndex)
+                    chatSideBar.chatRoom = conferenceRoomsModel.chatRoomAt(manualIndex)
                 }
 
-                if (conferenceRoomsModel.rowCount() > 0) {
-                    chatSideBar.chatRoom = conferenceRoomsModel.chatRoomAt(0)
-                    chatSideBar.chatProvider = conferenceRoomsModel.chatProviderAt(0)
-                    return
-                }
+                return
+            }
 
-                const aggr = control.roomsAggregator
-                if (aggr && aggr.bestMatchingChatRoom) {
-                    chatSideBar.chatRoom = aggr.bestMatchingChatRoom
-                    chatSideBar.chatProvider = aggr.providerOfRoom(chatSideBar.chatRoom)
-                    return
-                }
-                if (control.conferenceConnector) {
-                    chatSideBar.chatRoom = control.conferenceConnector.chatRoom()
-                    chatSideBar.chatProvider = null
-                    return
-                }
-                chatSideBar.chatRoom = null
+            // Override roomsAggregator chat room if more participants joined
+            if (control.conferenceConnector && (control.conferenceChatInUse
+                                                || (control.conferenceConnector && control.conferenceConnector.numberOfUsers > 2))) {
+                control.conferenceChatInUse = true
+                chatSideBar.chatRoom = control.conferenceConnector.chatRoom()
                 chatSideBar.chatProvider = null
-            })
+                return
+            }
+
+            if (conferenceRoomsModel.rowCount() > 0) {
+                chatSideBar.chatRoom = conferenceRoomsModel.chatRoomAt(0)
+                chatSideBar.chatProvider = conferenceRoomsModel.chatProviderAt(0)
+                return
+            }
+
+            const aggr = control.roomsAggregator
+            if (aggr && aggr.bestMatchingChatRoom) {
+                chatSideBar.chatRoom = aggr.bestMatchingChatRoom
+                chatSideBar.chatProvider = aggr.providerOfRoom(chatSideBar.chatRoom)
+                return
+            }
+            if (control.conferenceConnector) {
+                chatSideBar.chatRoom = control.conferenceConnector.chatRoom()
+                chatSideBar.chatProvider = null
+                return
+            }
+            chatSideBar.chatRoom = null
+            chatSideBar.chatProvider = null
+        }
+
+        function updateChatRoom() {
+            Qt.callLater(chatSideBar.updateChatRoomNow)
         }
     }
 
