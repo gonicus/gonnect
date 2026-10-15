@@ -32,11 +32,6 @@ Menu {
             color: "transparent"
         }
         onTriggered: () => control.setPresenceState(PresenceState.Busy)
-
-        Accessible.role: Accessible.Button
-        Accessible.name: dndAction.text
-        Accessible.focusable: true
-        Accessible.onPressAction: () => control.setPresenceState(PresenceState.Busy)
     }
 
     MenuItem {
@@ -47,11 +42,6 @@ Menu {
             color: "transparent"
         }
         onTriggered: () => control.setPresenceState(PresenceState.Away)
-
-        Accessible.role: Accessible.Button
-        Accessible.name: awayAction.text
-        Accessible.focusable: true
-        Accessible.onPressAction: () => control.setPresenceState(PresenceState.Away)
     }
 
     MenuItem {
@@ -62,11 +52,6 @@ Menu {
             color: "transparent"
         }
         onTriggered: () => control.setPresenceState(PresenceState.Available)
-
-        Accessible.role: Accessible.Button
-        Accessible.name: availableAction.text
-        Accessible.focusable: true
-        Accessible.onPressAction: () => control.setPresenceState(PresenceState.Available)
     }
 
     MenuSeparator { }
@@ -76,10 +61,5 @@ Menu {
         text: qsTr("Set status text...")
         icon.source: Icons.editor
         onTriggered: () => control.openStatusTextEditPopup()
-
-        Accessible.role: Accessible.Button
-        Accessible.name: setStatusTextAction.text
-        Accessible.focusable: true
-        Accessible.onPressAction: () => control.openStatusTextEditPopup()
     }
 }

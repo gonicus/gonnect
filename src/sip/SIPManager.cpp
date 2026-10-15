@@ -3,9 +3,11 @@
 #include <QTimer>
 #include <QRegularExpression>
 
+#include "SIPManager.h"
+#include "SIPCallManager.h"
+#include "SIPCall.h"
 #include "Application.h"
 #include "SIPEventLoop.h"
-#include "SIPManager.h"
 #include "SIPMediaConfig.h"
 #include "SIPUserAgentConfig.h"
 #include "SIPAccountManager.h"
@@ -689,6 +691,9 @@ void SIPManager::shutdown()
     qCDebug(lcSIPManager) << "shutting down";
 
     m_ep.hangupAllCalls();
+
+    // Deal with asynchronous destruction of still ongoing calls
+    qDeleteAll(SIPCallManager::instance().calls());
 
     // Release ownership of the log writer to pjsua2, which will delete it
     // during libDestroy(). Without this, libDestroy() logs internally and

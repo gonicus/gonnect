@@ -37,11 +37,17 @@ Item {
 
     property int toggleColorMode: BarButton.ToggleColorMode.Normal
 
+    activeFocusOnTab: control.enabled
+
     Accessible.role: Accessible.Button
     Accessible.name: control.text
     Accessible.description: control.tooltipText
     Accessible.focusable: true
     Accessible.onPressAction: () => control.clicked()
+
+    Keys.onReturnPressed: () => control.clicked()
+    Keys.onEnterPressed: () => control.clicked()
+    Keys.onSpacePressed: () => control.clicked()
 
     states: [
 
@@ -90,7 +96,7 @@ Item {
             id: buttonLabel
             Accessible.ignored: true
             color: Theme.isDarkMode ? Theme.secondaryTextColor : Theme.inactiveTextColor
-            font.pixelSize: 11
+            font.pixelSize: Theme.fontSizeSmall
             horizontalAlignment: Label.AlignHCenter
             anchors {
                 bottom: parent.bottom
@@ -105,7 +111,6 @@ Item {
 
         Rectangle {
             id: toggledBackground
-            Accessible.ignored: true
             width: control.toggledSize
             height: control.toggledSize
             radius: 4
@@ -118,7 +123,6 @@ Item {
             id: buttonIcon
             Accessible.ignored: true
             color: buttonLabel.color
-            width: control.iconSize
             height: control.iconSize
             icon {
                 width: control.iconSize
@@ -133,7 +137,6 @@ Item {
 
         Rectangle {
             id: indicatorBadge
-            Accessible.ignored: true
             x: buttonIcon.x + 14
             y: buttonIcon.y + 1
             visible: false

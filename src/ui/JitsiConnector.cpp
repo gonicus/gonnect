@@ -187,8 +187,11 @@ void JitsiConnector::addIncomingMessage(QString fromId, QString nickName, QStrin
     AppSettings settings;
     if (settings.value("generic/jitsiChatAsNotifications", true).toBool()
         && !PlatformSession::instance().isScreenShareActive()) {
-        auto notification = new Notification(tr("New chat message"), message,
-                                             Notification::Priority::normal, true, this);
+
+        const QString sender = nickName.isEmpty() ? fromId : nickName;
+        const auto title = tr("[%1] Message from %2").arg(conferenceName(), sender);
+        auto notification =
+                new Notification(title, message, Notification::Priority::normal, true, this);
         notification->setIcon(":/icons/gonnect.svg");
 
         m_chatNotifications.append(notification);
@@ -201,12 +204,19 @@ void JitsiConnector::addIncomingMessage(QString fromId, QString nickName, QStrin
 
 QString JitsiConnector::jitsiHtmlInternal()
 {
+    QFile js(QStringLiteral(":/qtwebchannel/qwebchannel.js"));
+    if (!js.open(QIODevice::ReadOnly)) {
+        qCCritical(lcJitsiConnector) << "cannot read qwebchannel.js:" << js.errorString();
+        return {};
+    }
+
+    const QString qwebchannelJs = QString::fromUtf8(js.readAll());
     return QString(R"""(
 <!DOCTYPE html>
 <html>
 <head>
-  <script type="text/javascript" src="qrc:///qtwebchannel/qwebchannel.js"></script>
-  <script src="%1/external_api.js"></script>
+  <script type="text/javascript">%1</script>
+  <script src="%2/external_api.js"></script>
   <style type="text/css">
     html, body {
       height: 100%;
@@ -226,7 +236,7 @@ QString JitsiConnector::jitsiHtmlInternal()
 </body>
 </html>
 )""")
-            .arg(GlobalInfo::instance().jitsiUrl());
+            .arg(qwebchannelJs, GlobalInfo::instance().jitsiUrl());
 }
 
 QString JitsiConnector::jitsiJavascriptInternal()
@@ -512,8 +522,19 @@ void JitsiConnector::checkJitsiBackendFeatures()
     auto manager = new QNetworkAccessManager(this);
 
     QNetworkRequest request;
+
+    // SSL config
+    QSslConfiguration sslConfig = QSslConfiguration::defaultConfiguration();
+    ReadOnlyConfdSettings settings;
+    if (!settings.value("generic/verifyServer", true).toBool()) {
+        sslConfig.setPeerVerifyMode(QSslSocket::PeerVerifyMode::VerifyNone);
+    }
+    sslConfig.addCaCertificates(AuthManager::instance().sslCAs());
+    request.setSslConfiguration(sslConfig);
+
     request.setUrl(QUrl(QString("%1/config.js").arg(GlobalInfo::instance().jitsiUrl())));
 
+    // Result handlers
     auto reply = manager->get(request);
     connect(reply, &QNetworkReply::errorOccurred, this, [](QNetworkReply::NetworkError err) {
         qCCritical(lcJitsiConnector) << "Error on fetching config js:" << err;
@@ -1155,7 +1176,7 @@ void JitsiConnector::transferVideoManagerDeviceToJitsi()
     }
 
     // Find correct Jitsi device id for QCameraDevice
-    const auto deviceName = videoDevice.description();
+    const auto deviceName = videoDevice.description;
     JitsiMediaDevice *bestMatchingDevice = nullptr;
     qreal maxD = 0.0;
 
@@ -1193,6 +1214,11 @@ ContactInfo JitsiConnector::remoteContactInfo() const
     ContactInfo contactInfo;
     contactInfo.displayName = m_displayName.isEmpty() ? m_roomName : m_displayName;
     return contactInfo;
+}
+
+QUrl JitsiConnector::baseUrl() const
+{
+    return GlobalInfo::instance().jitsiUrl();
 }
 
 bool JitsiConnector::hasCapability(const Capability capabilityToCheck) const
@@ -1313,7 +1339,9 @@ void JitsiConnector::joinConference(const QString &conferenceId, const QString &
     setIsInConference(true);
     setVideoMuted(!m_startWithVideo);
 
-    if (startFlags & IConferenceConnector::StartFlag::ScreenShareActive) {
+    if ((startFlags & IConferenceConnector::StartFlag::ScreenShareActive)
+        || (startFlags & IConferenceConnector::StartFlag::WindowShareActive)) {
+
         if (isInitialized()) {
             setSharingScreen(true);
         } else {
@@ -1378,7 +1406,7 @@ void JitsiConnector::enterPassword(const QString &password, bool rememberPasswor
     }
 }
 
-void JitsiConnector::leaveConference()
+void JitsiConnector::resetConferenceState()
 {
     if (m_callHistoryItem) {
         m_callHistoryItem->endCall();
@@ -1393,7 +1421,14 @@ void JitsiConnector::leaveConference()
 
     m_chatRoom->clear();
 
-    Q_EMIT executeLeaveRoomCommand();
+    // Reset per-conference toggle state so it doesn't leak into the next conference
+    setIsSharingScreenInternal(false);
+    setVideoMutedInternal(false);
+    if (m_isAudioMuted) {
+        m_isAudioMuted = false;
+        Q_EMIT isAudioMutedChanged();
+    }
+
     setConferenceName("");
     setDisplayName("");
     setIsInConference(false);
@@ -1401,27 +1436,16 @@ void JitsiConnector::leaveConference()
     GlobalCallState::instance().unholdOtherCall();
 }
 
+void JitsiConnector::leaveConference()
+{
+    Q_EMIT executeLeaveRoomCommand();
+    resetConferenceState();
+}
+
 void JitsiConnector::terminateConference()
 {
-    if (m_callHistoryItem) {
-        m_callHistoryItem->endCall();
-        m_callHistoryItem.clear();
-    }
-
-    if (m_inConferenceNotification) {
-        NotificationManager::instance().remove(m_inConferenceNotification->id());
-        m_inConferenceNotification->deleteLater();
-        m_inConferenceNotification = nullptr;
-    }
-
-    m_chatRoom->clear();
-
     Q_EMIT executeEndConferenceCommand();
-    setConferenceName("");
-    setDisplayName("");
-    setIsInConference(false);
-    Q_EMIT GlobalCallState::instance().callEnded(true);
-    GlobalCallState::instance().unholdOtherCall();
+    resetConferenceState();
 }
 
 void JitsiConnector::setOnHold(bool shallHold)
@@ -1505,6 +1529,9 @@ void JitsiConnector::setSubtitlesEnabled(bool enabled)
 
 void JitsiConnector::setSharingScreen(bool shareScreen)
 {
+    qCInfo(lcJitsiConnector) << "setSharingScreen" << shareScreen << "current:" << m_isSharingScreen
+                             << "pending:" << m_isToggleScreenSharePending;
+
     if (m_isSharingScreen != shareScreen) {
         Q_EMIT executeToggleShareScreenCommand();
     }

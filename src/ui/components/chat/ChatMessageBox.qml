@@ -258,8 +258,8 @@ Item {
 
         Label {
             text: qsTr("Edit last message")
-            font.pixelSize: 14
-            color: Theme.foregroundWhiteColor
+            font.pixelSize: Theme.fontSizeNormal
+            color: Theme.whiteColor
             anchors {
                 left: parent.left
                 leftMargin: 10
@@ -283,7 +283,7 @@ Item {
                 width: 14
                 height: 14
                 source: Icons.mobileCloseApp
-                color: Theme.foregroundWhiteColor
+            color: Theme.whiteColor
             }
 
             anchors {
@@ -295,11 +295,8 @@ Item {
 
             onClicked: () => internal.exitEditMode()
 
-            Accessible.role: Accessible.Button
             Accessible.name: qsTr("Cancel edit")
             Accessible.description: qsTr("Discard the current message edit")
-            Accessible.focusable: true
-            Accessible.onPressAction: () => closeEditingButton.clicked()
         }
     }
 
@@ -319,7 +316,7 @@ Item {
         clip: true
         padding: 0
         contentWidth: messageFieldScrollView.availableWidth
-        contentHeight: messageField.height
+        contentHeight: messageField.contentHeight
         anchors {
             top: editBanner.bottom
             left: parent.left
@@ -331,10 +328,10 @@ Item {
         TextEdit {
             id: messageField
             color: Theme.primaryTextColor
-            font.pixelSize: 14
+            font.pixelSize: Theme.fontSizeNormal
             wrapMode: TextEdit.Wrap
             width: messageFieldScrollView.availableWidth
-            height: Math.max(messageField.contentHeight, messageFieldScrollView.availableHeight)
+            height: messageField.contentHeight
 
             onCursorRectangleChanged: internal.ensureCursorVisible()
 
@@ -720,7 +717,7 @@ Item {
         }
         BottomButtonBarButton {
             id: preButton
-            icon: Icons.formatTextDirectionLtr
+            icon: Icons.formatTextPre
             toolTipText: qsTr("Preformatted")
             visible: !buttonBar.groupedFormatOptions && (control.capabilities & IChatProvider.Capability.Markdown)
             onClicked: () => messageField.insertOrRemove("<pre>", "</pre>")
@@ -833,7 +830,7 @@ Item {
             }
             MenuItem {
                 text: qsTr("Preformatted")
-                icon.source: Icons.formatTextDirectionLtr
+                icon.source: Icons.formatTextPre
                 onTriggered: () => messageField.insertOrRemove("<pre>", "</pre>")
             }
             MenuItem {
@@ -847,6 +844,5 @@ Item {
     Accessible.role: Accessible.EditableText
     Accessible.name: qsTr("Type message")
     Accessible.description: qsTr("Enter the chat text message")
-    Accessible.focusable: true
 
 }

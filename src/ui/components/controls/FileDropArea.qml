@@ -11,6 +11,7 @@ Item {
     implicitHeight: label.implicitHeight
 
     signal dropAccepted(list<url> url)
+    signal dropRejected(string reason) // TODO: @Markus -> handle this instead of direct reaction in drop zone
 
     property bool compact: false
 
@@ -24,7 +25,7 @@ Item {
                 outlineBg.radius: 5
                 label.icon.width: 20
                 label.icon.height: 20
-                label.font.pixelSize: 16
+                label.font.pixelSize: Theme.fontSizeMedium
             }
         }
     ]
@@ -64,7 +65,7 @@ Item {
             id: label
             anchors.centerIn: parent
             color: Theme.primaryTextColor
-            font.pixelSize: 24
+            font.pixelSize: Theme.fontSizeExtraLarge
             text: dropInArea.isInputValid ? qsTr("Send attachment") : dropInArea.invalidMessage
             spacing: 20
             icon {
@@ -80,67 +81,91 @@ Item {
         id: dropInArea
         anchors.fill: parent
         onEntered: drag => {
-                       if (dropInArea.isValid(drag)) {
+                       if (dropInArea.isDroppable(drag)) {
                            drag.accept(Qt.CopyAction)
                        }
                    }
 
+        onExited: {
+            dropInArea.isInputValid = false
+            dropInArea.invalidMessage = ""
+        }
+
         onDropped: drop => {
-                       if (dropInArea.isInputValid) {
-                           drop.accept(Qt.CopyAction)
-                           control.dropAccepted(FileContentHelper.uploadableUrls(dropInArea.uploadUrls))
-                       }
-                   }
+            if (!dropInArea.isInputValid) {
+                return
+            }
+
+            const urls = FileContentHelper.uploadableUrls(dropInArea.resolveUrls(drop))
+            const rejectionReason = dropInArea.rejectionReason(urls)
+
+            if (rejectionReason) {
+                console.debug(category, "Drop rejected:", rejectionReason)
+                dropInArea.isInputValid = false
+                dropInArea.invalidMessage = rejectionReason
+                control.dropRejected(rejectionReason)
+                return
+            }
+
+            drop.accept(Qt.CopyAction)
+            control.dropAccepted(urls)
+        }
 
         property bool isInputValid: false
         property string invalidMessage
         property list<url> uploadUrls
 
-        function isValid(ev) {
+        function isDroppable(ev) {
+            const hasPortalTransfer = ev.formats.includes(FileContentHelper.portalFileTransferMimeType)
 
-            console.debug(category, "FileDropArea checking validity", "has Urls:", ev.hasUrls, "urls:", ev.urls)
+            console.debug(category, "FileDropArea checking drag", "has Urls:", ev.hasUrls,
+                          "portal file transfer:", hasPortalTransfer)
 
-            const bailOut = (msg, logMsg = "") => {
-                if (logMsg) {
-                    console.debug(category, logMsg)
-                }
-
+            if (!ev.hasUrls && !hasPortalTransfer) {
+                console.debug(category, "drag event has no urls")
                 dropInArea.isInputValid = false
-                dropInArea.invalidMessage = msg
-            }
-
-            if (!ev.hasUrls) {
-                bailOut(qsTr("Not a file"), "drag event has no urls")
+                dropInArea.invalidMessage = qsTr("Not a file")
                 return false
             }
 
-            const urls = FileContentHelper.uploadableUrls(ev.urls)
+            dropInArea.isInputValid = true
+            dropInArea.invalidMessage = ""
+            return true
+        }
 
+        function resolveUrls(ev) {
+            if (ev.formats.includes(FileContentHelper.portalFileTransferMimeType)) {
+                const token = ev.getDataAsString(FileContentHelper.portalFileTransferMimeType)
+                const resolved = FileContentHelper.resolvePortalFileToken(token)
+
+                if (resolved.length) {
+                    return resolved
+                }
+            }
+
+            return ev.urls
+        }
+
+        function rejectionReason(urls) {
             if (!urls.length) {
-                bailOut(qsTr("No valid files"), "no uploadable urls")
-                return false
+                return qsTr("No valid files")
             }
 
             for (const url of urls) {
                 console.debug(category, "Checking single file url", url)
 
                 if (!url.toString().startsWith("file://")) {
-                    bailOut(qsTr("Disallowed type"), "Not a local file url")
-                    return false
+                    return qsTr("Disallowed type")
                 }
                 if (!FileContentHelper.isLocalReadable(url)) {
-                    bailOut(qsTr("File not readable"), "File not readable")
-                    return false
+                    return qsTr("File not readable")
                 }
                 if (!FileContentHelper.isLocalDirectory(url) && !FileContentHelper.isLocalFile(url)) {
-                    bailOut(qsTr("Not a file"), "Url does not point to a valid local file")
-                    return false
+                    return qsTr("Not a file")
                 }
             }
 
-            dropInArea.uploadUrls = urls
-            dropInArea.isInputValid = true
-            return true
+            return ""
         }
     }
 }

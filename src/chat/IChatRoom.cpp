@@ -13,14 +13,6 @@ void IChatRoom::setIsLoadingMessageHistory(bool value)
     }
 }
 
-void IChatRoom::setIsCompletelyLoaded(bool value)
-{
-    if (m_isCompletelyLoaded != value) {
-        m_isCompletelyLoaded = value;
-        Q_EMIT isCompletelyLoadedChanged();
-    }
-}
-
 void IChatRoom::setLatestMessageDateTime(const QDateTime &dateTime)
 {
     if (m_latestMessageDateTime != dateTime) {
@@ -34,5 +26,13 @@ void IChatRoom::setRoomSettings(const RoomSettings &roomSettings)
     if (m_roomSettings != roomSettings) {
         m_roomSettings = roomSettings;
         Q_EMIT roomSettingsChanged();
+    }
+}
+
+void IChatRoom::setConferenceUrl(const QString &url)
+{
+    if (m_conferenceUrl != url) {
+        m_conferenceUrl = url;
+        Q_EMIT conferenceUrlChanged();
     }
 }

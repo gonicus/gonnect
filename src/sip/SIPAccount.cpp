@@ -26,7 +26,6 @@ SIPAccount::SIPAccount(const QString &group, QObject *parent)
 
 void SIPAccount::initialize()
 {
-    m_accountConfig.presConfig.publishEnabled = true;
 
     bool ok = false;
     static QRegularExpression sipURI = QRegularExpression("^(sips?):([^@]+)(?:@(.+))?$");
@@ -36,6 +35,7 @@ void SIPAccount::initialize()
     m_shallNegotiateCapabilities = m_settings.value("negotiateCapabilities", true).toBool();
     m_useInstantMessagingWithoutCheck =
             m_settings.value("useInstantMessagingWithoutCheck", false).toBool();
+    m_accountConfig.presConfig.publishEnabled = m_settings.value("publishEnabled", true).toBool();
 
     QString transport = m_settings.value("transport", "tls").toString();
     if (transport == "tls") {
@@ -1123,6 +1123,11 @@ void SIPAccount::reinitBuddies()
     const auto savedBuddies = m_buddies;
     m_buddies.clear();
     qDeleteAll(savedBuddies);
+
+    // Reset state while re-subscribing buddies
+    for (const auto &uri : std::as_const(uris)) {
+        Q_EMIT SIPManager::instance().buddyStateChanged(uri, SIPBuddyState::UNKNOWN);
+    }
 
     for (const auto &uri : std::as_const(uris)) {
         auto buddy = new SIPBuddy(this, uri);

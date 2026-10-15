@@ -21,12 +21,11 @@ Item {
         anchors.centerIn: parent
         visible: !control.hasActivities
         color: Theme.secondaryTextColor
-        font.pixelSize: 18
+        font.pixelSize: Theme.fontSizeLarge
         text: "🕒  " + (control.proxyModel?.isFiltering
                         ? qsTr("No activities matching the filter")
                         : qsTr("No activities"))
 
-        Accessible.role: Accessible.StaticText
         Accessible.name: control.proxyModel?.isFiltering
                          ? qsTr("No activities matching the filter")
                          : qsTr("No activities")
@@ -87,7 +86,7 @@ Item {
         delegate: Item {
             id: delg
             enabled: ViewHelper.isJitsiAvailable || !delg.isJitsiMeetCall || delg.isSIPCall
-            height: 50
+            height: Math.max(50, rowLayout.implicitHeight + Theme.d)
             anchors {
                 left: parent?.left
                 right: parent?.right
@@ -155,9 +154,8 @@ Item {
             Component.onCompleted: () => delg.updateBuddyStatus()
 
             Accessible.role: Accessible.ListItem
-            Accessible.name: qsTr("Activities item")
-            Accessible.description: qsTr("Selected activity %1 - %2 - time %3").arg(delg.title).arg(delg.text).arg(timeTextLabel.text)
-            Accessible.focusable: true
+            Accessible.name: qsTr("%1, %2").arg(delg.title).arg(timeTextLabel.text)
+            Accessible.description: delg.text
 
             Connections {
                 target: SIPManager
@@ -175,7 +173,8 @@ Item {
             }
 
             RowLayout {
-                height: 40
+                id: rowLayout
+                height: rowLayout.implicitHeight
                 spacing: 0
                 anchors {
                     left: parent.left
@@ -205,7 +204,7 @@ Item {
                     id: nameContainer
                     Layout.preferredWidth: (delg.width - avatarImage.width - typeIcon.width - timesContainer.width - 50) / 2
                     Layout.alignment: Qt.AlignVCenter
-                    implicitHeight: titleLabel.implicitHeight
+                    implicitHeight: titleLabel.implicitHeight + (subtitleLabel.visible ? subtitleLabel.implicitHeight : 0)
                     implicitWidth: Math.max(titleLabel.implicitWidth, subtitleLabel.implicitWidth)
 
                     Label {
@@ -254,7 +253,7 @@ Item {
                     id: textContainer
                     Layout.preferredWidth: nameContainer.Layout.preferredWidth
                     Layout.alignment: Qt.AlignVCenter
-                    implicitHeight: textLabel.implicitHeight
+                    implicitHeight: textLabel.implicitHeight + (locationLabel.visible ? locationLabel.implicitHeight : 0)
                     implicitWidth: Math.max(textLabel.implicitWidth, locationLabel.implicitWidth)
 
                     Label {
@@ -336,15 +335,15 @@ Item {
                             }
                         }
                     }
-
-                    Accessible.ignored: true
                 }
 
                 Item {
                     id: timesContainer
-                    implicitHeight: timeLabel.implicitHeight
-                    Layout.preferredWidth: 60
-                    Layout.rightMargin: 10
+                    implicitHeight: timeLabel.implicitHeight + (durationLabel.visible ? durationLabel.implicitHeight : 0)
+                    Layout.preferredWidth: Math.max(60,
+                                                    timeTextLabel.implicitWidth + 2 * Theme.d,
+                                                    durationTextLabel.implicitWidth + 2 * Theme.d)
+                    Layout.rightMargin: Theme.d
                     Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
 
                     Item {
@@ -481,7 +480,7 @@ Item {
                 onDoubleTapped: () => {
                     if (delg.isSIPCall) {
                         SIPCallManager.call(delg.account, delg.remoteUrl, delg.contactId)
-                    } else if (delg.isJitsiMeetCall && !ViewHelper.isActiveVideoCall) {
+                    } else if (delg.isJitsiMeetCall && !VideoCallHelper.hasActiveVideoCall) {
                         ViewHelper.requestMeeting(delg.remoteUrl)
                     }
                 }

@@ -8,11 +8,13 @@ import base
 Item {
     id: control
     implicitWidth: control.leftPadding + headingLoader.implicitWidth + control.rightPadding
-    height: 46
+    height: Math.max(46, 46 * Theme.fontScale)
 
     property int leftPadding: 0
     property int rightPadding: 0
     property string text: ""
+    property alias actions: actionsRow.data
+    readonly property real actionsWidth: actionsRow.width
     property bool showHeading: true
     property bool showDivider: false
     property alias headingMargin: headingLoaderWrapper.implicitWidth
@@ -44,11 +46,19 @@ Item {
             sourceComponent: headingComponent
             anchors {
                 left: parent.left
-                right: parent.right
+                right: actionsRow.left
+                rightMargin: actionsRow.width > 0 ? 10 : 0
             }
         }
 
-        Accessible.ignored: true
+        RowLayout {
+            id: actionsRow
+            spacing: 10
+            anchors {
+                right: parent.right
+                verticalCenter: parent.verticalCenter
+            }
+        }
     }
 
     Component {
@@ -63,11 +73,13 @@ Item {
             Label {
                 id: headingText
                 text: control.text
-                font.pixelSize: 16
+                font.pixelSize: Theme.fontSizeMedium
                 font.weight: Font.Medium
                 elide: Text.ElideRight
                 color: Theme.secondaryTextColor
                 Layout.fillWidth: true
+
+                Accessible.ignored: true
             }
 
             Pane {
@@ -80,8 +92,6 @@ Item {
                     anchors.centerIn: parent
                 }
             }
-
-            Accessible.ignored: true
         }
     }
 
@@ -93,7 +103,5 @@ Item {
             right: parent.right
             bottom: parent.bottom
         }
-
-        Accessible.ignored: true
     }
 }

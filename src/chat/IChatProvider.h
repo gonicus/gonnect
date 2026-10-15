@@ -61,6 +61,10 @@ public:
     bool isConnected() const { return m_isConnected; }
     qsizetype unreadNotificationsCount() const { return m_unreadNotificationsCount; }
 
+    /// The limit (in bytes) for media/files that can be sent. A value ≤ 0 means that files
+    /// uploading is n/a. If the limit is arbitrary, it should return the data types max value.
+    virtual qint64 mediaSizeLimit() const = 0;
+
     virtual QString ownUserId() const = 0;
     virtual QString displayName() = 0;
     virtual qsizetype chatRoomsCount() = 0;
@@ -174,11 +178,13 @@ public:
     Q_INVOKABLE virtual QString uploadFile(const QString &filePath) = 0;
 
     /// Receive an image from the clipboard and send it as a message in the given room.
-    Q_INVOKABLE virtual void uploadImageFromClipboard(const QString &roomId) = 0;
+    Q_INVOKABLE virtual void uploadImageFromClipboard(const QString &roomId,
+                                                      const QString &threadId = QString()) = 0;
 
     /// Load n more messages in the given room.
-    virtual void loadMessages(IChatRoom *chatRoom,
-                              quint32 n = IChatProvider::defaultMessageLimit) = 0;
+    /// If the optional threadId is set, only messages of that thread must be loaded.
+    virtual void loadMessages(IChatRoom *chatRoom, quint32 n = IChatProvider::defaultMessageLimit,
+                              const QString &threadId = QString()) = 0;
 
     /*! \name Device Verification
      *
@@ -325,7 +331,7 @@ Q_SIGNALS:
 
     /// An image upload from the clipboard has finished. The image in imageFilePath is ready to be
     /// reviewed and/or sent.
-    void clipboardImageUploaded(QUrl imageFilePath, IChatRoom *chatRoom);
+    void clipboardImageUploaded(QUrl imageFilePath, IChatRoom *chatRoom, QString threadId);
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(IChatProvider::Capabilities)

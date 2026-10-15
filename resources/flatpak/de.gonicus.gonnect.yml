@@ -43,10 +43,6 @@ finish-args:
   - --talk-name=org.gnome.evolution.dataserver.Subprocess.Backend.*
   # Access for evolution-data-server avatars
   - --filesystem=xdg-data/evolution/addressbook/system/photos:ro
-  # Access to music folder for ring tones
-  - --filesystem=xdg-music:ro
-  # Place to save download chat attachments
-  - --filesystem=xdg-download:rw
   # Kerberos socket
   - --filesystem=/run/.heim_org.h5l.kcm-socket
 
@@ -100,6 +96,8 @@ modules:
           project-id: 13287
           stable-only: true
           url-template: https://kerberos.org/dist/krb5/${major}.${minor}/krb5-${major}.${minor}.${patch}.tar.gz
+      - type: patch
+        path: patches/krb5-c23-strchr.patch
       - type: file
         path: krb5.conf
 
@@ -158,6 +156,8 @@ modules:
         path: patches/pjproject-cisco-dlg-transport-pinning.patch
       - type: patch
         path: patches/pjsip-mwi-crash.patch
+      - type: patch
+        path: patches/pjsip-ice-media-ioqueue.patch
 
   - name: openldap
     config-opts:
@@ -334,7 +334,8 @@ modules:
       - -DCMAKE_OPTIMIZE_DEPENDENCIES=ON
       - -DENABLE_GOW_001=ON
       - -DENABLE_GOW_002=ON
-      - -DENABLE_GOW_003=ON
+      - -DENABLE_GOW_004=ON
+      - -DENABLE_GOW_005=ON
       - -DENABLE_PCH=ON
     sources:
       - type: dir

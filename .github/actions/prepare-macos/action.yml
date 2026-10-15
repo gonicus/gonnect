@@ -9,12 +9,6 @@ outputs:
 runs:
   using: 'composite'
   steps:
-
-    - name: Setup cmake
-      uses: jwlawson/actions-setup-cmake@0d6a7d60b009d01c9e7523be22153ff8f19460d3 # v2
-      with:
-        cmake-version: 'latest'
-
     - name: Install dependencies
       shell: bash
       run: |
@@ -25,7 +19,7 @@ runs:
       uses: ./.github/actions/get-qt-version
 
     - name: Install Qt
-      uses: jurplel/install-qt-action@v4
+      uses: jurplel/install-qt-action@a9c63c7c123f3069cff414e7e482d95dfa9d8125 # v4
       with:
         version: ${{ steps.get-qt.outputs.qt-version }}
         host: 'mac'
@@ -37,7 +31,7 @@ runs:
     - name: Install Conan
       uses: conan-io/setup-conan@ed3942a6883243f4af84e13e49c972f9440fa1c2 # v1
       with:
-        version: 2.29.0
+        version: 2.33.0
         cache_packages: true
 
     - name: Install Conan dependencies

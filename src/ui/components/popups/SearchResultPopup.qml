@@ -119,7 +119,7 @@ Popup {
                 margins: Theme.d
             }
 
-            Accessible.role: Accessible.Column
+            Accessible.role: Accessible.Grouping
             Accessible.name: qsTr("Search filter and identity selection")
             Accessible.description: qsTr("Select search filter to be applied, as well as the outgoing identity")
 
@@ -142,9 +142,6 @@ Popup {
                     bottom: identitySelector.top
                     bottomMargin: 5
                 }
-
-                Accessible.role: Accessible.StaticText
-                Accessible.name: identityLabel.text
             }
 
             IdentitySelector {
@@ -168,8 +165,6 @@ Popup {
                 left: filterBar.right
                 leftMargin: Theme.d
             }
-
-            Accessible.ignored: true
         }
 
         Item {
@@ -182,7 +177,7 @@ Popup {
                 margins: Theme.d
             }
 
-            Accessible.role: Accessible.Column
+            Accessible.role: Accessible.Grouping
             Accessible.name: qsTr("Search results")
             Accessible.description: qsTr("All search results will be listed here in their respective categories")
 
@@ -293,7 +288,7 @@ Popup {
                             }
 
                             readonly property bool shallBeVisible: ViewHelper.isJitsiAvailable
-                                                                   && !ViewHelper.isActiveVideoCall
+                                                                   && !VideoCallHelper.hasActiveVideoCall
                                                                    && ViewHelper.isValidJitsiRoomName(control.immediateSearchPhrase)
 
                             onManuallyHovered: () => {
@@ -449,7 +444,7 @@ Popup {
                                 onTriggerPrimaryAction: () => {
                                     if (historyDelg.isPhoneNumber) {
                                         SIPCallManager.call("account0", historyDelg.url, "", identitySelector.currentValue);
-                                    } else if (!ViewHelper.isActiveVideoCall) {
+                                    } else if (!VideoCallHelper.hasActiveVideoCall) {
                                         ViewHelper.requestMeeting(historyDelg.url)
                                     }
                                     control.primaryActionTriggered()
@@ -478,7 +473,7 @@ Popup {
                                         onCallClicked: () => {
                                             if (historyDelg.isPhoneNumber) {
                                                 SIPCallManager.call("account0", historyDelg.url, "", identitySelector.currentValue);
-                                            } else if (!ViewHelper.isActiveVideoCall) {
+                                            } else if (!VideoCallHelper.hasActiveVideoCall) {
                                                 ViewHelper.requestMeeting(historyDelg.url)
                                             }
                                             control.primaryActionTriggered()
@@ -510,7 +505,7 @@ Popup {
                                         roomName: historyDelg.url
                                         width: 230
                                         onCallClicked: () => {
-                                            if (!ViewHelper.isActiveVideoCall) {
+                                            if (!VideoCallHelper.hasActiveVideoCall) {
                                                 ViewHelper.requestMeeting(historyDelg.url)
                                             }
                                         }

@@ -44,9 +44,6 @@ Item {
             verticalCenter: parent.verticalCenter
             verticalCenterOffset: callListView.contentHeight / 2
         }
-
-        Accessible.role: Accessible.StaticText
-        Accessible.name: dragCallLabel.text
     }
 
     ListView {
@@ -108,8 +105,6 @@ Item {
                 right: parent.right
                 top: parent.top
             }
-
-            Accessible.ignored: true
         }
 
         IconLabel {

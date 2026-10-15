@@ -298,9 +298,6 @@ Item {
                 leftMargin: 15
                 bottomMargin: 10
             }
-
-            Accessible.role: Accessible.StaticText
-            Accessible.name: nameLabel.text
         }
 
         Rectangle {
@@ -332,19 +329,15 @@ Item {
                 anchors.fill: parent
                 radius: parent.radius
                 color: Theme.backgroundOffsetColor
-
-                Accessible.ignored: true
             }
 
             Label {
                 id: dtmfFeedbackLabel
                 anchors.centerIn: parent
-                font.pixelSize: 50
+                font.pixelSize: Theme.fontSizeHuge
 
                 Accessible.ignored: true
             }
-
-            Accessible.ignored: true
         }
     }
 

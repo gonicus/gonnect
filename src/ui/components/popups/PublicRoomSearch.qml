@@ -220,7 +220,7 @@ Item {
         id: hintLabel
         visible: searchResultListView.count === 0
         color: Theme.secondaryTextColor
-        font.pixelSize: 16
+        font.pixelSize: Theme.fontSizeMedium
         anchors.centerIn: searchResultListView
         text: {
             if (chatRoomSearchModel.isLoading) {

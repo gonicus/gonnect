@@ -10,6 +10,7 @@ MultiEffect {
     shadowEnabled: true
     shadowColor: Theme.shadowColor
     shadowBlur: 0.5
+    blurMax: 32
     shadowOpacity: 1.0
     shadowScale: 1.0
 }

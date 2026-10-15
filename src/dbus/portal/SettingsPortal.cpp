@@ -53,6 +53,31 @@ SettingsPortal::SettingsPortal(QObject *parent) : QObject(parent)
             m_accentColor = dbusDoubleTripleToColor(reply.value());
             Q_EMIT accentColorChanged();
         }
+
+        // Font scale: try to read KDE setting - if it's not there, go for the
+        // GNOME one as it is always propagated.
+        auto r = m_portal->ReadAll({ "org.kde.kdeglobals.General" });
+        r.waitForFinished();
+
+        if (r.isValid()) {
+            const QMap<QString, QVariantMap> cfg = r.value();
+
+            if (cfg.contains("org.kde.kdeglobals.General")) {
+                const QVariantMap generalNS = cfg.value("org.kde.kdeglobals.General");
+                if (generalNS.contains("font")) {
+                    updateScaleFromFontString(generalNS.value("font").toString());
+                }
+            }
+        }
+
+        if (!m_hasKDEFont) {
+            reply = m_portal->ReadOne("org.gnome.desktop.interface", "text-scaling-factor");
+            reply.waitForFinished();
+            if (reply.isValid()) {
+                m_fontScale = reply.value().variant().toDouble();
+                Q_EMIT fontScaleChanged();
+            }
+        }
     });
 
     connect(m_portal, &OrgFreedesktopPortalSettingsInterface::SettingChanged, this,
@@ -74,7 +99,6 @@ ThemeManager::ColorScheme SettingsPortal::unsignedToColorScheme(unsigned value)
 void SettingsPortal::settingsChanged(QString ns, QString key, QDBusVariant value)
 {
     if (ns == "org.freedesktop.appearance") {
-
         if (key == "color-scheme") {
             m_colorScheme = unsignedToColorScheme(value.variant().toUInt());
             Q_EMIT colorSchemeChanged();
@@ -91,6 +115,15 @@ void SettingsPortal::settingsChanged(QString ns, QString key, QDBusVariant value
             m_accentColor = dbusDoubleTripleToColor(value);
             Q_EMIT accentColorChanged();
             return;
+        }
+    } else if (ns == "org.gnome.desktop.interface" && !m_hasKDEFont) {
+        if (key == "text-scaling-factor") {
+            m_fontScale = value.variant().toDouble();
+            Q_EMIT fontScaleChanged();
+        }
+    } else if (ns == "org.kde.kdeglobals.General") {
+        if (key == "font") {
+            updateScaleFromFontString(value.variant().toString());
         }
     }
 }
@@ -109,4 +142,26 @@ QColor SettingsPortal::dbusDoubleTripleToColor(QDBusVariant value)
 
     RgbColor c = qdbus_cast<RgbColor>(v);
     return QColor::fromRgbF(c.r, c.g, c.b);
+}
+
+void SettingsPortal::updateScaleFromFontString(const QString &fontString)
+{
+    // Format is 'FontFamily,pointSize,.....'
+    const QStringList parts = fontString.split(',');
+    if (parts.size() < 2) {
+        return;
+    }
+
+    bool ok = false;
+    const double pointSize = parts[1].toDouble(&ok);
+    if (!ok) {
+        return;
+    }
+
+    m_hasKDEFont = true;
+
+    const qreal pixelSize = pointSize * 96.0 / 72.0;
+    m_fontScale = pixelSize / m_designBasePixelSize;
+
+    Q_EMIT fontScaleChanged();
 }

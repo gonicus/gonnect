@@ -1,7 +1,7 @@
 #pragma once
 
 #include <QObject>
-#include <QtQml>
+#include <QtQml/qqmlregistration.h>
 
 class PresenceState : public QObject
 {

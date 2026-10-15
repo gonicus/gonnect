@@ -12,7 +12,11 @@ Item {
     property IChatProvider chatProvider
     property IChatRoom chatRoom
     property bool shallBeVisible
+    property string threadId
 
+    signal closeThreadRequested()
+
+    readonly property bool isThreadMode: threadId.length > 0
     readonly property bool isLoadingMessageHistory: control.chatRoom?.isLoadingMessageHistory ?? false
     readonly property Contact soleOtherContact: control.chatRoom && control.chatRoom.isDirectChat
                                                 ? ContactHelper.lookupByChatUser(control.chatRoom.otherUser)
@@ -28,7 +32,11 @@ Item {
     QtObject {
         id: internal
 
-        property bool hasActiveCall
+        readonly property IConferenceConnector activeConferenceConnector: control.chatRoom && control.chatRoom.conferenceUrl
+                                                                          ? VideoCallHelper.matchingConferenceConnector(control.chatRoom.conferenceUrl)
+                                                                          : null
+
+            property bool hasActiveCall
 
         Component.onCompleted: () => internal.updateHasActiveCall()
 
@@ -61,15 +69,16 @@ Item {
 
     Label {
         id: mainLabel
-        font.pixelSize: 16
+        font.pixelSize: Theme.fontSizeMedium
         font.weight: Font.Medium
         elide: Text.ElideRight
         color: Theme.secondaryTextColor
-        text: control.chatRoom
-              ? (control.chatRoom.isDirectChat
-                 ? qsTr("Direct conversation with %1").arg(control.chatRoom.name)
-                 : qsTr("Chat room %1").arg(control.chatRoom.name))
-              : ""
+        text: !control.chatRoom ? ""
+              : control.isThreadMode
+                ? qsTr('Subthread (in "%1")').arg(control.chatRoom.name)
+                : (control.chatRoom.isDirectChat
+                   ? qsTr("Direct conversation with %1").arg(control.chatRoom.name)
+                   : qsTr("Chat room %1").arg(control.chatRoom.name))
         anchors {
             left: avatarImage.visible ? avatarImage.right : parent.left
             leftMargin: Theme.d
@@ -117,11 +126,12 @@ Item {
         }
 
         ButtonBarSeparator {
-            visible: titleLoadingIndicatorRow.visible
+            visible: titleLoadingIndicatorRow.visible && !control.threadId
         }
 
         BarButton {
             id: favButton
+            visible: !control.isThreadMode
             iconPath: Icons.folderFavorites
             toggled: control.chatRoom?.isFavorite ?? false
             text: qsTr("Favorite")
@@ -130,6 +140,7 @@ Item {
 
         BarButton {
             id: optionsButton
+            visible: !control.isThreadMode
             iconPath: Icons.settingsConfigure
             text: qsTr("More")
             showDropdownButton: true
@@ -138,9 +149,65 @@ Item {
                            chatRoomMenuComponent.createObject(optionsButton, {
                                                                   toggleFavoriteVisible: false,
                                                                   editRoomVisible: !!(Number(control.chatRoom?.permissions ?? 0) & IChatRoom.Permission.CanEdit),
-                                                                  inviteUsersVisible: !!(Number(control.chatRoom?.permissions ?? 0) & IChatRoom.Permission.CanInvite)
+                                                                  inviteUsersVisible: !!(Number(control.chatRoom?.permissions ?? 0) & IChatRoom.Permission.CanInvite),
+                                                                  editConferenceUrlVisible: !!(Number(control.chatRoom?.permissions ?? 0) & IChatRoom.Permission.CanEditConferenceUrl)
                                                               }).popup()
                        }
+        }
+
+        BarButton {
+            id: startConferenceButton
+            text: qsTr("Conference")
+            toggled: true
+            toggledColor: Theme.greenColor
+            iconPath: Icons.videoCall
+            enabled: !VideoCallHelper.hasActiveVideoCall
+            visible: !!internal.activeConferenceConnector && !leaveConferenceButton.visible
+
+            Accessible.name: qsTr("Start conference")
+
+            onClicked: () => VideoCallHelper.joinOrStartConference(control.chatRoom?.conferenceUrl)
+        }
+
+        BarButton {
+            id: leaveConferenceButton
+            text: qsTr("Leave")
+            toggled: true
+            toggledColor: Theme.redColor
+            iconPath: Icons.callStop
+            visible: !!internal.activeConferenceConnector
+                     && VideoCallHelper.activeVideoCallUrl !== ""
+                     && VideoCallHelper.isActiveVideoCallUrl(control.chatRoom.conferenceUrl)
+
+            Accessible.name: qsTr("Leave conference")
+
+            onClicked: () => {
+                const conn = internal.activeConferenceConnector
+
+                if (conn.ownRole === ConferenceUser.Role.Moderator && conn.numberOfUsers > 1) {
+                    leaveMenu.popup(leaveConferenceButton, -leaveMenu.width + leaveConferenceButton.width, leaveConferenceButton.height)
+                } else {
+                    conn.leaveConference()
+                }
+            }
+
+            Menu {
+                id: leaveMenu
+
+                MenuItem {
+                    text: qsTr("Leave conference")
+                    onClicked: () => {
+                        internal.activeConferenceConnector.leaveConference()
+                    }
+                }
+
+                MenuItem {
+                    text: qsTr("End conference for all")
+                    onClicked: () => {
+                        internal.activeConferenceConnector.terminateConference()
+                    }
+                }
+            }
         }
 
         BarButton {
@@ -149,7 +216,7 @@ Item {
             toggled: true
             toggledColor: Theme.greenColor
             iconPath: Icons.callStart
-            visible: !!control.soleOtherContact && !internal.hasActiveCall
+            visible: !!control.soleOtherContact && !control.isThreadMode && !internal.hasActiveCall
 
             onClicked: () => {
                            const soleNumber = control.numbersModel.soleNumber()
@@ -167,7 +234,7 @@ Item {
 
             Accessible.name: qsTr("Start phone call")
         }
-
+      
         BarButton {
             id: hangupButton
             text: qsTr("Hang up")
@@ -188,6 +255,14 @@ Item {
 
             Accessible.name: qsTr("Hang up phone call")
         }
+
+        HeaderIconButton {
+            visible: control.isThreadMode
+            iconSource: Icons.mobileCloseApp
+            accessiblePurpose: qsTr("Close thread")
+            anchors.verticalCenter: parent.verticalCenter
+            onClicked: () => control.closeThreadRequested()
+        }
     }
 
     Component {
@@ -204,6 +279,7 @@ Item {
                                       const chatProvider = control.chatProvider
                                       item.accepted.connect(() => chatProvider.requestRoomLeave(roomId))
                                   }
+            onEditConferenceUrlTriggered: () => ViewHelper.requestUrlEditDialog(control.chatRoom)
         }
     }
 
@@ -241,11 +317,7 @@ Item {
                                                      contactType: NumberStats.ContactType.PhoneNumber
                                                  })
 
-                    Accessible.role: Accessible.Button
-                    Accessible.name: qsTr("Call contact button")
-                    Accessible.description: qsTr("Selected number %1").arg(menuDelg.number)
-                    Accessible.focusable: true
-                    Accessible.onPressAction: () => PhoneNumberUtil.startMeetingOrCall(menuDelg.addr)
+                    Accessible.name: qsTr("Call %1").arg(menuDelg.number)
 
                     onTriggered: () => SIPCallManager.call(menuDelg.number)
                 }

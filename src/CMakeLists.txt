@@ -198,6 +198,8 @@ if(FLATPAK)
         dbus/portal/AccountPortal.cpp
         dbus/portal/BackgroundPortal.h
         dbus/portal/BackgroundPortal.cpp
+        dbus/portal/CameraPortal.h
+        dbus/portal/CameraPortal.cpp
         dbus/portal/GlobalShortcutPortal.h
         dbus/portal/GlobalShortcutPortal.cpp
         dbus/portal/InhibitPortal.h
@@ -231,7 +233,9 @@ if(FLATPAK)
         platform/linux/LinuxDesktopSearchProvider.h
         platform/linux/LinuxDesktopSearchProvider.cpp
         platform/linux/LinuxPlatformSession.h
-        platform/linux/LinuxPlatformSession.cpp)
+        platform/linux/LinuxPlatformSession.cpp
+        platform/linux/PipeWireCameraDevices.h
+        platform/linux/PipeWireCameraDevices.cpp)
 
 elseif(LINUX)
     set(PLATFORM_SOURCES
@@ -357,12 +361,14 @@ qt_add_qml_module(gonnect
         ui/components/chat/ChatRoomList.qml
         ui/components/chat/ChatRoomListItem.qml
         ui/components/chat/ChatRoomListSectionHeader.qml
+        ui/components/chat/ChatRoomListThreadItem.qml
         ui/components/chat/ChatUnjoinedPage.qml
         ui/components/chat/CodeBlock.qml
         ui/components/chat/DeviceVerification.qml
         ui/components/chat/FileAttachment.qml
         ui/components/chat/MultiText.qml
         ui/components/chat/PinnedChatMessagesList.qml
+        ui/components/chat/ReactionButton.qml
         ui/components/chat/ReadMarker.qml
 
         ui/components/controls/AudioFileSelector.qml
@@ -376,6 +382,7 @@ qt_add_qml_module(gonnect
         ui/components/controls/ButtonBarSeparator.qml
         ui/components/controls/CheckBox.qml
         ui/components/controls/ClipboardButton.qml
+        ui/components/controls/ComboBox.qml
         ui/components/controls/ControlBar.qml
         ui/components/controls/DtmfDialer.qml
         ui/components/controls/EmojiButton.qml
@@ -385,6 +392,7 @@ qt_add_qml_module(gonnect
         ui/components/controls/FileDropArea.qml
         ui/components/controls/HeaderIconButton.qml
         ui/components/controls/HideableMenuItem.qml
+        ui/components/controls/HideableMenuSeparator.qml
         ui/components/controls/JoinRuleComboBox.qml
         ui/components/controls/Label.qml
         ui/components/controls/LabeledItem.qml
@@ -432,6 +440,7 @@ qt_add_qml_module(gonnect
         ui/components/popups/EditChatRoom.qml
         ui/components/popups/EditChatMessage.qml
         ui/components/popups/EditStatusText.qml
+        ui/components/popups/EditUrlDialog.qml
         ui/components/popups/EmojiPickerPopup.qml
         ui/components/popups/FileSelectionOverview.qml
         ui/components/popups/FilteredEmojis.qml
@@ -653,6 +662,8 @@ qt_add_qml_module(gonnect
         chat/ChatConnectorManager.cpp
         chat/ChatMessage.h
         chat/ChatMessage.cpp
+        chat/ChatMessageContainer.h
+        chat/ChatMessageContainer.cpp
         chat/ChatMessageContentAudioFile.h
         chat/ChatMessageContentImage.h
         chat/ChatMessageContentImage.cpp
@@ -672,6 +683,8 @@ qt_add_qml_module(gonnect
         chat/ChatMessageReaction.cpp
         chat/ChatModel.h
         chat/ChatModel.cpp
+        chat/ChatThreadModel.h
+        chat/ChatThreadModel.cpp
         chat/ChatUser.h
         chat/ChatUser.cpp
         chat/ChatUsersModel.h
@@ -701,6 +714,8 @@ qt_add_qml_module(gonnect
         chat/PinnedChatMessages.cpp
         chat/PublicChatRoom.h
 
+        conference/ConferenceLinkedRoomsProxyModel.h
+        conference/ConferenceLinkedRoomsProxyModel.cpp
         conference/ConferenceUser.h
         conference/ConferenceUser.cpp
         conference/IConferenceConnector.h
@@ -765,6 +780,8 @@ qt_add_qml_module(gonnect
         helper/TextFormatHelper.h
         helper/TextFormatHelper.cpp
         helper/PjSipTools.h
+        helper/VideoCallHelper.h
+        helper/VideoCallHelper.cpp
 
         media/AudioManager.h
         media/AudioManager.cpp
@@ -774,6 +791,7 @@ qt_add_qml_module(gonnect
         media/AudioProcessor.cpp
         media/Sniffer.h
         media/Sniffer.cpp
+        media/VideoDevice.h
         media/VideoManager.h
         media/VideoManager.cpp
 

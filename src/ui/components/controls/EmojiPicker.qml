@@ -72,9 +72,8 @@ Item {
                 bottom: parent.bottom
             }
 
-            Accessible.role: Accessible.Row
+            Accessible.role: Accessible.Grouping
             Accessible.name: qsTr("Switch Emoji category")
-            Accessible.focusable: true
 
             Repeater {
                 id: emojiGroupsRepeater
@@ -120,9 +119,8 @@ Item {
             bottom: parent.bottom
         }
 
-        Accessible.role: Accessible.Column
+        Accessible.role: Accessible.Grouping
         Accessible.name: qsTr("Select Emoji")
-        Accessible.focusable: true
 
         model: EmojiProxyModel {
             id: emojiProxy
