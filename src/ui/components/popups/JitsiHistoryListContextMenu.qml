@@ -20,33 +20,18 @@ Menu {
         text: qsTr('Start conference')
         enabled: !VideoCallHelper.hasActiveVideoCall
         onTriggered: () => control.callClicked()
-
-        Accessible.role: Accessible.MenuItem
-        Accessible.name: startAction.text
-        Accessible.focusable: true
-        Accessible.onPressAction: () => control.callClicked()
     }
 
     Action {
         id: favToggleAction
         text: control.isFavorite ? qsTr('Remove favorite') : qsTr('Add favorite')
         onTriggered: () => ViewHelper.toggleFavorite(control.roomName, NumberStats.ContactType.JitsiMeetUrl)
-
-        Accessible.role: Accessible.MenuItem
-        Accessible.name: favToggleAction.text
-        Accessible.focusable: true
-        Accessible.onPressAction: () => ViewHelper.toggleFavorite(control.roomName, NumberStats.ContactType.JitsiMeetUrl)
     }
 
     Action {
         id: copyAction
         text: qsTr('Copy room name')
         onTriggered: () => ClipboardHelper.copyToClipboard(control.roomName)
-
-        Accessible.role: Accessible.MenuItem
-        Accessible.name: copyAction.text
-        Accessible.focusable: true
-        Accessible.onPressAction: () => ClipboardHelper.copyToClipboard(control.roomName)
     }
 
     Action {
@@ -54,10 +39,5 @@ Menu {
         text: qsTr("Remove")
         icon.source: Icons.userTrash
         onTriggered: () => control.removeItem()
-
-        Accessible.role: Accessible.Button
-        Accessible.name: removeAction.text
-        Accessible.focusable: true
-        Accessible.onPressAction: () => control.removeItem()
     }
 }

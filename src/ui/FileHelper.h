@@ -28,6 +28,14 @@ public:
     /// Return just the file name from a complete path.
     Q_INVOKABLE QString fileNameFromPath(const QString &path) const;
 
+    /// Return absolute path to the generic persistent folder path + the given sub folder.
+    Q_INVOKABLE QString persistentFolderPath(const QString &subFolder) const;
+
+    /// Copy the given file to the subfolder as storageKey. Returns the persisted file path (with
+    /// "file://").
+    Q_INVOKABLE QString persistFile(const QUrl &source, const QString &subFolder,
+                                    const QString &storageKey) const;
+
     /// Return absolute path to the default download folder.
     Q_INVOKABLE QString downloadFolderPath() const;
 

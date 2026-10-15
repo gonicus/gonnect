@@ -31,9 +31,7 @@ ConfirmDialog {
             rightMargin: 20
         }
 
-        Accessible.role: Accessible.EditableText
         Accessible.name: control.inputLabel
-        Accessible.focusable: true
         Component.onCompleted: () => { if (inputField.visible) inputField.forceActiveFocus() }
     }
 

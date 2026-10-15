@@ -13,7 +13,7 @@ class GlobalInfo : public QObject
     Q_PROPERTY(bool shallShowEmergencyButton READ shallShowEmergencyButton CONSTANT FINAL)
 
 public:
-    enum class WorkaroundId { GOW_001, GOW_002, GOW_003 };
+    enum class WorkaroundId { GOW_001, GOW_002, GOW_003, GOW_004, GOW_005 };
     Q_ENUM(WorkaroundId)
 
     static QString workaroundIdToString(const WorkaroundId enumValue)
@@ -35,6 +35,7 @@ public:
     Q_INVOKABLE QString teamsUrl();
 
     Q_INVOKABLE bool isWorkaroundActive(const GlobalInfo::WorkaroundId id);
+    Q_INVOKABLE bool useNewScreenSharingAPI();
 
     bool shallShowEmergencyButton();
     bool hasEmergencyNumbers();

@@ -281,11 +281,11 @@ Item {
                     if (control.isSharingScreen) {
                         control.setScreenShare(false, false)
                     } else {
-                        control.setScreenShare(true, true)
-
-                        //TODO: this can be re-enabled after QTBUG-142040 / QTBUG-142040 are fixed
-                        //      see Conference.qml +293
-                        //screenShareMenu.popup(screenShareButton, -screenShareButton.width + screenShareButton.width, screenShareButton.height)
+                        if (GlobalInfo.useNewScreenSharingAPI()) {
+                            screenShareMenu.popup(screenShareButton, 0, screenShareButton.height)
+                        } else {
+                            control.setScreenShare(true, true)
+                        }
                     }
                 }
 
@@ -296,12 +296,16 @@ Item {
                     MenuItem {
                         icon.source: Icons.window
                         text: qsTr("Share window")
-                        onTriggered: () => control.setScreenShare(true, false)
+                        onTriggered: () => {
+                            control.setScreenShare(true, false)
+                        }
                     }
                     MenuItem {
                         icon.source: Icons.screen
                         text: qsTr("Share screen")
-                        onTriggered: () => control.setScreenShare(true, true)
+                        onTriggered: () => {
+                            control.setScreenShare(true, true)
+                        }
                     }
                 }
             }

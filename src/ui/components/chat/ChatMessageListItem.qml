@@ -8,9 +8,17 @@ import base
 
 Item {
     id: control
-    implicitHeight: reactionsContainer.visible
-                    ? (reactionsContainer.y + reactionsContainer.implicitHeight)
-                    : (messageContentItem.y + messageContentItem.height)
+    implicitHeight: {
+        let h = 0
+        if (reactionsContainer.visible) {
+            h = reactionsContainer.y + reactionsContainer.implicitHeight
+        } else {
+            h = messageContentItem.y + messageContentItem.height
+        }
+
+        const avatarHeight = avatarImage.visible ? (avatarImage.y + avatarImage.height) : 0
+        return Math.max(h, avatarHeight)
+    }
 
     LoggingCategory {
         id: category
@@ -114,14 +122,12 @@ Item {
     ]
 
     Accessible.role: Accessible.ListItem
-    Accessible.name: qsTr("Chat message")
-    Accessible.focusable: true
-    Accessible.description: qsTr("Selected chat message - from %1, at %2: %3")
-                                .arg(control.nickName)
-                                .arg(control.timestamp)
-                                .arg(control.content instanceof ChatMessageContentText && control.content.isSimpleText
-                                     ? control.content.simpleText
-                                     : "")
+    Accessible.name: qsTr("%1, %2: %3")
+                         .arg(control.nickName)
+                         .arg(control.timestamp)
+                         .arg(control.content instanceof ChatMessageContentText && control.content.isSimpleText
+                              ? control.content.simpleText
+                              : "")
 
     QtObject {
         id: internal
@@ -616,8 +622,7 @@ Item {
             onClicked: () => control.openThread(control.isThreadRoot ? control.eventId : control.threadId)
 
             readonly property bool shallBeVisible: SelectionState.selectedThreadId === ""
-                                                   && (control.isThreadRoot || control.threadId !== "")
-        }
+                                                   && (control.isThreadRoot || control.threadId !== "") }
 
         Repeater {
             id: reactionRepeater

@@ -43,10 +43,6 @@ finish-args:
   - --talk-name=org.gnome.evolution.dataserver.Subprocess.Backend.*
   # Access for evolution-data-server avatars
   - --filesystem=xdg-data/evolution/addressbook/system/photos:ro
-  # Access to music folder for ring tones
-  - --filesystem=xdg-music:ro
-  # Place to save download chat attachments
-  - --filesystem=xdg-download:rw
   # Kerberos socket
   - --filesystem=/run/.heim_org.h5l.kcm-socket
 
@@ -331,6 +327,9 @@ modules:
       - -DCMAKE_UNITY_BUILD=ON
       - -DCMAKE_OPTIMIZE_DEPENDENCIES=ON
       - -DENABLE_GOW_001=ON
+      - -DENABLE_GOW_002=ON
+      - -DENABLE_GOW_004=ON
+      - -DENABLE_GOW_005=ON
       - -DENABLE_PCH=ON
     sources:
       - type: dir
