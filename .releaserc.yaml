@@ -13,6 +13,7 @@ plugins:
   - "@semantic-release/github"
   - - "@semantic-release/exec"
     - prepareCmd: ./scripts/prepare-new-version.sh ${nextRelease.version}
+      successCmd: echo "tag=${nextRelease.gitTag}" >> "$GITHUB_OUTPUT"
   - "@semantic-release/changelog"
   - - "@semantic-release/git"
     - assets:

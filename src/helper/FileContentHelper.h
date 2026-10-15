@@ -12,6 +12,8 @@ class FileContentHelper : public QObject
     QML_ELEMENT
     QML_SINGLETON
 
+    Q_PROPERTY(QString portalFileTransferMimeType READ portalFileTransferMimeType CONSTANT)
+
 public:
     enum class FileType { Image, Audio, Video, Other };
     Q_ENUM(FileType)
@@ -34,7 +36,10 @@ public:
     Q_INVOKABLE bool isLocalReadable(const QUrl &url) const;
 
     Q_INVOKABLE QList<QUrl> uploadableUrls(const QList<QUrl> &urls) const;
+    Q_INVOKABLE QList<QUrl> resolvePortalFileToken(const QString &token) const;
 
 private:
     FileContentHelper(QObject *parent = nullptr);
+
+    QString portalFileTransferMimeType() const;
 };

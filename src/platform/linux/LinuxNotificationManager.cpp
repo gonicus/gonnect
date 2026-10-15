@@ -156,9 +156,11 @@ bool LinuxNotificationManager::remove(const QString &id)
 
     if (m_notifications.contains(id)) {
         m_notifications.value(id)->deleteLater();
-        notify_notification_close(m_internalNotifications.value(id), NULL);
 
-        m_internalNotifications.remove(id);
+        if (auto *internalNotification = m_internalNotifications.take(id)) {
+            notify_notification_close(internalNotification, NULL);
+            g_object_unref(internalNotification);
+        }
     }
 
     return m_notifications.remove(id);
@@ -175,7 +177,11 @@ void LinuxNotificationManager::shutdown()
     }
 
     qDeleteAll(m_notifications);
-    qDeleteAll(m_internalNotifications);
+
+    for (auto *notification : std::as_const(m_internalNotifications)) {
+        g_object_unref(notification);
+    }
+
     m_notifications.clear();
     m_internalNotifications.clear();
 }
