@@ -1,3 +1,18 @@
+# [2.5.0-beta.9](https://github.com/gonicus/gonnect/compare/v2.5.0-beta.8...v2.5.0-beta.9) (2026-10-15)
+
+
+### Bug Fixes
+
+* crashes when exiting during call/conference ([#767](https://github.com/gonicus/gonnect/issues/767)) ([1134a64](https://github.com/gonicus/gonnect/commit/1134a6407d875c8f98b6dab26c19e43009b08c2e))
+* do not show call page on incoming SIP during Jitsi conf ([#759](https://github.com/gonicus/gonnect/issues/759)) ([2c1e366](https://github.com/gonicus/gonnect/commit/2c1e3663939b7c3d5b098f9a4bd613983038377f))
+* same buddy state for all while resetting ([#768](https://github.com/gonicus/gonnect/issues/768)) ([1738060](https://github.com/gonicus/gonnect/commit/1738060e3d46101a86574ce3fcaa79be3226985f))
+
+
+### Features
+
+* flatpak portal plus ([#769](https://github.com/gonicus/gonnect/issues/769)) ([3e4b8e5](https://github.com/gonicus/gonnect/commit/3e4b8e5f12d0b087aa671bd4ae58d7bf7b11b87f))
+* more sip-chat-jitsi integration; small fixes ([#770](https://github.com/gonicus/gonnect/issues/770)) ([152cc0f](https://github.com/gonicus/gonnect/commit/152cc0f0d89c36f4e56ffafaa9b6c73fbf15674a))
+
 # [2.5.0-beta.8](https://github.com/gonicus/gonnect/compare/v2.5.0-beta.7...v2.5.0-beta.8) (2026-10-12)
 
 
