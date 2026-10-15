@@ -1153,12 +1153,15 @@ void IpcDispatcher::processResponse(
         QMutableListIterator it(m_rooms);
         while (it.hasNext()) {
             auto room = it.next();
-            if (!handledRoomIds.contains(room->id())) {
-                if (auto *cache = m_userRoomStateCache.take(room->id())) {
+            const auto roomId = room->id();
+
+            if (!handledRoomIds.contains(roomId)) {
+                if (auto *cache = m_userRoomStateCache.take(roomId)) {
                     delete cache;
                 }
+                m_notifiedInvitedRoomIds.remove(roomId);
                 removeNotificationsForRoom(room);
-                m_roomLookup.remove(room->id());
+                m_roomLookup.remove(roomId);
                 Q_EMIT chatRoomRemoved(indexOf(room), room);
                 it.remove();
                 room->deleteLater();
@@ -1172,6 +1175,7 @@ void IpcDispatcher::processResponse(
         if (!roomObj) {
             roomObj = addChatRoom(roomProto, tag);
         }
+
         processRoomUsers(roomProto, roomObj);
         Q_EMIT chatRoomCreationCompleted(roomObj, tag);
 
@@ -2082,8 +2086,22 @@ IpcChatRoom *IpcDispatcher::addChatRoom(const de::gonicus::gonnect::Room &room, 
     connect(roomObj, &IChatRoom::notificationCountChanged, this,
             [this](qsizetype) { updateUnreadNotificationsCount(); });
 
-    // Send room invitation signal
+    // Notify about invitation
+    // Case 1: invited state arrives later
+    connect(roomObj, &IChatRoom::ownUserJoinStateChanged, this, [this, roomObj]() {
+        const auto roomId = roomObj->id();
+        if (roomObj->ownUserJoinState() != IChatRoom::UserRoomState::Invited
+            || m_notifiedInvitedRoomIds.contains(roomId)) {
+            return;
+        }
+
+        m_notifiedInvitedRoomIds.insert(roomId);
+        Q_EMIT roomInviteReceived(roomId, roomObj->name(), roomObj->invitationText());
+    });
+
+    // Case 2: invited state already known
     if (roomObj->ownUserJoinState() == IChatRoom::UserRoomState::Invited) {
+        m_notifiedInvitedRoomIds.insert(roomObj->id());
         Q_EMIT roomInviteReceived(roomObj->id(), roomObj->name(), roomObj->invitationText());
     }
 
