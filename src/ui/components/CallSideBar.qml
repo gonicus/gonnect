@@ -231,21 +231,21 @@ Item {
             iconPath: Icons.dialogMessages
             visible: !!(control.roomsAggregator?.chatRooms.length)
             text: qsTr("Chat")
-            highlighted: control.selectedSideBarMode === CallSideBar.Chat
-                         && (!chatButton.isConferenceChatSource || control.manualChatSourceIndex === -1)
+            highlighted: control.selectedSideBarMode === CallSideBar.Chat && chatButton.isActiveSource
             showIndicatorBadge: (control.conferenceConnector?.chatRoom()?.notificationCount ?? 0) > 0
             labelElide: control.extended ? Text.ElideNone : Text.ElideRight
 
             readonly property bool isConferenceChatSource: control.conferenceConnector?.hasCapability(IConferenceConnector.Capability.ChatInCall) ?? false
+            readonly property bool isActiveSource: chatButton.isConferenceChatSource
+                                                   ? control.manualChatSourceIndex === -1
+                                                   : control.manualChatSourceIndex === null
 
             onClicked: () => {
-                if (control.selectedSideBarMode === CallSideBar.Chat && (!chatButton.isConferenceChatSource || control.manualChatSourceIndex === -1)) {
+                if (control.selectedSideBarMode === CallSideBar.Chat && chatButton.isActiveSource) {
                     control.selectedSideBarMode = CallSideBar.None
                 } else {
                     control.selectedSideBarMode = CallSideBar.Chat
-                    if (chatButton.isConferenceChatSource) {
-                        control.manualChatSourceIndex = -1
-                    }
+                    control.manualChatSourceIndex = chatButton.isConferenceChatSource ? -1 : null
                     chatSideBar.updateChatRoomNow()
                 }
             }
