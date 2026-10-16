@@ -79,6 +79,7 @@ Item {
                 id: mainLabel
                 elide: Label.ElideRight
                 font.weight: Font.Medium
+                maximumLineCount: 1
                 anchors {
                     left: mainRowLeftInsetLoader.item ? mainRowLeftInsetLoader.right : parent.left
                     right: mainRowRightInsetLoader.item ? mainRowRightInsetLoader.left : parent.right
@@ -104,6 +105,7 @@ Item {
                 elide: Label.ElideRight
                 font.pixelSize: Theme.fontSizeSmall
                 color: Theme.secondaryTextColor
+                maximumLineCount: 1
                 visible: false
                 anchors {
                     top: mainLabel.bottom
