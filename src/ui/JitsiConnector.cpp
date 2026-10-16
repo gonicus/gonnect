@@ -1198,6 +1198,7 @@ void JitsiConnector::setConferenceName(const QString &name)
     if (m_roomName != name) {
         m_roomName = name;
         Q_EMIT conferenceNameChanged();
+        Q_EMIT conferenceUrlChanged();
     }
 }
 
