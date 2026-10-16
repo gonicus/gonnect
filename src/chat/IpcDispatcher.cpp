@@ -1564,7 +1564,13 @@ void IpcDispatcher::processResponse(
                 invitedEvent.hasRoomDisplayName() ? invitedEvent.roomDisplayName() : "";
         const auto invitationText =
                 invitedEvent.hasInvitationText() ? invitedEvent.invitationText() : "";
-        Q_EMIT roomInviteReceived(invitedEvent.roomId(), displayName, invitationText);
+
+        const auto roomId = invitedEvent.roomId();
+        if (!m_notifiedInvitedRoomIds.contains(roomId)) {
+            m_notifiedInvitedRoomIds.insert(roomId);
+            Q_EMIT roomInviteReceived(invitedEvent.roomId(), displayName, invitationText);
+        }
+
     } else if (rc.hasPublicRoomListResponse()) {
 
         auto listResp = rc.publicRoomListResponse();
@@ -2100,7 +2106,8 @@ IpcChatRoom *IpcDispatcher::addChatRoom(const de::gonicus::gonnect::Room &room, 
     });
 
     // Case 2: invited state already known
-    if (roomObj->ownUserJoinState() == IChatRoom::UserRoomState::Invited) {
+    if (roomObj->ownUserJoinState() == IChatRoom::UserRoomState::Invited
+        && !m_notifiedInvitedRoomIds.contains(roomObj->id())) {
         m_notifiedInvitedRoomIds.insert(roomObj->id());
         Q_EMIT roomInviteReceived(roomObj->id(), roomObj->name(), roomObj->invitationText());
     }
