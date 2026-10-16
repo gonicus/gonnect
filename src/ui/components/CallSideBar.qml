@@ -232,15 +232,20 @@ Item {
             visible: !!(control.roomsAggregator?.chatRooms.length)
             text: qsTr("Chat")
             highlighted: control.selectedSideBarMode === CallSideBar.Chat
-                         && control.manualChatSourceIndex === -1
+                         && (!chatButton.isConferenceChatSource || control.manualChatSourceIndex === -1)
             showIndicatorBadge: (control.conferenceConnector?.chatRoom()?.notificationCount ?? 0) > 0
             labelElide: control.extended ? Text.ElideNone : Text.ElideRight
+
+            readonly property bool isConferenceChatSource: control.conferenceConnector?.hasCapability(IConferenceConnector.Capability.ChatInCall) ?? false
+
             onClicked: () => {
-                if (control.selectedSideBarMode === CallSideBar.Chat && control.manualChatSourceIndex === -1) {
+                if (control.selectedSideBarMode === CallSideBar.Chat && (!chatButton.isConferenceChatSource || control.manualChatSourceIndex === -1)) {
                     control.selectedSideBarMode = CallSideBar.None
                 } else {
                     control.selectedSideBarMode = CallSideBar.Chat
-                    control.manualChatSourceIndex = -1
+                    if (chatButton.isConferenceChatSource) {
+                        control.manualChatSourceIndex = -1
+                    }
                     chatSideBar.updateChatRoomNow()
                 }
             }
