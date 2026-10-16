@@ -167,6 +167,16 @@ Item {
         // assigned explicitly instead.
         readonly property int buttonSpacing: Theme.d
 
+        readonly property bool isLinkedRoomShown: {
+            for (let i = 0; i < roomsRepeater.count; ++i) {
+                const item = roomsRepeater.itemAt(i)
+                if (item && item.chatProvider === chatSideBar.chatProvider && item.roomId === chatSideBar.chatRoom?.id) {
+                    return true
+                }
+            }
+            return false
+        }
+
         function relayoutButtons() {
             const items = []
             if (chatButton.visible) {
@@ -231,17 +241,14 @@ Item {
             iconPath: Icons.dialogMessages
             visible: !!(control.roomsAggregator?.chatRooms.length)
             text: qsTr("Chat")
-            highlighted: control.selectedSideBarMode === CallSideBar.Chat && chatButton.isActiveSource
+            highlighted: control.selectedSideBarMode === CallSideBar.Chat && !headerBar.isLinkedRoomShown
             showIndicatorBadge: (control.conferenceConnector?.chatRoom()?.notificationCount ?? 0) > 0
             labelElide: control.extended ? Text.ElideNone : Text.ElideRight
 
             readonly property bool isConferenceChatSource: control.conferenceConnector?.hasCapability(IConferenceConnector.Capability.ChatInCall) ?? false
-            readonly property bool isActiveSource: chatButton.isConferenceChatSource
-                                                   ? control.manualChatSource === -1
-                                                   : control.manualChatSource === null
 
             onClicked: () => {
-                if (control.selectedSideBarMode === CallSideBar.Chat && chatButton.isActiveSource) {
+                if (control.selectedSideBarMode === CallSideBar.Chat && !headerBar.isLinkedRoomShown) {
                     control.selectedSideBarMode = CallSideBar.None
                 } else {
                     control.selectedSideBarMode = CallSideBar.Chat
@@ -265,11 +272,13 @@ Item {
                 iconPath: Icons.dialogMessages
                 text: roomDelg.name
                 highlighted: control.selectedSideBarMode === CallSideBar.Chat
-                             && control.manualChatSource?.roomId === roomDelg.roomId
+                             && chatSideBar.chatProvider === roomDelg.chatProvider
+                             && chatSideBar.chatRoom?.id === roomDelg.roomId
                 showIndicatorBadge: roomDelg.unreadCount > 0
                 labelElide: control.extended ? Text.ElideNone : Text.ElideRight
                 onClicked: () => {
-                               if (control.selectedSideBarMode === CallSideBar.Chat && control.manualChatSource?.roomId === roomDelg.roomId) {
+                               const isShown = chatSideBar.chatProvider === roomDelg.chatProvider && chatSideBar.chatRoom?.id === roomDelg.roomId
+                               if (control.selectedSideBarMode === CallSideBar.Chat && isShown) {
                                    control.selectedSideBarMode = CallSideBar.None
                                } else {
                                    control.selectedSideBarMode = CallSideBar.Chat
