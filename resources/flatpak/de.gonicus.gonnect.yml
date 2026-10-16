@@ -152,6 +152,8 @@ modules:
         path: patches/pjsip-pres-crash.patch
       - type: patch
         path: patches/pjsip-mwi-crash.patch
+      - type: patch
+        path: patches/pjsip-ice-media-ioqueue.patch
 
   - name: openldap
     config-opts:

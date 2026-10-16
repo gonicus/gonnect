@@ -1,0 +1,18 @@
+diff --git a/pjsip/src/pjsua-lib/pjsua_media.c b/pjsip/src/pjsua-lib/pjsua_media.c
+index c93d3de..40a22d0 100644
+--- a/pjsip/src/pjsua-lib/pjsua_media.c
++++ b/pjsip/src/pjsua-lib/pjsua_media.c
+@@ -1167,8 +1167,12 @@ static pj_status_t create_ice_media_transport(
+     pj_ice_strans_cfg_default(&ice_cfg);
+     pj_bzero(&ice_cfg.stun, sizeof(ice_cfg.stun));
+     pj_bzero(&ice_cfg.turn, sizeof(ice_cfg.turn));
++    // Receive ICE media on the media endpoint's ioqueue whenever that one
++    // has worker threads, just like plain UDP media transports do.
+     pj_stun_config_init(&ice_cfg.stun_cfg, &pjsua_var.cp.factory, 0,
+-                        pjsip_endpt_get_ioqueue(pjsua_var.endpt),
++                        pjsua_var.media_cfg.thread_cnt > 0 ?
++                            pjmedia_endpt_get_ioqueue(pjsua_var.med_endpt) :
++                            pjsip_endpt_get_ioqueue(pjsua_var.endpt),
+                         pjsip_endpt_get_timer_heap(pjsua_var.endpt));
+     
+     ice_cfg.resolver = pjsua_var.resolver;
