@@ -49,8 +49,8 @@ Item {
 
     property AggregatedDirectRoomsOfContact roomsAggregator: null
 
-    // -1 is conference chat, so null required as non-value here
-    property var manualChatSourceIndex: null
+    // null: automatic selection, -1 is conference chat, else { provider, roomId }
+    property var manualChatSource: null
 
     property int linkedRoomsCount: 0
 
@@ -237,15 +237,15 @@ Item {
 
             readonly property bool isConferenceChatSource: control.conferenceConnector?.hasCapability(IConferenceConnector.Capability.ChatInCall) ?? false
             readonly property bool isActiveSource: chatButton.isConferenceChatSource
-                                                   ? control.manualChatSourceIndex === -1
-                                                   : control.manualChatSourceIndex === null
+                                                   ? control.manualChatSource === -1
+                                                   : control.manualChatSource === null
 
             onClicked: () => {
                 if (control.selectedSideBarMode === CallSideBar.Chat && chatButton.isActiveSource) {
                     control.selectedSideBarMode = CallSideBar.None
                 } else {
                     control.selectedSideBarMode = CallSideBar.Chat
-                    control.manualChatSourceIndex = chatButton.isConferenceChatSource ? -1 : null
+                    control.manualChatSource = chatButton.isConferenceChatSource ? -1 : null
                     chatSideBar.updateChatRoomNow()
                 }
             }
@@ -257,23 +257,23 @@ Item {
             delegate: BarButton {
                 id: roomDelg
 
-                required property int index
                 required property string roomId
                 required property string name
                 required property int unreadCount
+                required property IChatProvider chatProvider
 
                 iconPath: Icons.dialogMessages
                 text: roomDelg.name
                 highlighted: control.selectedSideBarMode === CallSideBar.Chat
-                             && control.manualChatSourceIndex === roomDelg.index
+                             && control.manualChatSource?.roomId === roomDelg.roomId
                 showIndicatorBadge: roomDelg.unreadCount > 0
                 labelElide: control.extended ? Text.ElideNone : Text.ElideRight
                 onClicked: () => {
-                               if (control.selectedSideBarMode === CallSideBar.Chat && control.manualChatSourceIndex === roomDelg.index) {
+                               if (control.selectedSideBarMode === CallSideBar.Chat && control.manualChatSource?.roomId === roomDelg.roomId) {
                                    control.selectedSideBarMode = CallSideBar.None
                                } else {
                                    control.selectedSideBarMode = CallSideBar.Chat
-                                   control.manualChatSourceIndex = roomDelg.index
+                                   control.manualChatSource = { provider : roomDelg.chatProvider, roomId : roomDelg.roomId }
                                    chatSideBar.updateChatRoomNow()
                                }
                            }
@@ -374,7 +374,7 @@ Item {
             function onIsInConferenceChanged() {
                 if (!control.conferenceConnector.isInConference) {
                     control.conferenceChatInUse = false
-                    control.manualChatSourceIndex = null
+                    control.manualChatSource = null
                 }
                 chatSideBar.updateChatRoom()
             }
@@ -417,17 +417,17 @@ Item {
         // automatic triggers (model or connector signals) should go through updateChatRoom()
         // instead, which defers and coalesces rapid bursts of such signals.
         function updateChatRoomNow() {
-            const manualIndex = control.manualChatSourceIndex
+            const manualSource = control.manualChatSource
 
-            if (manualIndex !== null) {
-                if (manualIndex >= 0 && manualIndex >= conferenceRoomsModel.rowCount()) {
-                    control.manualChatSourceIndex = null
-                } else if (manualIndex === -1) {
+            if (manualSource !== null) {
+                if (manualSource !== -1 && !manualSource.provider?.chatRoomByRoomId(manualSource.roomId)) {
+                    control.manualChatSource = null
+                } else if (manualSource === -1) {
                     chatSideBar.chatProvider = null
                     chatSideBar.chatRoom = control.conferenceConnector?.chatRoom() ?? null
                 } else {
-                    chatSideBar.chatProvider = conferenceRoomsModel.chatProviderAt(manualIndex)
-                    chatSideBar.chatRoom = conferenceRoomsModel.chatRoomAt(manualIndex)
+                    chatSideBar.chatProvider = manualSource.provider
+                    chatSideBar.chatRoom = manualSource.provider.chatRoomByRoomId(manualSource.roomId)
                 }
 
                 return
