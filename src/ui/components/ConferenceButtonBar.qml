@@ -312,7 +312,7 @@ Item {
 
             BarButton {
                 id: moreButton
-                enabled: !control.isOnHold && control.areInCallButtonsEnabled
+                enabled: !control.isOnHold
                 text: qsTr("More")
                 showDropdownButton: true
                 iconPath: Icons.applicationMenu

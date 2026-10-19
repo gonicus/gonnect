@@ -138,7 +138,8 @@ public:
     void markAsRead(const QString &roomId);
 
     virtual void loadMessages(IChatRoom *chatRoom, quint32 n = IChatProvider::defaultMessageLimit,
-                              const QString &threadId = QString()) override;
+                              const QString &threadId = QString(),
+                              const QString &beforeMessageId = QString()) override;
 
     /// Load a single messe. It will be available in lookup, but not in the indexed message list.
     void loadSingleMessage(const QString &roomId, const QString &messageId);
@@ -400,6 +401,9 @@ private:
     /// Map of ipc tag to room id of RoomMessagesRequest objects that have not received an answer
     /// yet.
     QHash<quint64, RoomTagInfo> m_roomListTags;
+
+    /// Set of room ids this client is invited to and GOnnect has alread shown a notification for.
+    QSet<QString> m_notifiedInvitedRoomIds;
 
     /// Map of chat messages that have been requested indvidually (i.e. not in bulk) and have not
     /// received an answer yet. Key is the request tag, value the message id.

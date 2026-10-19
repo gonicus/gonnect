@@ -81,6 +81,19 @@ IChatRoom::Permissions ConferenceChatRoom::permissions()
     return IChatRoom::Permissions();
 }
 
+qsizetype ConferenceChatRoom::chatMessageCount() const
+{
+    return m_messages.count();
+}
+
+ChatMessage *ConferenceChatRoom::messageByIndex(qsizetype index) const
+{
+    if (index >= 0 && index < m_messages.size()) {
+        return m_messages.at(index);
+    }
+    return nullptr;
+}
+
 ChatMessage *ConferenceChatRoom::chatMessageById(const QString &id) const
 {
     Q_UNUSED(id)

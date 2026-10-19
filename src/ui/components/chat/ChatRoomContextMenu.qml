@@ -13,11 +13,14 @@ Menu {
     signal editRoomTriggered
     signal inviteUsersTriggered
     signal editConferenceUrlTriggered
+    signal indexingToggled
 
     property bool toggleFavoriteVisible: true
     property bool editRoomVisible: true
     property bool inviteUsersVisible: true
     property bool editConferenceUrlVisible: false
+    property bool toggleIndexingVisible: false
+    property bool indexingEnabled: false
 
     property string conferenceUrl: ""
     property Contact contact: null
@@ -70,6 +73,13 @@ Menu {
         text: qsTr("Leave room...")
         icon.source: Icons.dialogCancel
         onTriggered: () => control.leaveRoomTriggered()
+    }
+
+    HideableMenuItem {
+        text: control.indexingEnabled ? qsTr("Disable search index") : qsTr("Enable search index")
+        icon.source: Icons.systemSearch
+        visible: control.toggleIndexingVisible
+        onTriggered: () => control.indexingToggled()
     }
 
     Instantiator {
