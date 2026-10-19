@@ -23,6 +23,7 @@ Menu {
     property bool isBlocked
     property bool isSipSubscriptable
     property bool isOpenChatAvailable
+    property bool showRemove: false
 
     onClosed: () => control.destroy()
 
@@ -72,10 +73,11 @@ Menu {
         onTriggered: () => control.blockTemporarilyClicked()
     }
 
-    Action {
+    HideableMenuItem {
         id: removeAction
         text: qsTr("Remove")
         icon.source: Icons.userTrash
+        visible: control.showRemove
         onTriggered: () => control.removeItem()
     }
 }

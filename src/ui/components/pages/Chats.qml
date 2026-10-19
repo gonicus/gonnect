@@ -80,16 +80,6 @@ Item {
             DialogFactory.createInfoDialog({text : reasonStr })
         }
 
-        function onRoomInviteReceived(roomId : string, roomDisplayName : string, invitationText : string) {
-            ViewHelper.topDrawer.loader.sourceComponent = roomInvitedComponent
-
-            const item = ViewHelper.topDrawer.loader.item
-            item.chatProvider = control.attachedData
-            item.roomId = roomId
-            item.roomDisplayName = roomDisplayName
-            item.invitationText = invitationText
-        }
-
         function onClipboardImageUploaded(imageFilePath : url, chatRoom : IChatRoom, threadId : string) {
             ViewHelper.topDrawer.loader.sourceComponent = imagePreviewComponent
 
@@ -98,12 +88,6 @@ Item {
             item.chatRoom = chatRoom
             item.threadId = threadId
         }
-    }
-
-    Component {
-        id: roomInvitedComponent
-
-        InvitedToChatRoom {}
     }
 
     Component {
