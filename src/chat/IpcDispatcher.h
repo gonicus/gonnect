@@ -401,6 +401,9 @@ private:
     /// yet.
     QHash<quint64, RoomTagInfo> m_roomListTags;
 
+    /// Set of room ids this client is invited to and GOnnect has alread shown a notification for.
+    QSet<QString> m_notifiedInvitedRoomIds;
+
     /// Map of chat messages that have been requested indvidually (i.e. not in bulk) and have not
     /// received an answer yet. Key is the request tag, value the message id.
     QHash<quint64, QString> m_singleMessageTags;

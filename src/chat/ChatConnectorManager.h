@@ -68,6 +68,8 @@ Q_SIGNALS:
     void isChatAvailableChanged();
     void chatConnectorsChanged();
     void unreadNotificationsCountChanged();
+    void roomInviteReceived(IChatProvider *provider, QString roomId, QString roomDisplayName,
+                            QString invitationText);
 };
 
 class ChatConnectorManagerWrapper

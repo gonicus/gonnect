@@ -478,6 +478,24 @@ BaseWindow {
         }
     }
 
+    readonly property Connections chatConnectorManagerConnections: Connections {
+        target: ChatConnectorManager
+        function onRoomInviteReceived(provider : IChatProvider, roomId : string, roomDisplayName : string, invitationText : string) {
+            ViewHelper.topDrawer.loader.sourceComponent = roomInvitedComponent
+
+            const item = ViewHelper.topDrawer.loader.item
+            item.chatProvider = provider
+            item.roomId = roomId
+            item.roomDisplayName = roomDisplayName
+            item.invitationText = invitationText
+        }
+
+        readonly property Component roomInvitedComponent: Component {
+            id: roomInvitedComponent
+            InvitedToChatRoom {}
+        }
+    }
+
     readonly property Connections viewHelperConnections: Connections {
         target: ViewHelper
         function onUrlCopyDialogRequested(url, text) {
