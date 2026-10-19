@@ -29,6 +29,7 @@ Item {
     property alias showDropdownButton: dropDownIconContainer.visible
     property alias showIndicatorBadge: indicatorBadge.visible
     property string tooltipText: ""
+    property alias labelElide: buttonLabel.elide
 
     enum ToggleColorMode {
         Normal,

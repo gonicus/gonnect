@@ -377,7 +377,11 @@ new QWebChannel(qt.webChannelTransport, function(channel) {
     })
 
     jitsiConn.executeSetVideoInputDeviceCommand.connect((deviceId) => {
-        api.setVideoInputDevice(undefined, deviceId)
+        api.getCurrentDevices().then(devices => {
+            if (devices?.videoInput?.deviceId !== deviceId) {
+                api.setVideoInputDevice(undefined, deviceId)
+            }
+        })
     })
 
     jitsiConn.executeToggleVirtualBackgroundDialogCommand.connect(() => {
@@ -1173,6 +1177,7 @@ void JitsiConnector::transferVideoManagerDeviceToJitsi()
 
     if (videoDevice.isNull()) {
         selectVideoInputDevice("");
+        return;
     }
 
     // Find correct Jitsi device id for QCameraDevice
@@ -1198,6 +1203,7 @@ void JitsiConnector::setConferenceName(const QString &name)
     if (m_roomName != name) {
         m_roomName = name;
         Q_EMIT conferenceNameChanged();
+        Q_EMIT conferenceUrlChanged();
     }
 }
 

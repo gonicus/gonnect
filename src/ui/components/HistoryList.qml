@@ -438,6 +438,7 @@ Item {
                     isSipSubscriptable: delg.hasBuddyState
                     isReady: delg.isReady
                     isOpenChatAvailable: !!aggregatedRooms.bestMatchingChatRoom
+                    showRemove: true
 
                     onCallClicked: () => SIPCallManager.call(delg.account, delg.remoteUrl, delg.contactId)
                     onCallAsClicked: (identityId) => SIPCallManager.call(delg.account, delg.remoteUrl, delg.contactId, identityId)
@@ -464,7 +465,9 @@ Item {
                     id: rowJitsiContextMenu
                     isFavorite: delg.isFavorite
                     roomName: delg.remotePhoneNumber
+                    showRemove: true
                     width: 230
+
                     onCallClicked: () => ViewHelper.requestMeeting(delg.remoteUrl)
                     onRemoveItem: () => delg.removeEntry()
                 }

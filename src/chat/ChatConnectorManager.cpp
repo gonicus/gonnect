@@ -1,4 +1,5 @@
 #include "ChatConnectorManager.h"
+#include "ChatMessageSearchProvider.h"
 #include "Credentials.h"
 #include "IChatProvider.h"
 #include "IpcDispatcher.h"
@@ -82,6 +83,11 @@ void ChatConnectorManager::init()
     if (m_isInitialized) {
         return;
     }
+
+    // INFO: We're hooking up the message search provider early to get notified
+    // about all provider/room changes
+    // Warn: No ref tracking atm, thus no destruction...
+    (void)ChatMessageSearchProvider::instance();
 
     static const QRegularExpression groupRegex = QRegularExpression("^chat[0-9]+$");
     ReadOnlyConfdSettings settings;
@@ -331,6 +337,12 @@ void ChatConnectorManager::processSettingGroup(const QString &group)
 
         connect(provider, &IChatProvider::unreadNotificationsCountChanged, this,
                 &ChatConnectorManager::updateUnreadNotificationsCount);
+
+        connect(provider, &IChatProvider::roomInviteReceived, this,
+                [this, provider](const QString &roomId, const QString &roomDisplayName,
+                                 const QString &invitationText) {
+                    Q_EMIT roomInviteReceived(provider, roomId, roomDisplayName, invitationText);
+                });
 
         Q_EMIT isChatAvailableChanged();
         Q_EMIT chatConnectorsChanged();
