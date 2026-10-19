@@ -23,7 +23,7 @@ VideoManager::VideoManager(QObject *parent) : QObject{ parent }
 
 #ifdef Q_OS_FLATPAK
     connect(&m_pipewireCameras, &PipeWireCameraDevices::devicesChanged, this,
-            [this](){ m_debounceUpdateTimer.start(); });
+            [this]() { m_debounceUpdateTimer.start(); });
 #endif
 
     connect(this, &VideoManager::selectedDeviceIdChanged, this, [this]() {
