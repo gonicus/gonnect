@@ -42,6 +42,8 @@ class IConferenceConnector : public ICallState
     Q_PROPERTY(bool hasTextpad READ hasTextpad NOTIFY hasTextpadChanged FINAL)
     Q_PROPERTY(bool hasDialIn READ hasDialIn NOTIFY hasDialInChanged FINAL)
     Q_PROPERTY(bool hasTranscription READ hasTranscription NOTIFY hasTranscriptionChanged FINAL)
+    Q_PROPERTY(bool isTranscriptionActive READ isTranscriptionActive NOTIFY
+                       isTranscriptionActiveChanged FINAL)
 
     Q_PROPERTY(IConferenceConnector::VideoQuality videoQuality READ videoQuality NOTIFY
                        videoQualityChanged FINAL)
@@ -156,6 +158,7 @@ public:
     virtual bool hasTextpad() const = 0;
 
     virtual bool hasTranscription() const = 0;
+    virtual bool isTranscriptionActive() const = 0;
     Q_INVOKABLE virtual void toggleTranscription() = 0;
     virtual const QList<TranscriptionChunk> &transcriptionChunks() const = 0;
     Q_INVOKABLE virtual void
@@ -188,6 +191,7 @@ Q_SIGNALS:
     void hasTextpadChanged();
     void hasDialInChanged();
     void hasTranscriptionChanged();
+    void isTranscriptionActiveChanged();
     void isPasswordRequiredChanged();
     void roomPasswordChanged();
     void displayNameChanged();

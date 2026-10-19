@@ -514,15 +514,17 @@ api.addListener("raiseHandUpdated", data => {
 })
 
 api.addListener("transcribingStatusChanged", data => {
+    console.debug("setTranscriptionActive", data.on)
     jitsiConn.setTranscriptionActive(data.on)
 })
 
 api.addListener("transcriptionChunkReceived", data => {
+    console.debug("received transcription chunk:", JSON.stringify(data))
     jitsiConn.addTranscriptionChunk(
         data.messageID,
-        data.participant.id,
-        data.participant.name,
-        data.participant.avatarUrl,
+        data.participant?.id ?? "",
+        data.participant?.name ?? "",
+        data.participant?.avatarUrl ?? "",
         data.language,
         data.final,
         data.stable,

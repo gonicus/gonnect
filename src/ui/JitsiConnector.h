@@ -56,7 +56,7 @@ public:
     Q_INVOKABLE void setUserRole(const QString &id, const QString &roleString);
     Q_INVOKABLE void setLargeVideoUserById(const QString &id);
 
-    bool isTranscriptionActive() const { return m_isTranscriptionActive; }
+    bool isTranscriptionActive() const override { return m_isTranscriptionActive; }
     Q_INVOKABLE void setTranscriptionActive(bool value);
     virtual const QList<TranscriptionChunk> &transcriptionChunks() const override
     {
@@ -222,8 +222,6 @@ Q_SIGNALS:
     // Internal API
     // These events are meant to be received by JS code.
     void messageSent(QString message);
-
-    void isTranscriptionActiveChanged();
 
     void executeLeaveRoomCommand();
     void executeEndConferenceCommand();
