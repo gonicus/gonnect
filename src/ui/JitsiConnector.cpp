@@ -520,15 +520,19 @@ api.addListener("transcribingStatusChanged", data => {
 
 api.addListener("transcriptionChunkReceived", data => {
     console.debug("received transcription chunk:", JSON.stringify(data))
+
+    // data seems to be in a sub-object depending on Jitsi version
+    const chunk = data.data ?? data
+
     jitsiConn.addTranscriptionChunk(
-        data.messageID,
-        data.participant?.id ?? "",
-        data.participant?.name ?? "",
-        data.participant?.avatarUrl ?? "",
-        data.language,
-        data.final,
-        data.stable,
-        data.unstable
+        chunk.messageID,
+        chunk.participant?.id ?? "",
+        chunk.participant?.name ?? "",
+        chunk.participant?.avatarUrl ?? "",
+        chunk.language,
+        chunk.final,
+        chunk.stable,
+        chunk.unstable
     )
 })
 
