@@ -332,6 +332,12 @@ void ChatConnectorManager::processSettingGroup(const QString &group)
         connect(provider, &IChatProvider::unreadNotificationsCountChanged, this,
                 &ChatConnectorManager::updateUnreadNotificationsCount);
 
+        connect(provider, &IChatProvider::roomInviteReceived, this,
+                [this, provider](const QString &roomId, const QString &roomDisplayName,
+                                 const QString &invitationText) {
+                    Q_EMIT roomInviteReceived(provider, roomId, roomDisplayName, invitationText);
+                });
+
         Q_EMIT isChatAvailableChanged();
         Q_EMIT chatConnectorsChanged();
 
