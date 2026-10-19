@@ -150,7 +150,9 @@ Item {
                                                                   toggleFavoriteVisible: false,
                                                                   editRoomVisible: !!(Number(control.chatRoom?.permissions ?? 0) & IChatRoom.Permission.CanEdit),
                                                                   inviteUsersVisible: !!(Number(control.chatRoom?.permissions ?? 0) & IChatRoom.Permission.CanInvite),
-                                                                  editConferenceUrlVisible: !!(Number(control.chatRoom?.permissions ?? 0) & IChatRoom.Permission.CanEditConferenceUrl)
+                                                                  editConferenceUrlVisible: !!(Number(control.chatRoom?.permissions ?? 0) & IChatRoom.Permission.CanEditConferenceUrl),
+                                                                  toggleIndexingVisible: true,
+                                                                  indexingEnabled: ChatMessageSearchProvider.isRoomIndexingEnabled(control.chatRoom?.id ?? "")
                                                               }).popup()
                        }
         }
@@ -269,6 +271,7 @@ Item {
         id: chatRoomMenuComponent
 
         ChatRoomContextMenu {
+            id: chatRoomContextMenu
             onEditRoomTriggered: () => ViewHelper.showEditRoomDialog(control.chatProvider, control.chatRoom.id)
             onInviteUsersTriggered: () => ViewHelper.showInviteUserToRoomDialog(control.chatProvider, control.chatRoom.id)
             onLeaveRoomTriggered: () => {
@@ -280,6 +283,7 @@ Item {
                                       item.accepted.connect(() => chatProvider.requestRoomLeave(roomId))
                                   }
             onEditConferenceUrlTriggered: () => ViewHelper.requestUrlEditDialog(control.chatRoom)
+            onIndexingToggled: () => ChatMessageSearchProvider.setRoomIndexingEnabled(control.chatRoom.id, !chatRoomContextMenu.indexingEnabled)
         }
     }
 

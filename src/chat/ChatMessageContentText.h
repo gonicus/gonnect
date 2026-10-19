@@ -25,6 +25,7 @@ public:
     QString htmlText() const { return m_htmlText; }
     QString rawText() const { return m_rawText; }
     QList<ChatMessageContentPart *> contentParts() const { return m_parts; }
+
     void setText(const QString &text);
 
     void processText();

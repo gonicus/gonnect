@@ -59,6 +59,8 @@ public:
 
     uint realMessagesCount() const { return m_realMessagesCount; }
 
+    Q_INVOKABLE qsizetype rowOfMessage(const QString &eventId) const;
+
 private Q_SLOTS:
     void onChatRoomChanged();
     void updateRealMessagesCount();

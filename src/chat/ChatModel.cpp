@@ -143,6 +143,23 @@ QVariant ChatModel::data(const QModelIndex &index, int role) const
     return rawData(item, role);
 }
 
+qsizetype ChatModel::rowOfMessage(const QString &eventId) const
+{
+    if (eventId.isEmpty() || !m_chatRoom) {
+        return -1;
+    }
+
+    const auto messages = m_chatRoom->chatMessages();
+    const auto it = std::ranges::find_if(messages, [eventId](const ChatMessage *message) {
+        return message->eventId() == eventId;
+    });
+    if (it != messages.end()) {
+        return std::distance(messages.begin(), it);
+    }
+
+    return -1;
+}
+
 QVariant ChatModel::rawData(const ChatMessage *item, int role) const
 {
     if (!item) {

@@ -1,10 +1,10 @@
 #include <fcntl.h>
 #include <stdlib.h>
 #include <QLoggingCategory>
-#include "KeychainSettings.h"
 #include "Credentials.h"
 
 #ifdef Q_OS_FLATPAK
+#  include "KeychainSettings.h"
 #  include "SecretPortal.h"
 #endif
 

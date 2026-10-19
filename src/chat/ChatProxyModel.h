@@ -30,6 +30,8 @@ public:
     virtual QHash<int, QByteArray> roleNames() const override;
     virtual QVariant data(const QModelIndex &index, int role) const override;
 
+    Q_INVOKABLE qsizetype rowOfMessage(const QString &eventId) const;
+
 protected:
     virtual bool lessThan(const QModelIndex &sourceLeft,
                           const QModelIndex &sourceRight) const override;

@@ -93,6 +93,19 @@ QVariant ChatProxyModel::data(const QModelIndex &index, int role) const
     }
 }
 
+qsizetype ChatProxyModel::rowOfMessage(const QString &eventId) const
+{
+    if (eventId.isEmpty()) {
+        return -1;
+    }
+
+    if (const auto *chatModel = qobject_cast<ChatModel *>(sourceModel())) {
+        return mapFromSource(chatModel->index(chatModel->rowOfMessage(eventId))).row();
+    }
+
+    return -1;
+}
+
 ChatMessage *ChatProxyModel::ownMessageAt(qsizetype proxyIndex) const
 {
     const QModelIndex prevSource = mapToSource(this->index(proxyIndex, 0));

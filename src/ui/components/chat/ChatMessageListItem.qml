@@ -411,6 +411,47 @@ Item {
         }
     }
 
+    Rectangle {
+        id: jumpHighlight
+        opacity: 0
+        color: Theme.accentColor
+        radius: 6
+        anchors {
+            fill: messageContentItem
+            leftMargin: ((control.content instanceof ChatMessageContentText) || (control.content instanceof ChatMessageContentRemoved)) ? -4 : 0
+            margins: (control.content instanceof ChatMessageContentImage) ? -4 : 0
+        }
+
+        SequentialAnimation {
+            id: flashAnimation
+
+            NumberAnimation {
+                target: jumpHighlight
+                property: "opacity"
+                to: 0.35
+                duration: 150
+            }
+            PauseAnimation {
+                duration: 1200
+            }
+            NumberAnimation {
+                target: jumpHighlight
+                property: "opacity"
+                to: 0
+                duration: 700
+            }
+        }
+
+        Connections {
+            target: SelectionState
+            function onHighlightedMessageIdChanged() {
+                if (SelectionState.highlightedMessageId !== "" && SelectionState.highlightedMessageId === control.eventId) {
+                    flashAnimation.restart()
+                }
+            }
+        }
+    }
+
     ChatMessageListItemContent {
         id: messageContentItem
         isStateUpdate: control.isStateUpdate

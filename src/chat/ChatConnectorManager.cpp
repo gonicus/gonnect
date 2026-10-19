@@ -1,4 +1,5 @@
 #include "ChatConnectorManager.h"
+#include "ChatMessageSearchProvider.h"
 #include "Credentials.h"
 #include "IChatProvider.h"
 #include "IpcDispatcher.h"
@@ -82,6 +83,11 @@ void ChatConnectorManager::init()
     if (m_isInitialized) {
         return;
     }
+
+    // INFO: We're hooking up the message search provider early to get notified
+    // about all provider/room changes
+    // Warn: No ref tracking atm, thus no destruction...
+    (void)ChatMessageSearchProvider::instance();
 
     static const QRegularExpression groupRegex = QRegularExpression("^chat[0-9]+$");
     ReadOnlyConfdSettings settings;

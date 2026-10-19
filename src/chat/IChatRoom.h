@@ -115,8 +115,14 @@ public:
     /// List of chat messages of this room, sorted by timestamp ascending
     virtual QList<ChatMessage *> chatMessages() const = 0;
 
+    /// Number of chat messages in this room (i.e. the size of chatMessages())
+    Q_INVOKABLE virtual qsizetype chatMessageCount() const = 0;
+
     /// Retrieve a message by id lookup or nullptr if not found
     virtual ChatMessage *messageById(const QString &id) const = 0;
+
+    /// Retrieve a message by its index (as in chatMessages()) or nullptr if out of bounds
+    Q_INVOKABLE virtual ChatMessage *messageByIndex(qsizetype index) const = 0;
 
     /// List of pinned chat messages of this room, sorted by timestamp ascending
     virtual QList<ChatMessage *> pinnedChatMessages() const = 0;
@@ -147,7 +153,9 @@ public:
     virtual bool isInitiallyLoaded() const = 0;
 
     /// Start the loading of next batch of messages.
-    Q_INVOKABLE virtual void loadMessages(const QString &threadId = QString()) = 0;
+    Q_INVOKABLE virtual void loadMessages(const QString &threadId = QString(),
+                                          const QString &beforeMessageId = QString(),
+                                          quint32 limit = 100) = 0;
 
     /// Toggle whether the message is pinned in this room or not.
     Q_INVOKABLE virtual void togglePin(const QString &messageId) = 0;

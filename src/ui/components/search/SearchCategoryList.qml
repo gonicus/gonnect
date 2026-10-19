@@ -12,7 +12,8 @@ Column {
         None = 0,
         Contacts = 1,
         History = 2,
-        RoomsAndTeams = 4
+        RoomsAndTeams = 4,
+        Messages = 8
     }
 
     property int selectedCategories: SearchCategoryList.Category.Contacts
@@ -45,5 +46,9 @@ Column {
     CategoryItem {
         name: qsTr("Rooms and Teams")
         value: SearchCategoryList.Category.RoomsAndTeams
+    }
+    CategoryItem {
+        name: qsTr("Messages")
+        value: SearchCategoryList.Category.Messages
     }
 }
