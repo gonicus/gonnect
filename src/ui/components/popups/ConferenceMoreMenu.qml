@@ -115,6 +115,15 @@ Menu {
         onClicked: () => control.iConferenceConnector.muteAll()
     }
 
+    HideableMenuItem {
+        visible: control.iConferenceConnector.ownRole === ConferenceUser.Role.Moderator
+                 && control.iConferenceConnector.hasCapability(IConferenceConnector.Capability.Transcription)
+                 && control.iConferenceConnector.hasTranscription
+        text: qsTr("Toggle transcription")
+        icon.source: Icons.addSubtitle
+        onClicked: () => control.iConferenceConnector.toggleTranscription()
+    }
+
     MenuSeparator {
         visible: control.iConferenceConnector.hasCapability(IConferenceConnector.Capability.Sharable)
     }

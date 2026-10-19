@@ -8,6 +8,7 @@
 #include "JitsiMediaDevice.h"
 #include "ConferenceUser.h"
 #include "MuteSyncGuard.h"
+#include "TranscriptionChunk.h"
 
 class CallHistoryItem;
 class SIPAudioDevice;
@@ -55,6 +56,18 @@ public:
     Q_INVOKABLE void setUserRole(const QString &id, const QString &roleString);
     Q_INVOKABLE void setLargeVideoUserById(const QString &id);
 
+    bool isTranscriptionActive() const { return m_isTranscriptionActive; }
+    Q_INVOKABLE void setTranscriptionActive(bool value);
+    virtual const QList<TranscriptionChunk> &transcriptionChunks() const override
+    {
+        return m_transcriptionChunks;
+    }
+    Q_INVOKABLE virtual void
+    addTranscriptionChunk(const QString &messageId, const QString &participantId,
+                          const QString &participantName, const QString &participantAvatarUrl,
+                          const QString &language, const QString &finalText,
+                          const QString &stableText, const QString &unstableText) override;
+
     // Interface methods
     ContactInfo remoteContactInfo() const override;
 
@@ -66,6 +79,8 @@ public:
     bool hasWhiteboard() const override { return m_hasWhiteboard; }
     void toggleWhiteboard() override;
     bool hasTextpad() const override { return m_hasTextpad; }
+    void toggleTranscription() override;
+    bool hasTranscription() const override { return m_hasTranscription; }
     bool isPasswordRequired() const override { return m_isPasswordRequired; }
     QString roomPassword() const override { return m_roomPassword; }
     void setRoomPassword(QString value) override;
@@ -139,6 +154,7 @@ private:
 
     void setHasWhiteboard(bool value);
     void setHasTextpad(bool value);
+    void setHasTranscription(bool value);
     void setConferenceName(const QString &name);
     void setIsInConference(bool value);
     void setIsOnHold(bool value);
@@ -180,10 +196,14 @@ private:
     bool m_isToggleScreenSharePending = false;
     bool m_hasWhiteboard = false;
     bool m_hasTextpad = false;
+    bool m_hasTranscription = false;
     QUrl m_dialInConfCodeUrl;
     QUrl m_dialInNumbersUrl;
     QString m_roomPassword;
     VideoQuality m_videoQuality = VideoQuality::Average;
+    bool m_isTranscriptionActive = false;
+    QList<TranscriptionChunk> m_transcriptionChunks;
+    QHash<QString, int> m_transcriptionChunkLookup;
 
     QString m_roomName;
     QString m_displayName;
@@ -203,6 +223,8 @@ Q_SIGNALS:
     // These events are meant to be received by JS code.
     void messageSent(QString message);
 
+    void isTranscriptionActiveChanged();
+
     void executeLeaveRoomCommand();
     void executeEndConferenceCommand();
     void executePasswordCommand(QString password);
@@ -214,6 +236,7 @@ Q_SIGNALS:
     void executeToggleRaiseHandCommand();
     void executeToggleSubtitlesCommand();
     void executeToggleWhiteboardCommand();
+    void executeToggleTranscriptionCommand(bool enabled);
     void executeAnswerKnockingParticipant(QString id, bool approved);
     void executeSetAudioInputDeviceCommand(QString devicId);
     void executeSetAudioOutputDeviceCommand(QString devicId);

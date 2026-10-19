@@ -4,6 +4,7 @@
 #include "IChatRoom.h"
 #include "ConferenceUser.h"
 #include "CallHistoryItem.h"
+#include "TranscriptionChunk.h"
 
 #include <QPointer>
 
@@ -40,6 +41,7 @@ class IConferenceConnector : public ICallState
     Q_PROPERTY(bool hasWhiteboard READ hasWhiteboard NOTIFY hasWhiteboardChanged FINAL)
     Q_PROPERTY(bool hasTextpad READ hasTextpad NOTIFY hasTextpadChanged FINAL)
     Q_PROPERTY(bool hasDialIn READ hasDialIn NOTIFY hasDialInChanged FINAL)
+    Q_PROPERTY(bool hasTranscription READ hasTranscription NOTIFY hasTranscriptionChanged FINAL)
 
     Q_PROPERTY(IConferenceConnector::VideoQuality videoQuality READ videoQuality NOTIFY
                        videoQualityChanged FINAL)
@@ -71,6 +73,7 @@ public:
         VideoMute,
         VideoQualityAdjustable,
         Whiteboard,
+        Transcription,
     };
     Q_ENUM(Capability)
 
@@ -152,6 +155,15 @@ public:
 
     virtual bool hasTextpad() const = 0;
 
+    virtual bool hasTranscription() const = 0;
+    Q_INVOKABLE virtual void toggleTranscription() = 0;
+    virtual const QList<TranscriptionChunk> &transcriptionChunks() const = 0;
+    Q_INVOKABLE virtual void
+    addTranscriptionChunk(const QString &messageId, const QString &participantId,
+                          const QString &participantName, const QString &participantAvatarUrl,
+                          const QString &language, const QString &finalText,
+                          const QString &stableText, const QString &unstableText) = 0;
+
     virtual bool hasDialIn() const = 0;
     Q_INVOKABLE virtual void requestDialInInfo() = 0;
 
@@ -175,6 +187,7 @@ Q_SIGNALS:
     void hasWhiteboardChanged();
     void hasTextpadChanged();
     void hasDialInChanged();
+    void hasTranscriptionChanged();
     void isPasswordRequiredChanged();
     void roomPasswordChanged();
     void displayNameChanged();
@@ -202,4 +215,7 @@ Q_SIGNALS:
     void dialInfoReceived(QVariantMap numbers, QString code);
     void participantKnocked(QString id, QString name);
     void knockAnswered(QString id);
+
+    void transcriptionChunkAdded(qsizetype index);
+    void transcriptionChunkUpdated(qsizetype index);
 };

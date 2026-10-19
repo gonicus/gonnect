@@ -360,6 +360,17 @@ new QWebChannel(qt.webChannelTransport, function(channel) {
         api.executeCommand("toggleWhiteboard")
     })
 
+    jitsiConn.executeToggleTranscriptionCommand.connect(enabled => {
+        if (enabled) {
+            api.executeCommand("startRecording", {
+                mode: "file",
+                transcription: true
+            })
+        } else {
+            api.executeCommand("stopRecording", "file", true)
+        }
+    })
+
     jitsiConn.executeSetNoiseSupressionCommand.connect((value) => {
         api.executeCommand("setNoiseSuppressionEnabled", { enabled: value })
     })
@@ -496,10 +507,27 @@ api.addListener("knockingParticipant", data => {
     jitsiConn.addKnockingParticipant(data.participant.id, data.participant.name)
 })
 
-api.addListener("raisHandUpdated", data => {
+api.addListener("raiseHandUpdated", data => {
     if (data.id === api.getMyUserId()) {
         jitsiConn.setIsHandRaisedInternal(!!data.handRaised)
     }
+})
+
+api.addListener("transcribingStatusChanged", data => {
+    jitsiConn.setTranscriptionActive(data.on)
+})
+
+api.addListener("transcriptionChunkReceived", data => {
+    jitsiConn.addTranscriptionChunk(
+        data.messageID,
+        data.participant.id,
+        data.participant.name,
+        data.participant.avatarUrl,
+        data.language,
+        data.final,
+        data.stable,
+        data.unstable
+    )
 })
 
 )""")
@@ -549,9 +577,11 @@ void JitsiConnector::checkJitsiBackendFeatures()
             qCCritical(lcJitsiConnector) << "  " << err.errorString();
         }
     });
-    connect(reply, &QIODevice::readyRead, this, [reply, this]() {
+    connect(reply, &QNetworkReply::finished, this, [reply, this]() {
         static const QRegularExpression whiteboardRegex(
-                R"(whiteboard\s*(?:=|:)\s*{\s*enabled\s*:\s*true)");
+                R"(whiteboard\s*(?:=|:)\s*{[^}]*?enabled\s*:\s*true)");
+        static const QRegularExpression transcriptionRegex(
+                R"(transcription\s*(?:=|:)\s*{[^}]*?enabled\s*:\s*true)");
         static const QRegularExpression etherpadRegex(R"(etherpad_base\s*(?:=|:)\s*['"])");
         static const QRegularExpression dialInConfCodeUrl(
                 R"(dialInConfCodeUrl\s*(?:=|:)\s*['"](?<url>.*)['"])");
@@ -562,6 +592,7 @@ void JitsiConnector::checkJitsiBackendFeatures()
 
         setHasWhiteboard(whiteboardRegex.match(txt).hasMatch());
         setHasTextpad(etherpadRegex.match(txt).hasMatch());
+        setHasTranscription(transcriptionRegex.match(txt).hasMatch());
 
         const auto dialInConfCodeUrlMatch = dialInConfCodeUrl.match(txt);
         if (dialInConfCodeUrlMatch.hasMatch()) {
@@ -576,6 +607,8 @@ void JitsiConnector::checkJitsiBackendFeatures()
         if (hasDialIn()) {
             Q_EMIT hasDialInChanged();
         }
+
+        reply->deleteLater();
     });
 }
 
@@ -595,6 +628,14 @@ void JitsiConnector::setHasTextpad(bool value)
     }
 }
 
+void JitsiConnector::setHasTranscription(bool value)
+{
+    if (hasCapability(Capability::Transcription) && m_hasTranscription != value) {
+        m_hasTranscription = value;
+        Q_EMIT hasTranscriptionChanged();
+    }
+}
+
 void JitsiConnector::setLargeVideoUserById(const QString &id)
 {
     for (const auto user : std::as_const(m_users)) {
@@ -604,6 +645,48 @@ void JitsiConnector::setLargeVideoUserById(const QString &id)
         }
     }
     setLargeVideoUser(nullptr);
+}
+
+void JitsiConnector::setTranscriptionActive(bool value)
+{
+    qCDebug(lcJitsiConnector) << "setTranscriptionActive" << value;
+
+    if (m_isTranscriptionActive != value) {
+        m_isTranscriptionActive = value;
+        Q_EMIT isTranscriptionActiveChanged();
+    }
+}
+
+void JitsiConnector::addTranscriptionChunk(const QString &messageId, const QString &participantId,
+                                           const QString &participantName,
+                                           const QString &participantAvatarUrl,
+                                           const QString &language, const QString &finalText,
+                                           const QString &stableText, const QString &unstableText)
+{
+    if (messageId.isEmpty()) {
+        qCWarning(lcJitsiConnector) << "Cannot add transcription chunk with empty messageId";
+        return;
+    }
+
+    qCDebug(lcJitsiConnector) << "addTranscriptionChunk" << messageId << participantId
+                              << participantName << participantAvatarUrl << language << finalText
+                              << stableText << unstableText;
+
+    const TranscriptionChunk chunk{
+        messageId, participantId, participantName, participantAvatarUrl,           language,
+        finalText, stableText,    unstableText,    QDateTime::currentDateTimeUtc()
+    };
+
+    const auto it = m_transcriptionChunkLookup.constFind(messageId);
+    if (it != m_transcriptionChunkLookup.constEnd()) {
+        m_transcriptionChunks[it.value()] = chunk;
+        Q_EMIT transcriptionChunkUpdated(it.value());
+    } else {
+        const auto newIndex = m_transcriptionChunks.size();
+        m_transcriptionChunkLookup.insert(messageId, newIndex);
+        m_transcriptionChunks.append(chunk);
+        Q_EMIT transcriptionChunkAdded(newIndex);
+    }
 }
 
 void JitsiConnector::setIsInConference(bool value)
@@ -934,6 +1017,10 @@ void JitsiConnector::setUserRole(const QString &id, const QString &roleString)
 
 void JitsiConnector::muteAll()
 {
+    if (ownRole() != ConferenceUser::Role::Moderator) {
+        qCWarning(lcJitsiConnector) << "Only moderators can mute all";
+        return;
+    }
     Q_EMIT executeMuteAllCommand();
 }
 
@@ -1230,12 +1317,13 @@ QUrl JitsiConnector::baseUrl() const
 bool JitsiConnector::hasCapability(const Capability capabilityToCheck) const
 {
     const static QSet<Capability> m_capabilites = {
-        Capability::AudioMute,  Capability::ChatInCall,   Capability::Holdable,
-        Capability::RaiseHand,  Capability::ScreenShare,  Capability::Sharable,
-        Capability::Subtitles,  Capability::MuteAll,      Capability::NoiseSuppression,
-        Capability::UserRoles,  Capability::UserKickable, Capability::RoomPassword,
-        Capability::ShareUrl,   Capability::Textpad,      Capability::TileView,
-        Capability::Whiteboard, Capability::VideoMute,    Capability::VideoQualityAdjustable,
+        Capability::AudioMute,    Capability::ChatInCall,   Capability::Holdable,
+        Capability::RaiseHand,    Capability::ScreenShare,  Capability::Sharable,
+        Capability::Subtitles,    Capability::MuteAll,      Capability::NoiseSuppression,
+        Capability::UserRoles,    Capability::UserKickable, Capability::RoomPassword,
+        Capability::ShareUrl,     Capability::Textpad,      Capability::TileView,
+        Capability::Whiteboard,   Capability::VideoMute,    Capability::VideoQualityAdjustable,
+        Capability::Transcription
     };
     return m_capabilites.contains(capabilityToCheck);
 }
@@ -1243,6 +1331,15 @@ bool JitsiConnector::hasCapability(const Capability capabilityToCheck) const
 void JitsiConnector::toggleWhiteboard()
 {
     Q_EMIT executeToggleWhiteboardCommand();
+}
+
+void JitsiConnector::toggleTranscription()
+{
+    if (ownRole() != ConferenceUser::Role::Moderator) {
+        qCWarning(lcJitsiConnector) << "Transcription toggle only allowed for moderators";
+        return;
+    }
+    Q_EMIT executeToggleTranscriptionCommand(!m_isTranscriptionActive);
 }
 
 bool JitsiConnector::hasDialIn() const

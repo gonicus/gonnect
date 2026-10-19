@@ -22,6 +22,9 @@ Item {
                 w += item.width + Theme.d
             }
         }
+        if (transcriptionButton.visible) {
+            w += transcriptionButton.width + Theme.d
+        }
         if (personCountButton.visible) {
             w += personCountButton.width + Theme.d
         }
@@ -86,7 +89,8 @@ Item {
         Caller,
         Chat,
         AdditionalInfo,
-        Users
+        Users,
+        Transcription
     }
 
     readonly property alias selectedCallItem: callList.selectedItem
@@ -146,6 +150,13 @@ Item {
                     userList.visible: true
                     personCountButton.highlighted: true
                 }
+            },
+            State {
+                when: control.selectedSideBarMode === CallSideBar.Transcription
+                PropertyChanges {
+                    transcriptionSideBar.visible: true
+                    transcriptionButton.highlighted: true
+                }
             }
         ]
     }
@@ -188,6 +199,9 @@ Item {
                     items.push(item)
                 }
             }
+            if (transcriptionButton.visible) {
+                items.push(transcriptionButton)
+            }
             if (personCountButton.visible) {
                 items.push(personCountButton)
             }
@@ -221,6 +235,7 @@ Item {
         readonly property int layoutTrigger: {
             let t = control.extended ? 1 : 0
             t = t * 2 + (chatButton.visible ? 1 : 0)
+            t = t * 2 + (transcriptionButton.visible ? 1 : 0)
             t = t * 2 + (personCountButton.visible ? 1 : 0)
             t = t * 2 + (additionalInfoButton.visible ? 1 : 0)
             t = t * 1000 + roomsRepeater.count
@@ -287,6 +302,22 @@ Item {
                                }
                            }
             }
+        }
+
+        BarButton {
+            id: transcriptionButton
+            iconPath: Icons.addSubtitle
+            visible: control.conferenceConnector?.isTranscriptionActive ?? false
+            text: qsTr("Transcription")
+            highlighted: control.selectedSideBarMode === CallSideBar.Transcription
+            labelElide: control.extended ? Text.ElideNone : Text.ElideRight
+            onClicked: () => {
+                           if (control.selectedSideBarMode === CallSideBar.Transcription) {
+                               control.selectedSideBarMode = CallSideBar.None
+                           } else {
+                               control.selectedSideBarMode = CallSideBar.Transcription
+                           }
+                       }
         }
 
         BarButton {
@@ -474,6 +505,29 @@ Item {
 
         function updateChatRoom() {
             Qt.callLater(chatSideBar.updateChatRoomNow)
+        }
+    }
+
+    TranscriptionSideBar {
+        id: transcriptionSideBar
+        conferenceConnector: control.conferenceConnector
+        visible: false
+        anchors {
+            top: headerBar.bottom
+            bottom: parent.bottom
+            left: parent.left
+            right: parent.right
+        }
+    }
+
+    Connections {
+        target: control.conferenceConnector
+        function onIsTranscriptionActiveChanged() {
+            if (control.conferenceConnector.isTranscriptionActive) {
+                control.selectedSideBarMode = CallSideBar.Transcription
+            } else if (control.selectedSideBarMode === CallSideBar.Transcription) {
+                control.selectedSideBarMode = CallSideBar.None
+            }
         }
     }
 
