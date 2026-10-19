@@ -23,7 +23,7 @@ VideoManager::VideoManager(QObject *parent) : QObject{ parent }
 
 #ifdef Q_OS_FLATPAK
     connect(&m_pipewireCameras, &PipeWireCameraDevices::devicesChanged, this,
-            &VideoManager::updateDevices);
+            [this]() { m_debounceUpdateTimer.start(); });
 #endif
 
     connect(this, &VideoManager::selectedDeviceIdChanged, this, [this]() {
@@ -83,7 +83,7 @@ void VideoManager::acquireCameras()
                 return;
             }
 
-            updateDevices();
+            m_debounceUpdateTimer.start();
         });
     });
 #endif
@@ -196,7 +196,6 @@ void VideoManager::updateProfile()
     for (const auto &device : std::as_const(m_devices)) {
         if (device.isDefault) {
             setProperty("selectedDeviceId", device.id);
-            Q_EMIT selectedDeviceIdChanged();
             return;
         }
     }
