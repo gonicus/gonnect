@@ -723,6 +723,9 @@ Popup {
                             delegate: SearchResultItem {
                                 id: messageDelg
                                 width: control.colWidth
+                                richText: true
+                                maximumLineCount: 2
+                                wrapMode: Text.WordWrap
                                 highlighted: keyNavigator.selectedItem === messageDelg
                                 mainRowLeftInsetLoader.sourceComponent: IconLabel {
                                     color: Theme.primaryTextColor
@@ -739,7 +742,7 @@ Popup {
                                 property ChatMessage message: ChatMessageSearchProvider.getChatMessage(messageDelg.roomUid, messageDelg.messageUid)
 
                                 mainText: messageDelg.message
-                                          ? ChatMessageSearchProvider.getChatMessageText(messageDelg.message)
+                                          ? ChatMessageSearchProvider.getChatMessageExcerpt(messageDelg.message)
                                           : qsTr("Loading...")
                                 secondaryText: messageDelg.message
                                                //: %1 is placeholder for the name, %2 for the formatted date string

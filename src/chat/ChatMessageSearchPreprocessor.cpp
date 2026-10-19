@@ -120,3 +120,21 @@ QString ChatMessageSearchPreprocessor::process(const QString &text)
 
     return out.join(u' ');
 }
+
+QString ChatMessageSearchPreprocessor::normalizeForMatching(const QString &text)
+{
+    QMutexLocker locker(&m_preprocessorMutex);
+
+    const auto utf8In = text.toUtf8();
+    icu::UnicodeString us =
+            icu::UnicodeString::fromUTF8(icu::StringPiece(utf8In.constData(), utf8In.size()));
+
+    if (m_transliterator) {
+        m_transliterator->transliterate(us);
+    }
+
+    std::string utf8Out;
+    us.toUTF8String(utf8Out);
+
+    return QString::fromUtf8(utf8Out.data(), utf8Out.size());
+}

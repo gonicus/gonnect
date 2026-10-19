@@ -21,6 +21,8 @@ public:
 
     bool isInitialized() const { return m_isInitialized; }
 
+    QString normalizeForMatching(const QString &text);
+
 private:
     bool m_isInitialized = false;
 

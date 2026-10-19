@@ -48,7 +48,7 @@ public:
     void removeChatRoomsByProvider(const QString &providerUid);
 
     Q_INVOKABLE ChatMessage *getChatMessage(const QString &roomUid, const QString &messageUid);
-    Q_INVOKABLE QString getChatMessageText(ChatMessage *message);
+    Q_INVOKABLE QString getChatMessageExcerpt(ChatMessage *message);
 
     Q_INVOKABLE bool isRoomIndexingEnabled(const QString &roomUid) const;
     Q_INVOKABLE void setRoomIndexingEnabled(const QString &roomUid, bool enabled);
@@ -65,6 +65,8 @@ private:
     QString backfillSettingsKey(const QString &roomUid) const;
     void indexRoomMessages(IChatRoom &room) const;
     void clearRoomIndex(const QString &roomUid);
+    QString truncatedHtml(const QString &text) const;
+    QString stripMarkdownNoise(const QString &text) const;
 
     ChatMessageSearchIndexer *m_indexer = nullptr;
     ChatMessageSearchModel *m_model = nullptr;

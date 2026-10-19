@@ -66,6 +66,8 @@ public:
 
     QList<SearchResult> search(const QString &query, int limit = 20);
 
+    ChatMessageSearchPreprocessor &preprocessor() const { return *m_preprocessor; }
+
     bool optimize();
 
 Q_SIGNALS:

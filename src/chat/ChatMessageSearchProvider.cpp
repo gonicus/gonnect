@@ -1,4 +1,6 @@
 #include <QLoggingCategory>
+#include <QRegularExpression>
+#include <Theme.h>
 
 #include "ChatMessageSearchProvider.h"
 #include "ChatMessageSearchIndexer.h"
@@ -93,6 +95,34 @@ void ChatMessageSearchProvider::clearRoomIndex(const QString &roomUid)
     }
     m_indexer->removeMessagesByRoom(roomUid);
     setRoomBackfillComplete(roomUid, false);
+}
+
+static constexpr qsizetype EXCERPT_RADIUS_CHARS = 40;
+
+QString ChatMessageSearchProvider::truncatedHtml(const QString &text) const
+{
+    QString s = text.left(EXCERPT_RADIUS_CHARS);
+
+    // Do not cut through surrogate pair (emoji)
+    if (s.size() == EXCERPT_RADIUS_CHARS && s.size() < text.size() && !s.isEmpty()
+        && s.back().isHighSurrogate()) {
+        s.chop(1);
+    }
+
+    // Ellipsis
+    if (s.size() < text.size()) {
+        s += QStringLiteral("…");
+    }
+
+    return stripMarkdownNoise(s).toHtmlEscaped();
+}
+
+QString ChatMessageSearchProvider::stripMarkdownNoise(const QString &text) const
+{
+    auto str = text;
+    static const QRegularExpression htmlRegEx(R"(<[^>]*>)");
+    str.remove(htmlRegEx);
+    return str;
 }
 
 IChatProvider *ChatMessageSearchProvider::getChatProviderByRoom(const QString &roomUid)
@@ -311,14 +341,65 @@ ChatMessage *ChatMessageSearchProvider::getChatMessage(const QString &roomUid,
     return chatMessage;
 }
 
-QString ChatMessageSearchProvider::getChatMessageText(ChatMessage *message)
+QString ChatMessageSearchProvider::getChatMessageExcerpt(ChatMessage *message)
 {
     if (!message) {
         return "";
     }
 
     if (const auto textContent = qobject_cast<ChatMessageContentText *>(message->content())) {
-        return textContent->rawText();
+
+        auto &preprocessor = m_indexer->preprocessor();
+        const QString rawText = textContent->rawText();
+        const QString normalizedText = preprocessor.normalizeForMatching(rawText);
+        const auto phrases = m_searchPhrase.simplified().split(' ', Qt::SkipEmptyParts);
+
+        // Find matches
+        qsizetype matchPos = -1;
+        qsizetype matchLen = 0;
+
+        for (const auto &phrase : phrases) {
+            const auto normalizedPhrase = preprocessor.normalizeForMatching(phrase);
+            if (normalizedPhrase.isEmpty()) {
+                continue;
+            }
+
+            const auto index = normalizedText.indexOf(normalizedPhrase);
+            if (index >= 0 && (matchPos < 0 || index < matchPos)) {
+                matchPos = index;
+                matchLen = phrase.length();
+            }
+        }
+
+        // No match -> beginning of text
+        if (matchPos < 0) {
+            return truncatedHtml(rawText);
+        }
+
+        // Match found - construct result string with emphasized match
+        const auto windowStart = std::max<qsizetype>(0, matchPos - EXCERPT_RADIUS_CHARS);
+        const auto windowEnd =
+                std::min<qsizetype>(rawText.length(), matchPos + matchLen + EXCERPT_RADIUS_CHARS);
+
+        const auto before = rawText.mid(windowStart, matchPos - windowStart);
+        const auto match = rawText.mid(matchPos, matchLen);
+        const auto after = rawText.mid(matchPos + matchLen, windowEnd - (matchPos + matchLen));
+
+        const auto accentHex = Theme::instance().accentColor().name();
+
+        QString excerpt;
+        if (windowStart > 0) {
+            excerpt += QStringLiteral("…");
+        }
+        excerpt += stripMarkdownNoise(before).toHtmlEscaped();
+        excerpt += QStringLiteral("<b><font color=\"%1\">").arg(accentHex);
+        excerpt += stripMarkdownNoise(match).toHtmlEscaped();
+        excerpt += QStringLiteral("</font></b>");
+        excerpt += stripMarkdownNoise(after).toHtmlEscaped();
+        if (windowEnd < rawText.length()) {
+            excerpt += QStringLiteral("…");
+        }
+        return excerpt;
     }
 
     return "";
