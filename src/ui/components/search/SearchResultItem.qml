@@ -15,6 +15,9 @@ Item {
     property alias secondaryText: secondaryLabel.text
     property bool highlighted
     property bool canBeHighlighted: true
+    property bool richText: false
+    property alias maximumLineCount: mainLabel.maximumLineCount
+    property alias wrapMode: mainLabel.wrapMode
 
     signal manuallyHovered
     signal triggerPrimaryAction
@@ -38,31 +41,13 @@ Item {
 
         Rectangle {
             id: mainRow
-            height: 50
+            height: Math.max(50, textColumn.implicitHeight + Theme.d)
             radius: 2
             color: control.canBeHighlighted && control.highlighted ? Theme.highlightColor : 'transparent'
             anchors {
                 left: parent.left
                 right: parent.right
             }
-
-            states: [
-                State {
-                    when: secondaryLabel.text !== ''
-
-                    PropertyChanges {
-                        secondaryLabel.visible: true
-                    }
-
-                    AnchorChanges {
-                        target: mainLabel
-                        anchors {
-                            verticalCenter: undefined
-                            bottom: mainRow.verticalCenter
-                        }
-                    }
-                }
-            ]
 
             Loader {
                 id: mainRowLeftInsetLoader
@@ -75,16 +60,38 @@ Item {
                 }
             }
 
-            Label {
-                id: mainLabel
-                elide: Label.ElideRight
-                font.weight: Font.Medium
+            Column {
+                id: textColumn
                 anchors {
                     left: mainRowLeftInsetLoader.item ? mainRowLeftInsetLoader.right : parent.left
                     right: mainRowRightInsetLoader.item ? mainRowRightInsetLoader.left : parent.right
-                    leftMargin: 10
-                    rightMargin: 10
                     verticalCenter: parent.verticalCenter
+                    leftMargin: Theme.d
+                    rightMargin: Theme.d
+                }
+
+                Label {
+                    id: mainLabel
+                    elide: Label.ElideRight
+                    font.weight: Font.Medium
+                    maximumLineCount: 1
+                    textFormat: control.richText ? Text.StyledText : Text.PlainText
+                    anchors {
+                        left: parent.left
+                        right: parent.right
+                    }
+                }
+
+                Label {
+                    id: secondaryLabel
+                    elide: Label.ElideRight
+                    font.pixelSize: Theme.fontSizeSmall
+                    color: Theme.secondaryTextColor
+                    maximumLineCount: 1
+                    anchors {
+                        left: parent.left
+                        right: parent.right
+                    }
                 }
             }
 
@@ -96,19 +103,6 @@ Item {
                     right: parent.left
                     rightMargin: 13
                     verticalCenter: parent.verticalCenter
-                }
-            }
-
-            Label {
-                id: secondaryLabel
-                elide: Label.ElideRight
-                font.pixelSize: Theme.fontSizeSmall
-                color: Theme.secondaryTextColor
-                visible: false
-                anchors {
-                    top: mainLabel.bottom
-                    left: mainLabel.left
-                    right: mainLabel.right
                 }
             }
 

@@ -138,7 +138,8 @@ public:
     void markAsRead(const QString &roomId);
 
     virtual void loadMessages(IChatRoom *chatRoom, quint32 n = IChatProvider::defaultMessageLimit,
-                              const QString &threadId = QString()) override;
+                              const QString &threadId = QString(),
+                              const QString &beforeMessageId = QString()) override;
 
     /// Load a single messe. It will be available in lookup, but not in the indexed message list.
     void loadSingleMessage(const QString &roomId, const QString &messageId);
