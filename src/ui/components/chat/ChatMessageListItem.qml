@@ -364,7 +364,8 @@ Item {
             id: readMarker
             readUsers: control.readUsers
             allUsersCount: control.chatRoom?.joinedChatUserCount ?? 0
-            visible: control.isOwnMessage
+            visible: (control.capabilities & IChatProvider.Capability.ReadMarkers)
+                     && control.isOwnMessage
                      && !control.isPending
                      && !control.isFailed
                      && (control.isLatestOwnMessage
