@@ -35,6 +35,7 @@ void Pinger::ping(qreal customVolume)
         m_player = new QMediaPlayer(this);
         connect(m_player, &QMediaPlayer::playbackStateChanged, this,
                 &Pinger::onPlaybackStateChanged);
+        connect(m_player, &QMediaPlayer::errorOccurred, this, &Pinger::onPlayerError);
     }
 
     // Setup player and volume
@@ -69,5 +70,16 @@ void Pinger::onPlaybackStateChanged(QMediaPlayer::PlaybackState state)
 {
     if (state == QMediaPlayer::StoppedState) {
         stop();
+    }
+}
+
+void Pinger::onPlayerError(QMediaPlayer::Error, const QString &errorString)
+{
+    static const QUrl fallback("qrc:/audio/message-new-instant.wav");
+    if (m_player && m_player->source() != fallback) {
+        qCWarning(lcPinger) << "Failed to play notification tone (using fallback now):"
+                            << errorString;
+        m_player->setSource(fallback);
+        m_player->play();
     }
 }

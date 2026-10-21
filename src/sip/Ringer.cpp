@@ -31,6 +31,7 @@ void Ringer::start(qreal customVolume)
     if (!m_player) {
         m_player = new QMediaPlayer(this);
         connect(m_player, &QMediaPlayer::playbackStateChanged, this, &Ringer::playbackStateChanged);
+        connect(m_player, &QMediaPlayer::errorOccurred, this, &Ringer::onPlayerError);
     }
 
     // Determine ring tone path
@@ -80,6 +81,16 @@ void Ringer::playbackStateChanged(QMediaPlayer::PlaybackState state)
                 m_player->play();
             }
         }
+    }
+}
+
+void Ringer::onPlayerError(QMediaPlayer::Error, const QString &errorString)
+{
+    static const QUrl fallback("qrc:/audio/phone-incoming-call.mp3");
+    if (m_player && m_player->source() != fallback) {
+        qCWarning(lcRinger) << "Failed to play ring tone (using fallback now):" << errorString;
+        m_player->setSource(fallback);
+        m_player->play();
     }
 }
 
