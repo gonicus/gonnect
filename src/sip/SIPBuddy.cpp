@@ -28,16 +28,29 @@ bool SIPBuddy::initialize()
 
     try {
         create(*m_account, cfg);
-        subscribePresence(true);
     } catch (pj::Error &err) {
         qCCritical(lcSIPBuddy) << "failed to create buddy" << m_uri << ":" << err.info(false);
         return false;
+    }
+
+    // Subscribe if we're already registered
+    if (m_account->isRegistered()) {
+        subscribe();
     }
 
     return true;
 }
 
 SIPBuddy::~SIPBuddy() { }
+
+void SIPBuddy::subscribe()
+{
+    try {
+        subscribePresence(true);
+    } catch (pj::Error &err) {
+        qCWarning(lcSIPBuddy) << "failed to subscribe to buddy" << m_uri << ":" << err.info(false);
+    }
+}
 
 void SIPBuddy::onBuddyState()
 {
