@@ -537,9 +537,14 @@ void IpcDispatcher::markAsRead(const QString &roomId)
     sendRequest(req);
 }
 
-void IpcDispatcher::loadMessages(IChatRoom *chatRoom, quint32 n, const QString &threadId)
+void IpcDispatcher::loadMessages(IChatRoom *chatRoom, quint32 n, const QString &threadId,
+                                 const QString &beforeMessageId)
 {
     Q_CHECK_PTR(chatRoom);
+
+    qCInfo(lcIpcDispatcher).noquote().nospace()
+            << "loadMessages(IChatRoom(id=" << chatRoom->id() << ",name=" << chatRoom->name()
+            << "), " << n << ", " << threadId << ", " << beforeMessageId << ")";
 
     if (chatRoom->isLoadingMessageHistory()) {
         return;
@@ -563,15 +568,22 @@ void IpcDispatcher::loadMessages(IChatRoom *chatRoom, quint32 n, const QString &
         msgReq.setThreadId(threadId);
     }
 
-    const auto &existingMessages = chatRoom->chatMessages();
-    if (!existingMessages.isEmpty()) {
-        if (threadId.isEmpty()) {
-            msgReq.setFromMessageId(existingMessages.first()->eventId());
-        } else {
-            for (auto *msg : existingMessages) {
-                if (msg->threadId() == threadId || msg->eventId() == threadId) {
-                    msgReq.setFromMessageId(msg->eventId());
-                    break;
+    if (!beforeMessageId.isEmpty()) {
+        msgReq.setFromMessageId(beforeMessageId);
+
+    } else {
+        const auto &existingMessages = chatRoom->chatMessages();
+        if (!existingMessages.isEmpty()) {
+            if (threadId.isEmpty()) {
+                msgReq.setFromMessageId(existingMessages.first()->eventId());
+            } else {
+                for (auto *msg : existingMessages) {
+                    if (msg->threadId() == threadId || msg->eventId() == threadId) {
+                        msgReq.setFromMessageId(msg->eventId());
+                        qCInfo(lcIpcDispatcher) << "RoomMessagesRequest for" << chatRoom->id()
+                                                << "fromMessageId:" << msgReq.fromMessageId();
+                        break;
+                    }
                 }
             }
         }
@@ -867,6 +879,13 @@ bool IpcDispatcher::sendRequest(RequestContainer *requestContainer, const SendPo
         timer->callOnTimeout(this, [timer, tag, timeoutSeconds = policy.timeoutSeconds, this]() {
             m_timeoutTimers.remove(tag);
 
+            const auto roomTagInfo = m_roomListTags.take(tag);
+            if (!roomTagInfo.roomId.isEmpty()) {
+                if (auto *room = m_roomLookup.value(roomTagInfo.roomId)) {
+                    room->setIsLoadingMessageHistory(false);
+                }
+            }
+
             const auto messageId = m_singleMessageTags.take(tag);
             if (!messageId.isEmpty()) {
                 m_failedMessageIds.insert(messageId);
@@ -990,6 +1009,7 @@ void IpcDispatcher::processResponse(
     } else if (rc.hasMultipartEnd()) {
         const auto count = m_multipartCount.take(tag);
         const auto tagInfo = m_roomListTags.take(tag);
+
         if (!tagInfo.roomId.isEmpty()) {
             if (auto room = m_roomLookup.value(tagInfo.roomId, nullptr)) {
                 room->setIsLoadingMessageHistory(false);
@@ -1153,12 +1173,15 @@ void IpcDispatcher::processResponse(
         QMutableListIterator it(m_rooms);
         while (it.hasNext()) {
             auto room = it.next();
-            if (!handledRoomIds.contains(room->id())) {
-                if (auto *cache = m_userRoomStateCache.take(room->id())) {
+            const auto roomId = room->id();
+
+            if (!handledRoomIds.contains(roomId)) {
+                if (auto *cache = m_userRoomStateCache.take(roomId)) {
                     delete cache;
                 }
+                m_notifiedInvitedRoomIds.remove(roomId);
                 removeNotificationsForRoom(room);
-                m_roomLookup.remove(room->id());
+                m_roomLookup.remove(roomId);
                 Q_EMIT chatRoomRemoved(indexOf(room), room);
                 it.remove();
                 room->deleteLater();
@@ -1172,6 +1195,7 @@ void IpcDispatcher::processResponse(
         if (!roomObj) {
             roomObj = addChatRoom(roomProto, tag);
         }
+
         processRoomUsers(roomProto, roomObj);
         Q_EMIT chatRoomCreationCompleted(roomObj, tag);
 
@@ -1560,7 +1584,13 @@ void IpcDispatcher::processResponse(
                 invitedEvent.hasRoomDisplayName() ? invitedEvent.roomDisplayName() : "";
         const auto invitationText =
                 invitedEvent.hasInvitationText() ? invitedEvent.invitationText() : "";
-        Q_EMIT roomInviteReceived(invitedEvent.roomId(), displayName, invitationText);
+
+        const auto roomId = invitedEvent.roomId();
+        if (!m_notifiedInvitedRoomIds.contains(roomId)) {
+            m_notifiedInvitedRoomIds.insert(roomId);
+            Q_EMIT roomInviteReceived(invitedEvent.roomId(), displayName, invitationText);
+        }
+
     } else if (rc.hasPublicRoomListResponse()) {
 
         auto listResp = rc.publicRoomListResponse();
@@ -1922,7 +1952,7 @@ IpcDispatcher::createOrUpdateReceivedChatMessage(const de::gonicus::gonnect::Mes
         chatMessage = room->chatMessageById(message.messageId());
     }
 
-    const bool isNew = !room->hasMessage(chatMessage);
+    const bool isNew = room->indexOfMessage(chatMessage) < 0;
 
     ChatMessage::Flags flags = m_configInfo.userId == message.senderId()
             ? ChatMessage::Flag::OwnMessage
@@ -2082,8 +2112,23 @@ IpcChatRoom *IpcDispatcher::addChatRoom(const de::gonicus::gonnect::Room &room, 
     connect(roomObj, &IChatRoom::notificationCountChanged, this,
             [this](qsizetype) { updateUnreadNotificationsCount(); });
 
-    // Send room invitation signal
-    if (roomObj->ownUserJoinState() == IChatRoom::UserRoomState::Invited) {
+    // Notify about invitation
+    // Case 1: invited state arrives later
+    connect(roomObj, &IChatRoom::ownUserJoinStateChanged, this, [this, roomObj]() {
+        const auto roomId = roomObj->id();
+        if (roomObj->ownUserJoinState() != IChatRoom::UserRoomState::Invited
+            || m_notifiedInvitedRoomIds.contains(roomId)) {
+            return;
+        }
+
+        m_notifiedInvitedRoomIds.insert(roomId);
+        Q_EMIT roomInviteReceived(roomId, roomObj->name(), roomObj->invitationText());
+    });
+
+    // Case 2: invited state already known
+    if (roomObj->ownUserJoinState() == IChatRoom::UserRoomState::Invited
+        && !m_notifiedInvitedRoomIds.contains(roomObj->id())) {
+        m_notifiedInvitedRoomIds.insert(roomObj->id());
         Q_EMIT roomInviteReceived(roomObj->id(), roomObj->name(), roomObj->invitationText());
     }
 

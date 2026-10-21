@@ -47,6 +47,15 @@ Popup {
                      }
     }
 
+    Binding {
+        target: ChatMessageSearchProvider
+        property: "searchPhrase"
+        value: (searchCategories.selectedCategories & SearchCategoryList.Category.Messages)
+                ? searchListModel.searchPhrase
+                : ""
+        restoreMode: Binding.RestoreBindingOrValue
+    }
+
     onSearchTextChanged: () => {
                              if (control.immediateSearchPhrase === "") {
                                  searchDebounceTimer.stop()
@@ -119,7 +128,7 @@ Popup {
                 margins: Theme.d
             }
 
-            Accessible.role: Accessible.Column
+            Accessible.role: Accessible.Grouping
             Accessible.name: qsTr("Search filter and identity selection")
             Accessible.description: qsTr("Select search filter to be applied, as well as the outgoing identity")
 
@@ -142,9 +151,6 @@ Popup {
                     bottom: identitySelector.top
                     bottomMargin: 5
                 }
-
-                Accessible.role: Accessible.StaticText
-                Accessible.name: identityLabel.text
             }
 
             IdentitySelector {
@@ -168,8 +174,6 @@ Popup {
                 left: filterBar.right
                 leftMargin: Theme.d
             }
-
-            Accessible.ignored: true
         }
 
         Item {
@@ -182,7 +186,7 @@ Popup {
                 margins: Theme.d
             }
 
-            Accessible.role: Accessible.Column
+            Accessible.role: Accessible.Grouping
             Accessible.name: qsTr("Search results")
             Accessible.description: qsTr("All search results will be listed here in their respective categories")
 
@@ -409,7 +413,7 @@ Popup {
                             right: parent.right
                         }
 
-                        Component.onCompleted: () => keyNavigator.addContainer(historyResultList, 2)
+                        Component.onCompleted: () => keyNavigator.addContainer(historyResultList, 3)
 
                         Repeater {
                             id: historySearchRepeater
@@ -541,7 +545,7 @@ Popup {
                             required property int index
                             required property string displayName
 
-                            Component.onCompleted: () => keyNavigator.addContainer(contactsSourceDelegate, contactsSourceDelegate.index + 2)
+                            Component.onCompleted: () => keyNavigator.addContainer(contactsSourceDelegate, contactsSourceDelegate.index + 4)
 
                             Repeater {
                                 id: searchResultRepeater
@@ -697,6 +701,78 @@ Popup {
                                         }
                                     }
                                 }
+                            }
+                        }
+                    }
+
+                    SearchResultCategory {
+                        id: messageResultList
+                        headerText: qsTr("Messages")
+                        visible: (searchCategories.selectedCategories & SearchCategoryList.Category.Messages)
+                                 && messageSearchRepeater.count > 0
+                        anchors {
+                            left: parent.left
+                            right: parent.right
+                        }
+
+                        Component.onCompleted: () => keyNavigator.addContainer(messageResultList, 100)
+
+                        Repeater {
+                            id: messageSearchRepeater
+                            model: ChatMessageSearchProvider.model
+                            delegate: SearchResultItem {
+                                id: messageDelg
+                                width: control.colWidth
+                                richText: true
+                                maximumLineCount: 2
+                                wrapMode: Text.WordWrap
+                                highlighted: keyNavigator.selectedItem === messageDelg
+                                mainRowLeftInsetLoader.sourceComponent: IconLabel {
+                                    color: Theme.primaryTextColor
+                                    icon {
+                                        color: Theme.primaryTextColor
+                                        source: Icons.messageThread
+                                    }
+                                }
+
+                                required property string messageUid
+                                required property string roomUid
+                                required property double rank
+
+                                property ChatMessage message: ChatMessageSearchProvider.getChatMessage(messageDelg.roomUid, messageDelg.messageUid)
+
+                                mainText: messageDelg.message
+                                          ? ChatMessageSearchProvider.getChatMessageExcerpt(messageDelg.message)
+                                          : qsTr("Loading...")
+                                secondaryText: messageDelg.message
+                                               //: %1 is placeholder for the name, %2 for the formatted date string
+                                               ? qsTr("%1, %2").arg(messageDelg.message?.nickName ?? "")
+                                                               .arg(messageDelg.message?.timestamp
+                                                                    ? messageDelg.message.timestamp.toLocaleString(Qt.locale(), qsTr("dd.MM.yy hh:mm"))
+                                                                    : "")
+                                               : ""
+
+                                readonly property Connections searchProviderConnections: Connections {
+                                    target: ChatMessageSearchProvider
+                                    function onChatMessageLoaded(loadedRoomUid : string, loadedMessageUid : string) {
+                                        if (loadedRoomUid === messageDelg.roomUid && loadedMessageUid === messageDelg.messageUid) {
+                                            messageDelg.message = ChatMessageSearchProvider.getChatMessage(messageDelg.roomUid, messageDelg.messageUid)
+                                        }
+                                    }
+                                }
+
+                                onManuallyHovered: () => keyNavigator.setExternallySelected(messageDelg)
+                                onTriggerPrimaryAction: () => {
+                                                            const provider = ChatMessageSearchProvider.getChatProviderByRoom(messageDelg.roomUid)
+                                                            if (provider) {
+                                                                SelectionState.messageJumpInfo = {
+                                                                    roomId: messageDelg.roomUid,
+                                                                    messageId: messageDelg.messageUid
+                                                                }
+                                                                ViewHelper.showChatRoom(provider, messageDelg.roomUid)
+                                                            }
+                                                            control.primaryActionTriggered()
+                                                        }
                             }
                         }
                     }

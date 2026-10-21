@@ -9,10 +9,10 @@ on:
       skipFlatpak:
         description: 'Skip Flatpak manifest'
         type: 'boolean'
-env:
-  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
-  BUILD_TYPE: Release
-  EXT_BASE: ${{github.workspace}}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   semantic-release:
@@ -24,10 +24,12 @@ jobs:
       contents: write       # to be able to publish a GitHub release
       issues: write         # to be able to comment on released issues
       pull-requests: write  # to be able to comment on released pull requests
+    outputs:
+      tag: ${{ steps.release.outputs.tag }}
     steps:
       - name: Get token
         id: get_token
-        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3
         with:
           client-id: ${{ secrets.RELEASE_APP_ID }}
           private-key: ${{ secrets.RELEASE_APP_KEY }}
@@ -37,7 +39,7 @@ jobs:
           fetch-depth: 0
           token: ${{ steps.get_token.outputs.token }}
       - name: Setup Node.js
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: "lts/*"
       - name: Install dependencies
@@ -45,8 +47,22 @@ jobs:
           sudo apt update
           sudo apt install -y xmlstarlet jq
       - name: Release
+        id: release
         env:
           GITHUB_TOKEN: ${{ steps.get_token.outputs.token }}
           DRY_RUN_OPTION: ${{ inputs.dryRun == true && '--dry-run' || '' }}
           UPDATE_FLATPAK: ${{ inputs.skipFlatpak == true && 'NO' || 'YES' }}
         run: npx --package=semantic-release --package=@semantic-release/changelog --package=@semantic-release/git --package=@semantic-release/exec -- semantic-release $DRY_RUN_OPTION
+
+  publish:
+    name: Publish
+    needs: semantic-release
+    # The tag is only set, if semantic-release actually published a new release.
+    if: needs.semantic-release.outputs.tag != ''
+    permissions:
+      contents: write
+      id-token: write
+    uses: ./.github/workflows/release-build.yml
+    secrets: inherit
+    with:
+      tag: ${{ needs.semantic-release.outputs.tag }}

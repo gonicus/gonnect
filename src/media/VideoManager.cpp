@@ -3,6 +3,10 @@
 #include <QLoggingCategory>
 #include <QRegularExpression>
 
+#ifdef Q_OS_FLATPAK
+#  include "CameraPortal.h"
+#endif
+
 Q_LOGGING_CATEGORY(lcVideoManager, "gonnect.sip.video")
 
 VideoManager::VideoManager(QObject *parent) : QObject{ parent }
@@ -17,13 +21,18 @@ VideoManager::VideoManager(QObject *parent) : QObject{ parent }
     connect(&m_mediaDevices, &QMediaDevices::videoInputsChanged, this,
             [this]() { m_debounceUpdateTimer.start(); });
 
+#ifdef Q_OS_FLATPAK
+    connect(&m_pipewireCameras, &PipeWireCameraDevices::devicesChanged, this,
+            [this]() { m_debounceUpdateTimer.start(); });
+#endif
+
     connect(this, &VideoManager::selectedDeviceIdChanged, this, [this]() {
         qCInfo(lcVideoManager) << "Video device selected:" << m_selectedDeviceId
                                << "saving as profile" << m_currentProfile;
 
         // Save selected device to settings
         auto device = deviceById(m_selectedDeviceId);
-        if (device.isNull() || device.isDefault()) {
+        if (device.isNull() || device.isDefault) {
             m_settings->remove(QString("video%1/camera").arg(m_currentProfile));
         } else {
             m_settings->setValue(QString("video%1/camera").arg(m_currentProfile),
@@ -36,6 +45,50 @@ VideoManager::VideoManager(QObject *parent) : QObject{ parent }
     updateDevices();
 }
 
+void VideoManager::acquireCameras()
+{
+#ifdef Q_OS_FLATPAK
+    auto &portal = CameraPortal::instance();
+
+    if (m_pipewireCameras.isRunning() || m_portalPending) {
+        return;
+    }
+
+    if (!portal.isValid() || !portal.isCameraPresent()) {
+        qCInfo(lcVideoManager)
+                << "camera portal unavailable or no camera present - falling back to QMediaDevices";
+        return;
+    }
+
+    portal.AccessCamera([this, &portal](uint code, const QVariantMap &response) {
+        if (code != AbstractPortal::ResponseCode::SUCCESS) {
+            qCInfo(lcVideoManager)
+                    << "camera access not granted:" << response.value("error").toString();
+            return;
+        }
+
+        m_portalPending = true;
+
+        portal.OpenPipeWireRemote([this](int fd, const QString &error) {
+            m_portalPending = false;
+
+            if (fd < 0) {
+                qCWarning(lcVideoManager) << "could not open PipeWire remote:" << error;
+                return;
+            }
+
+            if (!m_pipewireCameras.start(fd)) {
+                qCWarning(lcVideoManager) << "could not start PipeWire camera enumeration - "
+                                             "falling back to QMediaDevices";
+                return;
+            }
+
+            m_debounceUpdateTimer.start();
+        });
+    });
+#endif
+}
+
 bool VideoManager::isDeviceAvailable(const QString &deviceId) const
 {
     if (deviceId.isEmpty()) {
@@ -43,7 +96,7 @@ bool VideoManager::isDeviceAvailable(const QString &deviceId) const
     }
 
     for (const auto &dev : std::as_const(m_devices)) {
-        if (!dev.isNull() && dev.id() == deviceId) {
+        if (!dev.isNull() && dev.id == deviceId) {
             return true;
         }
     }
@@ -51,41 +104,68 @@ bool VideoManager::isDeviceAvailable(const QString &deviceId) const
     return false;
 }
 
-QCameraDevice VideoManager::deviceById(const QString &deviceId) const
+VideoDevice VideoManager::deviceById(const QString &deviceId) const
 {
     for (const auto &dev : std::as_const(m_devices)) {
-        if (dev.id() == deviceId) {
+        if (dev.id == deviceId) {
             return dev;
         }
     }
 
-    return QCameraDevice();
+    return VideoDevice();
 }
 
-QCameraDevice VideoManager::selectedDevice() const
+VideoDevice VideoManager::selectedDevice() const
 {
     if (m_selectedDeviceId.isEmpty()) {
-        return QCameraDevice();
+        return VideoDevice();
     }
 
     return deviceById(m_selectedDeviceId);
+}
+
+QList<VideoDevice> VideoManager::devicesFromMediaDevices() const
+{
+    QList<VideoDevice> devices;
+
+    const auto videoInputs = m_mediaDevices.videoInputs();
+
+    for (const auto &device : videoInputs) {
+        if (!device.isNull()) {
+            devices.append(VideoDevice{ device.id(), device.description(), device.isDefault() });
+        }
+    }
+
+    return devices;
 }
 
 void VideoManager::updateDevices()
 {
     m_devices.clear();
 
-    const auto videoInputs = m_mediaDevices.videoInputs();
-    qCInfo(lcVideoManager) << "Found" << videoInputs.size() << "video input devices";
+#ifdef Q_OS_FLATPAK
+    if (m_pipewireCameras.isRunning()) {
+        const auto cameras = m_pipewireCameras.devices();
 
-    for (const auto &device : videoInputs) {
-        qCInfo(lcVideoManager) << "  " << device.id() << device.description()
-                               << "default:" << (device.isDefault() ? "yes" : "no")
-                               << "valid:" << (device.isNull() ? "no" : "yes");
-
-        if (!device.isNull()) {
-            m_devices.append(device);
+        for (const auto &camera : std::as_const(cameras)) {
+            m_devices.append(VideoDevice{ camera.name, camera.description, false });
         }
+
+        if (!m_devices.isEmpty()) {
+            m_devices.first().isDefault = true;
+        }
+    } else {
+        m_devices = devicesFromMediaDevices();
+    }
+#else
+    m_devices = devicesFromMediaDevices();
+#endif
+
+    qCInfo(lcVideoManager) << "Found" << m_devices.size() << "video input devices";
+
+    for (const auto &device : std::as_const(m_devices)) {
+        qCInfo(lcVideoManager) << "  " << device.id << device.description
+                               << "default:" << (device.isDefault ? "yes" : "no");
     }
 
     Q_EMIT devicesChanged();
@@ -114,9 +194,8 @@ void VideoManager::updateProfile()
 
     // Select default device as fallback
     for (const auto &device : std::as_const(m_devices)) {
-        if (device.isDefault()) {
-            setProperty("selectedDeviceId", device.id());
-            Q_EMIT selectedDeviceIdChanged();
+        if (device.isDefault) {
+            setProperty("selectedDeviceId", device.id);
             return;
         }
     }

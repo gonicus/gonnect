@@ -22,13 +22,17 @@ public:
     virtual QString avatarPath() override { return ""; }
     virtual QString invitationText() override { return {}; }
     virtual bool isInitiallyLoaded() const override { return true; }
-    virtual void loadMessages(const QString &) override { }
+    virtual void loadMessages(const QString &, const QString & = QString(), quint32 = 100) override
+    {
+    }
     virtual qsizetype notificationCount() override;
     virtual void resetUnreadCount() override;
     virtual void markAsRead() override;
     virtual IChatRoom::JoinRule joinRule() override;
     virtual IChatRoom::Permissions permissions() override;
     virtual QList<ChatMessage *> chatMessages() const override { return m_messages; }
+    virtual qsizetype chatMessageCount() const override;
+    virtual ChatMessage *messageByIndex(qsizetype index) const override;
     virtual ChatMessage *messageById(const QString &) const override { return nullptr; }
     virtual QList<ChatMessage *> pinnedChatMessages() const override { return {}; }
     virtual qsizetype pinnedChatMessageCount() const override { return 0; }

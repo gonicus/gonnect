@@ -29,6 +29,7 @@ Item {
     property alias showDropdownButton: dropDownIconContainer.visible
     property alias showIndicatorBadge: indicatorBadge.visible
     property string tooltipText: ""
+    property alias labelElide: buttonLabel.elide
 
     enum ToggleColorMode {
         Normal,
@@ -37,11 +38,17 @@ Item {
 
     property int toggleColorMode: BarButton.ToggleColorMode.Normal
 
+    activeFocusOnTab: control.enabled
+
     Accessible.role: Accessible.Button
     Accessible.name: control.text
     Accessible.description: control.tooltipText
     Accessible.focusable: true
     Accessible.onPressAction: () => control.clicked()
+
+    Keys.onReturnPressed: () => control.clicked()
+    Keys.onEnterPressed: () => control.clicked()
+    Keys.onSpacePressed: () => control.clicked()
 
     states: [
 
@@ -105,7 +112,6 @@ Item {
 
         Rectangle {
             id: toggledBackground
-            Accessible.ignored: true
             width: control.toggledSize
             height: control.toggledSize
             radius: 4
@@ -132,7 +138,6 @@ Item {
 
         Rectangle {
             id: indicatorBadge
-            Accessible.ignored: true
             x: buttonIcon.x + 14
             y: buttonIcon.y + 1
             visible: false

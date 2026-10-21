@@ -40,11 +40,9 @@ Item {
             readonly property bool isMe: delg.id === control.conferenceConnector?.ownId ?? false
 
             Accessible.role: Accessible.ListItem
-            Accessible.name: qsTr("Chat user")
-            Accessible.description: qsTr("Selected chat user: %1").arg(delg.displayName) +
-                                    (", " + delg.isModerator ? qsTr("moderator") : "") +
-                                    (", " + delg.isMe ? qsTr("it's you") : "")
-            Accessible.focusable: true
+            Accessible.name: delg.displayName
+            Accessible.description: [delg.isModerator ? qsTr("moderator") : "",
+                                     delg.isMe ? qsTr("it's you") : ""].filter((s) => s !== "").join(", ")
 
             Rectangle {
                 id: selectedBackground
@@ -56,8 +54,6 @@ Item {
                     leftMargin: 10
                     rightMargin: 10
                 }
-
-                Accessible.ignored: true
             }
 
             Rectangle {
@@ -70,8 +66,6 @@ Item {
                     leftMargin: 10
                     rightMargin: 10
                 }
-
-                Accessible.ignored: true
             }
 
             AvatarImage {
@@ -156,22 +150,12 @@ Item {
                         id: userKick
                         text: qsTr("Kick")
                         onClicked: () => control.conferenceConnector.kickUser(delg.id)
-
-                        Accessible.role: Accessible.MenuItem
-                        Accessible.name: userKick.text
-                        Accessible.focusable: true
-                        Accessible.onPressAction: () => userKick.click()
                     }
                     MenuItem {
                         id: userMakeMod
                         enabled: !delg.isModerator
                         text: qsTr("Make moderator")
                         onClicked: () => control.conferenceConnector.grantUserRole(delg.id, ConferenceUser.Role.Moderator)
-
-                        Accessible.role: Accessible.MenuItem
-                        Accessible.name: userMakeMod.text
-                        Accessible.focusable: true
-                        Accessible.onPressAction: () => userMakeMod.click()
                     }
                 }
             }

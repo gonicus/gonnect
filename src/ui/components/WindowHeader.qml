@@ -35,8 +35,6 @@ Rectangle {
             right: control.right
             bottom: control.bottom
         }
-
-        Accessible.ignored: true
     }
 
     DragHandler {

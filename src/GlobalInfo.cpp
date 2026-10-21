@@ -134,3 +134,12 @@ const QList<EmergencyContact *> &GlobalInfo::emergencyContacts()
     initEmergencyContacts();
     return m_emergencyContacts;
 }
+
+bool GlobalInfo::useNewScreenSharingAPI()
+{
+#ifdef Q_OS_LINUX
+    return !isWorkaroundActive(GlobalInfo::WorkaroundId::GOW_005);
+#else
+    return true;
+#endif
+}

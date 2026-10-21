@@ -38,11 +38,7 @@ Item {
                   : Theme.backgroundSecondaryColor)
         border {
             width: 1
-            color: control.highlighted
-                   ? Theme.highlightColor
-                   : (hoverHandler.hovered
-                      ? Theme.borderHeaderIconHovered
-                      : Theme.borderColor)
+            color: control.highlighted ? Theme.highlightColor : Theme.borderColor
         }
     }
 

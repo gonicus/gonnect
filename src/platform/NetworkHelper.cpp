@@ -196,15 +196,46 @@ QStringList NetworkHelper::nameservers() const
 
 QSet<QString> NetworkHelper::localAddresses() const
 {
+    static const QStringList ignoredInterfacePrefixes = {
+        "docker", "br-", "veth",    "virbr", "vnet",  "podman", "cni",
+        "lxc",    "lxd", "flannel", "cali",  "vxlan", "kube",
+    };
+
     QSet<QString> result;
 
-    const auto addresses = QNetworkInterface::allAddresses();
-    for (const QHostAddress &address : std::as_const(addresses)) {
-        if (address.isLoopback() || address.isLinkLocal()) {
+    const auto nifs = QNetworkInterface::allInterfaces();
+    for (const auto &nif : std::as_const(nifs)) {
+        const auto flags = nif.flags();
+        if (!flags.testFlag(QNetworkInterface::IsUp)
+            || !flags.testFlag(QNetworkInterface::IsRunning)
+            || flags.testFlag(QNetworkInterface::IsLoopBack)) {
             continue;
         }
 
-        result.insert(address.toString());
+        const QString ifName = nif.name();
+        const bool ignored =
+                std::any_of(ignoredInterfacePrefixes.cbegin(), ignoredInterfacePrefixes.cend(),
+                            [&ifName](const QString &prefix) { return ifName.startsWith(prefix); });
+        if (ignored) {
+            continue;
+        }
+
+        const auto entries = nif.addressEntries();
+        for (const QNetworkAddressEntry &entry : std::as_const(entries)) {
+            const QHostAddress address = entry.ip();
+
+            if (address.isLoopback() || address.isLinkLocal()) {
+                continue;
+            }
+
+            const bool deprecated = address.protocol() == QAbstractSocket::IPv6Protocol
+                    && !entry.isPermanent() && entry.preferredLifetime().hasExpired();
+            if (deprecated) {
+                continue;
+            }
+
+            result.insert(address.toString());
+        }
     }
 
     return result;

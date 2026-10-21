@@ -204,12 +204,19 @@ void JitsiConnector::addIncomingMessage(QString fromId, QString nickName, QStrin
 
 QString JitsiConnector::jitsiHtmlInternal()
 {
+    QFile js(QStringLiteral(":/qtwebchannel/qwebchannel.js"));
+    if (!js.open(QIODevice::ReadOnly)) {
+        qCCritical(lcJitsiConnector) << "cannot read qwebchannel.js:" << js.errorString();
+        return {};
+    }
+
+    const QString qwebchannelJs = QString::fromUtf8(js.readAll());
     return QString(R"""(
 <!DOCTYPE html>
 <html>
 <head>
-  <script type="text/javascript" src="qrc:///qtwebchannel/qwebchannel.js"></script>
-  <script src="%1/external_api.js"></script>
+  <script type="text/javascript">%1</script>
+  <script src="%2/external_api.js"></script>
   <style type="text/css">
     html, body {
       height: 100%;
@@ -229,7 +236,7 @@ QString JitsiConnector::jitsiHtmlInternal()
 </body>
 </html>
 )""")
-            .arg(GlobalInfo::instance().jitsiUrl());
+            .arg(qwebchannelJs, GlobalInfo::instance().jitsiUrl());
 }
 
 QString JitsiConnector::jitsiJavascriptInternal()
@@ -370,7 +377,11 @@ new QWebChannel(qt.webChannelTransport, function(channel) {
     })
 
     jitsiConn.executeSetVideoInputDeviceCommand.connect((deviceId) => {
-        api.setVideoInputDevice(undefined, deviceId)
+        api.getCurrentDevices().then(devices => {
+            if (devices?.videoInput?.deviceId !== deviceId) {
+                api.setVideoInputDevice(undefined, deviceId)
+            }
+        })
     })
 
     jitsiConn.executeToggleVirtualBackgroundDialogCommand.connect(() => {
@@ -1166,10 +1177,11 @@ void JitsiConnector::transferVideoManagerDeviceToJitsi()
 
     if (videoDevice.isNull()) {
         selectVideoInputDevice("");
+        return;
     }
 
     // Find correct Jitsi device id for QCameraDevice
-    const auto deviceName = videoDevice.description();
+    const auto deviceName = videoDevice.description;
     JitsiMediaDevice *bestMatchingDevice = nullptr;
     qreal maxD = 0.0;
 
@@ -1191,6 +1203,7 @@ void JitsiConnector::setConferenceName(const QString &name)
     if (m_roomName != name) {
         m_roomName = name;
         Q_EMIT conferenceNameChanged();
+        Q_EMIT conferenceUrlChanged();
     }
 }
 
@@ -1332,7 +1345,9 @@ void JitsiConnector::joinConference(const QString &conferenceId, const QString &
     setIsInConference(true);
     setVideoMuted(!m_startWithVideo);
 
-    if (startFlags & IConferenceConnector::StartFlag::ScreenShareActive) {
+    if ((startFlags & IConferenceConnector::StartFlag::ScreenShareActive)
+        || (startFlags & IConferenceConnector::StartFlag::WindowShareActive)) {
+
         if (isInitialized()) {
             setSharingScreen(true);
         } else {
@@ -1520,6 +1535,9 @@ void JitsiConnector::setSubtitlesEnabled(bool enabled)
 
 void JitsiConnector::setSharingScreen(bool shareScreen)
 {
+    qCInfo(lcJitsiConnector) << "setSharingScreen" << shareScreen << "current:" << m_isSharingScreen
+                             << "pending:" << m_isToggleScreenSharePending;
+
     if (m_isSharingScreen != shareScreen) {
         Q_EMIT executeToggleShareScreenCommand();
     }
