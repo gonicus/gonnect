@@ -511,6 +511,7 @@ qt_add_qml_module(gonnect
         ui/components/DateEventsList.qml
         ui/components/FavoritesList.qml
         ui/components/HistoryList.qml
+        ui/components/IndicatorIcon.qml
         ui/components/MainTabBar.qml
         ui/components/PresenceStatusIndicator.qml
         ui/components/UsersList.qml
@@ -518,7 +519,6 @@ qt_add_qml_module(gonnect
         ui/components/RTTDisplay.qml
         ui/components/SettingsPage.qml
         ui/components/TogglerList.qml
-        ui/components/TranscriptionSideBar.qml
         ui/components/VerticalLevelMeter.qml
         ui/components/WindowHeader.qml
         # Dynamic UI
@@ -579,7 +579,6 @@ qt_add_qml_module(gonnect
         StateManager.h
         Ticker.h
         Ticker.cpp
-        TranscriptionChunk.h
         UISettings.cpp
         UISettings.h
         MSOAuthManager.cpp
@@ -938,8 +937,6 @@ qt_add_qml_module(gonnect
         ui/TogglerModel.cpp
         ui/TogglerProxyModel.h
         ui/TogglerProxyModel.cpp
-        ui/TranscriptionChunksModel.h
-        ui/TranscriptionChunksModel.cpp
         ui/ViewHelper.h
         ui/ViewHelper.cpp
         ui/WebEngineKeyEventFilter.h

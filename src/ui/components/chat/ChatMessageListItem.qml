@@ -59,6 +59,7 @@ Item {
     readonly property bool isOwnMessage: !!(control.flags & ChatMessage.Flag.OwnMessage)
     readonly property bool isPending: !!(control.flags & ChatMessage.Flag.Pending)
     readonly property bool isFailed: !!(control.flags & ChatMessage.Flag.Failed)
+    readonly property bool isTranscription: !!(control.flags & ChatMessage.Flag.Transcription)
 
     property IChatProvider chatProvider
     property IChatRoom chatRoom
@@ -264,7 +265,12 @@ Item {
         size: 36
         source: control.avatarPath
         initials: ViewHelper.initials(control.nickName)
-        showPresenceStatus: false
+        showPresenceStatus: control.isTranscription
+        indicatorComponent: Component {
+            IndicatorIcon {
+                iconPath: Icons.waveform
+            }
+        }
         anchors {
             left: parent.left
             leftMargin: 10

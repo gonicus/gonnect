@@ -674,24 +674,36 @@ void JitsiConnector::addTranscriptionChunk(const QString &messageId, const QStri
         return;
     }
 
-    qCDebug(lcJitsiConnector) << "addTranscriptionChunk" << messageId << participantId
-                              << participantName << participantAvatarUrl << language << finalText
-                              << stableText << unstableText;
+    Q_UNUSED(participantAvatarUrl)
+    Q_UNUSED(language)
 
-    const TranscriptionChunk chunk{
-        messageId, participantId, participantName, participantAvatarUrl,           language,
-        finalText, stableText,    unstableText,    QDateTime::currentDateTimeUtc()
-    };
+    const QString messageText = finalText.isEmpty() ? (stableText + unstableText) : finalText;
+    auto *newContent = new ChatMessageContentText(messageText);
+    auto *msg = m_transcriptionMessageLookup.value(messageId, nullptr);
 
-    const auto it = m_transcriptionChunkLookup.constFind(messageId);
-    if (it != m_transcriptionChunkLookup.constEnd()) {
-        m_transcriptionChunks[it.value()] = chunk;
-        Q_EMIT transcriptionChunkUpdated(it.value());
+    if (msg) {
+        // Update existing message
+        msg->setContent(newContent);
+        Q_EMIT m_chatRoom->chatMessageContentChanged(m_chatRoom->indexOfMessage(msg), msg);
+
     } else {
-        const auto newIndex = m_transcriptionChunks.size();
-        m_transcriptionChunkLookup.insert(messageId, newIndex);
-        m_transcriptionChunks.append(chunk);
-        Q_EMIT transcriptionChunkAdded(newIndex);
+        // Create new message
+        const ConferenceUser *resolvedUser = findUserById(participantId);
+        QString userName;
+        if (resolvedUser) {
+            userName = resolvedUser->displayName();
+        }
+        if (userName.isEmpty()) {
+            userName = participantName;
+        }
+        if (userName.isEmpty()) {
+            userName = tr("Unknown user");
+        }
+
+        msg = new ChatMessage("", participantId, userName, newContent, QDateTime::currentDateTime(),
+                              m_chatRoom, ChatMessage::Flag::Transcription);
+        m_transcriptionMessageLookup.insert(messageId, msg);
+        m_chatRoom->addMessage(msg);
     }
 }
 
@@ -1170,6 +1182,20 @@ QString JitsiConnector::jitsiDisplayName() const
     return settings.value("jitsi/displayName").toString();
 }
 
+ConferenceUser *JitsiConnector::findUserById(const QString &userId) const
+{
+    if (userId.isEmpty()) {
+        return nullptr;
+    }
+
+    for (auto *user : std::as_const(m_users)) {
+        if (user->id() == userId) {
+            return user;
+        }
+    }
+    return nullptr;
+}
+
 void JitsiConnector::selectAudioInputDevice(const QString &deviceId)
 {
     auto device = findDevice(m_audioInputDevices, deviceId);
@@ -1528,6 +1554,7 @@ void JitsiConnector::resetConferenceState()
         m_inConferenceNotification = nullptr;
     }
 
+    m_transcriptionMessageLookup.clear();
     m_chatRoom->clear();
 
     // Reset per-conference toggle state so it doesn't leak into the next conference

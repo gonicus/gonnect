@@ -4,7 +4,6 @@
 #include "IChatRoom.h"
 #include "ConferenceUser.h"
 #include "CallHistoryItem.h"
-#include "TranscriptionChunk.h"
 
 #include <QPointer>
 
@@ -160,7 +159,6 @@ public:
     virtual bool hasTranscription() const = 0;
     virtual bool isTranscriptionActive() const = 0;
     Q_INVOKABLE virtual void toggleTranscription() = 0;
-    virtual const QList<TranscriptionChunk> &transcriptionChunks() const = 0;
     Q_INVOKABLE virtual void
     addTranscriptionChunk(const QString &messageId, const QString &participantId,
                           const QString &participantName, const QString &participantAvatarUrl,
@@ -219,7 +217,4 @@ Q_SIGNALS:
     void dialInfoReceived(QVariantMap numbers, QString code);
     void participantKnocked(QString id, QString name);
     void knockAnswered(QString id);
-
-    void transcriptionChunkAdded(qsizetype index);
-    void transcriptionChunkUpdated(qsizetype index);
 };

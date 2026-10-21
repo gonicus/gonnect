@@ -8,7 +8,6 @@
 #include "JitsiMediaDevice.h"
 #include "ConferenceUser.h"
 #include "MuteSyncGuard.h"
-#include "TranscriptionChunk.h"
 
 class CallHistoryItem;
 class SIPAudioDevice;
@@ -58,10 +57,6 @@ public:
 
     bool isTranscriptionActive() const override { return m_isTranscriptionActive; }
     Q_INVOKABLE void setTranscriptionActive(bool value);
-    virtual const QList<TranscriptionChunk> &transcriptionChunks() const override
-    {
-        return m_transcriptionChunks;
-    }
     Q_INVOKABLE virtual void
     addTranscriptionChunk(const QString &messageId, const QString &participantId,
                           const QString &participantName, const QString &participantAvatarUrl,
@@ -170,6 +165,7 @@ private:
     JitsiMediaDevice *sipToJitsiDevice(const SIPAudioDevice *sipDevice) const;
     void addRoomMessage(QString message, QDateTime stamp = QDateTime::currentDateTime());
     QString jitsiDisplayName() const;
+    ConferenceUser *findUserById(const QString &userId) const;
 
     ConferenceUser::Role m_ownRole = ConferenceUser::Role::None;
     QString m_jitsiId;
@@ -202,8 +198,6 @@ private:
     QString m_roomPassword;
     VideoQuality m_videoQuality = VideoQuality::Average;
     bool m_isTranscriptionActive = false;
-    QList<TranscriptionChunk> m_transcriptionChunks;
-    QHash<QString, int> m_transcriptionChunkLookup;
 
     QString m_roomName;
     QString m_displayName;
@@ -213,6 +207,9 @@ private:
     QList<Notification *> m_chatNotifications;
     Notification *m_inConferenceNotification = nullptr;
     QSet<QString> m_knockedIds;
+
+    /// Lookup hash map messageId (transcription chunk) -> ChatMessage
+    QHash<QString, ChatMessage *> m_transcriptionMessageLookup;
 
     QList<JitsiMediaDevice *> m_audioInputDevices;
     QList<JitsiMediaDevice *> m_audioOutputDevices;
