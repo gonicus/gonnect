@@ -94,6 +94,14 @@ ChatMessage *ConferenceChatRoom::messageByIndex(qsizetype index) const
     return nullptr;
 }
 
+qsizetype ConferenceChatRoom::indexOfMessage(const ChatMessage *message) const
+{
+    if (!message) {
+        return -1;
+    }
+    return m_messages.indexOf(message);
+}
+
 ChatMessage *ConferenceChatRoom::chatMessageById(const QString &id) const
 {
     Q_UNUSED(id)

@@ -36,7 +36,8 @@ public:
         Pending = 1 << 5,
         Failed = 1 << 6,
         ThreadRoot = 1 << 7,
-        Edited = 1 << 8
+        Edited = 1 << 8,
+        Transcription = 1 << 9,
     };
     Q_ENUM(Flag)
     Q_DECLARE_FLAGS(Flags, Flag)

@@ -124,6 +124,9 @@ public:
     /// Retrieve a message by its index (as in chatMessages()) or nullptr if out of bounds
     Q_INVOKABLE virtual ChatMessage *messageByIndex(qsizetype index) const = 0;
 
+    /// Index of the given message (as in chatMessages()) or -1
+    virtual qsizetype indexOfMessage(const ChatMessage *message) const = 0;
+
     /// List of pinned chat messages of this room, sorted by timestamp ascending
     virtual QList<ChatMessage *> pinnedChatMessages() const = 0;
     virtual qsizetype pinnedChatMessageCount() const = 0;

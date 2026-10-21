@@ -67,7 +67,7 @@ public:
 
     bool hasMessage(const QString &messageId) const;
     bool hasMessage(const ChatMessage *message) const;
-    qsizetype indexOfMessage(const ChatMessage *message) const;
+    virtual qsizetype indexOfMessage(const ChatMessage *message) const override;
 
     void removeMessage(const QString &messageId);
 
