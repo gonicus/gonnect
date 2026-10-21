@@ -309,7 +309,8 @@ IChatProvider::Capabilities IpcDispatcher::capabilities() const
             | CAP::UploadFile
             | CAP::UploadMedia
             | CAP::Markdown
-            | CAP::PinMessage;
+            | CAP::PinMessage
+            | CAP::ReadMarkers;
     return s_capabilties;
     // clang-format on
 }
