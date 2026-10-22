@@ -1,0 +1,18 @@
+Fix property name of grouped properties without parameters
+
+"item1.TEL:+49..." was parsed with the name "TEL:" (off-by-one),
+so grouped properties (common in Apple/iCloud vCards) were not found.
+
+diff --git a/src/text_io.cpp b/src/text_io.cpp
+index 138c120..73aa952 100644
+--- a/src/text_io.cpp
++++ b/src/text_io.cpp
+@@ -200,7 +200,7 @@ vCardProperty TextReader::parseProperty(std::string line)
+         if(first_point_pos > 0 && first_point_pos < colon_pos)
+         {
+             group = line.substr(0, first_point_pos);
+-            name = line.substr(first_point_pos + 1, colon_pos - first_point_pos);
++            name = line.substr(first_point_pos + 1, colon_pos - first_point_pos - 1);
+         }
+         else
+         {
