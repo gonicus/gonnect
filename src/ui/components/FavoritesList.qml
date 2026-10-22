@@ -8,9 +8,15 @@ ListView {
     id: control
     topMargin: 10
     clip: true
+
+    property bool showPhoneFavorites: true
+    property bool showConferenceFavorites: true
+    property bool showChatFavorites: true
+
     model: FavoritesProxyModel {
-        showJitsi: ViewHelper.isJitsiAvailable
-        showChatRooms: ChatConnectorManager.isChatAvailable
+        showPhone: control.showPhoneFavorites
+        showJitsi: ViewHelper.isJitsiAvailable && control.showConferenceFavorites
+        showChatRooms: ChatConnectorManager.isChatAvailable && control.showChatFavorites
 
         FavoritesModel {}
     }

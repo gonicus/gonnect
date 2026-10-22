@@ -85,9 +85,11 @@ Menu {
     MenuSeparator {}
 
     HideableMenuItem {
-        text: qsTr("Toggle subtitles")
-        visible: control.iConferenceConnector.hasCapability(IConferenceConnector.Capability.Subtitles)
-        icon.source: control.iConferenceConnector.isSubtitlesEnabled ? Icons.checkbox : Icons.addSubtitle
+        text: control.iConferenceConnector.isTranscriptionActive ? qsTr("Disable transcription") : qsTr("Enable transcription")
+        visible: control.iConferenceConnector.ownRole === ConferenceUser.Role.Moderator
+                 && control.iConferenceConnector.hasCapability(IConferenceConnector.Capability.Transcription)
+                 && control.iConferenceConnector.hasTranscription
+        icon.source: control.iConferenceConnector.isTranscriptionActive ? Icons.waveformOff : Icons.waveform
         onClicked: () => control.iConferenceConnector.setSubtitlesEnabled(!control.iConferenceConnector.isSubtitlesEnabled)
     }
 
@@ -113,15 +115,6 @@ Menu {
         text: qsTr("Mute everyone")
         icon.source: Icons.microphoneSensitivityMuted
         onClicked: () => control.iConferenceConnector.muteAll()
-    }
-
-    HideableMenuItem {
-        visible: control.iConferenceConnector.ownRole === ConferenceUser.Role.Moderator
-                 && control.iConferenceConnector.hasCapability(IConferenceConnector.Capability.Transcription)
-                 && control.iConferenceConnector.hasTranscription
-        text: qsTr("Toggle transcription")
-        icon.source: control.iConferenceConnector.isTranscriptionActive ? Icons.waveform : Icons.waveformOff
-        onClicked: () => control.iConferenceConnector.toggleTranscription()
     }
 
     MenuSeparator {

@@ -360,17 +360,6 @@ new QWebChannel(qt.webChannelTransport, function(channel) {
         api.executeCommand("toggleWhiteboard")
     })
 
-    jitsiConn.executeToggleTranscriptionCommand.connect(enabled => {
-        if (enabled) {
-            api.executeCommand("startRecording", {
-                mode: "file",
-                transcription: true
-            })
-        } else {
-            api.executeCommand("stopRecording", "file", true)
-        }
-    })
-
     jitsiConn.executeSetNoiseSupressionCommand.connect((value) => {
         api.executeCommand("setNoiseSuppressionEnabled", { enabled: value })
     })
@@ -1363,15 +1352,6 @@ bool JitsiConnector::hasCapability(const Capability capabilityToCheck) const
 void JitsiConnector::toggleWhiteboard()
 {
     Q_EMIT executeToggleWhiteboardCommand();
-}
-
-void JitsiConnector::toggleTranscription()
-{
-    if (ownRole() != ConferenceUser::Role::Moderator) {
-        qCWarning(lcJitsiConnector) << "Transcription toggle only allowed for moderators";
-        return;
-    }
-    Q_EMIT executeToggleTranscriptionCommand(!m_isTranscriptionActive);
 }
 
 bool JitsiConnector::hasDialIn() const
