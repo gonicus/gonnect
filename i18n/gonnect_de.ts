@@ -1881,7 +1881,7 @@
     <message>
         <location filename="../src/ui/components/ConferenceButtonBar.qml" line="214"/>
         <source>Raise</source>
-        <translation>Hand heben</translation>
+        <translation>Melden</translation>
     </message>
     <message>
         <location filename="../src/ui/components/ConferenceButtonBar.qml" line="238"/>
@@ -1933,7 +1933,7 @@
     <message>
         <location filename="../src/ui/components/ConferenceButtonBar.qml" line="219"/>
         <source>Raise hand</source>
-        <translation>Hand heben</translation>
+        <translation>Melden</translation>
     </message>
     <message>
         <location filename="../src/ui/components/ConferenceButtonBar.qml" line="242"/>
