@@ -74,7 +74,6 @@ public:
     bool hasWhiteboard() const override { return m_hasWhiteboard; }
     void toggleWhiteboard() override;
     bool hasTextpad() const override { return m_hasTextpad; }
-    void toggleTranscription() override;
     bool hasTranscription() const override { return m_hasTranscription; }
     bool isPasswordRequired() const override { return m_isPasswordRequired; }
     QString roomPassword() const override { return m_roomPassword; }
@@ -231,7 +230,6 @@ Q_SIGNALS:
     void executeToggleRaiseHandCommand();
     void executeToggleSubtitlesCommand();
     void executeToggleWhiteboardCommand();
-    void executeToggleTranscriptionCommand(bool enabled);
     void executeAnswerKnockingParticipant(QString id, bool approved);
     void executeSetAudioInputDeviceCommand(QString devicId);
     void executeSetAudioOutputDeviceCommand(QString devicId);

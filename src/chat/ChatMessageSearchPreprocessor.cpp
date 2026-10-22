@@ -8,10 +8,10 @@ ChatMessageSearchPreprocessor::ChatMessageSearchPreprocessor(QObject *parent) : 
 {
     UErrorCode err = U_ZERO_ERROR;
     UParseError pe = {};
-    QString transliterationRules = tr(":: Lower;"
-                                      ":: NFD;"
-                                      ":: [:Nonspacing Mark:] Remove;"
-                                      ":: NFC;");
+    QString transliterationRules = ":: Lower;"
+                                   ":: NFD;"
+                                   ":: [:Nonspacing Mark:] Remove;"
+                                   ":: NFC;";
 
     // If ICU setup fails we'll continue without transliteration
     m_transliterator = icu::Transliterator::createFromRules(
