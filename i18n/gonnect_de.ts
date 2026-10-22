@@ -1453,7 +1453,7 @@
     <message>
         <location filename="../src/ui/components/chat/ChatMessageListItemRelatedContent.qml" line="47"/>
         <source>Start a new thread with message from %1</source>
-        <translation>Starte einen neuen Tread mit der Nachricht von %1</translation>
+        <translation>Starte einen neuen Thread mit der Nachricht von %1</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatMessageListItemRelatedContent.qml" line="48"/>
@@ -5505,9 +5505,10 @@
         <source>%n of %2 have read this message:
 %3</source>
         <translation>
+            <numerusform>%n von %2 hat diese Nachricht gelesen:
+%3</numerusform>
             <numerusform>%n von %2 haben diese Nachricht gelesen:
 %3</numerusform>
-            <numerusform></numerusform>
         </translation>
     </message>
 </context>
