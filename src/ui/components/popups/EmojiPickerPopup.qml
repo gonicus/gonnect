@@ -16,6 +16,13 @@ Popup {
 
     signal emojiPicked(string emoji)
 
+    onAboutToShow: () => {
+                       const item = emojiPickerLoader.item
+                       if (item && item instanceof EmojiPicker) {
+                           (item as EmojiPicker).resetSearchField()
+                       }
+                   }
+
     /// Open this popup at the given coordinates. It will position itself automatically.
     /// Must be global coordinates inside GonnectWindow.
     function openAt(p : point) {

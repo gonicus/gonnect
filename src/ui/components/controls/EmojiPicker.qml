@@ -20,6 +20,10 @@ Item {
 
     signal emojiPicked(string emoji)
 
+    function resetSearchField() {
+        searchField.text = ""
+    }
+
     function scrollToGroup(groupIndex : int) {
         const idx = emojiProxy.firstIndexOfGroup(groupIndex)
         if (idx >= 0) {
