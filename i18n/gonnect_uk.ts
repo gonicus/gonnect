@@ -3501,7 +3501,7 @@
     <message>
         <location filename="../src/ui/JitsiConnector.cpp" line="192"/>
         <source>[%1] Message from %2</source>
-        <translation type="unfinished">[%1] Повідомлення від %2</translation>
+        <translation>[%1] Повідомлення від %2</translation>
     </message>
     <message>
         <location filename="../src/ui/JitsiConnector.cpp" line="237"/>
@@ -4135,12 +4135,12 @@
     <message>
         <location filename="../src/ui/components/popups/PublicRoomSearch.qml" line="80"/>
         <source>Search for public chat rooms...</source>
-        <translation type="unfinished">Пошук публічних чат-кімнат...</translation>
+        <translation>Пошук публічних чат-кімнат...</translation>
     </message>
     <message numerus="yes">
         <location filename="../src/ui/components/popups/PublicRoomSearch.qml" line="164"/>
         <source>%n member(s), topic: %1</source>
-        <translation type="unfinished">
+        <translation>
             <numerusform>%n учасник, тема: %1</numerusform>
             <numerusform>%n учасники, тема: %1</numerusform>
             <numerusform>%n учасників, тема: %1</numerusform>
@@ -4149,31 +4149,31 @@
     <message numerus="yes">
         <location filename="../src/ui/components/popups/PublicRoomSearch.qml" line="165"/>
         <source>%n member(s)</source>
-        <translation type="unfinished">
+        <translation>
             <numerusform>%n учасник</numerusform>
-            <numerusform>%n учасники</numerusform>
+            <numerusform>%n учасника</numerusform>
             <numerusform>%n учасників</numerusform>
         </translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/PublicRoomSearch.qml" line="212"/>
         <source>Loading more results...</source>
-        <translation type="unfinished">Завантаження додаткових результатів...</translation>
+        <translation>Завантаження додаткових результатів...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/PublicRoomSearch.qml" line="227"/>
         <source>Searching...</source>
-        <translation type="unfinished">Пошук...</translation>
+        <translation>Пошук...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/PublicRoomSearch.qml" line="230"/>
         <source>No chat rooms found.</source>
-        <translation type="unfinished">Чат-кімнат не знайдено.</translation>
+        <translation>Чат-кімнат не знайдено.</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/PublicRoomSearch.qml" line="232"/>
         <source>Please enter a search phrase...</source>
-        <translation type="unfinished">Введіть пошуковий запит...</translation>
+        <translation>Введіть пошуковий запит...</translation>
     </message>
 </context>
 <context>
@@ -5407,9 +5407,9 @@
         <location filename="../src/StateManager.cpp" line="165"/>
         <source>There are %n active call(s).</source>
         <comment>calls</comment>
-        <translation type="unfinished">
+        <translation>
             <numerusform>Є %n активний дзвінок.</numerusform>
-            <numerusform>Є %n активні дзвінки.</numerusform>
+            <numerusform>Є %n активних дзвінка.</numerusform>
             <numerusform>Є %n активних дзвінків.</numerusform>
         </translation>
     </message>
@@ -5417,59 +5417,59 @@
         <location filename="../src/sip/SIPCallRoutingHop.cpp" line="15"/>
         <location filename="../src/sip/SIPCallRoutingHop.cpp" line="39"/>
         <source>redirected</source>
-        <translation type="unfinished">перенаправлено</translation>
+        <translation>перенаправлено</translation>
     </message>
     <message>
         <location filename="../src/sip/SIPCallRoutingHop.cpp" line="17"/>
         <location filename="../src/sip/SIPCallRoutingHop.cpp" line="41"/>
         <source>not answered</source>
-        <translation type="unfinished">без відповіді</translation>
+        <translation>без відповіді</translation>
     </message>
     <message>
         <location filename="../src/sip/SIPCallRoutingHop.cpp" line="19"/>
         <location filename="../src/sip/SIPCallRoutingHop.cpp" line="43"/>
         <source>busy</source>
-        <translation type="unfinished">зайнято</translation>
+        <translation>зайнято</translation>
     </message>
     <message>
         <location filename="../src/sip/SIPCallRoutingHop.cpp" line="21"/>
         <source>away</source>
-        <translation type="unfinished">відійшов</translation>
+        <translation>відійшов</translation>
     </message>
     <message>
         <location filename="../src/sip/SIPCallRoutingHop.cpp" line="23"/>
         <source>forwarded</source>
-        <translation type="unfinished">переадресовано</translation>
+        <translation>переадресовано</translation>
     </message>
     <message>
         <location filename="../src/sip/SIPCallRoutingHop.cpp" line="25"/>
         <source>time base redirection</source>
-        <translation type="unfinished">переадресація за часом</translation>
+        <translation>переадресація за часом</translation>
     </message>
     <message>
         <location filename="../src/sip/SIPCallRoutingHop.cpp" line="27"/>
         <source>do not disturb</source>
-        <translation type="unfinished">не турбувати</translation>
+        <translation>не турбувати</translation>
     </message>
     <message>
         <location filename="../src/sip/SIPCallRoutingHop.cpp" line="29"/>
         <source>rejected</source>
-        <translation type="unfinished">відхилено</translation>
+        <translation>відхилено</translation>
     </message>
     <message>
         <location filename="../src/sip/SIPCallRoutingHop.cpp" line="45"/>
         <source>aborted</source>
-        <translation type="unfinished">перервано</translation>
+        <translation>перервано</translation>
     </message>
     <message>
         <location filename="../src/sip/SIPCallRoutingHop.cpp" line="47"/>
         <source>not reachable</source>
-        <translation type="unfinished">недоступний</translation>
+        <translation>недоступний</translation>
     </message>
     <message>
         <location filename="../src/sip/SIPCallRoutingHop.cpp" line="49"/>
         <source>Code %1</source>
-        <translation type="unfinished">Код %1</translation>
+        <translation>Код %1</translation>
     </message>
 </context>
 <context>
@@ -5477,32 +5477,32 @@
     <message>
         <location filename="../src/ui/components/RTTDisplay.qml" line="29"/>
         <source>RTT message list</source>
-        <translation type="unfinished">Список RTT-повідомлень</translation>
+        <translation>Список RTT-повідомлень</translation>
     </message>
     <message>
         <location filename="../src/ui/components/RTTDisplay.qml" line="30"/>
         <source>List of all the RTT messages of the current call</source>
-        <translation type="unfinished">Список усіх RTT-повідомлень поточного виклику</translation>
+        <translation>Список усіх RTT-повідомлень поточного виклику</translation>
     </message>
     <message>
         <location filename="../src/ui/components/RTTDisplay.qml" line="47"/>
         <source>RTT message</source>
-        <translation type="unfinished">RTT-повідомлення</translation>
+        <translation>RTT-повідомлення</translation>
     </message>
     <message>
         <location filename="../src/ui/components/RTTDisplay.qml" line="48"/>
         <source>Selected RTT message from %1: %2</source>
-        <translation type="unfinished">Вибрано RTT-повідомлення від %1: %2</translation>
+        <translation>Вибрано RTT-повідомлення від %1: %2</translation>
     </message>
     <message>
         <location filename="../src/ui/components/RTTDisplay.qml" line="48"/>
         <source>you</source>
-        <translation type="unfinished">вас</translation>
+        <translation>Ти</translation>
     </message>
     <message>
         <location filename="../src/ui/components/RTTDisplay.qml" line="48"/>
         <source>call participant</source>
-        <translation type="unfinished">учасник виклику</translation>
+        <translation>учасник виклику</translation>
     </message>
 </context>
 <context>
@@ -5511,10 +5511,13 @@
         <location filename="../src/ui/components/chat/ReadMarker.qml" line="44"/>
         <source>%n of %2 have read this message:
 %3</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
-            <numerusform></numerusform>
+        <translation>
+            <numerusform>%n з %2 прочитав це повідомлення:
+%3</numerusform>
+            <numerusform>%n з %2 прочитали це повідомлення:
+%3</numerusform>
+            <numerusform>%n з %2 прочитали це повідомлення:
+%3</numerusform>
         </translation>
     </message>
 </context>
@@ -5526,7 +5529,7 @@
         <location filename="../src/contacts/ResponseTreeModel.cpp" line="186"/>
         <location filename="../src/contacts/ResponseTreeModel.cpp" line="202"/>
         <source>Additional Information</source>
-        <translation type="unfinished">Додаткова інформація</translation>
+        <translation>Додаткова інформація</translation>
     </message>
 </context>
 <context>
@@ -5534,27 +5537,27 @@
     <message>
         <location filename="../src/sip/RingToneFactory.cpp" line="16"/>
         <source>ringTone</source>
-        <translation type="unfinished">425,0,1000,4000,0</translation>
+        <translation>425,0,1000,4000,0</translation>
     </message>
     <message>
         <location filename="../src/sip/RingToneFactory.cpp" line="22"/>
         <source>busyTone</source>
-        <translation type="unfinished">425,0,480,480,0</translation>
+        <translation>425,0,480,480,0</translation>
     </message>
     <message>
         <location filename="../src/sip/RingToneFactory.cpp" line="28"/>
         <source>congestionTone</source>
-        <translation type="unfinished">425,0,240,240,0</translation>
+        <translation>425,0,240,240,0</translation>
     </message>
     <message>
         <location filename="../src/sip/RingToneFactory.cpp" line="34"/>
         <source>zip</source>
-        <translation type="unfinished">425,0,200,200,200,1000,200,200,200,1000,200,200,200,5000,4</translation>
+        <translation>425,0,200,200,200,1000,200,200,200,1000,200,200,200,5000,4</translation>
     </message>
     <message>
         <location filename="../src/sip/RingToneFactory.cpp" line="40"/>
         <source>endTone</source>
-        <translation type="unfinished">425,0,200,200,200,200,200,200,-1</translation>
+        <translation>425,0,200,200,200,200,200,200,-1</translation>
     </message>
 </context>
 <context>
@@ -5562,12 +5565,12 @@
     <message>
         <location filename="../src/ui/components/RoomAvatar.qml" line="60"/>
         <source>Upload file</source>
-        <translation type="unfinished">Завантажити файл</translation>
+        <translation>Завантажити файл</translation>
     </message>
     <message>
         <location filename="../src/ui/components/RoomAvatar.qml" line="65"/>
         <source>Remove</source>
-        <translation type="unfinished">Видалити</translation>
+        <translation>Видалити</translation>
     </message>
 </context>
 <context>
@@ -5575,42 +5578,42 @@
     <message>
         <location filename="../src/sip/SIPAccount.cpp" line="69"/>
         <source>&apos;userUri&apos; is no valid SIP URI: %1</source>
-        <translation type="unfinished">&apos;userUri&apos; не є допустимим SIP URI: %1</translation>
+        <translation>&apos;userUri&apos; не є допустимим SIP URI: %1</translation>
     </message>
     <message>
         <location filename="../src/sip/SIPAccount.cpp" line="77"/>
         <source>&apos;userUri&apos; is required</source>
-        <translation type="unfinished">&apos;userUri&apos; обов&apos;язковий</translation>
+        <translation>&apos;userUri&apos; обов&apos;язковий</translation>
     </message>
     <message>
         <location filename="../src/sip/SIPAccount.cpp" line="87"/>
         <source>&apos;voiceMailUri&apos; is no valid SIP URI: %1</source>
-        <translation type="unfinished">&apos;voiceMailUri&apos; не є допустимим SIP URI: %1</translation>
+        <translation>&apos;voiceMailUri&apos; не є допустимим SIP URI: %1</translation>
     </message>
     <message>
         <location filename="../src/sip/SIPAccount.cpp" line="102"/>
         <source>&apos;registrarUri&apos; is no valid SIP URI: %1</source>
-        <translation type="unfinished">&apos;registrarUri&apos; не є допустимим SIP URI: %1</translation>
+        <translation>&apos;registrarUri&apos; не є допустимим SIP URI: %1</translation>
     </message>
     <message>
         <location filename="../src/sip/SIPAccount.cpp" line="127"/>
         <source>&apos;registrarUri&apos; is required</source>
-        <translation type="unfinished">&apos;registrarUri&apos; обов&apos;язковий</translation>
+        <translation>&apos;registrarUri&apos; обов&apos;язковий</translation>
     </message>
     <message>
         <location filename="../src/sip/SIPAccount.cpp" line="138"/>
         <source>&apos;proxies&apos; contains invalid SIP URI entry: %1</source>
-        <translation type="unfinished">&apos;proxies&apos; містить недопустимий SIP URI: %1</translation>
+        <translation>&apos;proxies&apos; містить недопустимий SIP URI: %1</translation>
     </message>
     <message>
         <location filename="../src/sip/SIPAccount.cpp" line="484"/>
         <source>Failed to create %1: %2</source>
-        <translation type="unfinished">Не вдалося створити %1: %2</translation>
+        <translation>Не вдалося створити %1: %2</translation>
     </message>
     <message>
         <location filename="../src/sip/SIPAccount.cpp" line="1049"/>
         <source>Failed to persist SIP credentials: %1</source>
-        <translation type="unfinished">Не вдалося зберегти облікові дані SIP: %1</translation>
+        <translation>Не вдалося зберегти облікові дані SIP: %1</translation>
     </message>
 </context>
 <context>
@@ -5618,7 +5621,7 @@
     <message>
         <location filename="../src/sip/SIPBuddy.cpp" line="101"/>
         <source>%1 is now available</source>
-        <translation type="unfinished">%1 тепер доступний</translation>
+        <translation>%1 тепер доступний</translation>
     </message>
 </context>
 <context>
@@ -5626,22 +5629,22 @@
     <message>
         <location filename="../src/sip/SIPCall.cpp" line="432"/>
         <source>Failed to initialize microphone audio</source>
-        <translation type="unfinished">Не вдалося ініціалізувати аудіо мікрофона</translation>
+        <translation>Не вдалося ініціалізувати аудіо мікрофона</translation>
     </message>
     <message>
         <location filename="../src/sip/SIPCall.cpp" line="444"/>
         <source>Failed to initialize call audio</source>
-        <translation type="unfinished">Не вдалося ініціалізувати аудіо виклику</translation>
+        <translation>Не вдалося ініціалізувати аудіо виклику</translation>
     </message>
     <message>
         <location filename="../src/sip/SIPCall.cpp" line="902"/>
         <source>Active call with %1</source>
-        <translation type="unfinished">Активний дзвінок з %1</translation>
+        <translation>Активний дзвінок з %1</translation>
     </message>
     <message>
         <location filename="../src/sip/SIPCall.cpp" line="931"/>
         <source>Hang up</source>
-        <translation type="unfinished">Завершити</translation>
+        <translation>Завершити</translation>
     </message>
 </context>
 <context>
@@ -5649,39 +5652,39 @@
     <message>
         <location filename="../src/sip/SIPCallManager.cpp" line="180"/>
         <source>%1 is calling</source>
-        <translation type="unfinished">%1 дзвонить</translation>
+        <translation>%1 дзвонить</translation>
     </message>
     <message>
         <location filename="../src/sip/SIPCallManager.cpp" line="182"/>
         <source>%1 (%2) is calling</source>
-        <translation type="unfinished">%1 (%2) дзвонить</translation>
+        <translation>%1 (%2) дзвонить</translation>
     </message>
     <message>
         <location filename="../src/sip/SIPCallManager.cpp" line="209"/>
         <source>Via: %1</source>
-        <translation type="unfinished">Через: %1</translation>
+        <translation>Через: %1</translation>
     </message>
     <message>
         <location filename="../src/sip/SIPCallManager.cpp" line="224"/>
         <location filename="../src/sip/SIPCallManager.cpp" line="226"/>
         <source>Accept</source>
-        <translation type="unfinished">Прийняти</translation>
+        <translation>Прийняти</translation>
     </message>
     <message>
         <location filename="../src/sip/SIPCallManager.cpp" line="866"/>
         <source>Call back</source>
-        <translation type="unfinished">Передзвонити</translation>
+        <translation>Передзвонити</translation>
     </message>
     <message>
         <location filename="../src/sip/SIPCallManager.cpp" line="223"/>
         <location filename="../src/sip/SIPCallManager.cpp" line="227"/>
         <source>Reject</source>
-        <translation type="unfinished">Відхилити</translation>
+        <translation>Відхилити</translation>
     </message>
     <message>
         <location filename="../src/sip/SIPCallManager.cpp" line="833"/>
         <source>Missed call from %1</source>
-        <translation type="unfinished">Пропущений дзвінок від %1</translation>
+        <translation>Пропущений дзвінок від %1</translation>
     </message>
 </context>
 <context>
@@ -5689,7 +5692,7 @@
     <message>
         <location filename="../src/sip/SIPManager.cpp" line="296"/>
         <source>New Identity</source>
-        <translation type="unfinished">Новий ідентифікатор</translation>
+        <translation>Новий ідентифікатор</translation>
     </message>
 </context>
 <context>
@@ -5698,17 +5701,17 @@
         <location filename="../src/sip/SIPTemplate.cpp" line="66"/>
         <location filename="../src/sip/SIPTemplate.cpp" line="72"/>
         <source>Failed to write to %1</source>
-        <translation type="unfinished">Помилка запису в %1</translation>
+        <translation>Помилка запису в %1</translation>
     </message>
     <message>
         <location filename="../src/sip/SIPTemplate.cpp" line="91"/>
         <source>Failed to copy %1 to the config space</source>
-        <translation type="unfinished">Помилка копіювання %1 до каталогу конфігурації</translation>
+        <translation>Помилка копіювання %1 до каталогу конфігурації</translation>
     </message>
     <message>
         <location filename="../src/sip/SIPTemplate.cpp" line="96"/>
         <source>Source file %1 does not exist</source>
-        <translation type="unfinished">Вихідний файл %1 не існує</translation>
+        <translation>Вихідний файл %1 не існує</translation>
     </message>
 </context>
 <context>
@@ -5716,12 +5719,12 @@
     <message>
         <location filename="../src/ui/components/search/SearchCategoryItem.qml" line="19"/>
         <source>Search result category filter %1</source>
-        <translation type="unfinished">Фільтр категорії результатів пошуку %1</translation>
+        <translation>Фільтр категорії результатів пошуку %1</translation>
     </message>
     <message>
         <location filename="../src/ui/components/search/SearchCategoryItem.qml" line="20"/>
         <source>Filter for the individual search result items by category</source>
-        <translation type="unfinished">Фільтр результатів пошуку за категорією</translation>
+        <translation>Фільтр результатів пошуку за категорією</translation>
     </message>
 </context>
 <context>
@@ -5729,17 +5732,17 @@
     <message>
         <location filename="../src/ui/components/search/SearchCategoryList.qml" line="38"/>
         <source>Contacts</source>
-        <translation type="unfinished">Контакти</translation>
+        <translation>Контакти</translation>
     </message>
     <message>
         <location filename="../src/ui/components/search/SearchCategoryList.qml" line="42"/>
         <source>History</source>
-        <translation type="unfinished">Історія</translation>
+        <translation>Історія</translation>
     </message>
     <message>
         <location filename="../src/ui/components/search/SearchCategoryList.qml" line="46"/>
         <source>Rooms and Teams</source>
-        <translation type="unfinished">Кімнати та команди</translation>
+        <translation>Кімнати та команди</translation>
     </message>
 </context>
 <context>
@@ -5747,12 +5750,12 @@
     <message>
         <location filename="../src/ui/components/controls/SearchField.qml" line="77"/>
         <source>Search for contacts or room names...</source>
-        <translation type="unfinished">Пошук контактів або кімнат...</translation>
+        <translation>Пошук контактів або кімнат...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/controls/SearchField.qml" line="122"/>
         <source>Clear search field</source>
-        <translation type="unfinished">Очистити поле пошуку</translation>
+        <translation>Очистити поле пошуку</translation>
     </message>
 </context>
 <context>
@@ -5760,12 +5763,12 @@
     <message>
         <location filename="../src/ui/components/search/SearchResultCategory.qml" line="18"/>
         <source>Search result category %1</source>
-        <translation type="unfinished">Категорія результатів пошуку %1</translation>
+        <translation>Категорія результатів пошуку %1</translation>
     </message>
     <message>
         <location filename="../src/ui/components/search/SearchResultCategory.qml" line="19"/>
         <source>Divider for the individual search result items by category</source>
-        <translation type="unfinished">Роздільник результатів пошуку за категорією</translation>
+        <translation>Роздільник результатів пошуку за категорією</translation>
     </message>
 </context>
 <context>
@@ -5773,12 +5776,12 @@
     <message>
         <location filename="../src/ui/components/search/SearchResultItem.qml" line="34"/>
         <source>Search result</source>
-        <translation type="unfinished">Результат пошуку</translation>
+        <translation>Результат пошуку</translation>
     </message>
     <message>
         <location filename="../src/ui/components/search/SearchResultItem.qml" line="35"/>
         <source>Currently selected search result</source>
-        <translation type="unfinished">Поточний результат пошуку</translation>
+        <translation>Поточний результат пошуку</translation>
     </message>
 </context>
 <context>
@@ -5786,17 +5789,17 @@
     <message>
         <location filename="../src/ui/components/search/SearchResultNumberItem.qml" line="57"/>
         <source>Phone number</source>
-        <translation type="unfinished">Номер телефону</translation>
+        <translation>Номер телефону</translation>
     </message>
     <message>
         <location filename="../src/ui/components/search/SearchResultNumberItem.qml" line="58"/>
         <source>Selected favorite number %1</source>
-        <translation type="unfinished">Вибраний обраний номер %1</translation>
+        <translation>Вибраний обраний номер %1</translation>
     </message>
     <message>
         <location filename="../src/ui/components/search/SearchResultNumberItem.qml" line="58"/>
         <source>Selected phone number %1</source>
-        <translation type="unfinished">Вибраний номер телефону %1</translation>
+        <translation>Вибраний номер телефону %1</translation>
     </message>
 </context>
 <context>
@@ -5804,78 +5807,78 @@
     <message>
         <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="123"/>
         <source>Search filter and identity selection</source>
-        <translation type="unfinished">Фільтр пошуку та вибір ідентифікатора</translation>
+        <translation>Фільтр пошуку та вибір ідентифікатора</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="124"/>
         <source>Select search filter to be applied, as well as the outgoing identity</source>
-        <translation type="unfinished">Вибрати фільтр пошуку та вихідний ідентифікатор</translation>
+        <translation>Вибрати фільтр пошуку та вихідний ідентифікатор</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="137"/>
         <source>Outgoing identity</source>
-        <translation type="unfinished">Вихідний ідентифікатор</translation>
+        <translation>Вихідний ідентифікатор</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="186"/>
         <source>Search results</source>
-        <translation type="unfinished">Результати пошуку</translation>
+        <translation>Результати пошуку</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="187"/>
         <source>All search results will be listed here in their respective categories</source>
-        <translation type="unfinished">Усі результати пошуку будуть перераховані за категоріями</translation>
+        <translation>Усі результати пошуку буде наведено тут у відповідних категоріях</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="246"/>
         <source>Direct dial</source>
-        <translation type="unfinished">Прямий набір</translation>
+        <translation>Прямий набір</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="257"/>
         <source>Call &quot;%1&quot;</source>
-        <translation type="unfinished">Зателефонувати «%1»</translation>
+        <translation>Зателефонувати «%1»</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="282"/>
         <source>Open room &quot;%1&quot;</source>
-        <translation type="unfinished">Відкрити кімнату «%1»</translation>
+        <translation>Відкрити кімнату «%1»</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="283"/>
         <source>Jitsi Meet</source>
-        <translation type="unfinished">Jitsi Meet</translation>
+        <translation>Jitsi Meet</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="310"/>
         <source>Create chat room &quot;%1&quot;</source>
-        <translation type="unfinished">Створити чат-кімнату &quot;%1&quot;</translation>
+        <translation>Створити чат-кімнату &quot;%1&quot;</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="332"/>
         <source>in %1</source>
         <extracomment>Search submenu item under &quot;Create chatroom xyz&quot;; %1 will be replaced with chat provider&apos;s display name</extracomment>
-        <translation type="unfinished">через %1</translation>
+        <translation>через %1</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="356"/>
         <source>Chat rooms</source>
-        <translation type="unfinished">Чат-кімнати</translation>
+        <translation>Чат-кімнати</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="377"/>
         <source>Chat</source>
-        <translation type="unfinished">Чат</translation>
+        <translation>Чат</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="404"/>
         <source>History</source>
-        <translation type="unfinished">Історія</translation>
+        <translation>Історія</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="535"/>
         <source>Contacts</source>
-        <translation type="unfinished">Контакти</translation>
+        <translation>Контакти</translation>
     </message>
 </context>
 <context>
@@ -5883,98 +5886,98 @@
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="141"/>
         <source>Settings</source>
-        <translation type="unfinished">Налаштування</translation>
+        <translation>Налаштування</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="184"/>
         <source>Show chat messages as desktop notifications</source>
-        <translation type="unfinished">Показувати повідомлення чату як сповіщення</translation>
+        <translation>Показувати повідомлення чату як сповіщення</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="215"/>
         <source>Enable USB headset driver [%1]</source>
-        <translation type="unfinished">Увімкнути драйвер USB-гарнітури [%1]</translation>
+        <translation>Увімкнути драйвер USB-гарнітури [%1]</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="215"/>
         <source>not detected</source>
-        <translation type="unfinished">не виявлено</translation>
+        <translation>не виявлено</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="256"/>
         <source>Show dial window on USB headset pick up</source>
-        <translation type="unfinished">Показувати вікно набору при знятті USB-гарнітури</translation>
+        <translation>Показувати вікно набору при знятті USB-гарнітури</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="391"/>
         <source>Color scheme</source>
-        <translation type="unfinished">Колірна схема</translation>
+        <translation>Колірна схема</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="410"/>
         <source>System default</source>
-        <translation type="unfinished">Системна за замовчуванням</translation>
+        <translation>Системна за замовчуванням</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="414"/>
         <source>Light</source>
-        <translation type="unfinished">Світла</translation>
+        <translation>Світла</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="418"/>
         <source>Dark</source>
-        <translation type="unfinished">Темна</translation>
+        <translation>Темна</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="171"/>
         <source>Inverse Accept / Reject buttons</source>
-        <translation type="unfinished">Інвертувати кнопки прийняття/відхилення</translation>
+        <translation>Інвертувати кнопки прийняття/відхилення</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="356"/>
         <source>Use dark mode tray icon</source>
-        <translation type="unfinished">Використовувати значок трея для темного режиму</translation>
+        <translation>Використовувати значок трея для темного режиму</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="228"/>
         <source>Disable USB headset mute state propagation</source>
-        <translation type="unfinished">Вимкнути синхронізацію стану вимкнення USB-гарнітури</translation>
+        <translation>Вимкнути синхронізацію стану вимкнення USB-гарнітури</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="464"/>
         <source>Phoning</source>
-        <translation type="unfinished">Телефонія</translation>
+        <translation>Телефонія</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="157"/>
         <source>Show main window on startup</source>
-        <translation type="unfinished">Показувати головне вікно при запуску</translation>
+        <translation>Показувати головне вікно при запуску</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="198"/>
         <source>Show presence state on busylight</source>
-        <translation type="unfinished"></translation>
+        <translation>Відображати статус присутності на індикаторі зайнятості</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="242"/>
         <source>Disable synchronisation with the system mute state</source>
-        <translation type="unfinished">Вимкнути синхронізацію із системним вимкненням звуку</translation>
+        <translation>Вимкнути синхронізацію зі станом вимкнення звуку в системі</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="242"/>
         <location filename="../src/ui/components/SettingsPage.qml" line="332"/>
         <source>restart required</source>
-        <translation type="unfinished">потрібен перезапуск</translation>
+        <translation>потрібен перезапуск</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="271"/>
         <source>History</source>
-        <translation type="unfinished">Історія</translation>
+        <translation>Історія</translation>
     </message>
     <message numerus="yes">
         <location filename="../src/ui/components/SettingsPage.qml" line="300"/>
         <source>day(s) of history</source>
-        <translation type="unfinished">
+        <translation>
             <numerusform>день історії</numerusform>
             <numerusform>дні історії</numerusform>
             <numerusform>днів історії</numerusform>
@@ -5983,185 +5986,185 @@
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="323"/>
         <source>Appearance</source>
-        <translation type="unfinished">Зовнішній вигляд</translation>
+        <translation>Зовнішній вигляд</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="332"/>
         <source>Use custom window decoration</source>
-        <translation type="unfinished">Використовувати власне оформлення вікна</translation>
+        <translation>Використовувати власне оформлення вікна</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="424"/>
         <source>Theme selection box</source>
-        <translation type="unfinished">Поле вибору теми</translation>
+        <translation>Поле вибору теми</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="425"/>
         <source>Select the UI theme</source>
-        <translation type="unfinished">Вибрати тему інтерфейсу</translation>
+        <translation>Вибрати тему інтерфейсу</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="438"/>
         <source>Currently selected theme option</source>
-        <translation type="unfinished">Поточний параметр теми</translation>
+        <translation>Поточний параметр теми</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="473"/>
         <source>Signalling busy when a call is active</source>
-        <translation type="unfinished">Сигналізувати зайнятість при активному дзвінку</translation>
+        <translation>Сигналізувати &quot;Зайнято&quot; при активному дзвінку</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="569"/>
         <source>Rules for telephone number transmission</source>
-        <translation type="unfinished">Правила передачі номера телефону</translation>
+        <translation>Правила передачі номера телефону</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="578"/>
         <source>Standard preferred identity</source>
-        <translation type="unfinished">Стандартний бажаний ідентифікатор</translation>
+        <translation>Стандартний бажаний ідентифікатор</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="596"/>
         <source>Default</source>
-        <translation type="unfinished">За замовчуванням</translation>
+        <translation>За замовчуванням</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="599"/>
         <location filename="../src/ui/components/SettingsPage.qml" line="770"/>
         <source>Auto</source>
-        <translation type="unfinished">Авто</translation>
+        <translation>Авто</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="605"/>
         <source>Prefererred identity selection</source>
-        <translation type="unfinished">Вибір бажаного ідентифікатора</translation>
+        <translation>Вибір бажаного ідентифікатора</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="606"/>
         <source>Select the preferred identity</source>
-        <translation type="unfinished">Вибрати бажаний ідентифікатор</translation>
+        <translation>Вибрати бажаний ідентифікатор</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="619"/>
         <source>Currently selected identity option</source>
-        <translation type="unfinished">Поточний параметр ідентифікатора</translation>
+        <translation>Поточний параметр ідентифікатора</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="675"/>
         <source>No preferred identities yet.</source>
-        <translation type="unfinished">Немає бажаних ідентифікаторів.</translation>
+        <translation>Немає бажаних ідентифікаторів.</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="697"/>
         <source>Currently highlighted preferred identity. Tap to edit.</source>
-        <translation type="unfinished">Поточний бажаний ідентифікатор. Натисніть для редагування.</translation>
+        <translation>Поточний бажаний ідентифікатор. Натисніть для редагування.</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="758"/>
         <source>Standard</source>
-        <translation type="unfinished">Стандарт</translation>
+        <translation>Стандарт</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="798"/>
         <source>Add identity</source>
-        <translation type="unfinished">Додати ідентифікатор</translation>
+        <translation>Додати ідентифікатор</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="814"/>
         <source>Add a new preferred identity entry</source>
-        <translation type="unfinished">Додати новий бажаний ідентифікатор</translation>
+        <translation>Додати новий бажаний ідентифікатор</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="834"/>
         <source>Audio settings</source>
-        <translation type="unfinished">Налаштування звуку</translation>
+        <translation>Налаштування звуку</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="848"/>
         <source>managed by device</source>
-        <translation type="unfinished">керується пристроєм</translation>
+        <translation>керується пристроєм</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="861"/>
         <source>Input device</source>
-        <translation type="unfinished">Пристрій вводу</translation>
+        <translation>Пристрій вводу</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="925"/>
         <source>Output device</source>
-        <translation type="unfinished">Пристрій виводу</translation>
+        <translation>Пристрій виводу</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="989"/>
         <source>Output device for ring tone</source>
-        <translation type="unfinished">Пристрій виводу для мелодії дзвінка</translation>
+        <translation>Пристрій виводу для мелодії дзвінка</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="1021"/>
         <source>Currently selected ring output option</source>
-        <translation type="unfinished">Поточний параметр виводу дзвінка</translation>
+        <translation>Поточний параметр виведення сигналу виклику</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="1053"/>
         <source>Ring tone</source>
-        <translation type="unfinished">Мелодія дзвінка</translation>
+        <translation>Мелодія дзвінка</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="1120"/>
         <source>Adjust pause between ring tones [s]</source>
-        <translation type="unfinished">Налаштувати паузу між мелодіями дзвінка [с]</translation>
+        <translation>Налаштувати паузу між мелодіями дзвінка [с]</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="1152"/>
         <source>Notification tone</source>
-        <translation type="unfinished">Звук сповіщення</translation>
+        <translation>Звук сповіщення</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="1173"/>
         <source>Notification tone volume</source>
-        <translation type="unfinished">Гучність звуку сповіщення</translation>
+        <translation>Гучність звуку сповіщення</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="1263"/>
         <source>Reload contacts</source>
-        <translation type="unfinished">Перезавантажити контакти</translation>
+        <translation>Перезавантажити контакти</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="847"/>
         <source>Prefer USB headset ring sound if available</source>
-        <translation type="unfinished">Використовувати дзвінок USB-гарнітури при наявності</translation>
+        <translation>Використовувати сигнал виклику USB-гарнітури, якщо доступний</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="318"/>
         <source>Keep a call history for this number of days (from 1 to 999). Any entry before this time span is automatically removed. Changing this setting has an effect on the next day or a restart of GOnnect.</source>
-        <translation type="unfinished">Зберігати історію викликів протягом указаної кількості днів (від 1 до 999). Усі записи, старші за цей період, видаляються автоматично. Зміна цього параметра набуває чинності наступного дня або після перезапуску GOnnect.</translation>
+        <translation>Зберігати історію викликів протягом указаної кількості днів (від 1 до 999). Усі записи, старші за цей період, видаляються автоматично. Зміна цього параметра набуває чинності наступного дня або після перезапуску GOnnect.</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="1075"/>
         <location filename="../src/ui/components/SettingsPage.qml" line="1094"/>
         <location filename="../src/ui/components/SettingsPage.qml" line="1174"/>
         <source>Currently set to: </source>
-        <translation type="unfinished">Поточне значення: </translation>
+        <translation>Поточне значення: </translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="1074"/>
         <source>Ring tone volume</source>
-        <translation type="unfinished">Гучність мелодії дзвінка</translation>
+        <translation>Гучність мелодії дзвінка</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="880"/>
         <source>Audio input device</source>
-        <translation type="unfinished">Пристрій введення звуку</translation>
+        <translation>Пристрій введення звуку</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="893"/>
         <source>Currently selected audio input device</source>
-        <translation type="unfinished">Вибраний пристрій введення звуку</translation>
+        <translation>Вибраний пристрій введення звуку</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="944"/>
         <source>Audio output device</source>
-        <translation type="unfinished">Пристрій виведення звуку</translation>
+        <translation>Пристрій виведення звуку</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="957"/>
