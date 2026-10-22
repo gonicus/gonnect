@@ -53,7 +53,7 @@ void CardDAVAddressBookFeeder::init()
 
         connect(&m_webdavParser, &QWebdavDirParser::errorChanged, this,
                 &CardDAVAddressBookFeeder::onError);
-        connect(&m_webdav, &QWebdav::errorChanged, this, &CardDAVAddressBookFeeder::onError);
+        connect(&m_webdav, &QWebdav::errorChanged, this, &CardDAVAddressBookFeeder::onNetworkError);
 
         connect(&m_webdav, &QWebdav::authenticationRequired, this, [this]() {
             m_pendingAuth = true;
@@ -108,14 +108,6 @@ void CardDAVAddressBookFeeder::checkErrorStatus()
 void CardDAVAddressBookFeeder::resetContacts()
 {
     AddressBook::instance().removeContactsBySource(m_group);
-}
-
-void CardDAVAddressBookFeeder::onError(QString error)
-{
-    qCCritical(lcCardDAVAddressBookFeeder) << "Error:" << error;
-
-    m_pendingError = true;
-    checkErrorStatus();
 }
 
 void CardDAVAddressBookFeeder::feedAddressBook(bool authFailed)
@@ -516,6 +508,21 @@ QUrl CardDAVAddressBookFeeder::networkCheckURL() const
     url.setPort(port);
     url.setPath(path);
     return url;
+}
+
+void CardDAVAddressBookFeeder::onError(QString error)
+{
+    onNetworkError(error, QNetworkReply::NoError);
+}
+
+void CardDAVAddressBookFeeder::onNetworkError(QString error, QNetworkReply::NetworkError code)
+{
+    qCCritical(lcCardDAVAddressBookFeeder) << "Error:" << error;
+    m_pendingError = true;
+    if (code == QNetworkReply::AuthenticationRequiredError) {
+        m_pendingAuth = true;
+    }
+    checkErrorStatus();
 }
 
 #undef CARDDAV_MAGIC

@@ -44,7 +44,7 @@ void CalDAVEventFeeder::init()
 
         connect(&m_webdavParser, &QWebdavDirParser::errorChanged, this,
                 &CalDAVEventFeeder::onError);
-        connect(&m_webdav, &QWebdav::errorChanged, this, &CalDAVEventFeeder::onError);
+        connect(&m_webdav, &QWebdav::errorChanged, this, &CalDAVEventFeeder::onNetworkError);
 
         connect(&m_webdav, &QWebdav::authenticationRequired, this, [this]() {
             m_pendingAuth = true;
@@ -99,7 +99,7 @@ void CalDAVEventFeeder::checkErrorStatus()
                         QTimer::singleShot(m_config.retryInterval, this, [this]() {
                             m_calendarRefreshTimer.start();
 
-                            process();
+                            process(true);
                         });
                     }
                 }
@@ -119,11 +119,13 @@ void CalDAVEventFeeder::resetCalendar()
     }
 }
 
-void CalDAVEventFeeder::onError(QString error)
+void CalDAVEventFeeder::onNetworkError(QString error, QNetworkReply::NetworkError code)
 {
     qCCritical(lcCalDAVEventFeeder) << "Error:" << error;
-
     m_pendingError = true;
+    if (code == QNetworkReply::AuthenticationRequiredError) {
+        m_pendingAuth = true;
+    }
     checkErrorStatus();
 }
 
@@ -207,6 +209,11 @@ void CalDAVEventFeeder::process(bool authFailed)
             m_webdavParser.listDirectory(&m_webdav, "/");
         }
     });
+}
+
+void CalDAVEventFeeder::onError(QString error)
+{
+    onNetworkError(error, QNetworkReply::NoError);
 }
 
 bool CalDAVEventFeeder::processResponse(const QByteArray &data, const QString &source)
