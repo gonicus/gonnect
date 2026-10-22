@@ -71,7 +71,7 @@ BaseWindow {
 
             Accessible.id: "about.version"
             Accessible.role: Accessible.StaticText
-            Accessible.name: qsTr("GOnnect version %s").arg(ViewHelper.appVersion())
+            Accessible.name: qsTr("GOnnect version %1").arg(ViewHelper.appVersion())
             Accessible.description: appLabel.text
 
             Label {
