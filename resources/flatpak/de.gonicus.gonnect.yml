@@ -190,6 +190,8 @@ modules:
         path: patches/qtwebdav-cmake.patch
       - type: patch
         path: patches/qtwebdav-ssl-certificates.patch
+      - type: patch
+        path: patches/qtwebdav-propagate-network-error.patch
 
   - name: qtkeychain
     buildsystem: cmake-ninja

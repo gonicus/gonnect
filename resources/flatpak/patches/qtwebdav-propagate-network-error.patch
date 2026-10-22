@@ -1,0 +1,35 @@
+diff --git a/qwebdav.cpp b/qwebdav.cpp
+index 091500d..a4acf0b 100644
+--- a/qwebdav.cpp
++++ b/qwebdav.cpp
+@@ -204,7 +204,7 @@ void QWebdav::replyDeleteLater(QNetworkReply* reply)
+     m_outDataDevices.remove(reply);
+ }
+ 
+-void QWebdav::replyError(QNetworkReply::NetworkError)
++void QWebdav::replyError(QNetworkReply::NetworkError error)
+ {
+     auto reply = qobject_cast<QNetworkReply*>(QObject::sender());
+     if (reply==nullptr)
+@@ -223,7 +223,7 @@ void QWebdav::replyError(QNetworkReply::NetworkError)
+         return;
+     }
+ 
+-    emit errorChanged(reply->errorString());
++    emit errorChanged(reply->errorString(), error);
+ }
+ 
+ void QWebdav::provideAuthenication(QNetworkReply *reply, QAuthenticator *authenticator)
+diff --git a/qwebdav.h b/qwebdav.h
+index 7111f05..bca9b8e 100644
+--- a/qwebdav.h
++++ b/qwebdav.h
+@@ -133,7 +133,7 @@ public:
+ signals:
+     //! signal is emitted when an SSL error occured, the SSL certificates have to be checked
+     void checkSslCertifcate(const QList<QSslError> &errors);
+-    void errorChanged(QString error);
++    void errorChanged(QString error, QNetworkReply::NetworkError code = QNetworkReply::NoError);
+ 
+ protected slots:
+     void replyReadyRead();

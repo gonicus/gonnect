@@ -28,6 +28,7 @@ public:
 
 private Q_SLOTS:
     void onError(QString error);
+    void onNetworkError(QString error, QNetworkReply::NetworkError code);
     void onParserFinished();
     void flushCacheImpl();
 
