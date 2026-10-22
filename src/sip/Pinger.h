@@ -19,6 +19,7 @@ Q_SIGNALS:
 
 private Q_SLOTS:
     void onPlaybackStateChanged(QMediaPlayer::PlaybackState state);
+    void onPlayerError(QMediaPlayer::Error error, const QString &errorString);
 
 private:
     QMediaPlayer *m_player = nullptr;
