@@ -111,24 +111,20 @@ Item {
                 return
             }
 
-            // Target message in time line, but filtered by proxy model
-            const rawRow = chatModel.rowOfMessage(internal.jumpTargetMessageId)
-            if (rawRow >= 0) {
-                const msg = control.chatRoom.messageByIndex(rawRow)
-                if (msg.threadId !== SelectionState.selectedThreadId) {
-                    SelectionState.selectedThreadId = msg.threadId
-                }
+            // Reset thread view first - jump only possible in main timeline
+            if (SelectionState.selectedThreadId !== "") {
+                SelectionState.selectedThreadId = ""
                 Qt.callLater(internal.continueJump)
                 return
             }
 
-            // All loaded, but target not findable
+            // All loaded but not found
             if (internal.isCompletelyLoaded) {
                 internal.jumpTargetMessageId = ""
                 return
             }
 
-            // Target message not loaded yet - load it
+            // Not loaded yet - load next chunk
             if (control.chatRoom && !control.chatRoom.isLoadingMessageHistory) {
                 const oldestId = control.chatRoom.chatMessageCount() > 0
                                ? control.chatRoom.messageByIndex(0).eventId
