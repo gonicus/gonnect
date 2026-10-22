@@ -6,6 +6,7 @@
 #include "AudioManager.h"
 #include "Ringer.h"
 #include "AppSettings.h"
+#include "FileHelper.h"
 #include "SystemTrayMenu.h"
 #include "AudioHelper.h"
 
@@ -38,6 +39,22 @@ void Ringer::start(qreal customVolume)
     auto source = settings.value(QString("audio%1/ringtone").arg(currentProfile), "").toString();
     if (source.isEmpty()) {
         source = "qrc:/audio/phone-incoming-call.mp3";
+    } else {
+        const QString expectedPath =
+                FileHelper::instance().persistentFolderPath("sounds") + "/ringtone";
+        const QUrl sourceUrl(source);
+        const QString sourceLocalPath = sourceUrl.isLocalFile() ? sourceUrl.toLocalFile() : source;
+
+        if (sourceLocalPath != expectedPath) {
+            // Migrate old ring tone
+            const auto migratedPath =
+                    FileHelper::instance().persistFile(sourceUrl, "sounds", "ringtone");
+            if (!migratedPath.isEmpty()) {
+                qCInfo(lcRinger) << "Migrated ring tone by copying:" << migratedPath;
+                source = migratedPath;
+                settings.setValue(QString("audio%1/ringtone").arg(currentProfile), source);
+            }
+        }
     }
 
     if (source.isEmpty()) {

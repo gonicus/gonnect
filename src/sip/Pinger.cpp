@@ -2,6 +2,7 @@
 #include "AppSettings.h"
 #include "AudioManager.h"
 #include "AudioHelper.h"
+#include "FileHelper.h"
 
 #include <QAudioOutput>
 #include <QLoggingCategory>
@@ -29,6 +30,22 @@ void Pinger::ping(qreal customVolume)
     // Fallback sound
     if (source.isEmpty()) {
         source = "qrc:/audio/message-new-instant.wav";
+    } else {
+        const QString expectedPath =
+                FileHelper::instance().persistentFolderPath("sounds") + "/notification-tone";
+        const QUrl sourceUrl(source);
+        const QString sourceLocalPath = sourceUrl.isLocalFile() ? sourceUrl.toLocalFile() : source;
+
+        if (sourceLocalPath != expectedPath) {
+            // Migrate old ring tone
+            const auto migratedPath =
+                    FileHelper::instance().persistFile(sourceUrl, "sounds", "notification-tone");
+            if (!migratedPath.isEmpty()) {
+                qCInfo(lcPinger) << "Migrated notification tone by copying:" << migratedPath;
+                source = migratedPath;
+                settings.setValue(QString("audio%1/notificationTone").arg(currentProfile), source);
+            }
+        }
     }
 
     if (!m_player) {
