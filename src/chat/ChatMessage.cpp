@@ -80,7 +80,10 @@ void ChatMessage::setContent(QObject *content)
 
 void ChatMessage::setThreadId(const QString &threadId)
 {
-    m_threadId = threadId;
+    if (m_threadId != threadId) {
+        m_threadId = threadId;
+        Q_EMIT threadIdChanged();
+    }
 }
 
 bool ChatMessage::isStateUpdate() const
