@@ -553,7 +553,7 @@ Item {
         BarButton {
             id: muteButton
             toggled: !AudioManager.isAudioCaptureMuted
-            enabled: control.isEstablished && !control.isFinished
+            enabled: control.isEstablished && !control.isFinished && !control.isHolding
             toggleColorMode: BarButton.ToggleColorMode.Warn
             text: qsTr("Microphone")
             iconPath: Icons.audioInputMicrophone
@@ -573,7 +573,7 @@ Item {
             id: videoMuteButton
             text: qsTr("Camera")
             iconPath: Icons.cameraVideo
-            enabled: control.areInCallButtonsEnabled
+            enabled: control.areInCallButtonsEnabled && !control.isHolding
             visible: ViewHelper.isJitsiAvailable && control.hasCapabilityJitsi && !VideoCallHelper.hasActiveVideoCall
             onClicked: () => {
                 ViewHelper.nextMeetingStartFlags = IConferenceConnector.StartFlag.AudioActive | IConferenceConnector.StartFlag.VideoActive
@@ -589,7 +589,7 @@ Item {
             id: screenShareButton
             text: qsTr("Screen")
             iconPath: Icons.inputTouchscreen
-            enabled: control.areInCallButtonsEnabled
+            enabled: control.areInCallButtonsEnabled && !control.isHolding
             visible: ViewHelper.isJitsiAvailable && control.hasCapabilityJitsi && !VideoCallHelper.hasActiveVideoCall
             onClicked: () => {
                 if (GlobalInfo.useNewScreenSharingAPI()) {
