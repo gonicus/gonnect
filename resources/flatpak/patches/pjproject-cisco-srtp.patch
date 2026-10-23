@@ -1,0 +1,303 @@
+diff -Naur a/pjmedia/include/pjmedia/transport_srtp.h b/pjmedia/include/pjmedia/transport_srtp.h
+--- a/pjmedia/include/pjmedia/transport_srtp.h	2026-04-22 08:47:35.000000000 +0200
++++ b/pjmedia/include/pjmedia/transport_srtp.h	2026-07-30 11:02:17.476321205 +0200
+@@ -213,6 +213,14 @@
+     pj_bool_t                    close_member_tp;
+ 
+     /**
++     * Specify whether to initially offer SRTP transport when the usage policy
++     * is PJMEDIA_SRTP_OPTIONAL, but allow an RTP fallback.
++     *
++     * Default: PJ_FALSE.
++     */
++    pj_bool_t                    optional_offer_savp;
++
++    /**
+      * Specify the number of crypto suite settings. If set to zero, all
+      * available cryptos will be enabled. Default: zero.
+      */
+@@ -454,6 +462,28 @@
+                                        const pjmedia_srtp_setting *opt);
+ 
+ /**
++ * Re-key the SRTP transport in place: discard the cached local SDES master
++ * key(s) so that the next SDP offer regenerates fresh crypto material on the
++ * SAME underlying media transport (i.e. the RTP/RTCP ports are preserved).
++ *
++ * This is intended for endpoints that require a fresh SRTP key on every
++ * in-dialog re-INVITE (e.g. Cisco Unified CM secure line-side, which silently
++ * drops a re-INVITE that reuses the current key) but that also reject a
++ * re-INVITE which moves the RTP port -- so a full media re-init
++ * (PJSUA_CALL_REINIT_MEDIA) is not an option.
++ *
++ * The call only affects SDES keying; DTLS-SRTP re-keys through its own
++ * handshake and is left untouched. Passing a transport that is not an SRTP
++ * transport is a harmless no-op.
++ *
++ * @param srtp      The SRTP transport (any transport pointer is accepted; a
++ *                  non-SRTP transport is ignored).
++ *
++ * @return          PJ_SUCCESS on success.
++ */
++PJ_DECL(pj_status_t) pjmedia_transport_srtp_rekey(pjmedia_transport *srtp);
++
++/**
+  * Get fingerprint of local DTLS-SRTP certificate.
+  *
+  * @param srtp      The SRTP transport.
+diff -Naur a/pjmedia/src/pjmedia/transport_srtp.c b/pjmedia/src/pjmedia/transport_srtp.c
+--- a/pjmedia/src/pjmedia/transport_srtp.c	2026-04-22 08:47:35.000000000 +0200
++++ b/pjmedia/src/pjmedia/transport_srtp.c	2026-07-30 11:02:17.484321193 +0200
+@@ -888,6 +888,38 @@
+ }
+ 
+ 
++/*
++ * Re-key the SRTP transport in place (SDES): drop the cached local master
++ * key(s) so the next SDP offer regenerates fresh crypto on the same media
++ * transport, keeping the RTP/RTCP ports. See transport_srtp.h for rationale.
++ */
++PJ_DEF(pj_status_t) pjmedia_transport_srtp_rekey(pjmedia_transport *tp)
++{
++    transport_srtp  *srtp;
++    unsigned i;
++
++    PJ_ASSERT_RETURN(tp, PJ_EINVAL);
++
++    /* Be tolerant: ignore transports that are not SRTP so the caller can
++     * invoke this on every media transport without pre-checking the type. */
++    if (tp->op != &transport_srtp_op)
++        return PJ_SUCCESS;
++
++    srtp = (transport_srtp*) tp;
++
++    /* Clearing the key length forces generate_crypto_attr_value() (SDES) to
++     * produce a new random master key for the active crypto suite on the next
++     * encode_sdp(). The active tx_policy is left in place so the re-offer
++     * keeps offering the currently negotiated suite (with the fresh key). */
++    for (i = 0; i < srtp->setting.crypto_count; ++i) {
++        srtp->setting.crypto[i].key.ptr = NULL;
++        srtp->setting.crypto[i].key.slen = 0;
++    }
++
++    return PJ_SUCCESS;
++}
++
++
+ /* Create SRTP context */
+ static pj_status_t create_srtp_ctx(transport_srtp *srtp,
+                                    srtp_context *ctx,
+diff -Naur a/pjmedia/src/pjmedia/transport_srtp_sdes.c b/pjmedia/src/pjmedia/transport_srtp_sdes.c
+--- a/pjmedia/src/pjmedia/transport_srtp_sdes.c	2026-04-22 08:47:35.000000000 +0200
++++ b/pjmedia/src/pjmedia/transport_srtp_sdes.c	2026-07-30 11:02:12.118118800 +0200
+@@ -392,7 +392,9 @@
+                 return PJ_SUCCESS;
+             case PJMEDIA_SRTP_OPTIONAL:
+                 m_loc->desc.transport =
+-                                (srtp->peer_use == PJMEDIA_SRTP_MANDATORY)?
++                        ((srtp->peer_use == PJMEDIA_SRTP_MANDATORY) ||
++                         (srtp->setting.optional_offer_savp &&
++                          srtp->peer_use == PJMEDIA_SRTP_OPTIONAL))?
+                                 ID_RTP_SAVP : ID_RTP_AVP;
+                 break;
+             case PJMEDIA_SRTP_MANDATORY:
+diff -Naur a/pjsip/include/pjsua2/account.hpp b/pjsip/include/pjsua2/account.hpp
+--- a/pjsip/include/pjsua2/account.hpp	2026-04-22 08:47:35.000000000 +0200
++++ b/pjsip/include/pjsua2/account.hpp	2026-07-30 11:02:12.120341264 +0200
+@@ -936,6 +936,16 @@
+      */
+     IntVector                   keyings;
+ 
++    /**
++     * When the account uses PJMEDIA_SRTP_OPTIONAL, offer the media as
++     * RTP/SAVP instead of RTP/AVP, while still accepting an RTP/AVP answer
++     * without crypto attribute. See
++     * pjmedia_srtp_setting.optional_offer_savp for details.
++     *
++     * Default: false.
++     */
++    bool                        optionalOfferSavp;
++
+ public:
+     /**
+      * Default constructor initializes with default values.
+diff -Naur a/pjsip/include/pjsua-lib/pjsua.h b/pjsip/include/pjsua-lib/pjsua.h
+--- a/pjsip/include/pjsua-lib/pjsua.h	2026-04-22 08:47:35.000000000 +0200
++++ b/pjsip/include/pjsua-lib/pjsua.h	2026-07-30 11:02:17.486814031 +0200
+@@ -847,6 +847,16 @@
+      */
+     pjmedia_srtp_keying_method   keying[PJMEDIA_SRTP_KEYINGS_COUNT];
+ 
++    /**
++     * When the account does not use PJMEDIA_SRTP_MANDATORY, offer the media as
++     * RTP/SAVP instead of RTP/AVP, while still accepting an RTP/AVP answer
++     * without crypto attribute. See pjmedia_srtp_setting.optional_offer_savp
++     * for details.
++     *
++     * Default is PJ_FALSE.
++     */
++    pj_bool_t                    optional_offer_savp;
++
+ } pjsua_srtp_opt;
+ 
+ 
+@@ -5963,7 +5973,20 @@
+     /**
+      * Disable inter-media synchronization.
+      */
+-    PJSUA_CALL_NO_MEDIA_SYNC = 256
++    PJSUA_CALL_NO_MEDIA_SYNC = 256,
++
++    /**
++     * Re-key SRTP in place for this re-INVITE/UPDATE (or hold): regenerate a
++     * fresh SDES master key on the existing media transport, keeping the same
++     * RTP/RTCP ports. Unlike PJSUA_CALL_REINIT_MEDIA, the media transport is
++     * not recreated, so the RTP port does not change. This is required by
++     * endpoints that demand a fresh SRTP key on every in-dialog re-INVITE but
++     * reject one that also moves the RTP port (e.g. Cisco Unified CM secure
++     * line-side hold/resume). Has no effect on non-SRTP or DTLS-SRTP media.
++     * This flag is valid for #pjsua_call_set_hold2(), #pjsua_call_reinvite2(),
++     * and #pjsua_call_update2().
++     */
++    PJSUA_CALL_REKEY_SRTP = 512
+ 
+ } pjsua_call_flag;
+ 
+diff -Naur a/pjsip/src/pjsua2/account.cpp b/pjsip/src/pjsua2/account.cpp
+--- a/pjsip/src/pjsua2/account.cpp	2026-04-22 08:47:35.000000000 +0200
++++ b/pjsip/src/pjsua2/account.cpp	2026-07-30 11:02:12.121685078 +0200
+@@ -234,6 +234,8 @@
+     for (unsigned i = 0; i < prm.keying_count; ++i) {
+         this->keyings.push_back(prm.keying[i]);
+     }
++
++    this->optionalOfferSavp = PJ2BOOL(prm.optional_offer_savp);
+ }
+ 
+ pjsua_srtp_opt SrtpOpt::toPj() const
+@@ -252,6 +254,8 @@
+         opt.keying[i] = (pjmedia_srtp_keying_method)this->keyings[i];
+     }
+ 
++    opt.optional_offer_savp = this->optionalOfferSavp;
++
+     return opt;
+ }
+ 
+@@ -276,6 +280,8 @@
+         NODE_READ_UNSIGNED      (keying_node, keying);
+         this->keyings.push_back(keying);
+     }
++
++    NODE_READ_BOOL              (this_node, optionalOfferSavp);
+ }
+ 
+ void SrtpOpt::writeObject(ContainerNode &node) const PJSUA2_THROW(Error)
+@@ -293,6 +299,8 @@
+     for (unsigned i=0; i<this->keyings.size(); ++i) {
+         NODE_WRITE_UNSIGNED     (keying_node, this->keyings[i]);
+     }
++
++    NODE_WRITE_BOOL             (this_node, optionalOfferSavp);
+ }
+ 
+ ///////////////////////////////////////////////////////////////////////////////
+diff -Naur a/pjsip/src/pjsua-lib/pjsua_call.c b/pjsip/src/pjsua-lib/pjsua_call.c
+--- a/pjsip/src/pjsua-lib/pjsua_call.c	2026-04-22 08:47:35.000000000 +0200
++++ b/pjsip/src/pjsua-lib/pjsua_call.c	2026-07-30 11:02:17.488226063 +0200
+@@ -838,9 +838,18 @@
+ 
+     /* When contact is changed, the account transport may have been
+      * changed too, so let's update the dialog's transport too.
+-     */
+-    pjsua_init_tpselector(call->acc_id, &tp_sel);
+-    pjsip_dlg_set_transport(call->inv->dlg, &tp_sel);
++     *
++     * Exception: if the dialog has been explicitly pinned to a specific
++     * connection (PJSIP_TPSELECTOR_TRANSPORT, e.g. set by the application so
++     * that in-dialog requests stay on the connection the call was established
++     * on - required by Cisco Unified CM, which advertises a Contact address
++     * that does not resolve to the registered connection), keep that binding
++     * instead of falling back to the account's listener.
++     */
++    if (call->inv->dlg->tp_sel.type != PJSIP_TPSELECTOR_TRANSPORT) {
++        pjsua_init_tpselector(call->acc_id, &tp_sel);
++        pjsip_dlg_set_transport(call->inv->dlg, &tp_sel);
++    }
+ }
+ 
+ 
+@@ -3364,6 +3373,23 @@
+     return pjsua_call_set_hold2(call_id, 0, msg_data);
+ }
+ 
++/* Re-key SRTP in place on the provisional media transport(s): reset the
++ * cached local SDES master key so the upcoming SDP offer regenerates fresh
++ * crypto on the SAME media transport (keeping the RTP/RTCP ports). This is
++ * the port-preserving alternative to PJSUA_CALL_REINIT_MEDIA, needed by
++ * Cisco Unified CM secure line-side hold/resume. Non-SRTP transports are
++ * ignored by pjmedia_transport_srtp_rekey(). */
++static void call_rekey_srtp(pjsua_call *call)
++{
++    unsigned mi;
++
++    for (mi = 0; mi < call->med_prov_cnt; ++mi) {
++        if (call->media_prov[mi].tp)
++            pjmedia_transport_srtp_rekey(call->media_prov[mi].tp);
++    }
++}
++
++
+ PJ_DEF(pj_status_t) pjsua_call_set_hold2(pjsua_call_id call_id,
+                                          unsigned options,
+                                          const pjsua_msg_data *msg_data)
+@@ -3398,6 +3424,14 @@
+             goto on_return;
+     }
+ 
++    /* Cisco Unified CM (TLS/SRTP) silently drops an in-dialog hold re-INVITE
++     * that reuses the current SRTP key, but rejects one that also moves the
++     * RTP port (as PJSUA_CALL_REINIT_MEDIA would). When the caller asks for
++     * PJSUA_CALL_REKEY_SRTP, re-key the existing media transport(s) in place
++     * so the hold offer below carries a fresh key on the same RTP port. */
++    if (options & PJSUA_CALL_REKEY_SRTP)
++        call_rekey_srtp(call);
++
+     status = create_sdp_of_call_hold(call, &sdp);
+     if (status != PJ_SUCCESS)
+         goto on_return;
+@@ -3527,6 +3561,11 @@
+         goto on_return;
+     }
+ 
++    /* Re-key SRTP in place (same RTP port) before building the offer, e.g.
++     * for a Cisco Unified CM secure resume re-INVITE. See call_rekey_srtp(). */
++    if (call->opt.flag & PJSUA_CALL_REKEY_SRTP)
++        call_rekey_srtp(call);
++
+     /* Create SDP */
+     if (call->local_hold && (call->opt.flag & PJSUA_CALL_UNHOLD)==0) {
+         status = create_sdp_of_call_hold(call, &sdp);
+@@ -3658,6 +3697,11 @@
+         goto on_return;
+     }
+ 
++    /* Re-key SRTP in place (same RTP port) before building the offer, e.g.
++     * for a Cisco Unified CM secure resume re-INVITE. See call_rekey_srtp(). */
++    if (call->opt.flag & PJSUA_CALL_REKEY_SRTP)
++        call_rekey_srtp(call);
++
+     /* Create SDP */
+     if (call->local_hold && (call->opt.flag & PJSUA_CALL_UNHOLD)==0) {
+         status = create_sdp_of_call_hold(call, &sdp);
+diff -Naur a/pjsip/src/pjsua-lib/pjsua_media.c b/pjsip/src/pjsua-lib/pjsua_media.c
+--- a/pjsip/src/pjsua-lib/pjsua_media.c	2026-04-22 08:47:35.000000000 +0200
++++ b/pjsip/src/pjsua-lib/pjsua_media.c	2026-07-30 11:02:12.121054283 +0200
+@@ -2031,6 +2031,7 @@
+         srtp_opt.keying_count = acc_srtp_opt->keying_count;
+         for (i = 0; i < srtp_opt.keying_count; ++i)
+             srtp_opt.keying[i] = acc_srtp_opt->keying[i];
++        srtp_opt.optional_offer_savp = acc_srtp_opt->optional_offer_savp;
+ 
+         /* If media session has been ever established, let's use remote's 
+          * preference in SRTP usage policy, especially when it is stricter.
