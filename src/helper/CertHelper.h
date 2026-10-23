@@ -4,6 +4,8 @@
 #include <QQmlEngine>
 #include <QSslCertificate>
 
+class QQuickWebEngineProfile;
+
 class CertHelper : public QObject
 {
     Q_OBJECT
@@ -23,9 +25,23 @@ public:
     /// loaded.
     const QList<QSslCertificate> &caCerts();
 
+    /// Add all custom client certificates from settings to the given profile.
+    Q_INVOKABLE void addClientCerts(QQuickWebEngineProfile *profile) const;
+
 private:
+    enum class Format { Unknown, Pem, Pkcs12 };
+
     explicit CertHelper(QObject *parent = nullptr);
+
     void ensureCaInitialized();
+    bool isReadableFile(const QString &path) const;
+    CertHelper::Format detectFormat(const QByteArray &data) const;
+
+    void addClientCert(QQuickWebEngineProfile *profile, const QString &path) const;
+    void addClientCertPerm(QQuickWebEngineProfile *profile, const QByteArray &data) const;
+    void addClientCertP12(QQuickWebEngineProfile *profile, const QByteArray &data) const;
+    void addToStore(QQuickWebEngineProfile *profile, const QSslCertificate &cert,
+                    const QSslKey &key) const;
 
     QStringList m_caPaths;
     QList<QSslCertificate> m_caCerts;

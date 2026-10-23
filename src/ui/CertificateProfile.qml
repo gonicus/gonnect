@@ -40,6 +40,8 @@ QtObject {
                                    const mainLang = systemLocale.split("-")[0]
                                    profile.httpAcceptLanguage = `${systemLocale},${mainLang};q=0.9,en;q=0.8`
 
+                                   CertHelper.addClientCerts(profile)
+
                                    internal.profile = profile
                                }
     }
