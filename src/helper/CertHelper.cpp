@@ -130,7 +130,7 @@ void CertHelper::addClientCert(QQuickWebEngineProfile *profile, const QString &p
     switch (detectFormat(data)) {
 
     case Format::Pem:
-        addClientCertPerm(profile, data);
+        addClientCertPem(profile, data);
         break;
 
     case Format::Pkcs12:
@@ -144,7 +144,7 @@ void CertHelper::addClientCert(QQuickWebEngineProfile *profile, const QString &p
     }
 }
 
-void CertHelper::addClientCertPerm(QQuickWebEngineProfile *profile, const QByteArray &data) const
+void CertHelper::addClientCertPem(QQuickWebEngineProfile *profile, const QByteArray &data) const
 {
     Q_CHECK_PTR(profile);
 
@@ -177,6 +177,8 @@ void CertHelper::addClientCertP12(QQuickWebEngineProfile *profile, const QByteAr
     QSslKey key;
     QSslCertificate cert;
     QList<QSslCertificate> chain;
+
+    Q_UNUSED(chain) // intermediate CA not supported atm
 
     if (!QSslCertificate::importPkcs12(&buffer, &key, &cert, &chain)) {
         qCCritical(lcCertHelper) << "PKCS#12 import failed (corrupted or DER certificate)";

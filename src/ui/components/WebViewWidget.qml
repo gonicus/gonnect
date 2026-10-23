@@ -103,6 +103,14 @@ BaseWidget {
                     }
                 }
 
+                onSelectClientCertificate: selection => {
+                                               console.log("WebViewWidget client certificate requested, have", selection.certificates.length)
+
+                                               if (selection.certificates.length > 0) {
+                                                   selection.select(selection.certificates[0])
+                                               }
+                                           }
+
                 onCertificateError: function(error) {
                     console.log("Certificate error encountered:", error.description);
 

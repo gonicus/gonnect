@@ -38,7 +38,7 @@ private:
     CertHelper::Format detectFormat(const QByteArray &data) const;
 
     void addClientCert(QQuickWebEngineProfile *profile, const QString &path) const;
-    void addClientCertPerm(QQuickWebEngineProfile *profile, const QByteArray &data) const;
+    void addClientCertPem(QQuickWebEngineProfile *profile, const QByteArray &data) const;
     void addClientCertP12(QQuickWebEngineProfile *profile, const QByteArray &data) const;
     void addToStore(QQuickWebEngineProfile *profile, const QSslCertificate &cert,
                     const QSslKey &key) const;
