@@ -374,11 +374,7 @@ Item {
                         localStorageEnabled: true
                         screenCaptureEnabled: true
                     }
-                    profile {
-                        offTheRecord: false
-                        // This line let's the app crash all of a sudden...
-                        // storageName: "gonnect_jitsi_meet"
-                    }
+                    profile: CertificateProfile.profile
                     webChannel: WebChannel {
                         registeredObjects: [ confConn ]
                     }
