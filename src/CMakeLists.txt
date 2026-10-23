@@ -514,6 +514,7 @@ qt_add_qml_module(gonnect
         ui/components/DateEventsList.qml
         ui/components/FavoritesList.qml
         ui/components/HistoryList.qml
+        ui/components/IndicatorIcon.qml
         ui/components/MainTabBar.qml
         ui/components/PresenceStatusIndicator.qml
         ui/components/UsersList.qml

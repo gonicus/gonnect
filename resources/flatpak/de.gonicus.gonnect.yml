@@ -158,6 +158,8 @@ modules:
         path: patches/pjsip-mwi-crash.patch
       - type: patch
         path: patches/pjsip-ice-media-ioqueue.patch
+      - type: patch
+        path: patches/pjsip-a7fa90f45.patch
 
   - name: openldap
     config-opts:
@@ -172,8 +174,8 @@ modules:
       - /share/man
     sources:
       - type: archive
-        url: https://www.openldap.org/software/download/OpenLDAP/openldap-release/openldap-2.7.1.tgz
-        sha256: 253db80f301258ea69cda1184766d57395b836aaabf41157eb0316eb0fac1341
+        url: https://www.openldap.org/software/download/OpenLDAP/openldap-release/openldap-2.7.2.tgz
+        sha256: aad731aa22118ff327b9b4ddfc4b6f18ef9476586205da88a532e90940b523d2
         x-checker-data:
           type: anitya
           stable-only: true
@@ -192,6 +194,8 @@ modules:
         path: patches/qtwebdav-cmake.patch
       - type: patch
         path: patches/qtwebdav-ssl-certificates.patch
+      - type: patch
+        path: patches/qtwebdav-fix-collection.patch
 
   - name: qtkeychain
     buildsystem: cmake-ninja
@@ -276,6 +280,10 @@ modules:
         commit: 9e6a5349d27733c931815b2e236807f3414ab251
       - type: patch
         path: patches/vcard-cmake.patch
+      - type: patch
+        path: patches/vcard-do-not-skip-photo.patch
+      - type: patch
+        path: patches/vcard-fix-group-property-name.patch
 
   - name: hidapi
     buildsystem: cmake-ninja
@@ -340,9 +348,13 @@ modules:
       - mv /app/lib/libsqlite3.a /app/lib/libsqlcipher.a
       - rm -f /app/lib/pkgconfig/sqlite3.pc /app/bin/sqlite3
     sources:
-      - type: archive
-        url: https://github.com/sqlcipher/sqlcipher/archive/refs/tags/v4.16.0.tar.gz
-        sha256: d687bf981199ac019c6c87b11f92a5900aec777855e7ba5b30e5e1192933ce8a
+      - type: git
+        url: https://github.com/sqlcipher/sqlcipher.git
+        tag: v4.19.0
+        commit: c4b275a47932888216bade83aff2bbc73df0ff85
+        x-checker-data:
+          type: git
+          tag-pattern: ^v([0-9.]+)$
 
   - name: libstemmer
     buildsystem: simple
@@ -354,6 +366,9 @@ modules:
       - type: git
         url: https://github.com/snowballstem/snowball.git
         tag: v3.1.1
+        x-checker-data:
+          type: git
+          tag-pattern: ^v([0-9.]+)$
 
   - name: gonnect
     buildsystem: cmake-ninja

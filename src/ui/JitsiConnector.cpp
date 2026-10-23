@@ -377,7 +377,11 @@ new QWebChannel(qt.webChannelTransport, function(channel) {
     })
 
     jitsiConn.executeSetVideoInputDeviceCommand.connect((deviceId) => {
-        api.setVideoInputDevice(undefined, deviceId)
+        api.getCurrentDevices().then(devices => {
+            if (devices?.videoInput?.deviceId !== deviceId) {
+                api.setVideoInputDevice(undefined, deviceId)
+            }
+        })
     })
 
     jitsiConn.executeToggleVirtualBackgroundDialogCommand.connect(() => {
@@ -492,10 +496,33 @@ api.addListener("knockingParticipant", data => {
     jitsiConn.addKnockingParticipant(data.participant.id, data.participant.name)
 })
 
-api.addListener("raisHandUpdated", data => {
+api.addListener("raiseHandUpdated", data => {
     if (data.id === api.getMyUserId()) {
         jitsiConn.setIsHandRaisedInternal(!!data.handRaised)
     }
+})
+
+api.addListener("transcribingStatusChanged", data => {
+    console.debug("setTranscriptionActive", data.on)
+    jitsiConn.setTranscriptionActive(data.on)
+})
+
+api.addListener("transcriptionChunkReceived", data => {
+    console.debug("received transcription chunk:", JSON.stringify(data))
+
+    // data seems to be in a sub-object depending on Jitsi version
+    const chunk = data.data ?? data
+
+    jitsiConn.addTranscriptionChunk(
+        chunk.messageID,
+        chunk.participant?.id ?? "",
+        chunk.participant?.name ?? "",
+        chunk.participant?.avatarUrl ?? "",
+        chunk.language,
+        chunk.final,
+        chunk.stable,
+        chunk.unstable
+    )
 })
 
 )""")
@@ -545,9 +572,11 @@ void JitsiConnector::checkJitsiBackendFeatures()
             qCCritical(lcJitsiConnector) << "  " << err.errorString();
         }
     });
-    connect(reply, &QIODevice::readyRead, this, [reply, this]() {
+    connect(reply, &QNetworkReply::finished, this, [reply, this]() {
         static const QRegularExpression whiteboardRegex(
-                R"(whiteboard\s*(?:=|:)\s*{\s*enabled\s*:\s*true)");
+                R"(whiteboard\s*(?:=|:)\s*{[^}]*?enabled\s*:\s*true)");
+        static const QRegularExpression transcriptionRegex(
+                R"(transcription\s*(?:=|:)\s*{[^}]*?enabled\s*:\s*true)");
         static const QRegularExpression etherpadRegex(R"(etherpad_base\s*(?:=|:)\s*['"])");
         static const QRegularExpression dialInConfCodeUrl(
                 R"(dialInConfCodeUrl\s*(?:=|:)\s*['"](?<url>.*)['"])");
@@ -558,6 +587,7 @@ void JitsiConnector::checkJitsiBackendFeatures()
 
         setHasWhiteboard(whiteboardRegex.match(txt).hasMatch());
         setHasTextpad(etherpadRegex.match(txt).hasMatch());
+        setHasTranscription(transcriptionRegex.match(txt).hasMatch());
 
         const auto dialInConfCodeUrlMatch = dialInConfCodeUrl.match(txt);
         if (dialInConfCodeUrlMatch.hasMatch()) {
@@ -572,6 +602,8 @@ void JitsiConnector::checkJitsiBackendFeatures()
         if (hasDialIn()) {
             Q_EMIT hasDialInChanged();
         }
+
+        reply->deleteLater();
     });
 }
 
@@ -591,6 +623,14 @@ void JitsiConnector::setHasTextpad(bool value)
     }
 }
 
+void JitsiConnector::setHasTranscription(bool value)
+{
+    if (hasCapability(Capability::Transcription) && m_hasTranscription != value) {
+        m_hasTranscription = value;
+        Q_EMIT hasTranscriptionChanged();
+    }
+}
+
 void JitsiConnector::setLargeVideoUserById(const QString &id)
 {
     for (const auto user : std::as_const(m_users)) {
@@ -600,6 +640,60 @@ void JitsiConnector::setLargeVideoUserById(const QString &id)
         }
     }
     setLargeVideoUser(nullptr);
+}
+
+void JitsiConnector::setTranscriptionActive(bool value)
+{
+    qCDebug(lcJitsiConnector) << "setTranscriptionActive" << value;
+
+    if (m_isTranscriptionActive != value) {
+        m_isTranscriptionActive = value;
+        Q_EMIT isTranscriptionActiveChanged();
+    }
+}
+
+void JitsiConnector::addTranscriptionChunk(const QString &messageId, const QString &participantId,
+                                           const QString &participantName,
+                                           const QString &participantAvatarUrl,
+                                           const QString &language, const QString &finalText,
+                                           const QString &stableText, const QString &unstableText)
+{
+    if (messageId.isEmpty()) {
+        qCWarning(lcJitsiConnector) << "Cannot add transcription chunk with empty messageId";
+        return;
+    }
+
+    Q_UNUSED(participantAvatarUrl)
+    Q_UNUSED(language)
+
+    const QString messageText = finalText.isEmpty() ? (stableText + unstableText) : finalText;
+    auto *newContent = new ChatMessageContentText(messageText);
+    auto *msg = m_transcriptionMessageLookup.value(messageId, nullptr);
+
+    if (msg) {
+        // Update existing message
+        msg->setContent(newContent);
+        Q_EMIT m_chatRoom->chatMessageContentChanged(m_chatRoom->indexOfMessage(msg), msg);
+
+    } else {
+        // Create new message
+        const ConferenceUser *resolvedUser = findUserById(participantId);
+        QString userName;
+        if (resolvedUser) {
+            userName = resolvedUser->displayName();
+        }
+        if (userName.isEmpty()) {
+            userName = participantName;
+        }
+        if (userName.isEmpty()) {
+            userName = tr("Unknown user");
+        }
+
+        msg = new ChatMessage("", participantId, userName, newContent, QDateTime::currentDateTime(),
+                              m_chatRoom, ChatMessage::Flag::Transcription);
+        m_transcriptionMessageLookup.insert(messageId, msg);
+        m_chatRoom->addMessage(msg);
+    }
 }
 
 void JitsiConnector::setIsInConference(bool value)
@@ -930,6 +1024,10 @@ void JitsiConnector::setUserRole(const QString &id, const QString &roleString)
 
 void JitsiConnector::muteAll()
 {
+    if (ownRole() != ConferenceUser::Role::Moderator) {
+        qCWarning(lcJitsiConnector) << "Only moderators can mute all";
+        return;
+    }
     Q_EMIT executeMuteAllCommand();
 }
 
@@ -1073,6 +1171,20 @@ QString JitsiConnector::jitsiDisplayName() const
     return settings.value("jitsi/displayName").toString();
 }
 
+ConferenceUser *JitsiConnector::findUserById(const QString &userId) const
+{
+    if (userId.isEmpty()) {
+        return nullptr;
+    }
+
+    for (auto *user : std::as_const(m_users)) {
+        if (user->id() == userId) {
+            return user;
+        }
+    }
+    return nullptr;
+}
+
 void JitsiConnector::selectAudioInputDevice(const QString &deviceId)
 {
     auto device = findDevice(m_audioInputDevices, deviceId);
@@ -1173,6 +1285,7 @@ void JitsiConnector::transferVideoManagerDeviceToJitsi()
 
     if (videoDevice.isNull()) {
         selectVideoInputDevice("");
+        return;
     }
 
     // Find correct Jitsi device id for QCameraDevice
@@ -1225,12 +1338,13 @@ QUrl JitsiConnector::baseUrl() const
 bool JitsiConnector::hasCapability(const Capability capabilityToCheck) const
 {
     const static QSet<Capability> m_capabilites = {
-        Capability::AudioMute,  Capability::ChatInCall,   Capability::Holdable,
-        Capability::RaiseHand,  Capability::ScreenShare,  Capability::Sharable,
-        Capability::Subtitles,  Capability::MuteAll,      Capability::NoiseSuppression,
-        Capability::UserRoles,  Capability::UserKickable, Capability::RoomPassword,
-        Capability::ShareUrl,   Capability::Textpad,      Capability::TileView,
-        Capability::Whiteboard, Capability::VideoMute,    Capability::VideoQualityAdjustable,
+        Capability::AudioMute,    Capability::ChatInCall,   Capability::Holdable,
+        Capability::RaiseHand,    Capability::ScreenShare,  Capability::Sharable,
+        Capability::Subtitles,    Capability::MuteAll,      Capability::NoiseSuppression,
+        Capability::UserRoles,    Capability::UserKickable, Capability::RoomPassword,
+        Capability::ShareUrl,     Capability::Textpad,      Capability::TileView,
+        Capability::Whiteboard,   Capability::VideoMute,    Capability::VideoQualityAdjustable,
+        Capability::Transcription
     };
     return m_capabilites.contains(capabilityToCheck);
 }
@@ -1420,6 +1534,7 @@ void JitsiConnector::resetConferenceState()
         m_inConferenceNotification = nullptr;
     }
 
+    m_transcriptionMessageLookup.clear();
     m_chatRoom->clear();
 
     // Reset per-conference toggle state so it doesn't leak into the next conference

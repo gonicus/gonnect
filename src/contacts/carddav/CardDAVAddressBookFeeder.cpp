@@ -140,7 +140,8 @@ void CardDAVAddressBookFeeder::feedAddressBook(bool authFailed)
 void CardDAVAddressBookFeeder::processVcard(QByteArray data, const QString &uuid,
                                             const QDateTime &modifiedDate)
 {
-    // Check vCard version first - only 3.0 is supported atm
+    // Check vCard version
+    static const QStringList supportedVersions = { "3", "4" };
     static const QRegularExpression versionRegExp("VERSION:(?<version>[0-9.]+?)(\\r\\n?|\\n)");
 
     const auto matchResult = versionRegExp.match(data);
@@ -148,11 +149,18 @@ void CardDAVAddressBookFeeder::processVcard(QByteArray data, const QString &uuid
         qCCritical(lcCardDAVAddressBookFeeder) << "Cannot parse version from vCard - ignoring";
         return;
     }
-    const auto version = matchResult.captured("version");
-    if (version != "3.0") {
+
+    const auto versionStr = matchResult.captured("version");
+    const auto versionSplit = versionStr.split('.', Qt::SkipEmptyParts);
+    if (versionSplit.isEmpty()) {
+        qCCritical(lcCardDAVAddressBookFeeder) << "Cannot split version string" << versionStr;
+        return;
+    }
+
+    if (!supportedVersions.contains(versionSplit.first())) {
         qCCritical(lcCardDAVAddressBookFeeder)
-                << "Only vCard version 3.0 is supported at the moment but found" << version
-                << "- ignoring";
+                << "Version" << versionStr
+                << "is not supported. Supported versions are:" << supportedVersions.join(", ");
         return;
     }
 

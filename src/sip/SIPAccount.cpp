@@ -982,6 +982,8 @@ void SIPAccount::onRegState(pj::OnRegStateParam &prm)
         ++m_registrationCount;
     }
 
+    const bool newlyRegistered = !m_isRegistered && ai.regIsActive;
+
     if (m_isRegistered != ai.regIsActive) {
         m_isRegistered = ai.regIsActive;
 
@@ -993,6 +995,12 @@ void SIPAccount::onRegState(pj::OnRegStateParam &prm)
     if (prm.code == PJSIP_SC_OK && prm.expiration > 0 && m_afterResume) {
         m_afterResume = false;
         reinitBuddies();
+
+    } else if (newlyRegistered) {
+        // If we're newly registered, pre-existing buddies are not subscribed yet.
+        for (auto buddy : std::as_const(m_buddies)) {
+            buddy->subscribe();
+        }
     }
 
     if (!m_ciscoDeviceMac.isEmpty() && prm.code == PJSIP_SC_OK && prm.expiration > 0) {

@@ -55,6 +55,14 @@ public:
     Q_INVOKABLE void setUserRole(const QString &id, const QString &roleString);
     Q_INVOKABLE void setLargeVideoUserById(const QString &id);
 
+    bool isTranscriptionActive() const override { return m_isTranscriptionActive; }
+    Q_INVOKABLE void setTranscriptionActive(bool value);
+    Q_INVOKABLE virtual void
+    addTranscriptionChunk(const QString &messageId, const QString &participantId,
+                          const QString &participantName, const QString &participantAvatarUrl,
+                          const QString &language, const QString &finalText,
+                          const QString &stableText, const QString &unstableText) override;
+
     // Interface methods
     ContactInfo remoteContactInfo() const override;
 
@@ -66,6 +74,7 @@ public:
     bool hasWhiteboard() const override { return m_hasWhiteboard; }
     void toggleWhiteboard() override;
     bool hasTextpad() const override { return m_hasTextpad; }
+    bool hasTranscription() const override { return m_hasTranscription; }
     bool isPasswordRequired() const override { return m_isPasswordRequired; }
     QString roomPassword() const override { return m_roomPassword; }
     void setRoomPassword(QString value) override;
@@ -139,6 +148,7 @@ private:
 
     void setHasWhiteboard(bool value);
     void setHasTextpad(bool value);
+    void setHasTranscription(bool value);
     void setConferenceName(const QString &name);
     void setIsInConference(bool value);
     void setIsOnHold(bool value);
@@ -154,6 +164,7 @@ private:
     JitsiMediaDevice *sipToJitsiDevice(const SIPAudioDevice *sipDevice) const;
     void addRoomMessage(QString message, QDateTime stamp = QDateTime::currentDateTime());
     QString jitsiDisplayName() const;
+    ConferenceUser *findUserById(const QString &userId) const;
 
     ConferenceUser::Role m_ownRole = ConferenceUser::Role::None;
     QString m_jitsiId;
@@ -180,10 +191,12 @@ private:
     bool m_isToggleScreenSharePending = false;
     bool m_hasWhiteboard = false;
     bool m_hasTextpad = false;
+    bool m_hasTranscription = false;
     QUrl m_dialInConfCodeUrl;
     QUrl m_dialInNumbersUrl;
     QString m_roomPassword;
     VideoQuality m_videoQuality = VideoQuality::Average;
+    bool m_isTranscriptionActive = false;
 
     QString m_roomName;
     QString m_displayName;
@@ -193,6 +206,9 @@ private:
     QList<Notification *> m_chatNotifications;
     Notification *m_inConferenceNotification = nullptr;
     QSet<QString> m_knockedIds;
+
+    /// Lookup hash map messageId (transcription chunk) -> ChatMessage
+    QHash<QString, ChatMessage *> m_transcriptionMessageLookup;
 
     QList<JitsiMediaDevice *> m_audioInputDevices;
     QList<JitsiMediaDevice *> m_audioOutputDevices;

@@ -24,6 +24,7 @@ class ChatMessage : public QObject
     Q_PROPERTY(ChatMessageContentUserStateChange::State state READ state CONSTANT FINAL)
     Q_PROPERTY(QString affectedUserId READ affectedUserId CONSTANT FINAL)
     Q_PROPERTY(QObject *content READ content NOTIFY contentChanged FINAL)
+    Q_PROPERTY(QString threadId READ threadId NOTIFY threadIdChanged FINAL)
 
 public:
     enum class Flag {
@@ -36,7 +37,8 @@ public:
         Pending = 1 << 5,
         Failed = 1 << 6,
         ThreadRoot = 1 << 7,
-        Edited = 1 << 8
+        Edited = 1 << 8,
+        Transcription = 1 << 9,
     };
     Q_ENUM(Flag)
     Q_DECLARE_FLAGS(Flags, Flag)
@@ -113,6 +115,7 @@ Q_SIGNALS:
     void contentChanged();
     void eventIdChanged();
     void timestampChanged();
+    void threadIdChanged();
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(ChatMessage::Flags)

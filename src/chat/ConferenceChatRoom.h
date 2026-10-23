@@ -34,6 +34,7 @@ public:
     virtual qsizetype chatMessageCount() const override;
     virtual ChatMessage *messageByIndex(qsizetype index) const override;
     virtual ChatMessage *messageById(const QString &) const override { return nullptr; }
+    virtual qsizetype indexOfMessage(const ChatMessage *message) const override;
     virtual QList<ChatMessage *> pinnedChatMessages() const override { return {}; }
     virtual qsizetype pinnedChatMessageCount() const override { return 0; }
     virtual ChatMessage *pinnedChatMessageByIndex(qsizetype) const override { return nullptr; }
