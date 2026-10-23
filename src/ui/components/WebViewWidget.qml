@@ -80,6 +80,7 @@ BaseWidget {
             WebEngineView {
                 id: webView
                 backgroundColor: Theme.backgroundColor
+                profile: CertificateProfile.profile
                 url: {
                     if (Theme.isDarkMode) {
                         return !!control.darkModeUrl.trim() ? control.darkModeUrl : control.lightModeUrl
@@ -93,14 +94,6 @@ BaseWidget {
                     javascriptEnabled: true
                     localStorageEnabled: true
                     localContentCanAccessFileUrls: true
-                }
-
-                profile {
-                    httpAcceptLanguage: {
-                        const systemLocale = Qt.locale().name.replace("_", "-")
-                        const mainLang = systemLocale.split("-")[0]
-                        return `${systemLocale},${mainLang};q=0.9,en;q=0.8`
-                    }
                 }
 
                 onLoadingChanged: function(loadRequest) {
