@@ -1,9 +1,9 @@
 id: de.gonicus.gonnect
 runtime: org.kde.Platform
-runtime-version: '6.11'
+runtime-version: '6.12'
 sdk: org.kde.Sdk
 base: io.qt.qtwebengine.BaseApp
-base-version: '6.11'
+base-version: '6.12'
 command: gonnect
 
 add-extensions:
@@ -170,8 +170,8 @@ modules:
       - /share/man
     sources:
       - type: archive
-        url: https://www.openldap.org/software/download/OpenLDAP/openldap-release/openldap-2.7.1.tgz
-        sha256: 253db80f301258ea69cda1184766d57395b836aaabf41157eb0316eb0fac1341
+        url: https://www.openldap.org/software/download/OpenLDAP/openldap-release/openldap-2.7.2.tgz
+        sha256: aad731aa22118ff327b9b4ddfc4b6f18ef9476586205da88a532e90940b523d2
         x-checker-data:
           type: anitya
           stable-only: true
@@ -377,9 +377,6 @@ modules:
       - -DCMAKE_UNITY_BUILD=ON
       - -DCMAKE_OPTIMIZE_DEPENDENCIES=ON
       - -DENABLE_GOW_001=ON
-      - -DENABLE_GOW_002=ON
-      - -DENABLE_GOW_004=ON
-      - -DENABLE_GOW_005=ON
       - -DENABLE_PCH=ON
     sources:
       - type: dir
