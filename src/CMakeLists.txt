@@ -183,6 +183,7 @@ set_target_properties(gonnect PROPERTIES
 
 set(gonnect_qml_singletons
     ui/components/dialogs/DialogFactory.qml
+    ui/CertificateProfile.qml
 )
 set_source_files_properties(${gonnect_qml_singletons} PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
 
@@ -778,6 +779,8 @@ qt_add_qml_module(gonnect
         helper/AudioHelper.cpp
         helper/AvatarPrioHelper.h
         helper/AvatarPrioHelper.cpp
+        helper/CertHelper.h
+        helper/CertHelper.cpp
         helper/ChatMessageTransformer.h
         helper/ChatMessageTransformer.cpp
         helper/CodeHighlighter.h

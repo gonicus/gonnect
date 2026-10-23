@@ -25,6 +25,7 @@
 #include "ChatMessage.h"
 #include "ErrorBus.h"
 #include "PlatformSession.h"
+#include "CertHelper.h"
 
 #include <QLoggingCategory>
 #include <QNetworkAccessManager>
@@ -556,7 +557,7 @@ void JitsiConnector::checkJitsiBackendFeatures()
     if (!settings.value("generic/verifyServer", true).toBool()) {
         sslConfig.setPeerVerifyMode(QSslSocket::PeerVerifyMode::VerifyNone);
     }
-    sslConfig.addCaCertificates(AuthManager::instance().sslCAs());
+    sslConfig.addCaCertificates(CertHelper::instance().caCerts());
     request.setSslConfiguration(sslConfig);
 
     request.setUrl(QUrl(QString("%1/config.js").arg(GlobalInfo::instance().jitsiUrl())));
