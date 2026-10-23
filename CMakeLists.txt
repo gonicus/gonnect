@@ -32,6 +32,7 @@ list(PREPEND CMAKE_PREFIX_PATH "${PROJECT_BINARY_DIR}/generators")
 set(FLATPAK $ENV{FLATPAK_ID})
 
 # Basic settings
+include(cmake/HardeningFlags.cmake)
 option(CMAKE_UNITY_BUILD "Enable unity builds" OFF)
 option(ENABLE_PCH "Enable precompiled headers" ON)
 option(BUILD_TESTING "Build tests" OFF)
@@ -94,7 +95,7 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 find_package(Qt6 REQUIRED COMPONENTS Gui ${PLATFORM_QT_MODULES} Qml Quick QuickControls2 LinguistTools)
-qt_standard_project_setup(REQUIRES 6.10
+qt_standard_project_setup(REQUIRES 6.11
     I18N_SOURCE_LANGUAGE en
     I18N_TRANSLATED_LANGUAGES de es it fa fr ru uk
 )
