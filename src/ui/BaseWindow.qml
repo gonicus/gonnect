@@ -376,6 +376,8 @@ Window {
             layer.effect: MultiEffect {
                 maskSource: bgMaskRect
                 maskEnabled: true
+                maskThresholdMin: 0.5
+                maskSpreadAtMin: 1.0
             }
 
             Loader {
