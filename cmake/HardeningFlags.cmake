@@ -22,6 +22,7 @@ if(ENABLE_HARDENING)
         add_link_options(-Wl,-z,relro -Wl,-z,now -Wl,-z,noexecstack)
     elseif(MSVC)
         add_compile_options(/guard:cf /sdl)
+        add_compile_definitions(_CRT_SECURE_NO_WARNINGS) # logfault headers...
         add_link_options(/guard:cf /CETCOMPAT)
     endif()
 endif() 
