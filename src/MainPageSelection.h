@@ -11,7 +11,7 @@ Q_CLASSINFO("RegisterEnumClassesUnscoped", "false")
 
 enum class PageType { Base, Call, Chats, Conference, Settings, Emergency };
 Q_ENUM_NS(PageType)
-}
+} // namespace MainPageSelectionEnums
 
 struct MainPageSelection
 {

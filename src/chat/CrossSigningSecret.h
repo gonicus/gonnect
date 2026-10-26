@@ -11,7 +11,7 @@ Q_CLASSINFO("RegisterEnumClassesUnscoped", "false")
 
 enum class CrossSigningMethod { SasString, SasSymbol };
 Q_ENUM_NS(CrossSigningMethod)
-}
+} // namespace CrossSigningSecretEnums
 
 class CrossSigningSecret
 {
