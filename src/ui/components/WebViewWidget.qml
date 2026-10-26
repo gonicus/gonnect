@@ -82,6 +82,10 @@ BaseWidget {
                 backgroundColor: Theme.backgroundColor
                 profile: CertificateProfile.profile
                 url: {
+                    if (!CertHelper.clientCertsInitialized) {
+                        return ""
+                    }
+
                     if (Theme.isDarkMode) {
                         return !!control.darkModeUrl.trim() ? control.darkModeUrl : control.lightModeUrl
                     } else {

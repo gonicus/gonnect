@@ -25,24 +25,36 @@ QtObject {
             additionalTrustedCertificateFiles: CertHelper.caCertPaths()
         }
 
-        Component.onCompleted: () => {
+        Component.onCompleted: () => internal.createProfile()
 
-                                   // Must be done onCompleted and not in binding because not everything would be loaded completely
-                                   const profile = internal.proto.instance()
+        readonly property Connections certHelperConnections: Connections {
+            target: CertHelper
+            function onClientCertsInitializedChanged() {
+                internal.createProfile()
+            }
+        }
 
-                                   if (!profile) {
-                                       console.error(category, "CertificateProfile could not be loaded")
-                                       return
-                                   }
-                                   profile.offTheRecord = false
+        function createProfile() {
+            if (!CertHelper.clientCertsInitialized) {
+                CertHelper.initializeClientCerts()
 
-                                   const systemLocale = Qt.locale().name.replace("_", "-")
-                                   const mainLang = systemLocale.split("-")[0]
-                                   profile.httpAcceptLanguage = `${systemLocale},${mainLang};q=0.9,en;q=0.8`
+            } else {
+                const profile = internal.proto.instance()
 
-                                   CertHelper.addClientCerts(profile)
+                if (!profile) {
+                    console.error(category, "CertificateProfile could not be loaded")
+                    return
+                }
+                profile.offTheRecord = false
 
-                                   internal.profile = profile
-                               }
+                const systemLocale = Qt.locale().name.replace("_", "-")
+                const mainLang = systemLocale.split("-")[0]
+                profile.httpAcceptLanguage = `${systemLocale},${mainLang};q=0.9,en;q=0.8`
+
+                CertHelper.addClientCerts(profile)
+
+                internal.profile = profile
+            }
+        }
     }
 }

@@ -415,6 +415,19 @@ Item {
                         }
                     }
 
+                    function loadJitsiSite() {
+                        if (CertHelper.clientCertsInitialized) {
+                            jitsiView.loadHtml(confConn.jitsiHtmlInternal(), GlobalInfo.jitsiUrl())
+                        }
+                    }
+
+                    Connections {
+                        target: CertHelper
+                        function onClientCertsInitializedChanged() {
+                            jitsiView.loadJitsiSite()
+                        }
+                    }
+
                     Connections {
                         target: jitsiView
                         enabled: GlobalInfo.useNewScreenSharingAPI()
@@ -829,8 +842,8 @@ Item {
                     }
                 }
 
-                Component.onCompleted: {
-                    jitsiView.loadHtml(confConn.jitsiHtmlInternal(), GlobalInfo.jitsiUrl())
+                Component.onCompleted: () => {
+                    jitsiView.loadJitsiSite()
                 }
             }
         }
