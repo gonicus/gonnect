@@ -4,6 +4,15 @@
 #include <qqmlintegration.h>
 #include "CrossSigningSymbol.h"
 
+namespace CrossSigningSecretEnums {
+Q_NAMESPACE
+QML_NAMED_ELEMENT(CrossSigningSecret)
+Q_CLASSINFO("RegisterEnumClassesUnscoped", "false")
+
+enum class CrossSigningMethod { SasString, SasSymbol };
+Q_ENUM_NS(CrossSigningMethod)
+}
+
 class CrossSigningSecret
 {
     Q_GADGET
@@ -11,8 +20,7 @@ class CrossSigningSecret
     QML_UNCREATABLE("")
 
 public:
-    enum class CrossSigningMethod { SasString, SasSymbol };
-    Q_ENUM(CrossSigningMethod)
+    using CrossSigningMethod = CrossSigningSecretEnums::CrossSigningMethod;
 
     CrossSigningSecret() { }
     CrossSigningSecret(const CrossSigningSecret &other) = default;
@@ -36,9 +44,3 @@ private:
     QString m_stringSecret;
     QList<CrossSigningSymbol> m_symbolSequence;
 };
-
-namespace CrossSigningSecretForeign {
-Q_NAMESPACE
-QML_NAMED_ELEMENT(CrossSigningSecret)
-QML_FOREIGN_NAMESPACE(CrossSigningSecret)
-} // namespace CrossSigningSecretForeign
