@@ -13,12 +13,7 @@
 
 Q_LOGGING_CATEGORY(lcCertHelper, "gonnect.helper.CertHelper")
 
-CertHelper::CertHelper(QObject *parent) : QObject{ parent }
-{
-
-    connect(&ViewHelper::instance(), &ViewHelper::passwordResponded, this,
-            &CertHelper::onPasswordResponse);
-}
+CertHelper::CertHelper(QObject *parent) : QObject{ parent } { }
 
 void CertHelper::initializeClientCerts()
 {
@@ -26,6 +21,9 @@ void CertHelper::initializeClientCerts()
         qCWarning(lcCertHelper) << "Client certificates have already been loaded";
         return;
     }
+
+    connect(&ViewHelper::instance(), &ViewHelper::passwordResponded, this,
+            &CertHelper::onPasswordResponse, Qt::UniqueConnection);
 
     m_isCreatingClientCertificateEntries = true;
 
