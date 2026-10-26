@@ -53,6 +53,9 @@ class GOnnectRecipe(ConanFile):
         cmake.install()
 
     def requirements(self):
+        # QT Version marker
+        #self.requires("qt/6.12.0");
+
         self.requires("hidapi/0.15.0")
         self.requires("pjproject/2.17")
         self.requires("openldap/2.7.2")
