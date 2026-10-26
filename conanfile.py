@@ -21,13 +21,6 @@ class GOnnectRecipe(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     exports_sources = "CMakeLists.txt", "src/*"
 
-    options = {
-        "with_conan_qt": [True, False],
-    }
-    default_options = {
-        "with_conan_qt": False,
-    }
-
     def layout(self):
         cmake_layout(self)
 
@@ -82,10 +75,7 @@ class GOnnectRecipe(ConanFile):
         if self.settings.os == "Linux":
             self.requires("libnotify/system")
             self.requires("libpulse/system")
-
-        if self.options.with_conan_qt:
-            self.requires("qt/6.12.0")
-            self.requires("mpg123/1.33.0", override=True)
+            self.requires("xorg/system")
             self.requires("wayland/1.24.0", override=True)
 
         self.requires("openssl/3.6.3", override=True)
@@ -105,63 +95,3 @@ class GOnnectRecipe(ConanFile):
 
         if self.settings.os == "Windows":
             self.options["pjproject/*"].with_uuid=False
-
-        if self.options.with_conan_qt:
-            self.options["*/*"].with_conan_qt=True
-            self.options["qt/*"].with_mysql=False
-            self.options["qt/*"].with_glib=False
-            self.options["qt/*"].with_pq=False
-            self.options["qt/*"].with_odbc=False
-            self.options["qt/*"].with_openal=False
-            self.options["qt/*"].qtconnectivity=True
-            self.options["qt/*"].qtsvg=True
-            self.options["qt/*"].qtdeclarative=True
-            self.options["qt/*"].qtactiveqt=False
-            self.options["qt/*"].qtmultimedia=True
-            self.options["qt/*"].qttools=True
-            self.options["qt/*"].qttranslations=True
-            self.options["qt/*"].qtshadertools=True
-            self.options["qt/*"].qtdoc=False
-            self.options["qt/*"].qtrepotools=False
-            self.options["qt/*"].qtqa=False
-            self.options["qt/*"].qtlocation=False
-            self.options["qt/*"].qtsensors=False
-            self.options["qt/*"].qt5compat=False
-            self.options["qt/*"].qtcoap=False
-            self.options["qt/*"].qtopcua=False
-            self.options["qt/*"].qtpositioning=False
-            self.options["qt/*"].qtquick3d=False
-            self.options["qt/*"].qtquicktimeline=False
-            self.options["qt/*"].qt3d=False
-            self.options["qt/*"].qtimageformats=True
-            self.options["qt/*"].qtserialbus=False
-            self.options["qt/*"].qtserialport=False
-            self.options["qt/*"].qtwebsockets=True
-            self.options["qt/*"].qtwebchannel=True
-            self.options["qt/*"].qtwebengine=True
-            self.options["qt/*"].qtnetworkauth=True
-            self.options["qt/*"].qthttpserver=True
-            self.options["qt/*"].qtscxml=False
-            self.options["qt/*"].qtmqtt=False
-            self.options["qt/*"].qtwebview=False
-            self.options["qt/*"].qtcharts=False
-            self.options["qt/*"].qtdatavis3d=False
-            self.options["qt/*"].qtvirtualkeyboard=False
-            self.options["qt/*"].qtremoteobjects=False
-            self.options["qt/*"].qtlottie=False
-            self.options["qt/*"].qtquick3dphysics=False
-            self.options["qt/*"].qtspeech=False
-            self.options["qt/*"].qtgrpc=False
-            self.options["qt/*"].qtquickeffectmaker=False
-            self.options["qt/*"].qtgraphs=False
-            self.options["qt/*"].qtwayland=False
-
-            if self.settings.os == "Linux":
-                self.options["qt/*"].with_dbus=True
-                self.options["qt/*"].with_fontconfig=True
-                self.options["qt/*"].qtwayland=False
-            else:
-                self.options["qt/*"].with_dbus=False
-
-            if self.settings.os == "Macos":
-                self.options["qt/*"].with_harfbuzz=False # TODO: why? cmake info export for harfbuzz != both?

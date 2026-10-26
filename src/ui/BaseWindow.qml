@@ -25,6 +25,11 @@ Window {
         window: control
     }
 
+    WindowShadowMargins {
+        window: control
+        margin: control.useOwnDecoration && !control.isMaximized ? control.shadowMargin : 0
+    }
+
     readonly property real devicePixelRatio: pixelRatio.ratio
 
     function snapToPixelGrid(value : real) : real {
