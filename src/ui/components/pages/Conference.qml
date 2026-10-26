@@ -399,6 +399,14 @@ Item {
                         permission.grant()
                     }
 
+                    onSelectClientCertificate: selection => {
+                                                   console.log("WebViewWidget client certificate requested, have", selection.certificates.length)
+
+                                                   if (selection.certificates.length > 0) {
+                                                       selection.select(selection.certificates[0])
+                                                   }
+                                               }
+
                     onLoadingChanged: (info) => {
                         if (info.status === WebEngineView.LoadSucceededStatus) {
                             jitsiView.runJavaScript(confConn.jitsiJavascriptInternal())
