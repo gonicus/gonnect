@@ -14,20 +14,14 @@ class QHotkey(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_conan_qt": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_conan_qt": False,
     }
 
     def export_sources(self):
         export_conandata_patches(self)
-
-    def requirements(self):
-        if self.options.with_conan_qt:
-            self.requires("qt/6.10.1")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
