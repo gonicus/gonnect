@@ -219,7 +219,8 @@ char **LDAPAddressBookFeeder::toCStringList(const QList<QByteArray> &values) con
     for (const QByteArray &value : std::as_const(values)) {
         const size_t sz = value.size() + 1;
         char *p = (char *)malloc(sz);
-        strncpy(p, value.constData(), sz);
+        snprintf(p, sz, "%s", value.constData());
+
         arr[i++] = p;
     }
 
