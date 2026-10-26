@@ -92,6 +92,37 @@ Window {
         background: Item {
             visible: control.useOwnDecoration
 
+            // Shadow and outline taken from libadwaita
+            RectangularShadow {
+                id: ambientShadow
+                anchors.fill: bgRect
+                visible: !control.isMaximized
+                radius: bgRect.radius
+                color: Qt.rgba(0, 0, 0, control.active ? 0.16 : 0.10)
+                blur: control.active ? 17 : 14
+                spread: control.active ? 5 : 4
+            }
+
+            RectangularShadow {
+                id: keyShadow
+                anchors.fill: bgRect
+                visible: !control.isMaximized && control.active
+                radius: bgRect.radius
+                color: Qt.rgba(0, 0, 0, 0.14)
+                blur: 8
+                spread: 1
+            }
+
+            RectangularShadow {
+                id: outlineShadow
+                anchors.fill: bgRect
+                visible: !control.isMaximized
+                radius: bgRect.radius
+                color: Qt.rgba(0, 0, 0, 0.05)
+                blur: 0
+                spread: 1
+            }
+
             Rectangle {
                 id: bgRect
                 color: Theme.backgroundColor
@@ -114,22 +145,6 @@ Window {
                     enabled: true
                     smooth: true
                 }
-            }
-
-            MultiEffect {
-                anchors.fill: bgRect
-                source: bgRect
-                visible: !control.isMaximized
-                blurEnabled: false
-
-                shadowEnabled: true
-                shadowColor: Theme.shadowColor
-                shadowHorizontalOffset: 0
-                shadowVerticalOffset: 3
-                shadowBlur: 0.5
-                blurMax: 16
-                shadowOpacity: 1.0
-                shadowScale: 1.0
             }
 
             Item {
