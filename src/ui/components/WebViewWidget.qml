@@ -57,6 +57,9 @@ BaseWidget {
 
         Loader {
             id: webViewLoader
+            active: !!CertificateProfile.profile
+            asynchronous: true
+            sourceComponent: webViewComponent
 
             anchors {
                 top: webviewHeading.bottom
@@ -69,9 +72,6 @@ BaseWidget {
                 leftMargin: 15
                 rightMargin: 15
             }
-
-            asynchronous: true
-            sourceComponent: webViewComponent
         }
 
         Component {

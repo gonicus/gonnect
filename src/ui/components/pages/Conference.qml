@@ -119,7 +119,7 @@ Item {
             if (!AuthManager.isAuthManagerInitialized) {
                 return undefined
             }
-            if (internal.isWebViewLoaded) {
+            if (internal.isWebViewLoaded && CertificateProfile.profile) {
                 return jitsiViewComponent
             }
             if (AuthManager.isJitsiAuthRequired && AuthManager.isWaitingForAuth) {
