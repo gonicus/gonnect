@@ -1,11 +1,11 @@
 pragma ComponentBehavior: Bound
 
-
 import QtQuick
 import QtQuick.Templates as T
 import QtQuick.Controls.Material
 import QtQuick.Controls.Material.impl
 import QtQuick.Window
+import base as Base
 
 T.Menu {
     id: control
@@ -73,13 +73,6 @@ T.Menu {
         }
     }
 
-    T.Overlay.modal: Rectangle {
-        color: control.Material.backgroundDimColor
-        Behavior on opacity { NumberAnimation { duration: 150 } }
-    }
-
-    T.Overlay.modeless: Rectangle {
-        color: control.Material.backgroundDimColor
-        Behavior on opacity { NumberAnimation { duration: 150 } }
-    }
+    T.Overlay.modal: Base.PopupBackgroundOverlay {}
+    T.Overlay.modeless: Base.PopupBackgroundOverlay {}
 }

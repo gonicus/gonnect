@@ -293,18 +293,7 @@ BaseWindow {
             exit: Transition { NumberAnimation { duration: 1 } }
 
             Overlay.modal: Component {
-                Item {
-                    Rectangle {
-                        color: control.Material.backgroundDimColor
-                        radius: 8
-                        anchors {
-                            fill: parent
-                            margins: control.shadowMargin
-                        }
-
-                        Behavior on opacity { NumberAnimation { duration: 150 } }
-                    }
-                }
+                PopupBackgroundOverlay {}
             }
 
             Component.onCompleted: () => {

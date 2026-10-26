@@ -471,6 +471,7 @@ qt_add_qml_module(gonnect
         ui/components/popups/OwnAvatarContextMenu.qml
         ui/components/popups/PublicRoomSearch.qml
         ui/components/popups/Popup.qml
+        ui/components/popups/PopupBackgroundOverlay.qml
         ui/components/popups/SearchResultPopup.qml
         ui/components/popups/UrlCopyDialog.qml
         ui/components/popups/UserSelect.qml
