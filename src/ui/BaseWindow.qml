@@ -69,7 +69,8 @@ Window {
 
     readonly property bool isMaximized: [ Window.Maximized, Window.FullScreen ].includes(control.visibility)
 
-    readonly property int shadowMargin: control.snapToPixelGrid(11)
+    readonly property int shadowMargin: control.snapToPixelGrid(2 * Theme.d)
+    readonly property int windowRadius: 15
 
     property Item activeSearchBox
 
@@ -94,7 +95,7 @@ Window {
             Rectangle {
                 id: bgRect
                 color: Theme.backgroundColor
-                radius: 8
+                radius: control.windowRadius
                 anchors {
                     fill: parent
                     margins: control.isMaximized ? 0 : control.shadowMargin
