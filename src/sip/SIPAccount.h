@@ -63,6 +63,7 @@ public:
 
     QString id() const { return m_account; }
     QString domain() const { return m_domain; }
+    QString ownNumber() const;
     uint retryInterval() const;
 
     QString voiceMessageAccount() const { return m_messageAccount; }
