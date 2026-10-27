@@ -31,6 +31,7 @@ if(ENABLE_DAV)
       PRIVATE
         ${PROJECT_SOURCE_DIR}/src
         ${PROJECT_SOURCE_DIR}/src/calendar
+        ${PROJECT_SOURCE_DIR}/src/helper
     )
 
     target_link_libraries(CalDAVEventFeederFactory

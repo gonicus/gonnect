@@ -20,6 +20,7 @@ if(ENABLE_DAV)
         ${PROJECT_SOURCE_DIR}/src/dbus/portal
         ${PROJECT_SOURCE_DIR}/src/ui
         ${PROJECT_SOURCE_DIR}/src/sip
+        ${PROJECT_SOURCE_DIR}/src/helper
         ${PROJECT_SOURCE_DIR}/src
         ${PROJECT_SOURCE_DIR}
         ${PROJECT_BINARY_DIR}/src

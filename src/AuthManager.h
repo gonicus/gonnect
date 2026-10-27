@@ -3,7 +3,6 @@
 #include <QObject>
 #include <QQmlEngine>
 #include <QNetworkRequestFactory>
-#include <QSslCertificate>
 
 class QOAuth2AuthorizationCodeFlow;
 class QOAuthHttpServerReplyHandler;
@@ -67,10 +66,6 @@ public:
     /// Whether the authentication process has started and it is waited for it to finish
     bool isWaitingForAuth() const { return m_isWaitingForAuth; }
 
-    /// Get a list of the configured CA certificates; empty when none are configured or could be
-    /// loaded
-    const QList<QSslCertificate> &sslCAs();
-
 private Q_SLOTS:
     void authenticateJitsiImpl(const QString &roomName);
     void authRoomWaiting();
@@ -91,8 +86,6 @@ private:
     QString m_oauthToken;
     QString m_jitsiRoomWaitingForAuth;
     QHash<QString, Token> m_jitsiTokens;
-    bool m_isCAsInitialized = false;
-    QList<QSslCertificate> m_cas;
     QOAuthHttpServerReplyHandler *m_replyHandler = nullptr;
 
     QDateTime m_expireDateTime;
