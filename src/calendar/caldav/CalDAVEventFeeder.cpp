@@ -4,7 +4,7 @@
 
 #include "CalDAVEventFeeder.h"
 #include "DateEventManager.h"
-#include "AuthManager.h"
+#include "CertHelper.h"
 #include "ReadOnlyConfdSettings.h"
 #include "SecretResponse.h"
 #include "ErrorBus.h"
@@ -18,7 +18,7 @@ CalDAVEventFeeder::CalDAVEventFeeder(QObject *parent, const CalDAVEventFeederCon
 {
     ReadOnlyConfdSettings settings;
     m_webdav.setVerifyCa(settings.value("generic/verifyServer", true).toBool());
-    m_webdav.addSslCa(AuthManager::instance().sslCAs());
+    m_webdav.addSslCa(CertHelper::instance().caCerts());
 }
 
 CalDAVEventFeeder::~CalDAVEventFeeder()

@@ -3,7 +3,7 @@
 #include "AddressBookManager.h"
 #include "AvatarManager.h"
 #include "ReadOnlyConfdSettings.h"
-#include "AuthManager.h"
+#include "CertHelper.h"
 #include "PhoneNumberUtil.h"
 #include "ErrorBus.h"
 #include "SecretResponse.h"
@@ -42,7 +42,7 @@ void CardDAVAddressBookFeeder::init()
 
     ReadOnlyConfdSettings settings;
     m_webdav.setVerifyCa(settings.value("generic/verifyServer", true).toBool());
-    m_webdav.addSslCa(AuthManager::instance().sslCAs());
+    m_webdav.addSslCa(CertHelper::instance().caCerts());
 
     loadCachedData(m_settingsHash);
 
