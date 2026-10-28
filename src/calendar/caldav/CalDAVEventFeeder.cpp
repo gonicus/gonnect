@@ -71,6 +71,7 @@ QCoro::Task<> CalDAVEventFeeder::run()
         qCInfo(lcCalDAVEventFeeder) << "Already running - ignoring run() call";
         co_return;
     }
+    qCDebug(lcCalDAVEventFeeder) << "Starting run() of CalDAV feeder" << m_config.source;
 
     m_isRunning = true;
     bool forcePrompt = false;
@@ -82,6 +83,8 @@ QCoro::Task<> CalDAVEventFeeder::run()
         // Retrieve secret
         const auto secret = co_await DateEventFeederManager::instance().acquireSecret(
                 forcePrompt, m_config.source);
+
+        qCDebug(lcCalDAVEventFeeder) << "Secret acquired, hasError=" << secret.hasError;
 
         if (secret.hasError) {
             qCCritical(lcCalDAVEventFeeder)
@@ -105,6 +108,8 @@ QCoro::Task<> CalDAVEventFeeder::run()
                                                                 { "D", "DAV:", "getetag" },
                                                                 { "D", "DAV:", "getlastmodified" },
                                                         });
+
+        qCDebug(lcCalDAVEventFeeder) << "PROPFIND returned, error=" << reply->error();
 
         // Auth incorrect
         if (reply->error() == QNetworkReply::AuthenticationRequiredError) {
@@ -139,8 +144,13 @@ QCoro::Task<> CalDAVEventFeeder::run()
         const auto items = WebDavPropfindParser{}.parseMultiStatus(reply->readAll());
         reply->deleteLater();
 
+        qCDebug(lcCalDAVEventFeeder) << "Received" << items.size() << "items";
+
         resetCalendar();
         m_checksums.clear();
+
+        uint successCount = 0;
+        uint failCount = 0;
 
         for (const auto &item : items) {
             if (item.isCollection()) {
@@ -151,11 +161,28 @@ QCoro::Task<> CalDAVEventFeeder::run()
             if (itemReply->error() == QNetworkReply::NoError) {
                 const auto data = itemReply->readAll();
                 if (responseDataChanged(data)) {
-                    processResponse(data, QString("%1_%2").arg(m_config.source, item.name()));
+                    const bool success = processResponse(
+                            data, QString("%1_%2").arg(m_config.source, item.name()));
+                    qCDebug(lcCalDAVEventFeeder)
+                            << "processResponse for" << item.name() << "-> success=" << success;
+
+                    if (success) {
+                        ++successCount;
+                    } else {
+                        ++failCount;
+                    }
                 }
+            } else {
+                qCWarning(lcCalDAVEventFeeder)
+                        << "GET failed for" << item.href << "-" << itemReply->errorString();
             }
+
             itemReply->deleteLater();
         }
+
+        qCDebug(lcCalDAVEventFeeder)
+                << "Processed" << items.size() << "items, successful:" << successCount
+                << "failed:" << failCount;
 
         break;
     }
