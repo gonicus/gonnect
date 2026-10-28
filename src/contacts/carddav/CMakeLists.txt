@@ -1,5 +1,4 @@
 if(ENABLE_DAV)
-    find_package(QtWebDAV REQUIRED)
     find_package(vCard REQUIRED)
 
     qt_add_plugin(CardDAVAddressBookFactory STATIC
@@ -28,7 +27,6 @@ if(ENABLE_DAV)
     )
 
     target_link_libraries(CardDAVAddressBookFactory PRIVATE
-      QtWebDAV
       Qt6::Core
       Qt6::Gui
       Qt6::Quick

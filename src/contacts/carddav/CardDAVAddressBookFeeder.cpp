@@ -3,14 +3,17 @@
 #include "AddressBookManager.h"
 #include "AvatarManager.h"
 #include "ReadOnlyConfdSettings.h"
-#include "CertHelper.h"
 #include "PhoneNumberUtil.h"
 #include "ErrorBus.h"
 #include "SecretResponse.h"
+#include "WebDavClient.h"
 
 #include <QRegularExpression>
 #include <QLoggingCategory>
 #include <QImage>
+#include <QFile>
+#include <QDir>
+#include <QStandardPaths>
 
 #include <vcard.h>
 #include <text_io.h>
@@ -25,84 +28,25 @@ using namespace std::chrono_literals;
 CardDAVAddressBookFeeder::CardDAVAddressBookFeeder(const QString &group, const int retryCount,
                                                    const int retryInterval,
                                                    AddressBookManager *parent)
-    : QObject(parent),
-      m_group(group),
-      m_retryCount(retryCount),
-      m_retryInterval(retryInterval),
-      m_initialRetryCount(retryCount)
+    : QObject(parent), m_group(group), m_retryCount(retryCount), m_retryInterval(retryInterval)
 {
     m_manager = qobject_cast<AddressBookManager *>(parent);
 }
 
+// Defined here so WebDavClient can be used as forward declaration in header file
+CardDAVAddressBookFeeder::~CardDAVAddressBookFeeder() = default;
+
 void CardDAVAddressBookFeeder::init()
 {
-    m_cacheWriteTimer.setSingleShot(true);
-    m_cacheWriteTimer.setInterval(3s);
-    m_cacheWriteTimer.callOnTimeout(this, &CardDAVAddressBookFeeder::flushCacheImpl);
-
-    ReadOnlyConfdSettings settings;
-    m_webdav.setVerifyCa(settings.value("generic/verifyServer", true).toBool());
-    m_webdav.addSslCa(CertHelper::instance().caCerts());
-
-    loadCachedData(m_settingsHash);
-
     if (!m_areWebDavConnectionsInitialized) {
         m_areWebDavConnectionsInitialized = true;
-        connect(&m_webdavParser, &QWebdavDirParser::finished, this,
-                &CardDAVAddressBookFeeder::onParserFinished);
 
-        connect(&m_webdavParser, &QWebdavDirParser::errorChanged, this,
-                &CardDAVAddressBookFeeder::onError);
-        connect(&m_webdav, &QWebdav::errorChanged, this, &CardDAVAddressBookFeeder::onError);
-
-        connect(&m_webdav, &QWebdav::authenticationRequired, this, [this]() {
-            m_pendingAuth = true;
-            checkErrorStatus();
-        });
+        m_cacheWriteTimer.setSingleShot(true);
+        m_cacheWriteTimer.setInterval(3s);
+        m_cacheWriteTimer.callOnTimeout(this, &CardDAVAddressBookFeeder::flushCacheImpl);
     }
-}
 
-void CardDAVAddressBookFeeder::checkErrorStatus()
-{
-    QMetaObject::invokeMethod(
-            this,
-            [this]() {
-                // Prepare feeder for re-run
-                if (m_cacheWriteTimer.isActive()) {
-                    m_cacheWriteTimer.stop();
-                }
-
-                if (m_pendingAuth && m_pendingError) {
-                    // Previous run failed due to auth, we'll prompt the user again immediately
-                    qCWarning(lcCardDAVAddressBookFeeder)
-                            << "Failed to process CardDAV sources - invalid password";
-
-                    feedAddressBook(true);
-                } else if (m_pendingError) {
-                    // Some other error has occurred, wait and try again
-                    if (m_retryCount > 0) {
-                        m_retryCount--;
-
-                        qCWarning(lcCardDAVAddressBookFeeder) << "Failed to process CardDAV sources"
-                                                              << m_group << "- trying later";
-
-                        QTimer::singleShot(m_retryInterval, this,
-                                           [this]() { feedAddressBook(true); });
-                    } else {
-                        qCCritical(lcCardDAVAddressBookFeeder)
-                                << "Repeatedly failed to access CardDAV source" << m_group;
-
-                        ErrorBus::instance().addError(
-                                tr("CardDAV source %1 repeatedly failed").arg(m_group));
-
-                        m_isProcessing = false;
-                    }
-                }
-
-                m_pendingAuth = false;
-                m_pendingError = false;
-            },
-            Qt::QueuedConnection);
+    loadCachedData(m_settingsHash);
 }
 
 void CardDAVAddressBookFeeder::resetContacts()
@@ -110,31 +54,91 @@ void CardDAVAddressBookFeeder::resetContacts()
     AddressBook::instance().removeContactsBySource(m_group);
 }
 
-void CardDAVAddressBookFeeder::onError(QString error)
+QCoro::Task<> CardDAVAddressBookFeeder::run()
 {
-    qCCritical(lcCardDAVAddressBookFeeder) << "Error:" << error;
+    m_isProcessing = true;
+    bool forcePrompt = false;
+    int retriesLeft = m_retryCount;
 
-    m_pendingError = true;
-    checkErrorStatus();
-}
+    while (true) {
 
-void CardDAVAddressBookFeeder::feedAddressBook(bool authFailed)
-{
-    m_manager->acquireSecret(authFailed, m_group, [this](const SecretResponse response) {
-        if (response.hasError) {
-            qCCritical(lcCardDAVAddressBookFeeder)
-                    << "Authentication for" << m_group << "has failed";
+        // Retrieve secret
+        const auto secret = co_await m_manager->acquireSecretAsync(forcePrompt, m_group);
+        if (secret.hasError) {
             ErrorBus::instance().addError(tr("Authentication error for %1").arg(m_group));
             m_isProcessing = false;
-        } else {
-            m_isProcessing = true;
-            m_webdav.setConnectionSettings(m_config.useSSL ? QWebdav::HTTPS : QWebdav::HTTP,
-                                           m_config.host, m_config.path, m_config.user,
-                                           response.secret, m_config.port);
-
-            m_webdavParser.listDirectory(&m_webdav, "/");
+            co_return;
         }
-    });
+
+        // Retrieve WebDAV root object(s)
+        m_webdavClient = std::make_unique<WebDavClient>(WebDavClient::ConnectionConfig{
+                QUrl(QString("%1://%2:%3%4")
+                             .arg(m_config.useSSL ? "https" : "http", m_config.host,
+                                  QString::number(m_config.port), m_config.path)),
+                m_config.user, secret.secret });
+
+        auto *reply = co_await m_webdavClient->propfind("/", 1,
+                                                        {
+                                                                { "D", "DAV:", "resourcetype" },
+                                                                { "D", "DAV:", "getetag" },
+                                                                { "D", "DAV:", "getlastmodified" },
+                                                        });
+
+        // Auth required
+        if (reply->error() == QNetworkReply::AuthenticationRequiredError) {
+            reply->deleteLater();
+            forcePrompt = true;
+            continue;
+        }
+
+        // Other error
+        if (reply->error() != QNetworkReply::NoError) {
+            reply->deleteLater();
+            if (retriesLeft-- <= 0) {
+                ErrorBus::instance().addError(
+                        tr("CardDAV source %1 repeatedly failed - retries exhausted").arg(m_group));
+                m_isProcessing = false;
+                co_return;
+            }
+            co_await QCoro::sleepFor(std::chrono::milliseconds(m_retryInterval));
+            continue;
+        }
+
+        // Good response - process items
+        const auto items = WebDavPropfindParser{}.parseMultiStatus(reply->readAll());
+        reply->deleteLater();
+        resetContacts();
+
+        for (const auto &item : items) {
+            if (item.isCollection()) {
+                continue;
+            }
+
+            const auto cacheId = item.name();
+            const auto modifiedDate = item.lastModified();
+
+            if (m_ignoredIds.contains(cacheId) && m_ignoredIds.value(cacheId) >= modifiedDate) {
+                continue;
+            }
+
+            if (Contact *cachedContact = m_cachedContacts.value(cacheId, nullptr)) {
+                if (cachedContact->lastModified() >= modifiedDate) {
+                    AddressBook::instance().addContact(cachedContact);
+                    continue;
+                }
+            }
+
+            auto *itemReply = co_await m_webdavClient->sendRequest(item.href, "GET", {});
+            if (itemReply->error() == QNetworkReply::NoError) {
+                processVcard(itemReply->readAll(), cacheId, modifiedDate);
+            }
+            itemReply->deleteLater();
+        }
+
+        break;
+    }
+
+    m_isProcessing = false;
 }
 
 void CardDAVAddressBookFeeder::processVcard(QByteArray data, const QString &uuid,
@@ -280,7 +284,7 @@ void CardDAVAddressBookFeeder::loadCachedData(const size_t hash)
     }
 
     if (!cacheFile.open(QIODevice::ReadOnly)) {
-        onError(QString("Unable to open file %1").arg(filePath));
+        qCCritical(lcCardDAVAddressBookFeeder) << "Unable to open file" << filePath;
         return;
     }
 
@@ -365,62 +369,13 @@ void CardDAVAddressBookFeeder::processPhotoProperty(const QString &id, const QBy
     }
 }
 
-void CardDAVAddressBookFeeder::onParserFinished()
-{
-    m_retryCount = m_initialRetryCount;
-    resetContacts();
-
-    const auto list = m_webdavParser.getList();
-    for (const auto &item : list) {
-        const auto cacheId = item.name();
-        const auto modifiedDate = item.lastModified();
-
-        if (m_ignoredIds.contains(cacheId) && m_ignoredIds.value(cacheId) >= modifiedDate) {
-            continue;
-        } else if (Contact *cachedContact = m_cachedContacts.value(cacheId, nullptr)) {
-            if (cachedContact->lastModified() >= modifiedDate) {
-                AddressBook::instance().addContact(cachedContact);
-                continue;
-            }
-        }
-
-        QNetworkReply *reply = m_webdav.get(item.path());
-        connect(
-                reply, &QNetworkReply::readyRead, this,
-                [reply, cacheId, modifiedDate, this]() {
-                    if (!reply) {
-                        return;
-                    }
-
-                    if (reply->error() != QNetworkReply::NoError) {
-                        qCDebug(lcCardDAVAddressBookFeeder)
-                                << "WebDAV reply error:" << reply->error();
-                        reply->deleteLater();
-                        return;
-                    }
-
-                    QByteArray data = reply->readAll();
-                    reply->deleteLater();
-
-                    QMimeDatabase db;
-                    QMimeType type = db.mimeTypeForData(data);
-                    if (type.name() == "text/vcard") {
-                        processVcard(data, cacheId, modifiedDate);
-                    }
-                },
-                Qt::ConnectionType::SingleShotConnection);
-    }
-
-    m_isProcessing = false;
-}
-
 void CardDAVAddressBookFeeder::flushCacheImpl()
 {
     const auto filePath = cacheFilePath(m_settingsHash, true);
     QFile cacheFile(filePath);
 
     if (!cacheFile.open(QIODevice::WriteOnly)) {
-        onError(QString("Unable to open file %1").arg(filePath));
+        qCCritical(lcCardDAVAddressBookFeeder) << "Unable to open file" << filePath;
         return;
     }
 
@@ -446,8 +401,6 @@ void CardDAVAddressBookFeeder::flushCacheImpl()
 
 void CardDAVAddressBookFeeder::process()
 {
-    m_retryCount = m_initialRetryCount;
-
     ReadOnlyConfdSettings settings;
     settings.beginGroup(m_group);
 
@@ -499,7 +452,7 @@ void CardDAVAddressBookFeeder::process()
                  useSSL };
 
     init();
-    feedAddressBook();
+    run();
 
     settings.endGroup();
 };
