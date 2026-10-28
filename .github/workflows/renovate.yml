@@ -35,7 +35,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
         with:
           python-version: '3.15'
 
@@ -57,7 +57,7 @@ jobs:
             }
 
       - name: Self-hosted Renovate
-        uses: renovatebot/github-action@a63d9a7bc606f7336fd20b47f2f32259a35e6213 # v46.3.9
+        uses: renovatebot/github-action@2804199d260ad00c1fae0e9e842888369391c776 # v46.3.10
         with:
           docker-cmd-file: .github/renovate-entrypoint.sh
           docker-user: root

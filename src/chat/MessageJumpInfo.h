@@ -7,8 +7,7 @@
 struct MessageJumpInfo
 {
     Q_GADGET
-    QML_NAMED_ELEMENT(MessageJumpInfo)
-    QML_VALUE_TYPE(MessageJumpInfo)
+    QML_VALUE_TYPE(messageJumpInfo)
     QML_STRUCTURED_VALUE
 
     Q_PROPERTY(QString roomId MEMBER roomId FINAL)

@@ -158,7 +158,6 @@ public:
 
     virtual bool hasTranscription() const = 0;
     virtual bool isTranscriptionActive() const = 0;
-    Q_INVOKABLE virtual void toggleTranscription() = 0;
     Q_INVOKABLE virtual void
     addTranscriptionChunk(const QString &messageId, const QString &participantId,
                           const QString &participantName, const QString &participantAvatarUrl,

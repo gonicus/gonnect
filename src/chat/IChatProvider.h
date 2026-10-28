@@ -245,7 +245,8 @@ public:
     Q_INVOKABLE virtual void requestCrossSigningStart() { Q_UNIMPLEMENTED(); }
 
     /// Select a method in response to a previous crossSigningMethodSelectRequired() signal.
-    Q_INVOKABLE virtual void selectCrossSigningMethod(CrossSigningSecret::CrossSigningMethod method)
+    Q_INVOKABLE virtual void
+    selectCrossSigningMethod(CrossSigningSecretEnums::CrossSigningMethod method)
     {
         Q_UNUSED(method);
         Q_UNIMPLEMENTED();
@@ -265,7 +266,8 @@ Q_SIGNALS:
 
     /// Signals that one of the given cross signing methods must be chosen.
     /// selectCrossSigningMethod() should be called afterwards
-    void crossSigningMethodSelectRequired(QList<CrossSigningSecret::CrossSigningMethod> methods);
+    void
+    crossSigningMethodSelectRequired(QList<CrossSigningSecretEnums::CrossSigningMethod> methods);
 
     /// Signals that the secret should be displayed to the user who then must accept
     void crossSigningAcceptRequired(CrossSigningSecret secret);

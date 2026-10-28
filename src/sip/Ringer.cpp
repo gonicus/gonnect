@@ -6,6 +6,7 @@
 #include "AudioManager.h"
 #include "Ringer.h"
 #include "AppSettings.h"
+#include "FileHelper.h"
 #include "SystemTrayMenu.h"
 #include "AudioHelper.h"
 
@@ -31,12 +32,29 @@ void Ringer::start(qreal customVolume)
     if (!m_player) {
         m_player = new QMediaPlayer(this);
         connect(m_player, &QMediaPlayer::playbackStateChanged, this, &Ringer::playbackStateChanged);
+        connect(m_player, &QMediaPlayer::errorOccurred, this, &Ringer::onPlayerError);
     }
 
     // Determine ring tone path
     auto source = settings.value(QString("audio%1/ringtone").arg(currentProfile), "").toString();
     if (source.isEmpty()) {
         source = "qrc:/audio/phone-incoming-call.mp3";
+    } else {
+        const QString expectedPath =
+                FileHelper::instance().persistentFolderPath("sounds") + "/ringtone";
+        const QUrl sourceUrl(source);
+        const QString sourceLocalPath = sourceUrl.isLocalFile() ? sourceUrl.toLocalFile() : source;
+
+        if (sourceLocalPath != expectedPath) {
+            // Migrate old ring tone
+            const auto migratedPath =
+                    FileHelper::instance().persistFile(sourceUrl, "sounds", "ringtone");
+            if (!migratedPath.isEmpty()) {
+                qCInfo(lcRinger) << "Migrated ring tone by copying:" << migratedPath;
+                source = migratedPath;
+                settings.setValue(QString("audio%1/ringtone").arg(currentProfile), source);
+            }
+        }
     }
 
     if (source.isEmpty()) {
@@ -80,6 +98,16 @@ void Ringer::playbackStateChanged(QMediaPlayer::PlaybackState state)
                 m_player->play();
             }
         }
+    }
+}
+
+void Ringer::onPlayerError(QMediaPlayer::Error, const QString &errorString)
+{
+    static const QUrl fallback("qrc:/audio/phone-incoming-call.mp3");
+    if (m_player && m_player->source() != fallback) {
+        qCWarning(lcRinger) << "Failed to play ring tone (using fallback now):" << errorString;
+        m_player->setSource(fallback);
+        m_player->play();
     }
 }
 
