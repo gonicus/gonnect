@@ -4,13 +4,13 @@ if(ENABLE_EDS)
 
     qt_add_plugin(EDSEventFeederFactory STATIC
       CLASS_NAME EDSEventFeederFactory
-    
+
       EDSEventFeederFactory.cpp
       EDSEventFeederFactory.h
       EDSEventFeeder.cpp
       EDSEventFeeder.h
     )
-    
+
     target_include_directories(EDSEventFeederFactory
       PRIVATE
         ${PROJECT_SOURCE_DIR}/src/calendar
@@ -23,13 +23,15 @@ if(ENABLE_EDS)
         ${GLIB_INCLUDE_DIRS}
         ${EDS_INCLUDE_DIRS}
     )
-    
+
     target_link_libraries(EDSEventFeederFactory
         PRIVATE
             Qt6::Core
             Qt6::Gui
             Qt6::Quick
             Qt6::DBus
+            QCoro6::Core
+            QCoro6::Network
             ${GLIB_LIBRARIES}
             ${EDS_LIBRARIES})
 

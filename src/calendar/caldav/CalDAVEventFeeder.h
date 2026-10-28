@@ -2,16 +2,17 @@
 
 #include <QObject>
 #include <QDateTime>
-#include <QTime>
 #include <QTimer>
+#include <QCoroCore>
 
 #include "IDateEventFeeder.h"
 #include "DateEventFeederManager.h"
 #include "CalDAVEventFeederConfig.h"
+
 #include <libical/ical.h>
 #include <libical/icalerror.h>
-#include <QtWebDAV/qwebdav.h>
-#include <QtWebDAV/qwebdavdirparser.h>
+
+class WebDavClient;
 
 class CalDAVEventFeeder : public QObject, public IDateEventFeeder
 {
@@ -26,37 +27,21 @@ public:
     void init() override;
     QUrl networkCheckURL() const override;
 
-    void process(bool authFailed = false);
-
-private Q_SLOTS:
-    void onError(QString error);
-    void onParserFinished();
-
 private:
-    void getNextItem();
+    QCoro::Task<> run();
 
     bool processResponse(const QByteArray &data, const QString &source);
-
     bool responseDataChanged(const QByteArray &data);
     QDateTime createDateTimeFromTimeType(icaltimetype &datetime);
-
-    void checkErrorStatus();
     void resetCalendar();
 
+    bool m_areWebDavConnectionsInitialized = false;
+    bool m_isRunning = false;
     QList<size_t> m_checksums;
-
     CalDAVEventFeederConfig m_config;
-    int m_initialRetryCount = 0;
-
     QTimer m_calendarRefreshTimer;
-
-    QWebdav m_webdav;
-    QWebdavDirParser m_webdavParser;
-    QList<QWebdavItem> m_items;
-
     QStringList m_concreteSources;
 
-    bool m_areWebDavConnectionsInitialized = false;
-    bool m_pendingError = false;
-    bool m_pendingAuth = false;
+    // Created later - password required first
+    std::unique_ptr<WebDavClient> m_webdavClient;
 };

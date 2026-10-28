@@ -4,6 +4,7 @@
 
 #include <QString>
 #include <QHash>
+#include <QDateTime>
 
 struct WebDavItem
 {
@@ -15,4 +16,6 @@ struct WebDavItem
     QHash<QString, WebDavPropertyValue> properties;
 
     bool isCollection() const;
+    QString name() const;
+    QDateTime lastModified() const;
 };

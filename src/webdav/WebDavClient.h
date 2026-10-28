@@ -28,7 +28,7 @@ public:
     [[nodiscard]] QCoro::Task<QNetworkReply *>
     sendRequest(const QString &relativePath, const QByteArray &verb, const QByteArray &body);
 
-    [[nodiscard]] QCoro::Task<QList<WebDavItem>>
+    [[nodiscard]] QCoro::Task<QNetworkReply *>
     propfind(const QString &path, int depth, const QList<WebDavPropertyRequest> &properties);
 
 private Q_SLOTS:

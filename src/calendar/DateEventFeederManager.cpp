@@ -8,6 +8,7 @@
 #include "ViewHelper.h"
 #include "ErrorBus.h"
 #include "SecretResponse.h"
+#include "WaiterHelper.h"
 
 #include <QTimer>
 #include <QLoggingCategory>
@@ -58,57 +59,65 @@ void DateEventFeederManager::reloadCalendar()
     processQueue();
 }
 
-void DateEventFeederManager::acquireSecret(bool forcePrompt, const QString &configId,
-                                           std::function<void(SecretResponse response)> callback)
+QCoro::Task<SecretResponse> DateEventFeederManager::acquireSecret(bool forcePrompt,
+                                                                  const QString &configId)
 {
+
     ReadOnlyConfdSettings settings;
 
     const auto configIdHash = settings.hashForSettingsGroup(configId);
     const auto secretKey = QString("%1_%2").arg(configId, configIdHash);
 
-    Credentials::instance().get(
-            secretKey + "/secret",
-            [this, forcePrompt, configId, secretKey,
-             callback](QKeychain::Error error, const QString &secret, const QString &) {
-                if (error == QKeychain::NoError && !forcePrompt) {
-                    callback({ secret });
-                } else if (error == QKeychain::Error::EntryNotFound || forcePrompt) {
+    // Read from credentials store
+    auto credentialsWaiter = std::make_unique<CredentialsWaiter>();
+    Credentials::instance().get(secretKey + "/secret",
+                                [configId, secretKey, raw = credentialsWaiter.get()](
+                                        QKeychain::Error error, const QString &secret,
+                                        const QString &) { Q_EMIT raw->received(error, secret); });
 
-                    disconnect(m_viewHelperConnections.take(configId));
+    const auto [error, secret] =
+            co_await qCoro(credentialsWaiter.get(), &CredentialsWaiter::received);
 
-                    auto &viewHelper = ViewHelper::instance();
-                    auto conn =
-                            connect(&viewHelper, &ViewHelper::passwordResponded, this,
-                                    [secretKey, configId, callback, this](const QString &id,
-                                                                          const QString &password) {
-                                        if (id == configId) {
-                                            disconnect(m_viewHelperConnections.take(configId));
+    if (error == QKeychain::NoError && !forcePrompt) {
+        co_return SecretResponse{ secret };
+    }
+    if (error != QKeychain::EntryNotFound && !forcePrompt) {
+        co_return SecretResponse{ QString(), true };
+    }
 
-                                            Credentials::instance().set(
-                                                    secretKey + "/secret", password,
-                                                    [](QKeychain::Error error, const QString &,
-                                                       const QString &message) {
-                                                        if (error != QKeychain::NoError) {
-                                                            ErrorBus::instance().error(
-                                                                    tr("Failed to persist calendar "
-                                                                       "credentials: %1")
-                                                                            .arg(message));
-                                                        }
-                                                    });
-                                            callback({ password });
-                                        }
-                                    });
+    // Manual password input
+    disconnect(m_viewHelperConnections.take(configId));
+    auto &viewHelper = ViewHelper::instance();
 
-                    m_viewHelperConnections.insert(configId, conn);
-
-                    ReadOnlyConfdSettings settings;
-                    settings.beginGroup(configId);
-                    viewHelper.requestPassword(configId, settings.value("host", "").toString());
-                    settings.endGroup();
-                } else {
-                    callback({ QString(), true });
+    auto passwordWaiter = std::make_unique<PasswordWaiter>();
+    auto conn = connect(
+            &viewHelper, &ViewHelper::passwordResponded, passwordWaiter.get(),
+            [raw = passwordWaiter.get(), configId](const QString &id, const QString &password) {
+                if (id == configId) {
+                    Q_EMIT raw->received(password);
                 }
             });
+    m_viewHelperConnections.insert(configId, conn);
+
+    settings.beginGroup(configId);
+    viewHelper.requestPassword(configId, settings.value("host", "").toString());
+    settings.endGroup();
+
+    const QString password = co_await qCoro(passwordWaiter.get(), &PasswordWaiter::received);
+    disconnect(m_viewHelperConnections.take(configId));
+
+    Credentials::instance().set(
+            secretKey + "/secret", password,
+            [secretKey](QKeychain::Error error, const QString &, const QString &message) {
+                if (error != QKeychain::NoError) {
+                    qCCritical(lcDateEventFeederManager)
+                            << "Failed to persist calendar credentials:" << message;
+                    ErrorBus::instance().error(
+                            tr("Failed to persist calendar credentials: %1").arg(message));
+                }
+            });
+
+    co_return SecretResponse(password);
 }
 
 void DateEventFeederManager::initFeederConfigs()

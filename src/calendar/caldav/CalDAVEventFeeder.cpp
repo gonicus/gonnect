@@ -4,21 +4,17 @@
 
 #include "CalDAVEventFeeder.h"
 #include "DateEventManager.h"
-#include "CertHelper.h"
-#include "ReadOnlyConfdSettings.h"
 #include "SecretResponse.h"
 #include "ErrorBus.h"
+#include "WebDavClient.h"
 
 Q_LOGGING_CATEGORY(lcCalDAVEventFeeder, "gonnect.app.dateevents.feeder.caldav")
 
 using namespace std::chrono_literals;
 
 CalDAVEventFeeder::CalDAVEventFeeder(QObject *parent, const CalDAVEventFeederConfig &config)
-    : QObject(parent), m_config(config), m_initialRetryCount(config.retryCount)
+    : QObject(parent), m_config(config)
 {
-    ReadOnlyConfdSettings settings;
-    m_webdav.setVerifyCa(settings.value("generic/verifyServer", true).toBool());
-    m_webdav.addSslCa(CertHelper::instance().caCerts());
 }
 
 CalDAVEventFeeder::~CalDAVEventFeeder()
@@ -36,20 +32,8 @@ QUrl CalDAVEventFeeder::networkCheckURL() const
 
 void CalDAVEventFeeder::init()
 {
-
     if (!m_areWebDavConnectionsInitialized) {
         m_areWebDavConnectionsInitialized = true;
-        connect(&m_webdavParser, &QWebdavDirParser::finished, this,
-                &CalDAVEventFeeder::onParserFinished);
-
-        connect(&m_webdavParser, &QWebdavDirParser::errorChanged, this,
-                &CalDAVEventFeeder::onError);
-        connect(&m_webdav, &QWebdav::errorChanged, this, &CalDAVEventFeeder::onError);
-
-        connect(&m_webdav, &QWebdav::authenticationRequired, this, [this]() {
-            m_pendingAuth = true;
-            checkErrorStatus();
-        });
 
         /*
             As the Kopano CalDAV server doesn't provide 'getetag' and 'getlastmodified' values,
@@ -60,54 +44,12 @@ void CalDAVEventFeeder::init()
             '/caldav/<USER>/Kalender'. A full calendar is generated on the fly once requested.
         */
         m_calendarRefreshTimer.setInterval(m_config.interval);
-        connect(&m_calendarRefreshTimer, &QTimer::timeout, this, [this]() { process(); });
+        connect(&m_calendarRefreshTimer, &QTimer::timeout, this, [this]() { run(); });
     }
 
     m_calendarRefreshTimer.start();
 
-    process();
-}
-
-void CalDAVEventFeeder::checkErrorStatus()
-{
-    QMetaObject::invokeMethod(
-            this,
-            [this]() {
-                // Prepare feeder for re-run
-                resetCalendar();
-                m_checksums.clear();
-                if (m_calendarRefreshTimer.isActive()) {
-                    m_calendarRefreshTimer.stop();
-                }
-
-                if (m_pendingAuth && m_pendingError) {
-                    // Previous run failed due to auth, we'll prompt the user again immediately
-                    qCWarning(lcCalDAVEventFeeder)
-                            << "Failed to process CalDAV sources - invalid password";
-
-                    m_calendarRefreshTimer.start();
-
-                    process(true);
-                } else if (m_pendingError) {
-                    // Some other error has occurred, wait and try again
-                    if (m_config.retryCount > 0) {
-                        m_config.retryCount--;
-
-                        qCWarning(lcCalDAVEventFeeder)
-                                << "Failed to process CalDAV sources - trying later";
-
-                        QTimer::singleShot(m_config.retryInterval, this, [this]() {
-                            m_calendarRefreshTimer.start();
-
-                            process();
-                        });
-                    }
-                }
-
-                m_pendingAuth = false;
-                m_pendingError = false;
-            },
-            Qt::QueuedConnection);
+    run();
 }
 
 void CalDAVEventFeeder::resetCalendar()
@@ -119,94 +61,102 @@ void CalDAVEventFeeder::resetCalendar()
     }
 }
 
-void CalDAVEventFeeder::onError(QString error)
+QCoro::Task<> CalDAVEventFeeder::run()
 {
-    qCCritical(lcCalDAVEventFeeder) << "Error:" << error;
-
-    m_pendingError = true;
-    checkErrorStatus();
-}
-
-void CalDAVEventFeeder::onParserFinished()
-{
-    m_config.retryCount = m_initialRetryCount;
-
-    m_concreteSources.clear();
-    m_items = m_webdavParser.getList();
-
-    getNextItem();
-}
-
-void CalDAVEventFeeder::getNextItem()
-{
-    if (m_items.isEmpty()) {
-        return;
+    if (m_isRunning) {
+        qCInfo(lcCalDAVEventFeeder) << "Already running - ignoring run() call";
+        co_return;
     }
 
-    auto item = m_items.takeFirst();
-    QNetworkReply *reply = m_webdav.get(item.path());
-    connect(
-            reply, &QNetworkReply::finished, this,
-            [item, reply, this]() {
-                if (!reply) {
-                    getNextItem();
-                    return;
-                }
+    m_isRunning = true;
+    bool forcePrompt = false;
+    int retriesLeft = m_config.retryCount;
 
-                if (reply->error() != QNetworkReply::NoError) {
-                    qCDebug(lcCalDAVEventFeeder) << "WebDAV reply error:" << reply->error();
-                    reply->deleteLater();
+    // Retry loop within one sync attempt
+    while (true) {
 
-                    getNextItem();
-                    return;
-                }
+        // Retrieve secret
+        const auto secret = co_await DateEventFeederManager::instance().acquireSecret(
+                forcePrompt, m_config.source);
 
-                QByteArray data = reply->readAll();
-                reply->deleteLater();
-
-                QMimeDatabase db;
-                QMimeType type = db.mimeTypeForData(data);
-
-                bool success = true;
-
-                if (type.name() == "text/calendar" && !data.isEmpty()
-                    && responseDataChanged(data)) {
-                    QString concreteSource = QString("%1_%2").arg(m_config.source, item.name());
-                    m_concreteSources.append(concreteSource);
-
-                    DateEventManager &manager = DateEventManager::instance();
-                    manager.removeDateEventsBySource(concreteSource);
-
-                    success = processResponse(data, concreteSource);
-                }
-
-                // If iCal parsing fails at any point, we want to start over entirely.
-                // Let processResponse() trigger a re-run on failure and clear the queue
-                if (success) {
-                    getNextItem();
-                } else {
-                    m_items.clear();
-                }
-            },
-            Qt::SingleShotConnection);
-}
-
-void CalDAVEventFeeder::process(bool authFailed)
-{
-    auto manager = q_check_ptr(qobject_cast<DateEventFeederManager *>(parent()));
-    manager->acquireSecret(authFailed, m_config.source, [this](const SecretResponse response) {
-        if (response.hasError) {
+        if (secret.hasError) {
             qCCritical(lcCalDAVEventFeeder)
                     << "Authentication for" << m_config.source << "has failed";
             ErrorBus::instance().addError(tr("Authentication error for %1").arg(m_config.source));
-        } else {
-            m_webdav.setConnectionSettings(m_config.useSSL ? QWebdav::HTTPS : QWebdav::HTTP,
-                                           m_config.host, m_config.path, m_config.user,
-                                           response.secret, m_config.port);
-
-            m_webdavParser.listDirectory(&m_webdav, "/");
+            m_isRunning = false;
+            co_return;
         }
-    });
+
+        // Create WebDAV client
+        m_webdavClient = std::make_unique<WebDavClient>(WebDavClient::ConnectionConfig{
+                QUrl(QString("%1://%2:%3%4")
+                             .arg(m_config.useSSL ? "https" : "http", m_config.host,
+                                  QString::number(m_config.port), m_config.path)),
+                m_config.user, secret.secret });
+
+        // Get WebDAV root entry
+        auto *reply = co_await m_webdavClient->propfind("/", 1,
+                                                        {
+                                                                { "D", "DAV:", "resourcetype" },
+                                                                { "D", "DAV:", "getetag" },
+                                                                { "D", "DAV:", "getlastmodified" },
+                                                        });
+
+        // Auth incorrect
+        if (reply->error() == QNetworkReply::AuthenticationRequiredError) {
+            reply->deleteLater();
+            qCWarning(lcCalDAVEventFeeder) << "Failed to process CalDAV source - invalid password";
+            forcePrompt = true;
+            continue;
+        }
+
+        // Other error
+        if (reply->error() != QNetworkReply::NoError) {
+            reply->deleteLater();
+
+            if (retriesLeft-- <= 0) {
+                qCCritical(lcCalDAVEventFeeder) << "Repeatedly failed to access CalDAV source"
+                                                << m_config.source << "- retries exhausted";
+                ErrorBus::instance().addError(
+                        tr("CalDAV source %1 repeatedly failed").arg(m_config.source));
+                m_isRunning = false;
+                co_return;
+            }
+
+            qCWarning(lcCalDAVEventFeeder)
+                    << "Failed to process CalDAV source" << m_config.source << "-"
+                    << reply->errorString() << "- trying again after" << m_config.retryInterval
+                    << "ms," << retriesLeft << "retries left";
+            co_await QCoro::sleepFor(std::chrono::milliseconds(m_config.retryInterval));
+            continue;
+        }
+
+        // Process correct result - traverse items
+        const auto items = WebDavPropfindParser{}.parseMultiStatus(reply->readAll());
+        reply->deleteLater();
+
+        resetCalendar();
+        m_checksums.clear();
+
+        for (const auto &item : items) {
+            if (item.isCollection()) {
+                continue;
+            }
+
+            auto *itemReply = co_await m_webdavClient->sendRequest(item.href, "GET", {});
+            if (itemReply->error() == QNetworkReply::NoError) {
+                const auto data = itemReply->readAll();
+                if (responseDataChanged(data)) {
+                    processResponse(data, QString("%1_%2").arg(m_config.source, item.name()));
+                }
+            }
+            itemReply->deleteLater();
+        }
+
+        break;
+    }
+
+    m_isRunning = false;
 }
 
 bool CalDAVEventFeeder::processResponse(const QByteArray &data, const QString &source)
@@ -309,8 +259,9 @@ bool CalDAVEventFeeder::processResponse(const QByteArray &data, const QString &s
 
                         if (icaltime_is_valid_time(recurStartCap)) {
                             if (!icalrecur_iterator_set_start(recurrenceIter, recurStartCap)) {
-                                onError(QString("Failed to set RRULE iterator starting date: %1")
-                                                .arg(icalerror_strerror(icalerrno)));
+                                qCCritical(lcCalDAVEventFeeder)
+                                        << "Failed to set RRULE iterator starting date:"
+                                        << icalerror_strerror(icalerrno);
 
                                 icalrecur_iterator_free(recurrenceIter);
 
@@ -375,7 +326,7 @@ bool CalDAVEventFeeder::processResponse(const QByteArray &data, const QString &s
     }
 
     if (icalerrno != ICAL_NO_ERROR) {
-        onError(icalerror_strerror(icalerrno));
+        qCCritical(lcCalDAVEventFeeder) << "ical error:" << icalerror_strerror(icalerrno);
         return false;
     }
     return true;

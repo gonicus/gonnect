@@ -44,24 +44,15 @@ QCoro::Task<QNetworkReply *> WebDavClient::sendRequest(const QString &relativePa
     co_return reply;
 }
 
-QCoro::Task<QList<WebDavItem>>
-WebDavClient::propfind(const QString &path, int depth,
-                       const QList<WebDavPropertyRequest> &properties)
+QCoro::Task<QNetworkReply *> WebDavClient::propfind(const QString &path, int depth,
+                                                    const QList<WebDavPropertyRequest> &properties)
 {
     auto request = createNetworkRequest(path);
     request.setRawHeader("Depth", QByteArray::number(depth));
 
     QNetworkReply *reply = co_await m_networkAccessManager.sendCustomRequest(
             request, "PROPFIND", m_propfindParser.buildPropfindBody(properties));
-
-    if (reply->error() != QNetworkReply::NoError) {
-        reply->deleteLater();
-        co_return {};
-    }
-
-    const auto items = m_propfindParser.parseMultiStatus(reply->readAll());
-    reply->deleteLater();
-    co_return items;
+    co_return reply;
 }
 
 void WebDavClient::onAuthenticationRequired(QNetworkReply *, QAuthenticator *authenticator)

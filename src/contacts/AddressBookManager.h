@@ -5,6 +5,7 @@
 #include <QObject>
 #include <QHash>
 #include <QTimer>
+#include <QCoroCore>
 
 class IAddressBookFeeder;
 
@@ -30,6 +31,9 @@ public:
 
     void acquireSecret(bool forcePrompt, const QString &group,
                        std::function<void(SecretResponse response)> callback);
+
+    [[nodiscard]] QCoro::Task<SecretResponse> acquireSecretAsync(bool forcePrompt,
+                                                                 const QString &group);
 
 private:
     explicit AddressBookManager(QObject *parent = nullptr);

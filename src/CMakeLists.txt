@@ -590,6 +590,7 @@ qt_add_qml_module(gonnect
         UISettings.h
         MSOAuthManager.cpp
         MSOAuthManager.h
+        WaiterHelper.h
 
         sip/CallHistory.h
         sip/CallHistory.cpp
