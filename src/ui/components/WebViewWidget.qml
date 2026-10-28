@@ -57,6 +57,9 @@ BaseWidget {
 
         Loader {
             id: webViewLoader
+            active: !!CertificateProfile.profile
+            asynchronous: true
+            sourceComponent: webViewComponent
 
             anchors {
                 top: webviewHeading.bottom
@@ -69,9 +72,6 @@ BaseWidget {
                 leftMargin: 15
                 rightMargin: 15
             }
-
-            asynchronous: true
-            sourceComponent: webViewComponent
         }
 
         Component {
@@ -80,7 +80,12 @@ BaseWidget {
             WebEngineView {
                 id: webView
                 backgroundColor: Theme.backgroundColor
+                profile: CertificateProfile.profile
                 url: {
+                    if (!CertHelper.clientCertsInitialized) {
+                        return ""
+                    }
+
                     if (Theme.isDarkMode) {
                         return !!control.darkModeUrl.trim() ? control.darkModeUrl : control.lightModeUrl
                     } else {
@@ -95,20 +100,20 @@ BaseWidget {
                     localContentCanAccessFileUrls: true
                 }
 
-                profile {
-                    httpAcceptLanguage: {
-                        const systemLocale = Qt.locale().name.replace("_", "-")
-                        const mainLang = systemLocale.split("-")[0]
-                        return `${systemLocale},${mainLang};q=0.9,en;q=0.8`
-                    }
-                }
-
                 onLoadingChanged: function(loadRequest) {
                     if (loadRequest.status === WebEngineView.LoadFailedStatus) {
                         console.error("Failed to load page:", loadRequest.url,
                                       ", error message:", loadRequest.errorString)
                     }
                 }
+
+                onSelectClientCertificate: selection => {
+                                               console.log("WebViewWidget client certificate requested, have", selection.certificates.length)
+
+                                               if (selection.certificates.length > 0) {
+                                                   selection.select(selection.certificates[0])
+                                               }
+                                           }
 
                 onCertificateError: function(error) {
                     console.log("Certificate error encountered:", error.description);

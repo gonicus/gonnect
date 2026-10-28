@@ -2,6 +2,7 @@
 #include "AppSettings.h"
 #include "AudioManager.h"
 #include "AudioHelper.h"
+#include "FileHelper.h"
 
 #include <QAudioOutput>
 #include <QLoggingCategory>
@@ -29,12 +30,29 @@ void Pinger::ping(qreal customVolume)
     // Fallback sound
     if (source.isEmpty()) {
         source = "qrc:/audio/message-new-instant.wav";
+    } else {
+        const QString expectedPath =
+                FileHelper::instance().persistentFolderPath("sounds") + "/notification-tone";
+        const QUrl sourceUrl(source);
+        const QString sourceLocalPath = sourceUrl.isLocalFile() ? sourceUrl.toLocalFile() : source;
+
+        if (sourceLocalPath != expectedPath) {
+            // Migrate old ring tone
+            const auto migratedPath =
+                    FileHelper::instance().persistFile(sourceUrl, "sounds", "notification-tone");
+            if (!migratedPath.isEmpty()) {
+                qCInfo(lcPinger) << "Migrated notification tone by copying:" << migratedPath;
+                source = migratedPath;
+                settings.setValue(QString("audio%1/notificationTone").arg(currentProfile), source);
+            }
+        }
     }
 
     if (!m_player) {
         m_player = new QMediaPlayer(this);
         connect(m_player, &QMediaPlayer::playbackStateChanged, this,
                 &Pinger::onPlaybackStateChanged);
+        connect(m_player, &QMediaPlayer::errorOccurred, this, &Pinger::onPlayerError);
     }
 
     // Setup player and volume
@@ -69,5 +87,16 @@ void Pinger::onPlaybackStateChanged(QMediaPlayer::PlaybackState state)
 {
     if (state == QMediaPlayer::StoppedState) {
         stop();
+    }
+}
+
+void Pinger::onPlayerError(QMediaPlayer::Error, const QString &errorString)
+{
+    static const QUrl fallback("qrc:/audio/message-new-instant.wav");
+    if (m_player && m_player->source() != fallback) {
+        qCWarning(lcPinger) << "Failed to play notification tone (using fallback now):"
+                            << errorString;
+        m_player->setSource(fallback);
+        m_player->play();
     }
 }

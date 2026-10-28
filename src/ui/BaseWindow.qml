@@ -25,6 +25,11 @@ Window {
         window: control
     }
 
+    WindowShadowMargins {
+        window: control
+        margin: control.useOwnDecoration && !control.isMaximized ? control.shadowMargin : 0
+    }
+
     readonly property real devicePixelRatio: pixelRatio.ratio
 
     function snapToPixelGrid(value : real) : real {
@@ -69,7 +74,8 @@ Window {
 
     readonly property bool isMaximized: [ Window.Maximized, Window.FullScreen ].includes(control.visibility)
 
-    readonly property int shadowMargin: control.snapToPixelGrid(11)
+    readonly property int shadowMargin: control.snapToPixelGrid(2 * Theme.d)
+    readonly property int windowRadius: 15
 
     property Item activeSearchBox
 
@@ -91,10 +97,41 @@ Window {
         background: Item {
             visible: control.useOwnDecoration
 
+            // Shadow and outline taken from libadwaita
+            RectangularShadow {
+                id: ambientShadow
+                anchors.fill: bgRect
+                visible: !control.isMaximized
+                radius: bgRect.radius
+                color: Qt.rgba(0, 0, 0, control.active ? 0.16 : 0.10)
+                blur: control.active ? 17 : 14
+                spread: control.active ? 5 : 4
+            }
+
+            RectangularShadow {
+                id: keyShadow
+                anchors.fill: bgRect
+                visible: !control.isMaximized && control.active
+                radius: bgRect.radius
+                color: Qt.rgba(0, 0, 0, 0.14)
+                blur: 8
+                spread: 1
+            }
+
+            RectangularShadow {
+                id: outlineShadow
+                anchors.fill: bgRect
+                visible: !control.isMaximized
+                radius: bgRect.radius
+                color: Qt.rgba(0, 0, 0, 0.05)
+                blur: 0
+                spread: 1
+            }
+
             Rectangle {
                 id: bgRect
                 color: Theme.backgroundColor
-                radius: 8
+                radius: control.windowRadius
                 anchors {
                     fill: parent
                     margins: control.isMaximized ? 0 : control.shadowMargin
@@ -113,22 +150,6 @@ Window {
                     enabled: true
                     smooth: true
                 }
-            }
-
-            MultiEffect {
-                anchors.fill: bgRect
-                source: bgRect
-                visible: !control.isMaximized
-                blurEnabled: false
-
-                shadowEnabled: true
-                shadowColor: Theme.shadowColor
-                shadowHorizontalOffset: 0
-                shadowVerticalOffset: 3
-                shadowBlur: 0.5
-                blurMax: 16
-                shadowOpacity: 1.0
-                shadowScale: 1.0
             }
 
             Item {
@@ -376,6 +397,8 @@ Window {
             layer.effect: MultiEffect {
                 maskSource: bgMaskRect
                 maskEnabled: true
+                maskThresholdMin: 0.5
+                maskSpreadAtMin: 1.0
             }
 
             Loader {

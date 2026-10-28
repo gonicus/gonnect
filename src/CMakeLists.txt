@@ -88,11 +88,15 @@ elseif(LINUX)
     pkg_check_modules(LIBNOTIFY REQUIRED libnotify IMPORTED_TARGET)
     pkg_check_modules(LIBPULSE REQUIRED libpulse IMPORTED_TARGET)
     pkg_check_modules(LIBPIPEWIRE REQUIRED libpipewire-0.3 IMPORTED_TARGET)
+    pkg_check_modules(XCB REQUIRED xcb IMPORTED_TARGET)
+    pkg_check_modules(WAYLAND_CLIENT REQUIRED wayland-client IMPORTED_TARGET)
        
     list(APPEND PLATFORM_LIBRARIES
         PkgConfig::LIBPULSE
         PkgConfig::LIBPIPEWIRE
         PkgConfig::LIBNOTIFY
+        PkgConfig::XCB
+        PkgConfig::WAYLAND_CLIENT
         Qt6::DBus)
 
     set(DBUS_SOURCES)
@@ -183,6 +187,7 @@ set_target_properties(gonnect PROPERTIES
 
 set(gonnect_qml_singletons
     ui/components/dialogs/DialogFactory.qml
+    ui/CertificateProfile.qml
 )
 set_source_files_properties(${gonnect_qml_singletons} PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
 
@@ -471,6 +476,7 @@ qt_add_qml_module(gonnect
         ui/components/popups/OwnAvatarContextMenu.qml
         ui/components/popups/PublicRoomSearch.qml
         ui/components/popups/Popup.qml
+        ui/components/popups/PopupBackgroundOverlay.qml
         ui/components/popups/SearchResultPopup.qml
         ui/components/popups/UrlCopyDialog.qml
         ui/components/popups/UserSelect.qml
@@ -511,6 +517,7 @@ qt_add_qml_module(gonnect
         ui/components/DateEventsList.qml
         ui/components/FavoritesList.qml
         ui/components/HistoryList.qml
+        ui/components/IndicatorIcon.qml
         ui/components/MainTabBar.qml
         ui/components/PresenceStatusIndicator.qml
         ui/components/UsersList.qml
@@ -777,6 +784,8 @@ qt_add_qml_module(gonnect
         helper/AudioHelper.cpp
         helper/AvatarPrioHelper.h
         helper/AvatarPrioHelper.cpp
+        helper/CertHelper.h
+        helper/CertHelper.cpp
         helper/ChatMessageTransformer.h
         helper/ChatMessageTransformer.cpp
         helper/CodeHighlighter.h
@@ -942,6 +951,8 @@ qt_add_qml_module(gonnect
         ui/WebEngineKeyEventFilter.cpp
         ui/WindowPixelRatio.h
         ui/WindowPixelRatio.cpp
+        ui/WindowShadowMargins.h
+        ui/WindowShadowMargins.cpp
 
         usb/IHeadsetDevice.h
         usb/HeadsetDevice.cpp

@@ -32,6 +32,7 @@ list(PREPEND CMAKE_PREFIX_PATH "${PROJECT_BINARY_DIR}/generators")
 set(FLATPAK $ENV{FLATPAK_ID})
 
 # Basic settings
+include(cmake/HardeningFlags.cmake)
 option(CMAKE_UNITY_BUILD "Enable unity builds" OFF)
 option(ENABLE_PCH "Enable precompiled headers" ON)
 option(BUILD_TESTING "Build tests" OFF)

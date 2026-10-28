@@ -34,6 +34,7 @@ public:
     virtual ~SIPBuddy();
 
     bool initialize();
+    void subscribe();
 
     virtual void onBuddyState();
 
