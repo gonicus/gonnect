@@ -75,8 +75,9 @@ QCoro::Task<SecretResponse> DateEventFeederManager::acquireSecret(bool forceProm
                                         QKeychain::Error error, const QString &secret,
                                         const QString &) { Q_EMIT raw->received(error, secret); });
 
-    const auto [error, secret] =
-            co_await qCoro(credentialsWaiter.get(), &CredentialsWaiter::received);
+    const auto result = co_await qCoro(credentialsWaiter.get(), &CredentialsWaiter::received);
+    const auto error = std::get<0>(result);
+    const auto secret = std::get<1>(result);
 
     if (error == QKeychain::NoError && !forcePrompt) {
         co_return SecretResponse{ secret };
