@@ -54,14 +54,14 @@ Here's a short feature list:
    * Device verification
  * **Presence**: SIP buddy and chat presence combined, own status and status text
  * Dashboard with widgets (appointments, favorites, history, chat, activities, web view)
- * Central search for contacts, chat rooms and history (Ctrl+K)
+ * Central search for contacts, chat rooms/messages and history (Ctrl+F)
  * Address sources
    * LDAP
    * CardDAV
-   * CSV
    * GNOME Contacts / Evolution Data Service
    * Microsoft 365 Contacts (on Windows)
    * Unified avatars from address sources and chat
+   * CSV
  * Calendar sources for upcoming conferences
    * CalDAV
    * GNOME Calendar / Evolution Data Service
