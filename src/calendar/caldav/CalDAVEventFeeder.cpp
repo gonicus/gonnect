@@ -100,6 +100,7 @@ QCoro::Task<> CalDAVEventFeeder::run()
         qCDebug(lcCalDAVEventFeeder) << "Created WebDavClient with url" << webdavUrl.toString();
 
         resetCalendar();
+        m_concreteSources.clear();
         m_checksums.clear();
 
         uint successCount = 0;
@@ -165,6 +166,11 @@ CalDAVEventFeeder::syncCalendarCollection(const QString &collectionPath, int dep
     const auto items = WebDavPropfindParser{}.parseMultiStatus(reply->readAll());
     reply->deleteLater();
 
+    const QString concreteSource = QString("%1_%2").arg(m_config.source, collectionPath);
+    if (!m_concreteSources.contains(concreteSource)) {
+        m_concreteSources.append(concreteSource);
+    }
+
     QStringList hrefsToFetch;
     for (const auto &item : items) {
         if (!item.isCollection()) {
@@ -212,8 +218,7 @@ CalDAVEventFeeder::syncCalendarCollection(const QString &collectionPath, int dep
                 continue;
             }
 
-            const bool success = processResponse(
-                    calendarData, QString("%1_%2").arg(m_config.source, result.name()));
+            const bool success = processResponse(calendarData, concreteSource);
             success ? ++successCount : ++failCount;
         }
     }
