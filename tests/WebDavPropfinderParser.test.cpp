@@ -131,6 +131,54 @@ void WebDavPropfindParserTest::testParsesNonDavNamespaceProperty()
     QVERIFY(foundHrefChild);
 }
 
+void WebDavPropfindParserTest::testParsesComponentAttributesForCalendarFiltering()
+{
+    const QByteArray xml = R"(<?xml version="1.0"?>
+            <D:multistatus xmlns:D="DAV:" xmlns:C="urn:ietf:params:xml:ns:caldav">
+              <D:response>
+                <D:href>/caldav/user/tasks/</D:href>
+                <D:propstat>
+                  <D:prop>
+                    <D:resourcetype><D:collection/><C:calendar/></D:resourcetype>
+                    <C:supported-calendar-component-set>
+                      <C:comp name="VTODO"/>
+                      <C:comp name="VTIMEZONE"/>
+                    </C:supported-calendar-component-set>
+                  </D:prop>
+                  <D:status>HTTP/1.1 200 OK</D:status>
+                </D:propstat>
+              </D:response>
+              <D:response>
+                <D:href>/caldav/user/calendar/</D:href>
+                <D:propstat>
+                  <D:prop>
+                    <D:resourcetype><D:collection/><C:calendar/></D:resourcetype>
+                    <C:supported-calendar-component-set>
+                      <C:comp name="VEVENT"/>
+                      <C:comp name="VTIMEZONE"/>
+                    </C:supported-calendar-component-set>
+                  </D:prop>
+                  <D:status>HTTP/1.1 200 OK</D:status>
+                </D:propstat>
+              </D:response>
+            </D:multistatus>)";
+
+    WebDavPropfindParser parser;
+    const auto items = parser.parseMultiStatus(xml);
+
+    QCOMPARE(items.size(), 2);
+
+    const auto &tasks = items.at(0);
+    QVERIFY(tasks.isCalendarCollection());
+    QVERIFY(tasks.supportsComponent("VTODO"));
+    QVERIFY(!tasks.supportsComponent("VEVENT"));
+
+    const auto &calendar = items.at(1);
+    QVERIFY(calendar.isCalendarCollection());
+    QVERIFY(calendar.supportsComponent("VEVENT"));
+    QVERIFY(!calendar.supportsComponent("VTODO"));
+}
+
 void WebDavPropfindParserTest::testBuildPropfindBodyProducesValidXmlWithMultipleNamespaces()
 {
     WebDavPropfindParser parser;

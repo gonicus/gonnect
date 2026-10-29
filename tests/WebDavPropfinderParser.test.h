@@ -15,6 +15,7 @@ private Q_SLOTS:
     void testHandlesResourceLevelForbiddenStatus();
     void testParsesMultipleResponses();
     void testParsesNonDavNamespaceProperty();
+    void testParsesComponentAttributesForCalendarFiltering();
     void testBuildPropfindBodyProducesValidXmlWithMultipleNamespaces();
     void testParseMultiStatusHandlesEmptyInput();
 };
