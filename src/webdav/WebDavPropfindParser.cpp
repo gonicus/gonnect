@@ -41,6 +41,51 @@ QByteArray WebDavPropfindParser::buildPropfindBody(const QList<WebDavPropertyReq
     return body;
 }
 
+QByteArray WebDavPropfindParser::buildMultigetBody(const QString &rootPrefix,
+                                                   const QString &rootNamespaceUri,
+                                                   const QString &rootElementName,
+                                                   const QList<WebDavPropertyRequest> &properties,
+                                                   const QStringList &hrefs)
+{
+    // Collect namespaces
+    QHash<QString, QString> namespaces;
+    namespaces.insert(rootPrefix, rootNamespaceUri);
+
+    for (const auto &p : properties) {
+        namespaces.insert(p.prefix, p.namespaceUri);
+    }
+
+    // Build body
+    QByteArray body = R"(<?xml version="1.0" encoding="utf-8"?>)"_ba;
+    body += (QString("<%1:%2 xmlns:D=\"DAV:\"").arg(rootPrefix, rootElementName).toUtf8());
+
+    // Add namespaces
+    QHashIterator it(namespaces);
+    while (it.hasNext()) {
+        it.next();
+        if (it.key() == "D") {
+            continue;
+        }
+        body += QString(" xmlns:%1=\"%2\"").arg(it.key(), it.value()).toUtf8();
+    }
+
+    // Add props
+    body += R"(><D:prop>)"_ba;
+    for (const auto &p : properties) {
+        body += QString("<%1:%2 />").arg(p.prefix, p.name).toUtf8();
+    }
+    body += R"(</D:prop>)"_ba;
+
+    // Add hrefs
+    for (const auto &href : hrefs) {
+        body += QString("<D:href>%1</D:href>").arg(href.toHtmlEscaped()).toUtf8();
+    }
+
+    body += QString("</%1:%2>").arg(rootPrefix, rootElementName).toUtf8();
+
+    return body;
+}
+
 QList<WebDavItem> WebDavPropfindParser::parseMultiStatus(const QByteArray &xmlData)
 {
 

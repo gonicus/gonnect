@@ -15,6 +15,10 @@ public:
     WebDavPropfindParser();
 
     QByteArray buildPropfindBody(const QList<WebDavPropertyRequest> &properties);
+    QByteArray buildMultigetBody(const QString &rootPrefix, const QString &rootNamespaceUri,
+                                 const QString &rootElementName,
+                                 const QList<WebDavPropertyRequest> &properties,
+                                 const QStringList &hrefs);
     QList<WebDavItem> parseMultiStatus(const QByteArray &xmlData);
 
 private:

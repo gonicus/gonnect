@@ -55,6 +55,16 @@ QCoro::Task<QNetworkReply *> WebDavClient::propfind(const QString &path, int dep
     co_return reply;
 }
 
+QCoro::Task<QNetworkReply *> WebDavClient::report(const QString &path, const QByteArray &body,
+                                                  int depth)
+{
+    auto request = createNetworkRequest(path);
+    request.setRawHeader("Depth", QByteArray::number(depth));
+    QNetworkReply *reply =
+            co_await m_networkAccessManager.sendCustomRequest(request, "REPORT", body);
+    co_return reply;
+}
+
 void WebDavClient::onAuthenticationRequired(QNetworkReply *, QAuthenticator *authenticator)
 {
     authenticator->setUser(m_connectionConfig.username);

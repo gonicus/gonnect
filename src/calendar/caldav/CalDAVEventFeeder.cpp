@@ -152,33 +152,58 @@ QCoro::Task<> CalDAVEventFeeder::run()
         resetCalendar();
         m_checksums.clear();
 
+        // CalDAV calendar-multiget
+        // Collect hrefs
+        QStringList hrefsToFetch;
+        for (const auto &item : items) {
+            if (!item.isCollection()) {
+                hrefsToFetch.append(item.href);
+            }
+        }
+
+        // Make consequitive calendar-multiget requests because batch size is usually limited
+        constexpr qsizetype batchSize = 100;
+
         uint successCount = 0;
         uint failCount = 0;
 
-        for (const auto &item : items) {
-            if (item.isCollection()) {
+        for (qsizetype offset = 0; offset < hrefsToFetch.size(); offset += batchSize) {
+            const auto batch = hrefsToFetch.mid(offset, batchSize);
+
+            const auto body = WebDavPropfindParser{}.buildMultigetBody(
+                    "C", "urn:ietf:params:xml:ns:caldav", "calendar-multiget",
+                    { { "D", "DAV:", "getetag" },
+                      { "C", "urn:ietf:params:xml:ns:caldav", "calendar-data" } },
+                    batch);
+
+            // Make request
+            auto *multigetReply = co_await m_webdavClient->report("", body);
+            if (multigetReply->error() != QNetworkReply::NoError) {
+                qCWarning(lcCalDAVEventFeeder)
+                        << "calendar-multiget batch failed:" << multigetReply->errorString();
+                multigetReply->deleteLater();
                 continue;
             }
 
-            auto *itemReply = co_await m_webdavClient->sendRequest(item.href, "GET", {});
-            if (itemReply->error() == QNetworkReply::NoError) {
-                const auto data = itemReply->readAll();
-                if (responseDataChanged(data)) {
-                    const bool success = processResponse(
-                            data, QString("%1_%2").arg(m_config.source, item.name()));
+            // Process response
+            const auto results = WebDavPropfindParser{}.parseMultiStatus(multigetReply->readAll());
+            multigetReply->deleteLater();
 
-                    if (success) {
-                        ++successCount;
-                    } else {
-                        ++failCount;
-                    }
+            qCDebug(lcCalDAVEventFeeder) << "Received calendar-multiget response" << offset << "to"
+                                         << std::min(offset + batchSize, hrefsToFetch.size());
+
+            for (const auto &result : results) {
+                const auto calendarData =
+                        result.property("urn:ietf:params:xml:ns:caldav", "calendar-data")
+                                .text.toUtf8();
+                if (calendarData.isEmpty() || !responseDataChanged(calendarData)) {
+                    continue;
                 }
-            } else {
-                qCWarning(lcCalDAVEventFeeder)
-                        << "GET failed for" << item.href << "-" << itemReply->errorString();
-            }
 
-            itemReply->deleteLater();
+                const bool success = processResponse(
+                        calendarData, QString("%1_%2").arg(m_config.source, result.name()));
+                success ? ++successCount : ++failCount;
+            }
         }
 
         qCDebug(lcCalDAVEventFeeder)

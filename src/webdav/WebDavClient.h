@@ -31,6 +31,9 @@ public:
     [[nodiscard]] QCoro::Task<QNetworkReply *>
     propfind(const QString &path, int depth, const QList<WebDavPropertyRequest> &properties);
 
+    [[nodiscard]] QCoro::Task<QNetworkReply *> report(const QString &path, const QByteArray &body,
+                                                      int depth = 0);
+
 private Q_SLOTS:
     void onAuthenticationRequired(QNetworkReply *reply, QAuthenticator *authenticator);
 
