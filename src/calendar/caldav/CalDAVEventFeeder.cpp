@@ -227,7 +227,10 @@ CalDAVEventFeeder::syncCalendarCollection(const QString &collectionPath, int dep
     if (depth == 0) {
         for (const auto &item : items) {
             if (item.isCollection() && item.isCalendarCollection()
-                && item.supportsComponent("VEVENT")) {
+                && (!item.hasProperty("urn:ietf:params:xml:ns:caldav",
+                                      "supported-calendar-component-set")
+                    || item.supportsComponent("VEVENT"))) {
+
                 const auto childResult = co_await syncCalendarCollection(item.href, depth + 1,
                                                                          successCount, failCount);
                 if (childResult == WebDavSyncResult::AuthRequired) {

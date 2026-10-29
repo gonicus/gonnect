@@ -7,6 +7,11 @@ WebDavPropertyValue WebDavItem::property(const QString &namespaceUri, const QStr
     return properties.value(QString("%1|%2").arg(namespaceUri, name));
 }
 
+bool WebDavItem::hasProperty(const QString &namespaceUri, const QString &name) const
+{
+    return properties.contains(QString("%1|%2").arg(namespaceUri, name));
+}
+
 bool WebDavItem::isCollection() const
 {
     const auto resourceType = property("DAV:", "resourcetype");
