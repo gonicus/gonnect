@@ -61,10 +61,6 @@ void CalDAVEventFeeder::resetCalendar()
     }
 }
 
-// Wsubobject-linkage creates an error when using coroutines with certain gcc versions (GCC Bug
-// #105595) see https://gcc.gnu.org/bugzilla/show_bug.cgi?id=105595
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wsubobject-linkage"
 QCoro::Task<> CalDAVEventFeeder::run()
 {
     if (m_isRunning) {
@@ -190,7 +186,6 @@ QCoro::Task<> CalDAVEventFeeder::run()
 
     m_isRunning = false;
 }
-#pragma GCC diagnostic pop
 
 bool CalDAVEventFeeder::processResponse(const QByteArray &data, const QString &source)
 {
