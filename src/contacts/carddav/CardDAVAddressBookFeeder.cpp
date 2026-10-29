@@ -144,6 +144,7 @@ QCoro::Task<> CardDAVAddressBookFeeder::run()
 
     m_isProcessing = false;
 }
+
 #pragma GCC diagnostic pop
 
 void CardDAVAddressBookFeeder::processVcard(QByteArray data, const QString &uuid,

@@ -124,7 +124,7 @@ void WebDavPropfindParserTest::testParsesNonDavNamespaceProperty()
 
     bool foundHrefChild = false;
     for (const auto &child : homeSet.childElements) {
-        if (child.first == "DAV:" && child.second == "href") {
+        if (child.namespaceUri == "DAV:" && child.localName == "href") {
             foundHrefChild = true;
         }
     }

@@ -16,6 +16,9 @@ struct WebDavItem
     QHash<QString, WebDavPropertyValue> properties;
 
     bool isCollection() const;
+    bool isCalendarCollection() const;
+    bool supportsComponent(const QString &componentName) const;
+
     QString name() const;
     QDateTime lastModified() const;
 };

@@ -103,117 +103,143 @@ QCoro::Task<> CalDAVEventFeeder::run()
 
         qCDebug(lcCalDAVEventFeeder) << "Created WebDavClient with url" << webdavUrl.toString();
 
-        // Get WebDAV root entry
-        auto *reply = co_await m_webdavClient->propfind("", 1,
-                                                        {
-                                                                { "D", "DAV:", "resourcetype" },
-                                                                { "D", "DAV:", "getetag" },
-                                                                { "D", "DAV:", "getlastmodified" },
-                                                                { "D", "DAV:", "displayname" },
-                                                        });
-
-        qCDebug(lcCalDAVEventFeeder) << "PROPFIND returned, error=" << reply->error();
-
-        // Auth incorrect
-        if (reply->error() == QNetworkReply::AuthenticationRequiredError) {
-            reply->deleteLater();
-            qCWarning(lcCalDAVEventFeeder) << "Failed to process CalDAV source - invalid password";
-            forcePrompt = true;
-            continue;
-        }
-
-        // Other error
-        if (reply->error() != QNetworkReply::NoError) {
-            reply->deleteLater();
-
-            if (retriesLeft-- <= 0) {
-                qCCritical(lcCalDAVEventFeeder) << "Repeatedly failed to access CalDAV source"
-                                                << m_config.source << "- retries exhausted";
-                ErrorBus::instance().addError(
-                        tr("CalDAV source %1 repeatedly failed").arg(m_config.source));
-                m_isRunning = false;
-                co_return;
-            }
-
-            qCWarning(lcCalDAVEventFeeder)
-                    << "Failed to process CalDAV source" << m_config.source << "-"
-                    << reply->errorString() << "- trying again after" << m_config.retryInterval
-                    << "ms," << retriesLeft << "retries left";
-            co_await QCoro::sleepFor(std::chrono::milliseconds(m_config.retryInterval));
-            continue;
-        }
-
-        // Process correct result - traverse items
-        const auto items = WebDavPropfindParser{}.parseMultiStatus(reply->readAll());
-        reply->deleteLater();
-
-        qCDebug(lcCalDAVEventFeeder) << "Received" << items.size() << "items";
-
         resetCalendar();
         m_checksums.clear();
-
-        // CalDAV calendar-multiget
-        // Collect hrefs
-        QStringList hrefsToFetch;
-        for (const auto &item : items) {
-            if (!item.isCollection()) {
-                hrefsToFetch.append(item.href);
-            }
-        }
-
-        // Make consequitive calendar-multiget requests because batch size is usually limited
-        const uint batchSize = m_config.multigetBatchSize;
 
         uint successCount = 0;
         uint failCount = 0;
 
-        for (qsizetype offset = 0; offset < hrefsToFetch.size(); offset += batchSize) {
-            const auto batch = hrefsToFetch.mid(offset, batchSize);
+        const auto result = co_await syncCalendarCollection("", 0, successCount, failCount);
 
-            const auto body = WebDavPropfindParser{}.buildMultigetBody(
-                    "C", "urn:ietf:params:xml:ns:caldav", "calendar-multiget",
-                    { { "D", "DAV:", "getetag" },
-                      { "C", "urn:ietf:params:xml:ns:caldav", "calendar-data" } },
-                    batch);
-
-            // Make request
-            auto *multigetReply = co_await m_webdavClient->report("", body);
-            if (multigetReply->error() != QNetworkReply::NoError) {
-                qCWarning(lcCalDAVEventFeeder)
-                        << "calendar-multiget batch failed:" << multigetReply->errorString();
-                multigetReply->deleteLater();
-                continue;
+        if (result == SyncResult::AuthRequired) {
+            qCWarning(lcCalDAVEventFeeder) << "Failed to process CalDAV source: invalid password";
+            forcePrompt = true;
+            continue;
+        }
+        if (result == SyncResult::OtherError) {
+            if (retriesLeft-- <= 0) {
+                ErrorBus::instance().addError(
+                        tr("CalDAV source %1 repeatedly failed - retries exhausted")
+                                .arg(m_config.source));
+                m_isRunning = false;
+                co_return;
             }
 
-            // Process response
-            const auto results = WebDavPropfindParser{}.parseMultiStatus(multigetReply->readAll());
-            multigetReply->deleteLater();
-
-            qCDebug(lcCalDAVEventFeeder) << "Received calendar-multiget response" << offset << "to"
-                                         << std::min(offset + batchSize, hrefsToFetch.size());
-
-            for (const auto &result : results) {
-                const auto calendarData =
-                        result.property("urn:ietf:params:xml:ns:caldav", "calendar-data")
-                                .text.toUtf8();
-                if (calendarData.isEmpty() || !responseDataChanged(calendarData)) {
-                    continue;
-                }
-
-                const bool success = processResponse(
-                        calendarData, QString("%1_%2").arg(m_config.source, result.name()));
-                success ? ++successCount : ++failCount;
-            }
+            qCWarning(lcCalDAVEventFeeder) << "Failed to process CalDAV sources" << m_config.source
+                                           << "- trying again after" << m_config.retryInterval
+                                           << "ms," << retriesLeft << "retries left";
+            co_await QCoro::sleepFor(std::chrono::milliseconds(m_config.retryInterval));
+            continue;
         }
 
         qCDebug(lcCalDAVEventFeeder)
-                << "Processed" << items.size() << "items, successful:" << successCount
-                << "failed:" << failCount;
+                << "Processed, successful:" << successCount << "failed:" << failCount;
 
         break;
     }
 
     m_isRunning = false;
+}
+
+QCoro::Task<CalDAVEventFeeder::SyncResult>
+CalDAVEventFeeder::syncCalendarCollection(const QString &collectionPath, int depth,
+                                          uint &successCount, uint &failCount)
+{
+    auto *reply = co_await m_webdavClient->propfind(
+            collectionPath, 1,
+            {
+                    { "D", "DAV:", "resourcetype" },
+                    { "D", "DAV:", "getetag" },
+                    { "D", "DAV:", "getlastmodified" },
+                    { "C", "urn:ietf:params:xml:ns:caldav", "supported-calendar-component-set" },
+            });
+
+    if (reply->error() == QNetworkReply::AuthenticationRequiredError) {
+        reply->deleteLater();
+        co_return SyncResult::AuthRequired;
+    }
+
+    if (reply->error() != QNetworkReply::NoError) {
+        qCWarning(lcCalDAVEventFeeder)
+                << "PROPFIND failed for" << collectionPath << ":" << reply->errorString();
+        reply->deleteLater();
+        co_return SyncResult::OtherError;
+    }
+
+    const auto items = WebDavPropfindParser{}.parseMultiStatus(reply->readAll());
+    reply->deleteLater();
+
+    QStringList hrefsToFetch;
+    for (const auto &item : items) {
+        if (!item.isCollection()) {
+            hrefsToFetch.append(item.href);
+        }
+    }
+
+    bool anyBatchFailed = false;
+    const auto batchSize = m_config.multigetBatchSize;
+
+    for (qsizetype offset = 0; offset < hrefsToFetch.size(); offset += batchSize) {
+        const auto batch = hrefsToFetch.mid(offset, batchSize);
+
+        const auto body = WebDavPropfindParser{}.buildMultigetBody(
+                "C", "urn:ietf:params:xml:ns:caldav", "calendar-multiget",
+                { { "D", "DAV:", "getetag" },
+                  { "C", "urn:ietf:params:xml:ns:caldav", "calendar-data" } },
+                batch);
+
+        // Make request
+        auto *multigetReply = co_await m_webdavClient->report(collectionPath, body);
+        if (multigetReply->error() == QNetworkReply::AuthenticationRequiredError) {
+            multigetReply->deleteLater();
+            co_return SyncResult::AuthRequired;
+        }
+        if (multigetReply->error() != QNetworkReply::NoError) {
+            qCWarning(lcCalDAVEventFeeder)
+                    << "calendar-multiget batch failed:" << multigetReply->errorString();
+            multigetReply->deleteLater();
+            anyBatchFailed = true;
+            continue;
+        }
+
+        // Process response
+        const auto results = WebDavPropfindParser{}.parseMultiStatus(multigetReply->readAll());
+        multigetReply->deleteLater();
+
+        qCDebug(lcCalDAVEventFeeder) << "Received calendar-multiget response" << offset << "to"
+                                     << std::min(offset + batchSize, hrefsToFetch.size());
+
+        for (const auto &result : results) {
+            const auto calendarData =
+                    result.property("urn:ietf:params:xml:ns:caldav", "calendar-data").text.toUtf8();
+            if (calendarData.isEmpty() || !responseDataChanged(calendarData)) {
+                continue;
+            }
+
+            const bool success = processResponse(
+                    calendarData, QString("%1_%2").arg(m_config.source, result.name()));
+            success ? ++successCount : ++failCount;
+        }
+    }
+
+    // Descent on level in tree
+    if (depth == 0) {
+        for (const auto &item : items) {
+            if (item.isCollection() && item.isCalendarCollection()
+                && item.supportsComponent("VEVENT")) {
+                const auto childResult = co_await syncCalendarCollection(item.href, depth + 1,
+                                                                         successCount, failCount);
+                if (childResult == SyncResult::AuthRequired) {
+                    co_return SyncResult::AuthRequired;
+                }
+                if (childResult == SyncResult::OtherError) {
+                    anyBatchFailed = true;
+                }
+            }
+        }
+    }
+
+    co_return anyBatchFailed ? SyncResult::OtherError : SyncResult::Success;
 }
 #pragma GCC diagnostic pop
 

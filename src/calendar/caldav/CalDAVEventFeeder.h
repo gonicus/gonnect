@@ -30,6 +30,11 @@ public:
 private:
     QCoro::Task<> run();
 
+    enum class SyncResult { Success, AuthRequired, OtherError };
+
+    QCoro::Task<SyncResult> syncCalendarCollection(const QString &collectionPath, int depth,
+                                                   uint &successCount, uint &failCount);
+
     bool processResponse(const QByteArray &data, const QString &source);
     bool responseDataChanged(const QByteArray &data);
     QDateTime createDateTimeFromTimeType(icaltimetype &datetime);

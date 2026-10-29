@@ -121,8 +121,15 @@ WebDavPropertyValue WebDavPropfindParser::parsePropertyValue(QXmlStreamReader &r
         }
 
         if (reader.isStartElement()) {
-            value.childElements.append(
-                    { reader.namespaceUri().toString(), reader.name().toString() });
+            WebDavChildElement child;
+            child.namespaceUri = reader.namespaceUri().toString();
+            child.localName = reader.name().toString();
+            const auto attributes = reader.attributes();
+            for (const auto &attr : attributes) {
+                child.attributes.insert(attr.name().toString(), attr.value().toString());
+            }
+
+            value.childElements.append(child);
             reader.skipCurrentElement();
         } else if (reader.isCharacters() && !reader.isWhitespace()) {
             value.text += reader.text().toString();

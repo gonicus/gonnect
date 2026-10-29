@@ -2,9 +2,17 @@
 
 #include <QString>
 #include <QList>
+#include <QHash>
+
+struct WebDavChildElement
+{
+    QString namespaceUri;
+    QString localName;
+    QHash<QString, QString> attributes;
+};
 
 struct WebDavPropertyValue
 {
     QString text;
-    QList<std::pair<QString, QString>> childElements;
+    QList<WebDavChildElement> childElements;
 };
