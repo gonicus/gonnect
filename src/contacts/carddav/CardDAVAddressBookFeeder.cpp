@@ -519,13 +519,20 @@ void CardDAVAddressBookFeeder::process()
         attr = std::move(attr).toLower().trimmed();
     }
 
+    uint multigetBatchSize = settings.value("multigetBatchSize", 100).toUInt();
+    if (multigetBatchSize < 1) {
+        qCWarning(lcCardDAVAddressBookFeeder)
+                << "Invalid multigetBatchSize for" << m_group << "- resetting to default of 100";
+        multigetBatchSize = 100;
+    }
+
     m_config = { settings.value("baseNumber", "").toString(),
                  settings.value("host", "").toString(),
                  settings.value("path", "").toString(),
                  settings.value("user", "").toString(),
                  settings.value("port", useSSL ? 443 : 80).toInt(),
                  useSSL,
-                 settings.value("multigetBatchSize", 100).toInt() };
+                 multigetBatchSize };
 
     init();
     run();
