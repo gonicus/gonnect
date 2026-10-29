@@ -12,6 +12,8 @@ if(ENABLE_DAV)
       CardDAVAddressBookFeederConfig.h
     )
 
+    set_source_files_properties(CardDAVAddressBookFeeder.cpp PROPERTIES COMPILE_OPTIONS "$<$<CXX_COMPILER_ID:GNU>:-Wno-subobject-linkage>")
+
     target_include_directories(CardDAVAddressBookFactory
       PRIVATE
         ${PROJECT_SOURCE_DIR}/src/contacts
