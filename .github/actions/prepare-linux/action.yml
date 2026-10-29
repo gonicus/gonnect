@@ -62,7 +62,7 @@ runs:
       if: inputs.conan == 'true'
       uses: conan-io/setup-conan@5db0275587014d13a5ca698db681ce4782a6e052 # v1
       with:
-        version: 2.33.0
+        version: 2.34.0
         cache_packages: true
 
     - name: Install Conan dependencies
