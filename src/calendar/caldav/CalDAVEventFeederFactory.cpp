@@ -42,5 +42,6 @@ IDateEventFeeder *CalDAVEventFeederFactory::createFeeder(
             { settingsGroup, settings.value("host").toString(), settings.value("path").toString(),
               settings.value("user").toString(), settings.value("port", 0).toInt(),
               settings.value("useSSL", true).toBool(), settings.value("interval", 300000).toInt(),
-              currentTime, timeRangeStart, timeRangeEnd, retryCount, retryInterval });
+              currentTime, timeRangeStart, timeRangeEnd, retryCount, retryInterval,
+              settings.value("multigetBatchSize", 100).toUInt() });
 }

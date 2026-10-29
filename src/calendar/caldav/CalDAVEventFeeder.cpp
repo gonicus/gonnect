@@ -162,7 +162,7 @@ QCoro::Task<> CalDAVEventFeeder::run()
         }
 
         // Make consequitive calendar-multiget requests because batch size is usually limited
-        constexpr qsizetype batchSize = 100;
+        const uint batchSize = m_config.multigetBatchSize;
 
         uint successCount = 0;
         uint failCount = 0;
