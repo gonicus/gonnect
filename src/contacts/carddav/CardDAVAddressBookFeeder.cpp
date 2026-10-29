@@ -54,10 +54,6 @@ void CardDAVAddressBookFeeder::resetContacts()
     AddressBook::instance().removeContactsBySource(m_group);
 }
 
-// Wsubobject-linkage creates an error when using coroutines with certain gcc versions (GCC Bug
-// #105595) see https://gcc.gnu.org/bugzilla/show_bug.cgi?id=105595
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wsubobject-linkage"
 QCoro::Task<> CardDAVAddressBookFeeder::run()
 {
     m_isProcessing = true;
@@ -218,8 +214,6 @@ CardDAVAddressBookFeeder::syncContactsCollection(const QString &collectionPath, 
 
     co_return anyBatchFailed ? WebDavSyncResult::OtherError : WebDavSyncResult::Success;
 }
-
-#pragma GCC diagnostic pop
 
 void CardDAVAddressBookFeeder::processVcard(QByteArray data, const QString &uuid,
                                             const QDateTime &modifiedDate)

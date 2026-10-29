@@ -24,6 +24,8 @@ if(ENABLE_DAV)
       CalDAVEventFeederConfig.h
     )
 
+    set_source_files_properties(CalDAVEventFeeder.cpp PROPERTIES COMPILE_OPTIONS "$<$<CXX_COMPILER_ID:GNU>:-Wno-subobject-linkage>")
+
     target_include_directories(CalDAVEventFeederFactory
       PRIVATE
         ${PROJECT_SOURCE_DIR}/src
