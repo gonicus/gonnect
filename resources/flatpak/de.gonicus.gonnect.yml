@@ -1,9 +1,9 @@
 id: de.gonicus.gonnect
 runtime: org.kde.Platform
-runtime-version: '6.11'
+runtime-version: '6.12'
 sdk: org.kde.Sdk
 base: io.qt.qtwebengine.BaseApp
-base-version: '6.11'
+base-version: '6.12'
 command: gonnect
 
 add-extensions:
@@ -177,21 +177,6 @@ modules:
           stable-only: true
           project-id: 2551
           url-template: https://www.openldap.org/software/download/OpenLDAP/openldap-release/openldap-${major}.${minor}.${patch}.tgz
-
-  - name: qtwebdav
-    buildsystem: cmake-ninja
-    config-opts:
-      - -DBUILD_WITH_QT6=ON
-    sources:
-      - type: git
-        url: https://github.com/PikachuHy/QtWebDAV.git
-        commit: ac39687b8ae16118d385d3694e900becd108a0f2
-      - type: patch
-        path: patches/qtwebdav-cmake.patch
-      - type: patch
-        path: patches/qtwebdav-ssl-certificates.patch
-      - type: patch
-        path: patches/qtwebdav-fix-collection.patch
 
   - name: qtkeychain
     buildsystem: cmake-ninja
@@ -377,9 +362,6 @@ modules:
       - -DCMAKE_UNITY_BUILD=ON
       - -DCMAKE_OPTIMIZE_DEPENDENCIES=ON
       - -DENABLE_GOW_001=ON
-      - -DENABLE_GOW_002=ON
-      - -DENABLE_GOW_004=ON
-      - -DENABLE_GOW_005=ON
       - -DENABLE_PCH=ON
     sources:
       - type: dir
