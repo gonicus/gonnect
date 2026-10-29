@@ -163,6 +163,7 @@ CalDAVEventFeeder::syncCalendarCollection(const QString &collectionPath, int dep
         co_return WebDavSyncResult::OtherError;
     }
 
+    const QUrl requestedUrl = reply->url();
     const auto items = WebDavPropfindParser{}.parseMultiStatus(reply->readAll());
     reply->deleteLater();
 
@@ -225,7 +226,13 @@ CalDAVEventFeeder::syncCalendarCollection(const QString &collectionPath, int dep
 
     // Descent one level in tree
     if (depth == 0) {
+        const QString requestedPath = requestedUrl.adjusted(QUrl::StripTrailingSlash).path();
+
         for (const auto &item : items) {
+            if (QUrl(item.href).adjusted(QUrl::StripTrailingSlash).path() == requestedPath) {
+                continue; // Self entry - alread processd
+            }
+
             if (item.isCollection() && item.isCalendarCollection()
                 && (!item.hasProperty("urn:ietf:params:xml:ns:caldav",
                                       "supported-calendar-component-set")

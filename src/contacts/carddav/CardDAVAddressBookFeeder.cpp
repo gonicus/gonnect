@@ -129,6 +129,7 @@ CardDAVAddressBookFeeder::syncContactsCollection(const QString &collectionPath, 
         co_return WebDavSyncResult::OtherError;
     }
 
+    const QUrl requestedUrl = reply->url();
     const auto items = WebDavPropfindParser{}.parseMultiStatus(reply->readAll());
     reply->deleteLater();
 
@@ -200,7 +201,13 @@ CardDAVAddressBookFeeder::syncContactsCollection(const QString &collectionPath, 
 
     // Descent one level in tree
     if (depth == 0) {
+        const QString requestedPath = requestedUrl.adjusted(QUrl::StripTrailingSlash).path();
+
         for (const auto &item : items) {
+            if (QUrl(item.href).adjusted(QUrl::StripTrailingSlash).path() == requestedPath) {
+                continue; // Self entry - already processed
+            }
+
             if (item.isCollection() && item.isContactCollection()) {
                 const auto childResult = co_await syncContactsCollection(item.href, depth + 1);
                 if (childResult == WebDavSyncResult::AuthRequired) {
