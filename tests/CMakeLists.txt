@@ -167,6 +167,28 @@ target_link_libraries(usbTest
         Qt6::Test
 )
 
+qt_add_executable(webdavPropfindParserTest
+    WebDavPropfinderParser.test.cpp
+    WebDavPropfinderParser.test.h
+    ${PROJECT_SOURCE_DIR}/src/webdav/WebDavPropfindParser.cpp
+    ${PROJECT_SOURCE_DIR}/src/webdav/WebDavPropfindParser.h
+    ${PROJECT_SOURCE_DIR}/src/webdav/WebDavItem.cpp
+    ${PROJECT_SOURCE_DIR}/src/webdav/WebDavItem.h
+)
+
+add_test(NAME webdavPropfindParserTest COMMAND webdavPropfindParserTest)
+
+target_include_directories(webdavPropfindParserTest
+    PRIVATE
+        ${PROJECT_SOURCE_DIR}/src
+        ${PROJECT_SOURCE_DIR}/src/webdav
+)
+target_link_libraries(webdavPropfindParserTest
+    PRIVATE
+        Qt6::Core
+        Qt6::Test
+)
+
 qt_add_executable(chatMessageTransformerTest
     ChatMessageTransformer.test.cpp
     ChatMessageTransformer.test.h

@@ -18,4 +18,5 @@ struct CalDAVEventFeederConfig
     QDateTime timeRangeEnd;
     int retryCount;
     int retryInterval;
+    uint multigetBatchSize = 100;
 };

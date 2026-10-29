@@ -37,7 +37,7 @@ Window {
     }
 
     function snapWindowSize() {
-        if (pixelRatio.quantum <= 1 || control.isMaximized) {
+        if (!control.resizable || pixelRatio.quantum <= 1 || control.isMaximized) {
             return
         }
 

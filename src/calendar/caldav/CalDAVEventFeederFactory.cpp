@@ -37,10 +37,18 @@ IDateEventFeeder *CalDAVEventFeederFactory::createFeeder(
     ReadOnlyConfdSettings settings;
     settings.beginGroup(settingsGroup);
 
+    uint multigetBatchSize = settings.value("multigetBatchSize", 100).toUInt();
+    if (multigetBatchSize < 1) {
+        qWarning() << "Invalid multigetBatchSize for" << settingsGroup
+                   << "- resetting to default of 100";
+        multigetBatchSize = 100;
+    }
+
     return new CalDAVEventFeeder(
             feederManager,
             { settingsGroup, settings.value("host").toString(), settings.value("path").toString(),
               settings.value("user").toString(), settings.value("port", 0).toInt(),
               settings.value("useSSL", true).toBool(), settings.value("interval", 300000).toInt(),
-              currentTime, timeRangeStart, timeRangeEnd, retryCount, retryInterval });
+              currentTime, timeRangeStart, timeRangeEnd, retryCount, retryInterval,
+              multigetBatchSize });
 }

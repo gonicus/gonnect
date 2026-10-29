@@ -1,13 +1,13 @@
 if(ENABLE_CSV)
     qt_add_plugin(CSVAddressBookFactory STATIC
       CLASS_NAME CSVAddressBookFactory
-    
+
       CSVAddressBookFactory.cpp
       CSVAddressBookFactory.h
       CSVFileAddressBookFeeder.cpp
       CSVFileAddressBookFeeder.h
     )
-    
+
     target_include_directories(CSVAddressBookFactory
       PRIVATE
         ${PROJECT_SOURCE_DIR}/src/contacts
@@ -18,8 +18,15 @@ if(ENABLE_CSV)
         ${PROJECT_SOURCE_DIR}
         ${PROJECT_BINARY_DIR}/src
     )
-    
-    target_link_libraries(CSVAddressBookFactory PRIVATE Qt6::Core Qt6::Gui Qt6::Quick)
+
+    target_link_libraries(CSVAddressBookFactory
+      PRIVATE
+        Qt6::Core
+        Qt6::Gui
+        Qt6::Quick
+        QCoro6::Core
+        QCoro6::Network
+    )
 
     set(CSV_ADDRESSBOOK_LIBRARIES CSVAddressBookFactory PARENT_SCOPE)
     set(CSV_ADDRESSBOOK_FACTORY CSVAddressBookFactory PARENT_SCOPE)

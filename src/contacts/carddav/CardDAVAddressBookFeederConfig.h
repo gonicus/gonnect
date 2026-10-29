@@ -10,4 +10,5 @@ struct CardDAVAddressBookFeederConfig
     QString user;
     int port;
     bool useSSL;
+    uint multigetBatchSize = 100;
 };
