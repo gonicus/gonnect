@@ -17,6 +17,7 @@ struct WebDavItem
 
     bool isCollection() const;
     bool isCalendarCollection() const;
+    bool isContactCollection() const;
     bool supportsComponent(const QString &componentName) const;
 
     QString name() const;

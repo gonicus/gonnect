@@ -4,6 +4,7 @@
 #include "IAddressBookFeeder.h"
 #include "Contact.h"
 #include "BlockInfo.h"
+#include "WebDavSyncResult.h"
 
 #include <QObject>
 #include <QCoroCore>
@@ -33,6 +34,7 @@ private:
     void init();
 
     QCoro::Task<> run();
+    QCoro::Task<WebDavSyncResult> syncContactsCollection(const QString &collectionPath, int depth);
 
     void processVcard(QByteArray data, const QString &uuid, const QDateTime &modifiedDate);
     void loadCachedData(const size_t hash);

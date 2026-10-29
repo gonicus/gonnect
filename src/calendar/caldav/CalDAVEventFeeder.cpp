@@ -111,12 +111,12 @@ QCoro::Task<> CalDAVEventFeeder::run()
 
         const auto result = co_await syncCalendarCollection("", 0, successCount, failCount);
 
-        if (result == SyncResult::AuthRequired) {
+        if (result == WebDavSyncResult::AuthRequired) {
             qCWarning(lcCalDAVEventFeeder) << "Failed to process CalDAV source: invalid password";
             forcePrompt = true;
             continue;
         }
-        if (result == SyncResult::OtherError) {
+        if (result == WebDavSyncResult::OtherError) {
             if (retriesLeft-- <= 0) {
                 ErrorBus::instance().addError(
                         tr("CalDAV source %1 repeatedly failed - retries exhausted")
@@ -141,7 +141,7 @@ QCoro::Task<> CalDAVEventFeeder::run()
     m_isRunning = false;
 }
 
-QCoro::Task<CalDAVEventFeeder::SyncResult>
+QCoro::Task<WebDavSyncResult>
 CalDAVEventFeeder::syncCalendarCollection(const QString &collectionPath, int depth,
                                           uint &successCount, uint &failCount)
 {
@@ -156,14 +156,14 @@ CalDAVEventFeeder::syncCalendarCollection(const QString &collectionPath, int dep
 
     if (reply->error() == QNetworkReply::AuthenticationRequiredError) {
         reply->deleteLater();
-        co_return SyncResult::AuthRequired;
+        co_return WebDavSyncResult::AuthRequired;
     }
 
     if (reply->error() != QNetworkReply::NoError) {
         qCWarning(lcCalDAVEventFeeder)
                 << "PROPFIND failed for" << collectionPath << ":" << reply->errorString();
         reply->deleteLater();
-        co_return SyncResult::OtherError;
+        co_return WebDavSyncResult::OtherError;
     }
 
     const auto items = WebDavPropfindParser{}.parseMultiStatus(reply->readAll());
@@ -192,7 +192,7 @@ CalDAVEventFeeder::syncCalendarCollection(const QString &collectionPath, int dep
         auto *multigetReply = co_await m_webdavClient->report(collectionPath, body);
         if (multigetReply->error() == QNetworkReply::AuthenticationRequiredError) {
             multigetReply->deleteLater();
-            co_return SyncResult::AuthRequired;
+            co_return WebDavSyncResult::AuthRequired;
         }
         if (multigetReply->error() != QNetworkReply::NoError) {
             qCWarning(lcCalDAVEventFeeder)
@@ -222,24 +222,24 @@ CalDAVEventFeeder::syncCalendarCollection(const QString &collectionPath, int dep
         }
     }
 
-    // Descent on level in tree
+    // Descent one level in tree
     if (depth == 0) {
         for (const auto &item : items) {
             if (item.isCollection() && item.isCalendarCollection()
                 && item.supportsComponent("VEVENT")) {
                 const auto childResult = co_await syncCalendarCollection(item.href, depth + 1,
                                                                          successCount, failCount);
-                if (childResult == SyncResult::AuthRequired) {
-                    co_return SyncResult::AuthRequired;
+                if (childResult == WebDavSyncResult::AuthRequired) {
+                    co_return WebDavSyncResult::AuthRequired;
                 }
-                if (childResult == SyncResult::OtherError) {
+                if (childResult == WebDavSyncResult::OtherError) {
                     anyBatchFailed = true;
                 }
             }
         }
     }
 
-    co_return anyBatchFailed ? SyncResult::OtherError : SyncResult::Success;
+    co_return anyBatchFailed ? WebDavSyncResult::OtherError : WebDavSyncResult::Success;
 }
 #pragma GCC diagnostic pop
 

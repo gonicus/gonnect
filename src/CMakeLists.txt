@@ -993,6 +993,7 @@ qt_add_qml_module(gonnect
         webdav/WebDavPropertyValue.h
         webdav/WebDavPropfindParser.h
         webdav/WebDavPropfindParser.cpp
+        webdav/WebDavSyncResult.h
 )
 
 qt_add_protobuf(gonnect

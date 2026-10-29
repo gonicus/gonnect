@@ -8,6 +8,7 @@
 #include "IDateEventFeeder.h"
 #include "DateEventFeederManager.h"
 #include "CalDAVEventFeederConfig.h"
+#include "WebDavSyncResult.h"
 
 #include <libical/ical.h>
 #include <libical/icalerror.h>
@@ -30,10 +31,8 @@ public:
 private:
     QCoro::Task<> run();
 
-    enum class SyncResult { Success, AuthRequired, OtherError };
-
-    QCoro::Task<SyncResult> syncCalendarCollection(const QString &collectionPath, int depth,
-                                                   uint &successCount, uint &failCount);
+    QCoro::Task<WebDavSyncResult> syncCalendarCollection(const QString &collectionPath, int depth,
+                                                         uint &successCount, uint &failCount);
 
     bool processResponse(const QByteArray &data, const QString &source);
     bool responseDataChanged(const QByteArray &data);

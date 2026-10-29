@@ -30,6 +30,18 @@ bool WebDavItem::isCalendarCollection() const
     return false;
 }
 
+bool WebDavItem::isContactCollection() const
+{
+    const auto resourceType = property("DAV:", "resourcetype");
+    for (const auto &child : std::as_const(resourceType.childElements)) {
+        if (child.namespaceUri == "urn:ietf:params:xml:ns:carddav"
+            && child.localName == "addressbook") {
+            return true;
+        }
+    }
+    return false;
+}
+
 bool WebDavItem::supportsComponent(const QString &componentName) const
 {
     const auto componentSet =
