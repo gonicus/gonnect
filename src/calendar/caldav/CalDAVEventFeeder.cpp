@@ -95,18 +95,21 @@ QCoro::Task<> CalDAVEventFeeder::run()
         }
 
         // Create WebDAV client
-        m_webdavClient = std::make_unique<WebDavClient>(WebDavClient::ConnectionConfig{
-                QUrl(QString("%1://%2:%3%4")
-                             .arg(m_config.useSSL ? "https" : "http", m_config.host,
-                                  QString::number(m_config.port), m_config.path)),
-                m_config.user, secret.secret });
+        const QUrl webdavUrl(QString("%1://%2:%3%4")
+                                     .arg(m_config.useSSL ? "https" : "http", m_config.host,
+                                          QString::number(m_config.port), m_config.path));
+        m_webdavClient = std::make_unique<WebDavClient>(
+                WebDavClient::ConnectionConfig{ webdavUrl, m_config.user, secret.secret });
+
+        qCDebug(lcCalDAVEventFeeder) << "Created WebDavClient with url" << webdavUrl.toString();
 
         // Get WebDAV root entry
-        auto *reply = co_await m_webdavClient->propfind("/", 1,
+        auto *reply = co_await m_webdavClient->propfind("", 1,
                                                         {
                                                                 { "D", "DAV:", "resourcetype" },
                                                                 { "D", "DAV:", "getetag" },
                                                                 { "D", "DAV:", "getlastmodified" },
+                                                                { "D", "DAV:", "displayname" },
                                                         });
 
         qCDebug(lcCalDAVEventFeeder) << "PROPFIND returned, error=" << reply->error();
@@ -163,8 +166,6 @@ QCoro::Task<> CalDAVEventFeeder::run()
                 if (responseDataChanged(data)) {
                     const bool success = processResponse(
                             data, QString("%1_%2").arg(m_config.source, item.name()));
-                    qCDebug(lcCalDAVEventFeeder)
-                            << "processResponse for" << item.name() << "-> success=" << success;
 
                     if (success) {
                         ++successCount;
