@@ -148,6 +148,7 @@ CardDAVAddressBookFeeder::syncContactsCollection(const QString &collectionPath, 
         const auto body = WebDavPropfindParser{}.buildMultigetBody(
                 "CARD", "urn:ietf:params:xml:ns:carddav", "addressbook-multiget",
                 { { "D", "DAV:", "getetag" },
+                  { "D", "DAV:", "getlastmodified" },
                   { "CARD", "urn:ietf:params:xml:ns:carddav", "address-data" } },
                 batch);
 
