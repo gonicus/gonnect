@@ -989,10 +989,12 @@ qt_add_qml_module(gonnect
         webdav/WebDavClient.cpp
         webdav/WebDavItem.h
         webdav/WebDavItem.cpp
+        webdav/WebDavMultiStatus.h
         webdav/WebDavPropertyRequest.h
         webdav/WebDavPropertyValue.h
         webdav/WebDavPropfindParser.h
         webdav/WebDavPropfindParser.cpp
+        webdav/WebDavSyncChanges.h
         webdav/WebDavSyncResult.h
 )
 

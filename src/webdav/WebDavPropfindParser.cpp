@@ -86,29 +86,82 @@ QByteArray WebDavPropfindParser::buildMultigetBody(const QString &rootPrefix,
     return body;
 }
 
+QByteArray
+WebDavPropfindParser::buildSyncCollectionBody(const QString &syncToken,
+                                              const QList<WebDavPropertyRequest> &properties)
+{
+    QHash<QString, QString> namespaces;
+    for (const auto &p : properties) {
+        namespaces.insert(p.prefix, p.namespaceUri);
+    }
+
+    QByteArray body =
+            R"(<?xml version="1.0" encoding="utf-8"?><D:sync-collection xmlns:D="DAV:")"_ba;
+
+    QHashIterator it(namespaces);
+    while (it.hasNext()) {
+        it.next();
+        if (it.key() == "D") {
+            continue;
+        }
+        body += QString(" xmlns:%1=\"%2\"").arg(it.key(), it.value()).toUtf8();
+    }
+
+    body += QString("><D:sync-token>%1</D:sync-token>").arg(syncToken.toHtmlEscaped()).toUtf8();
+    body += R"(<D:sync-level>1</D:sync-level><D:prop>)"_ba;
+
+    for (const auto &p : properties) {
+        body += QString("<%1:%2 />").arg(p.prefix, p.name).toUtf8();
+    }
+
+    body += R"(</D:prop></D:sync-collection>)"_ba;
+
+    return body;
+}
+
 QList<WebDavItem> WebDavPropfindParser::parseMultiStatus(const QByteArray &xmlData)
 {
+    return parseMultiStatusDocument(xmlData).items;
+}
 
-    QList<WebDavItem> items;
+WebDavMultiStatus WebDavPropfindParser::parseMultiStatusDocument(const QByteArray &xmlData)
+{
+    WebDavMultiStatus multiStatus;
     QXmlStreamReader reader(xmlData);
 
     // First element is <multistatus>
     if (!reader.readNextStartElement()) {
-        return items;
+        return multiStatus;
     }
 
-    // Every child is <response>
+    // Children are <response> elements and traling <sync-token> (for sync-collection)
     while (reader.readNextStartElement()) {
-        if (reader.namespaceUri() == QLatin1String("DAV:")
-            && reader.name() == QLatin1String("response")) {
-            items.append(parseResponse(reader));
+        const bool isDavNamespace = reader.namespaceUri() == QLatin1String("DAV:");
+
+        if (isDavNamespace && reader.name() == QLatin1String("response")) {
+            multiStatus.items.append(parseResponse(reader));
+        } else if (isDavNamespace && reader.name() == QLatin1String("sync-token")) {
+            multiStatus.syncToken = reader.readElementText().trimmed();
         } else {
             // Unknown element
             reader.skipCurrentElement();
         }
     }
 
-    return items;
+    return multiStatus;
+}
+
+bool WebDavPropfindParser::isInvalidSyncTokenError(const QByteArray &xmlData) const
+{
+    QXmlStreamReader reader(xmlData);
+    while (!reader.atEnd()) {
+        if (reader.readNext() == QXmlStreamReader::StartElement
+            && reader.namespaceUri() == QLatin1String("DAV:")
+            && reader.name() == QLatin1String("valid-sync-token")) {
+            return true;
+        }
+    }
+    return false;
 }
 
 WebDavPropertyValue WebDavPropfindParser::parsePropertyValue(QXmlStreamReader &reader) const
