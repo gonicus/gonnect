@@ -998,6 +998,8 @@ qt_add_qml_module(gonnect
         webdav/WebDavSyncResult.h
 )
 
+set_source_files_properties(webdav/WebDavClient.cpp PROPERTIES COMPILE_OPTIONS "$<$<CXX_COMPILER_ID:GNU>:-Wno-subobject-linkage>")
+
 qt_add_protobuf(gonnect
     PROTO_FILES
         ../external/protos/chat.proto
