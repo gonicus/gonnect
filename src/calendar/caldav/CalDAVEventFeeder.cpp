@@ -148,6 +148,7 @@ CalDAVEventFeeder::syncCalendarCollection(const QString &collectionPath, int dep
                     { "D", "DAV:", "resourcetype" },
                     { "D", "DAV:", "getetag" },
                     { "D", "DAV:", "getlastmodified" },
+                    { "D", "DAV:", "sync-token" },
                     { "C", "urn:ietf:params:xml:ns:caldav", "supported-calendar-component-set" },
             });
 
@@ -163,7 +164,7 @@ CalDAVEventFeeder::syncCalendarCollection(const QString &collectionPath, int dep
         co_return WebDavSyncResult::OtherError;
     }
 
-    const QUrl requestedUrl = reply->url();
+    const QString requestedPath = WebDavItem::normalizedPath(reply->url());
     const auto items = WebDavPropfindParser{}.parseMultiStatus(reply->readAll());
     reply->deleteLater();
 
@@ -172,18 +173,126 @@ CalDAVEventFeeder::syncCalendarCollection(const QString &collectionPath, int dep
         m_concreteSources.append(concreteSource);
     }
 
+    // Non-empty sync-token indicates that sync-collection is supported
+    QString serverSyncToken;
+
+    const auto selfEntry = std::ranges::find_if(items, [&requestedPath](const WebDavItem &item) {
+        return item.normalizedPath() == requestedPath;
+    });
+
+    if (selfEntry == items.cend()) {
+        QStringList receivedPaths;
+        for (const auto &item : items) {
+            receivedPaths.append(item.normalizedPath());
+        }
+        qCWarning(lcCalDAVEventFeeder) << "No self entry for" << requestedPath
+                                       << "in PROPFIND response - received" << receivedPaths;
+    } else if (!selfEntry->isCalendarCollection()) {
+        qCDebug(lcCalDAVEventFeeder)
+                << requestedPath << "is no calendar (e.g. calendar home) - no sync-collection";
+    } else {
+        serverSyncToken = selfEntry->syncToken();
+        qCDebug(lcCalDAVEventFeeder)
+                << "Calendar" << requestedPath
+                << (serverSyncToken.isEmpty() ? "provides no sync-token - using full sync"
+                                              : "supports sync-collection");
+    }
+
+    // Build href list
     QStringList hrefsToFetch;
+    QSet<QString> existingPaths;
     for (const auto &item : items) {
         if (!item.isCollection()) {
             hrefsToFetch.append(item.href);
+            existingPaths.insert(item.normalizedPath());
         }
     }
 
+    const auto storedSyncToken = m_collectionStates.value(requestedPath).syncToken;
+    bool needsFullSync = serverSyncToken.isEmpty() || storedSyncToken.isEmpty();
+    WebDavSyncResult result = WebDavSyncResult::Success;
+
+    if (!needsFullSync && storedSyncToken == serverSyncToken) {
+        qCDebug(lcCalDAVEventFeeder) << "Calendar" << requestedPath << "is unchanged";
+
+    } else if (!needsFullSync) {
+        result = co_await syncCalendarChanges(collectionPath, requestedPath, storedSyncToken);
+
+        if (result == WebDavSyncResult::InvalidSyncToken
+            || result == WebDavSyncResult::OtherError) {
+            qCWarning(lcCalDAVEventFeeder) << "sync-collection for" << requestedPath
+                                           << "failed - falling back to full sync";
+            needsFullSync = true;
+        }
+    }
+
+    if (needsFullSync) {
+        pruneCalendarData(requestedPath, existingPaths);
+        result = co_await fetchCalendarData(collectionPath, requestedPath, hrefsToFetch);
+    }
+
+    if (result == WebDavSyncResult::AuthRequired) {
+        co_return WebDavSyncResult::AuthRequired;
+    }
+
+    bool anyBatchFailed = result != WebDavSyncResult::Success;
+
+    // Updated saved sync token
+    if (!anyBatchFailed && m_collectionStates.value(requestedPath).syncToken != serverSyncToken) {
+        m_collectionStates[requestedPath].syncToken = serverSyncToken;
+        qCDebug(lcCalDAVEventFeeder)
+                << "Sync token for" << requestedPath << "is now" << serverSyncToken;
+    }
+
+    processCalendarData(requestedPath, concreteSource, successCount, failCount);
+
+    // No token - no state
+    if (serverSyncToken.isEmpty()) {
+        m_collectionStates.remove(requestedPath);
+    }
+
+    // Descent one level in tree
+    if (depth == 0) {
+        QSet<QString> knownCollectionPaths = { requestedPath };
+
+        for (const auto &item : items) {
+            if (item.normalizedPath() == requestedPath) {
+                continue; // Self entry - alread processd
+            }
+
+            if (item.isCollection() && item.isCalendarCollection()
+                && (!item.hasProperty("urn:ietf:params:xml:ns:caldav",
+                                      "supported-calendar-component-set")
+                    || item.supportsComponent("VEVENT"))) {
+
+                knownCollectionPaths.insert(item.normalizedPath());
+
+                const auto childResult = co_await syncCalendarCollection(item.href, depth + 1,
+                                                                         successCount, failCount);
+                if (childResult == WebDavSyncResult::AuthRequired) {
+                    co_return WebDavSyncResult::AuthRequired;
+                }
+                if (childResult == WebDavSyncResult::OtherError) {
+                    anyBatchFailed = true;
+                }
+            }
+        }
+
+        pruneVanishedCollections(knownCollectionPaths);
+    }
+
+    co_return anyBatchFailed ? WebDavSyncResult::OtherError : WebDavSyncResult::Success;
+}
+
+QCoro::Task<WebDavSyncResult> CalDAVEventFeeder::fetchCalendarData(const QString &collectionPath,
+                                                                   const QString &requestedPath,
+                                                                   const QStringList &hrefs)
+{
     bool anyBatchFailed = false;
     const auto batchSize = m_config.multigetBatchSize;
 
-    for (qsizetype offset = 0; offset < hrefsToFetch.size(); offset += batchSize) {
-        const auto batch = hrefsToFetch.mid(offset, batchSize);
+    for (qsizetype offset = 0; offset < hrefs.size(); offset += batchSize) {
+        const auto batch = hrefs.mid(offset, batchSize);
 
         const auto body = WebDavPropfindParser{}.buildMultigetBody(
                 "C", "urn:ietf:params:xml:ns:caldav", "calendar-multiget",
@@ -210,47 +319,89 @@ CalDAVEventFeeder::syncCalendarCollection(const QString &collectionPath, int dep
         multigetReply->deleteLater();
 
         qCDebug(lcCalDAVEventFeeder) << "Received calendar-multiget response" << offset << "to"
-                                     << std::min(offset + batchSize, hrefsToFetch.size());
+                                     << std::min(offset + batchSize, hrefs.size());
 
+        auto &calendarData = m_collectionStates[requestedPath].calendarData;
         for (const auto &result : results) {
-            const auto calendarData =
+            const auto data =
                     result.property("urn:ietf:params:xml:ns:caldav", "calendar-data").text.toUtf8();
-            if (calendarData.isEmpty() || !responseDataChanged(calendarData)) {
-                continue;
-            }
-
-            const bool success = processResponse(calendarData, concreteSource);
-            success ? ++successCount : ++failCount;
-        }
-    }
-
-    // Descent one level in tree
-    if (depth == 0) {
-        const QString requestedPath = requestedUrl.adjusted(QUrl::StripTrailingSlash).path();
-
-        for (const auto &item : items) {
-            if (QUrl(item.href).adjusted(QUrl::StripTrailingSlash).path() == requestedPath) {
-                continue; // Self entry - alread processd
-            }
-
-            if (item.isCollection() && item.isCalendarCollection()
-                && (!item.hasProperty("urn:ietf:params:xml:ns:caldav",
-                                      "supported-calendar-component-set")
-                    || item.supportsComponent("VEVENT"))) {
-
-                const auto childResult = co_await syncCalendarCollection(item.href, depth + 1,
-                                                                         successCount, failCount);
-                if (childResult == WebDavSyncResult::AuthRequired) {
-                    co_return WebDavSyncResult::AuthRequired;
-                }
-                if (childResult == WebDavSyncResult::OtherError) {
-                    anyBatchFailed = true;
-                }
+            if (!data.isEmpty()) {
+                calendarData.insert(result.normalizedPath(), data);
             }
         }
     }
 
     co_return anyBatchFailed ? WebDavSyncResult::OtherError : WebDavSyncResult::Success;
+}
+
+QCoro::Task<WebDavSyncResult> CalDAVEventFeeder::syncCalendarChanges(const QString &collectionPath,
+                                                                     const QString &requestedPath,
+                                                                     const QString &syncToken)
+{
+    const auto changes = co_await m_webdavClient->syncCollection(collectionPath, syncToken);
+    if (changes.result != WebDavSyncResult::Success) {
+        co_return changes.result;
+    }
+
+    qCDebug(lcCalDAVEventFeeder) << "sync-collection for" << requestedPath << "reported"
+                                 << changes.changedHrefs.size() << "chanted and"
+                                 << changes.removedPaths.size() << "removed resources";
+
+    auto &calendarData = m_collectionStates[requestedPath].calendarData;
+    for (const auto &path : std::as_const(changes.removedPaths)) {
+        calendarData.remove(path);
+    }
+
+    co_return co_await fetchCalendarData(collectionPath, requestedPath,
+                                         changes.changedHrefs.values());
+}
+
+void CalDAVEventFeeder::processCalendarData(const QString &requestedPath,
+                                            const QString &concreteSource, uint &successCount,
+                                            uint &failCount)
+{
+
+    const auto calendarData = m_collectionStates.value(requestedPath).calendarData;
+
+    for (const auto &data : calendarData) {
+        if (!responseDataChanged(data)) {
+            continue;
+        }
+
+        const bool success = processResponse(data, concreteSource);
+        success ? ++successCount : ++failCount;
+    }
+}
+
+void CalDAVEventFeeder::pruneCalendarData(const QString &requestedPath,
+                                          const QSet<QString> &existingPaths)
+{
+    const auto it = m_collectionStates.find(requestedPath);
+    if (it == m_collectionStates.end()) {
+        return;
+    }
+
+    const auto removedCount = it->calendarData.removeIf(
+            [&existingPaths](QHash<QString, QByteArray>::iterator dataIt) {
+                return !existingPaths.contains(dataIt.key());
+            });
+
+    if (removedCount) {
+        qCDebug(lcCalDAVEventFeeder)
+                << "Pruned" << removedCount << "resources from state of" << requestedPath;
+    }
+}
+
+void CalDAVEventFeeder::pruneVanishedCollections(const QSet<QString> &knownCollectionPaths)
+{
+    const auto removedCount = m_collectionStates.removeIf(
+            [&knownCollectionPaths](QHash<QString, CollectionState>::iterator it) {
+                return !knownCollectionPaths.contains(it.key());
+            });
+
+    if (removedCount) {
+        qCDebug(lcCalDAVEventFeeder) << "Dropped state of" << removedCount << "vanished calendars";
+    }
 }
 
 bool CalDAVEventFeeder::processResponse(const QByteArray &data, const QString &source)
@@ -335,9 +486,10 @@ bool CalDAVEventFeeder::processResponse(const QByteArray &data, const QString &s
 
                 icalrecur_iterator *recurrenceIter = icalrecur_iterator_new(rrule, dtstart);
                 if (recurrenceIter) {
-                    // INFO: Since libical v3.0, a start time limit can be specified for recurrence
-                    // iterators in order to reduce parsing overhead, i.e. for old events that are
-                    // irrelevant to us. This only works for RRULE's that do not contain COUNT.
+                    // INFO: Since libical v3.0, a start time limit can be specified for
+                    // recurrence iterators in order to reduce parsing overhead, i.e. for old
+                    // events that are irrelevant to us. This only works for RRULE's that do not
+                    // contain COUNT.
                     // https://github.com/libical/libical/blob/3.0/src/libical/icalrecur.h#L291
                     if (rrule.count == 0) {
                         QDateTime timeRangeStart = m_config.timeRangeStart.toUTC();
