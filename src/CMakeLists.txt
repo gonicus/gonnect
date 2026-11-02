@@ -989,12 +989,16 @@ qt_add_qml_module(gonnect
         webdav/WebDavClient.cpp
         webdav/WebDavItem.h
         webdav/WebDavItem.cpp
+        webdav/WebDavMultiStatus.h
         webdav/WebDavPropertyRequest.h
         webdav/WebDavPropertyValue.h
         webdav/WebDavPropfindParser.h
         webdav/WebDavPropfindParser.cpp
+        webdav/WebDavSyncChanges.h
         webdav/WebDavSyncResult.h
 )
+
+set_source_files_properties(webdav/WebDavClient.cpp PROPERTIES COMPILE_OPTIONS "$<$<CXX_COMPILER_ID:GNU>:-Wno-subobject-linkage>")
 
 qt_add_protobuf(gonnect
     PROTO_FILES

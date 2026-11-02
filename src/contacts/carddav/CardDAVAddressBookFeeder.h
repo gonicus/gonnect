@@ -7,6 +7,7 @@
 #include "WebDavSyncResult.h"
 
 #include <QObject>
+#include <QSet>
 #include <QCoroCore>
 
 class AddressBook;
@@ -34,11 +35,25 @@ private:
     void init();
 
     QCoro::Task<> run();
-    QCoro::Task<WebDavSyncResult> syncContactsCollection(const QString &collectionPath, int depth);
+    [[nodiscard]] QCoro::Task<WebDavSyncResult>
+    syncContactsCollection(const QString &collectionPath, int depth);
+    /// If hrefsAreKnownChanged is true every card is parsed again (skipped cache heuristics)
+    [[nodiscard]] QCoro::Task<WebDavSyncResult> fetchContacts(const QString &collectionPath,
+                                                              const QStringList &hrefs,
+                                                              bool hrefsAreKnownChanged = false);
+    [[nodiscard]] QCoro::Task<WebDavSyncResult> syncCollection(const QString &collectionPath,
+                                                               const QString &requestedPath,
+                                                               const QString &syncToken);
+
+    void readdCachedContacts(const QString &collectionPath,
+                             const QSet<QString> &excludedPaths = {});
+    void pruneCachedContacts(const QString &collectionPath, const QSet<QString> &existingPaths);
+    void pruneVanishedCollections(const QSet<QString> &knownCollectionPaths);
 
     void processVcard(QByteArray data, const QString &uuid, const QDateTime &modifiedDate);
     void loadCachedData(const size_t hash);
     QString cacheFilePath(const size_t hash, bool createPath = false);
+    void scheduleCacheWrite();
     void processPhotoProperty(const QString &id, const QByteArray &data,
                               const QDateTime &modifiedDate) const;
 
@@ -51,6 +66,9 @@ private:
     QTimer m_cacheWriteTimer;
     QHash<QString, Contact *> m_cachedContacts;
     QHash<QString, QDateTime> m_ignoredIds;
+
+    /// Normalized collection path -> DAV:sync-token
+    QHash<QString, QString> m_syncTokens;
 
     QString m_group;
     BlockInfo m_blockInfo;

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "WebDavItem.h"
 #include "WebDavPropertyRequest.h"
 #include "WebDavPropfindParser.h"
+#include "WebDavSyncChanges.h"
 
 #include <QNetworkAccessManager>
 #include <QObject>
@@ -33,6 +33,10 @@ public:
 
     [[nodiscard]] QCoro::Task<QNetworkReply *> report(const QString &path, const QByteArray &body,
                                                       int depth = 0);
+
+    /// Changes via sync-collection. Empty token requests all (initial sync).
+    [[nodiscard]] QCoro::Task<WebDavSyncChanges> syncCollection(const QString &path,
+                                                                QString syncToken);
 
 private Q_SLOTS:
     void onAuthenticationRequired(QNetworkReply *reply, QAuthenticator *authenticator);
