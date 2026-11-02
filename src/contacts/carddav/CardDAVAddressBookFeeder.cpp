@@ -179,6 +179,10 @@ CardDAVAddressBookFeeder::syncContactsCollection(const QString &collectionPath, 
                     << "Sync token for" << requestedPath << "was rejected - doing full sync";
             m_syncTokens.remove(requestedPath);
             needsFullSync = true;
+        } else if (result == WebDavSyncResult::OtherError) {
+            qCWarning(lcCardDAVAddressBookFeeder)
+                    << "sync-collection for" << requestedPath << "failed - using cached contacts";
+            readdCachedContacts(requestedPath);
         }
     }
 

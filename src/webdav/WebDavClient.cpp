@@ -109,6 +109,10 @@ QCoro::Task<WebDavSyncChanges> WebDavClient::syncCollection(const QString &path,
         bool isTruncated = false;
 
         for (const auto &item : std::as_const(multiStatus.items)) {
+            if (item.href.isEmpty()) {
+                continue;
+            }
+
             const auto itemPath = item.normalizedPath();
 
             if (itemPath == collectionPath) {
@@ -119,13 +123,14 @@ QCoro::Task<WebDavSyncChanges> WebDavClient::syncCollection(const QString &path,
             if (item.httpStatus == 404) {
                 changes.changedHrefs.remove(itemPath);
                 changes.removedPaths.insert(itemPath);
-            } else if (item.httpStatus >= 200 && item.httpStatus < 300) {
+            } else {
                 changes.removedPaths.remove(itemPath);
                 changes.changedHrefs.insert(itemPath, item.href);
             }
         }
 
         if (!isTruncated) {
+            changes.syncToken = multiStatus.syncToken;
             co_return changes;
         }
 

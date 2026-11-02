@@ -134,7 +134,7 @@ WebDavMultiStatus WebDavPropfindParser::parseMultiStatusDocument(const QByteArra
         return multiStatus;
     }
 
-    // Children are <response> elements and traling <sync-token> (for sync-collection)
+    // Children are <response> elements and trailing <sync-token> (for sync-collection)
     while (reader.readNextStartElement()) {
         const bool isDavNamespace = reader.namespaceUri() == QLatin1String("DAV:");
 
