@@ -130,7 +130,6 @@ QCoro::Task<WebDavSyncChanges> WebDavClient::syncCollection(const QString &path,
         }
 
         if (!isTruncated) {
-            changes.syncToken = multiStatus.syncToken;
             co_return changes;
         }
 
