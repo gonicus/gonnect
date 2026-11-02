@@ -23,4 +23,11 @@ struct WebDavItem
 
     QString name() const;
     QDateTime lastModified() const;
+    QString syncToken() const;
+
+    // Canonical path/url
+    QString normalizedPath() const;
+    static QString normalizedPath(const QUrl &url);
+
+    static QString collectionPathOf(const QString &path);
 };

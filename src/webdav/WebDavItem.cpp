@@ -1,6 +1,8 @@
 #include "WebDavItem.h"
 
 #include <QUrl>
+#include <QLocale>
+#include <QTimeZone>
 
 WebDavPropertyValue WebDavItem::property(const QString &namespaceUri, const QString &name) const
 {
@@ -67,5 +69,35 @@ QString WebDavItem::name() const
 
 QDateTime WebDavItem::lastModified() const
 {
-    return QDateTime::fromString(property("DAV:", "getlastmodified").text, Qt::RFC2822Date);
+    // RFC 1123 date string (according to RFC 4918 sec. 15.7)
+    const auto text = property("DAV:", "getlastmodified").text.trimmed();
+    auto dateTime = QLocale::c().toDateTime(text, "ddd, dd MMM yyyy HH:mm:ss 'GMT'");
+    if (dateTime.isValid()) {
+        dateTime.setTimeZone(QTimeZone::UTC);
+        return dateTime;
+    }
+
+    // Fallback for date string with numeric zone instead of "GMT"
+    return QDateTime::fromString(text, Qt::RFC2822Date);
+}
+
+QString WebDavItem::syncToken() const
+{
+    return property("DAV:", "sync-token").text.trimmed();
+}
+
+QString WebDavItem::normalizedPath() const
+{
+    return normalizedPath(QUrl(href));
+}
+
+QString WebDavItem::normalizedPath(const QUrl &url)
+{
+    return url.adjusted(QUrl::NormalizePathSegments | QUrl::StripTrailingSlash)
+            .path(QUrl::FullyDecoded);
+}
+
+QString WebDavItem::collectionPathOf(const QString &path)
+{
+    return path.left(path.lastIndexOf('/'));
 }

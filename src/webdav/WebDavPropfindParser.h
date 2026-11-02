@@ -2,6 +2,7 @@
 
 #include "WebDavItem.h"
 #include "WebDavPropertyRequest.h"
+#include "WebDavMultiStatus.h"
 
 #include <QByteArray>
 #include <QList>
@@ -19,7 +20,12 @@ public:
                                  const QString &rootElementName,
                                  const QList<WebDavPropertyRequest> &properties,
                                  const QStringList &hrefs);
+    QByteArray buildSyncCollectionBody(const QString &syncToken,
+                                       const QList<WebDavPropertyRequest> &properties);
+
     QList<WebDavItem> parseMultiStatus(const QByteArray &xmlData);
+    WebDavMultiStatus parseMultiStatusDocument(const QByteArray &xmlData);
+    bool isInvalidSyncTokenError(const QByteArray &xmlData) const;
 
 private:
     WebDavPropertyValue parsePropertyValue(QXmlStreamReader &reader) const;
