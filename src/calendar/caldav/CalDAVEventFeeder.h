@@ -16,6 +16,7 @@
 #include <libical/icalerror.h>
 
 class WebDavClient;
+struct WebDavItem;
 
 class CalDAVEventFeeder : public QObject, public IDateEventFeeder
 {
@@ -43,6 +44,8 @@ private:
     [[nodiscard]] QCoro::Task<WebDavSyncResult>
     syncCalendarCollection(const QString &collectionPath, int depth, uint &successCount,
                            uint &failCount);
+    [[nodiscard]] QCoro::Task<WebDavSyncResult>
+    syncChildCalendar(const WebDavItem &item, int depth, uint &successCount, uint &failCount);
     [[nodiscard]] QCoro::Task<WebDavSyncResult> fetchCalendarData(const QString &collectionPath,
                                                                   const QString &requestedPath,
                                                                   const QStringList &hrefs);
@@ -50,6 +53,7 @@ private:
                                                                     const QString &requestedPath,
                                                                     const QString &syncToken);
 
+    QString registerConcreteSource(const QString &collectionPath);
     void processCalendarData(const QString &requestedPath, const QString &concreteSource,
                              uint &successCount, uint &failCount);
     void pruneCalendarData(const QString &requestedPath, const QSet<QString> &existingPaths);
