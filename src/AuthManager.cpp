@@ -2,6 +2,7 @@
 #include "ReadOnlyConfdSettings.h"
 #include "Credentials.h"
 #include "ErrorBus.h"
+#include "CertHelper.h"
 
 #include <QtNetworkAuth/QtNetworkAuth>
 #include <QLoggingCategory>
@@ -44,7 +45,7 @@ void AuthManager::init()
     if (!settings.value("generic/verifyServer", true).toBool()) {
         sslConfig.setPeerVerifyMode(QSslSocket::PeerVerifyMode::VerifyNone);
     }
-    sslConfig.addCaCertificates(sslCAs());
+    sslConfig.addCaCertificates(CertHelper::instance().caCerts());
     m_reqFactory.setSslConfiguration(sslConfig);
 
     settings.beginGroup("jitsi");
@@ -315,30 +316,6 @@ QString AuthManager::userUid() const
     return qgetenv("LOGNAME");
 }
 
-const QList<QSslCertificate> &AuthManager::sslCAs()
-{
-    if (!m_isCAsInitialized) {
-        m_isCAsInitialized = true;
-
-        ReadOnlyConfdSettings settings;
-        const auto pathList = settings.value("generic/caFiles").toStringList();
-
-        for (const auto &path : pathList) {
-            QFile file(path);
-            if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-                qCCritical(lcAuthManager) << "Unable to read CA file" << path;
-                continue;
-            }
-
-            QSslCertificate cert(file.readAll());
-            file.close();
-
-            m_cas.append(cert);
-        }
-    }
-    return m_cas;
-}
-
 void AuthManager::authenticateJitsiImpl(const QString &roomName)
 {
     setIsWaitingForAuth(true);
@@ -413,7 +390,7 @@ void AuthManager::authenticateJitsiImpl(const QString &roomName)
     if (!settings.value("generic/verifyServer", true).toBool()) {
         sslConfig.setPeerVerifyMode(QSslSocket::PeerVerifyMode::VerifyNone);
     }
-    sslConfig.addCaCertificates(sslCAs());
+    sslConfig.addCaCertificates(CertHelper::instance().caCerts());
     request.setSslConfiguration(sslConfig);
 
     QNetworkReply *reply = manager->get(request);

@@ -14,12 +14,10 @@ class QtKeychain(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_conan_qt": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_conan_qt": False,
     }
 
     def export_sources(self):
@@ -31,10 +29,6 @@ class QtKeychain(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-
-    def requirements(self):
-        if self.options.with_conan_qt:
-            self.requires("qt/6.10.1")
 
     def layout(self):
         cmake_layout(self)
