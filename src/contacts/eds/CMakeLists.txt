@@ -4,13 +4,13 @@ if(ENABLE_EDS)
 
     qt_add_plugin(EDSAddressBookFactory STATIC
       CLASS_NAME EDSAddressBookFactory
-    
+
       EDSAddressBookFactory.cpp
       EDSAddressBookFactory.h
       EDSAddressBookFeeder.cpp
       EDSAddressBookFeeder.h
     )
-    
+
     target_include_directories(EDSAddressBookFactory
       PRIVATE
         ${PROJECT_SOURCE_DIR}/src/contacts
@@ -24,13 +24,15 @@ if(ENABLE_EDS)
         ${GLIB_INCLUDE_DIRS}
         ${EDS_INCLUDE_DIRS}
     )
-    
+
     target_link_libraries(EDSAddressBookFactory
         PRIVATE
             Qt6::Core
             Qt6::Gui
             Qt6::Quick
             Qt6::DBus
+            QCoro6::Core
+            QCoro6::Network
             ${GLIB_LIBRARIES}
             ${EDS_LIBRARIES})
 

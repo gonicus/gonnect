@@ -2,16 +2,21 @@
 
 #include <QObject>
 #include <QDateTime>
-#include <QTime>
 #include <QTimer>
+#include <QHash>
+#include <QSet>
+#include <QCoroCore>
 
 #include "IDateEventFeeder.h"
 #include "DateEventFeederManager.h"
 #include "CalDAVEventFeederConfig.h"
+#include "WebDavSyncResult.h"
+
 #include <libical/ical.h>
 #include <libical/icalerror.h>
-#include <QtWebDAV/qwebdav.h>
-#include <QtWebDAV/qwebdavdirparser.h>
+
+class WebDavClient;
+struct WebDavItem;
 
 class CalDAVEventFeeder : public QObject, public IDateEventFeeder
 {
@@ -26,37 +31,49 @@ public:
     void init() override;
     QUrl networkCheckURL() const override;
 
-    void process(bool authFailed = false);
-
-private Q_SLOTS:
-    void onError(QString error);
-    void onParserFinished();
-
 private:
-    void getNextItem();
+    struct CollectionState
+    {
+        QString syncToken;
+        // Normalized resource path -> raw calendar-data
+        QHash<QString, QByteArray> calendarData;
+    };
+
+    QCoro::Task<> run();
+
+    [[nodiscard]] QCoro::Task<WebDavSyncResult>
+    syncCalendarCollection(const QString &collectionPath, int depth, uint &successCount,
+                           uint &failCount);
+    [[nodiscard]] QCoro::Task<WebDavSyncResult>
+    syncChildCalendar(const WebDavItem &item, int depth, uint &successCount, uint &failCount);
+    [[nodiscard]] QCoro::Task<WebDavSyncResult> fetchCalendarData(const QString &collectionPath,
+                                                                  const QString &requestedPath,
+                                                                  const QStringList &hrefs);
+    [[nodiscard]] QCoro::Task<WebDavSyncResult> syncCalendarChanges(const QString &collectionPath,
+                                                                    const QString &requestedPath,
+                                                                    const QString &syncToken);
+
+    QString registerConcreteSource(const QString &collectionPath);
+    void processCalendarData(const QString &requestedPath, const QString &concreteSource,
+                             uint &successCount, uint &failCount);
+    void pruneCalendarData(const QString &requestedPath, const QSet<QString> &existingPaths);
+    void pruneVanishedCollections(const QSet<QString> &knownCollectionPaths);
 
     bool processResponse(const QByteArray &data, const QString &source);
-
     bool responseDataChanged(const QByteArray &data);
     QDateTime createDateTimeFromTimeType(icaltimetype &datetime);
-
-    void checkErrorStatus();
     void resetCalendar();
 
+    bool m_areWebDavConnectionsInitialized = false;
+    bool m_isRunning = false;
     QList<size_t> m_checksums;
-
     CalDAVEventFeederConfig m_config;
-    int m_initialRetryCount = 0;
-
     QTimer m_calendarRefreshTimer;
-
-    QWebdav m_webdav;
-    QWebdavDirParser m_webdavParser;
-    QList<QWebdavItem> m_items;
-
     QStringList m_concreteSources;
 
-    bool m_areWebDavConnectionsInitialized = false;
-    bool m_pendingError = false;
-    bool m_pendingAuth = false;
+    // Normalized collection path -> state (kept for sync-collection)
+    QHash<QString, CollectionState> m_collectionStates;
+
+    // Created later - password required first
+    std::unique_ptr<WebDavClient> m_webdavClient;
 };

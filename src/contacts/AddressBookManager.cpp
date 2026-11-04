@@ -7,6 +7,7 @@
 #include "NetworkHelper.h"
 #include "Credentials.h"
 #include "ErrorBus.h"
+#include "WaiterHelper.h"
 
 #include <QTimer>
 #include <QUrl>
@@ -253,4 +254,15 @@ void AddressBookManager::acquireSecret(bool forcePrompt, const QString &group,
                     callback({ QString(), true });
                 }
             });
+}
+
+QCoro::Task<SecretResponse> AddressBookManager::acquireSecretAsync(bool forcePrompt,
+                                                                   const QString &group)
+{
+    auto waiter = std::make_unique<SecretWaiter>();
+    acquireSecret(forcePrompt, group, [raw = waiter.get()](SecretResponse response) {
+        Q_EMIT raw->received(response);
+    });
+
+    co_return co_await qCoro(waiter.get(), &SecretWaiter::received);
 }

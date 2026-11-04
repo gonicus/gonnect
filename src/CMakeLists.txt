@@ -20,6 +20,7 @@ find_package(logfault CONFIG REQUIRED)
 find_package(cmark REQUIRED)
 find_package(KF6SyntaxHighlighting REQUIRED)
 find_package(ICU REQUIRED COMPONENTS uc i18n data)
+find_package(QCoro6 REQUIRED COMPONENTS Core Network)
 
 if(UNIX)
     include(FindPkgConfig)
@@ -589,6 +590,7 @@ qt_add_qml_module(gonnect
         UISettings.h
         MSOAuthManager.cpp
         MSOAuthManager.h
+        WaiterHelper.h
 
         sip/CallHistory.h
         sip/CallHistory.cpp
@@ -982,7 +984,21 @@ qt_add_qml_module(gonnect
         usb/busylight/LitraGlow.cpp
         usb/busylight/BlinkStick.h
         usb/busylight/BlinkStick.cpp
+
+        webdav/WebDavClient.h
+        webdav/WebDavClient.cpp
+        webdav/WebDavItem.h
+        webdav/WebDavItem.cpp
+        webdav/WebDavMultiStatus.h
+        webdav/WebDavPropertyRequest.h
+        webdav/WebDavPropertyValue.h
+        webdav/WebDavPropfindParser.h
+        webdav/WebDavPropfindParser.cpp
+        webdav/WebDavSyncChanges.h
+        webdav/WebDavSyncResult.h
 )
+
+set_source_files_properties(webdav/WebDavClient.cpp PROPERTIES COMPILE_OPTIONS "$<$<CXX_COMPILER_ID:GNU>:-Wno-subobject-linkage>")
 
 qt_add_protobuf(gonnect
     PROTO_FILES
@@ -1036,6 +1052,8 @@ target_link_libraries(gonnect
         ICU::uc
         ICU::i18n
         ICU::data
+        QCoro6::Core
+        QCoro6::Network
         ${AKONADI_CONTACT_FACTORY}
         ${AKONADI_CALENDAR_FACTORY}
         ${CARDDAV_CONTACT_FACTORY}
@@ -1078,6 +1096,7 @@ target_include_directories(gonnect
     media
     platform
     rtt
+    webdav
     ${logfault_INCLUDE_DIRS}
     ${CMAKE_CURRENT_BINARY_DIR}
 )
