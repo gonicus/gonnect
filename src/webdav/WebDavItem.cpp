@@ -74,7 +74,9 @@ QDateTime WebDavItem::lastModified() const
     auto dateTime = QLocale::c().toDateTime(text, "ddd, dd MMM yyyy HH:mm:ss 'GMT'");
     if (dateTime.isValid()) {
         dateTime.setTimeZone(QTimeZone::UTC);
-        return dateTime;
+
+        // Some servers report epoch for unknown modification time
+        return dateTime.toSecsSinceEpoch() == 0 ? QDateTime() : dateTime;
     }
 
     // Fallback for date string with numeric zone instead of "GMT"

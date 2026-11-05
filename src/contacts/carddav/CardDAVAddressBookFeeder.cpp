@@ -23,6 +23,10 @@
 
 Q_LOGGING_CATEGORY(lcCardDAVAddressBookFeeder, "gonnect.app.feeder.CardDAVAddressBookFeeder")
 
+// If more cards than this threshold should be fetched, address-book query is preferred over
+// multiget.
+static constexpr qsizetype addressbookQueryThreshold = 500;
+
 using namespace std::chrono_literals;
 
 CardDAVAddressBookFeeder::CardDAVAddressBookFeeder(const QString &group, const int retryCount,
@@ -153,12 +157,11 @@ CardDAVAddressBookFeeder::syncContactsCollection(const QString &collectionPath, 
         }
     }
 
-    // Gather hrefs
+    // Gather paths of all listed cards
     QStringList hrefsToFetch;
     QSet<QString> normalizedHrefs;
     for (const auto &item : items) {
         if (!item.isCollection()) {
-            hrefsToFetch.append(item.href);
             normalizedHrefs.insert(item.normalizedPath());
         }
     }
@@ -188,7 +191,7 @@ CardDAVAddressBookFeeder::syncContactsCollection(const QString &collectionPath, 
 
     if (needsFullSync) {
         pruneCachedContacts(requestedPath, normalizedHrefs);
-        result = co_await fetchContacts(collectionPath, hrefsToFetch);
+        result = co_await fetchChangedContacts(collectionPath, items);
     }
 
     if (result == WebDavSyncResult::AuthRequired) {
@@ -281,34 +284,79 @@ QCoro::Task<WebDavSyncResult> CardDAVAddressBookFeeder::fetchContacts(const QStr
         qCDebug(lcCardDAVAddressBookFeeder) << "Received addressbook-multiget response" << offset
                                             << "to" << std::min(offset + batchSize, hrefs.size());
 
-        for (const auto &result : results) {
-            const auto contactData =
-                    result.property("urn:ietf:params:xml:ns:carddav", "address-data").text.toUtf8();
-            if (contactData.isEmpty()) {
-                continue;
-            }
-
-            const auto cacheId = result.normalizedPath();
-            const auto modifiedDate = result.lastModified();
-
-            if (!hrefsAreKnownChanged) {
-                if (m_ignoredIds.contains(cacheId) && m_ignoredIds.value(cacheId) >= modifiedDate) {
-                    continue;
-                }
-
-                if (Contact *cachedContact = m_cachedContacts.value(cacheId, nullptr)) {
-                    if (cachedContact->lastModified() >= modifiedDate) {
-                        AddressBook::instance().addContact(cachedContact);
-                        continue;
-                    }
-                }
-            }
-
-            processVcard(contactData, cacheId, modifiedDate);
-        }
+        processContactResults(results, hrefsAreKnownChanged);
     }
 
     co_return anyBatchFailed ? WebDavSyncResult::OtherError : WebDavSyncResult::Success;
+}
+
+QCoro::Task<WebDavSyncResult>
+CardDAVAddressBookFeeder::fetchChangedContacts(const QString &collectionPath,
+                                               const QList<WebDavItem> &items)
+{
+    auto hrefsToFetch = readdUnchangedCachedContacts(items);
+
+    if (hrefsToFetch.size() >= addressbookQueryThreshold) {
+        const auto queryResult = co_await queryContacts(collectionPath);
+
+        if (queryResult) {
+            // Servers can truncate results silently - fetch missing
+            hrefsToFetch.removeIf([&queryResult](const QString &href) {
+                return queryResult->contains(WebDavItem::normalizedPath(QUrl(href)));
+            });
+
+            qCDebug(lcCardDAVAddressBookFeeder)
+                    << "addressbook-query delivered" << queryResult->size() << "cards,"
+                    << hrefsToFetch.size() << "missing cards are fetched via multiget";
+
+        } else if (queryResult.error() == WebDavSyncResult::AuthRequired) {
+            co_return WebDavSyncResult::AuthRequired;
+
+        } else {
+            qCWarning(lcCardDAVAddressBookFeeder)
+                    << "addressbook-query failed for" << collectionPath
+                    << "- falling back to addressbook-multiget";
+        }
+    }
+
+    co_return co_await fetchContacts(collectionPath, hrefsToFetch);
+}
+
+QCoro::Task<std::expected<QSet<QString>, WebDavSyncResult>>
+CardDAVAddressBookFeeder::queryContacts(const QString &collectionPath)
+{
+    const auto body = WebDavPropfindParser{}.buildAddressbookQueryBody(
+            { { "D", "DAV:", "getetag" },
+              { "D", "DAV:", "getlastmodified" },
+              { "CARD", "urn:ietf:params:xml:ns:carddav", "address-data" } });
+
+    auto *reply = co_await m_webdavClient->report(collectionPath, body, 1);
+
+    const auto error = reply->error();
+    const auto errorString = reply->errorString();
+    const auto responseBody = reply->readAll();
+    reply->deleteLater();
+
+    if (error == QNetworkReply::AuthenticationRequiredError) {
+        co_return std::unexpected(WebDavSyncResult::AuthRequired);
+    }
+    if (error != QNetworkReply::NoError) {
+        qCWarning(lcCardDAVAddressBookFeeder)
+                << "addressbook-query failed for" << collectionPath << ":" << errorString;
+        co_return std::unexpected(WebDavSyncResult::OtherError);
+    }
+
+    const auto results = WebDavPropfindParser{}.parseMultiStatus(responseBody);
+    processContactResults(results, false);
+
+    QSet<QString> receivedPaths;
+    for (const auto &result : results) {
+        if (!result.property("urn:ietf:params:xml:ns:carddav", "address-data").text.isEmpty()) {
+            receivedPaths.insert(result.normalizedPath());
+        }
+    }
+
+    co_return receivedPaths;
 }
 
 QCoro::Task<WebDavSyncResult>
@@ -347,6 +395,70 @@ CardDAVAddressBookFeeder::syncCollection(const QString &collectionPath,
     readdCachedContacts(requestedPath, changedPaths);
 
     co_return co_await fetchContacts(collectionPath, changes.changedHrefs.values(), true);
+}
+
+void CardDAVAddressBookFeeder::processContactResults(const QList<WebDavItem> &results,
+                                                     bool hrefsAreKnownChanged)
+{
+    for (const auto &result : results) {
+        const auto contactData =
+                result.property("urn:ietf:params:xml:ns:carddav", "address-data").text.toUtf8();
+        if (contactData.isEmpty()) {
+            continue;
+        }
+
+        const auto cacheId = result.normalizedPath();
+        const auto modifiedDate = result.lastModified();
+
+        if (!hrefsAreKnownChanged) {
+            if (modifiedDate.isValid() && m_ignoredIds.contains(cacheId)
+                && m_ignoredIds.value(cacheId) >= modifiedDate) {
+                continue;
+            }
+
+            if (Contact *cachedContact = m_cachedContacts.value(cacheId, nullptr)) {
+                if (modifiedDate.isValid() && cachedContact->lastModified() >= modifiedDate) {
+                    AddressBook::instance().addContact(cachedContact);
+                    continue;
+                }
+            }
+        }
+
+        processVcard(contactData, cacheId, modifiedDate);
+    }
+}
+
+QStringList CardDAVAddressBookFeeder::readdUnchangedCachedContacts(const QList<WebDavItem> &items)
+{
+    QStringList hrefsToFetch;
+
+    for (const auto &item : items) {
+        if (item.isCollection()) {
+            continue;
+        }
+
+        const auto path = item.normalizedPath();
+        const auto lastModified = item.lastModified();
+
+        // Card must always be fetched because without modified date, it cannot be determined if new
+        // version exists
+        if (lastModified.isValid()) {
+            if (m_ignoredIds.contains(path) && m_ignoredIds.value(path) >= lastModified) {
+                continue;
+            }
+
+            Contact *cachedContact = m_cachedContacts.value(path, nullptr);
+            if (cachedContact && cachedContact->lastModified() >= lastModified) {
+                AddressBook::instance().addContact(cachedContact);
+                continue;
+            }
+        }
+
+        hrefsToFetch.append(item.href);
+    }
+
+    qCDebug(lcCardDAVAddressBookFeeder) << hrefsToFetch.size() << "listed cards must be fetched";
+    return hrefsToFetch;
 }
 
 void CardDAVAddressBookFeeder::readdCachedContacts(const QString &collectionPath,
