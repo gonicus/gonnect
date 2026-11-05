@@ -1,3 +1,22 @@
+# [2.5.0-beta.10](https://github.com/gonicus/gonnect/compare/v2.5.0-beta.9...v2.5.0-beta.10) (2026-11-05)
+
+
+### Bug Fixes
+
+* fixed chat search result jumps with active thread ([#782](https://github.com/gonicus/gonnect/issues/782)) ([a8bab6e](https://github.com/gonicus/gonnect/commit/a8bab6edd38a789360604188d346a1bfb3393093))
+* micro optimizations ([#791](https://github.com/gonicus/gonnect/issues/791)) ([3b5d7e5](https://github.com/gonicus/gonnect/commit/3b5d7e53d95c7ae216cd0a406994f2e908c5a3af))
+* mini collection of issue fixes ([#775](https://github.com/gonicus/gonnect/issues/775)) ([bf39a61](https://github.com/gonicus/gonnect/commit/bf39a612778c9123b31a143ad10fa22bf8278967))
+* misc small stuff ([#785](https://github.com/gonicus/gonnect/issues/785)) ([d556fc7](https://github.com/gonicus/gonnect/commit/d556fc759a8f4b7b242858499f5b14cfcf4df8a1))
+* room invitations ([#773](https://github.com/gonicus/gonnect/issues/773)) ([df0f0c5](https://github.com/gonicus/gonnect/commit/df0f0c500a9c96c2e5f97dac3cfc9f071d5799f2))
+* subscribe SIPBuddy after the account is registered ([#779](https://github.com/gonicus/gonnect/issues/779)) ([ed4accd](https://github.com/gonicus/gonnect/commit/ed4accd44fbb9148ececd4bfac7b524f372de4ec))
+
+
+### Features
+
+* chat search ([#622](https://github.com/gonicus/gonnect/issues/622)) ([9a53861](https://github.com/gonicus/gonnect/commit/9a53861071a7a4798f6e5b3ad20278bc3e13a3bc))
+* filter for favorites widgets ([#781](https://github.com/gonicus/gonnect/issues/781)) ([918bae6](https://github.com/gonicus/gonnect/commit/918bae6dc2edb302f82df642c374a5faa13d6c96))
+* transcription feature for Jitsi Meet conference ([#776](https://github.com/gonicus/gonnect/issues/776)) ([a52771c](https://github.com/gonicus/gonnect/commit/a52771c4229931a43566ee9ee9185f5f7c779554))
+
 # [2.5.0-beta.9](https://github.com/gonicus/gonnect/compare/v2.5.0-beta.8...v2.5.0-beta.9) (2026-10-15)
 
 
