@@ -23,15 +23,10 @@ AudioManager::AudioManager(QObject *parent) : QObject(parent)
             [](bool muted) { GlobalMuteState::instance().setMuted(muted); });
     session.start(!noSyncSystemMute());
 
-    // Use Qt mechanism to get notified for updates and re-initialize on changes
     m_updateDebouncer.setSingleShot(true);
-    connect(&m_updateDebouncer, &QTimer::timeout, this, &AudioManager::initialize);
+    connect(&m_updateDebouncer, &QTimer::timeout, this, &AudioManager::updateAudioDevices);
 
     m_mediaDevices = new QMediaDevices(this);
-    connect(m_mediaDevices, &QMediaDevices::audioInputsChanged, this,
-            [this]() { m_updateDebouncer.start(500ms); });
-    connect(m_mediaDevices, &QMediaDevices::audioOutputsChanged, this,
-            [this]() { m_updateDebouncer.start(500ms); });
 
     connect(this, &AudioManager::captureDeviceIdChanged, this,
             &AudioManager::captureAudioVolumeChanged);
@@ -113,6 +108,19 @@ AudioProcessor *AudioManager::audioProcessor()
 }
 
 void AudioManager::initialize()
+{
+    if (!m_initialized) {
+        connect(m_mediaDevices, &QMediaDevices::audioInputsChanged, this,
+                [this]() { m_updateDebouncer.start(500ms); });
+        connect(m_mediaDevices, &QMediaDevices::audioOutputsChanged, this,
+                [this]() { m_updateDebouncer.start(500ms); });
+    }
+
+    m_initialized = true;
+    updateAudioDevices();
+}
+
+void AudioManager::updateAudioDevices()
 {
     refreshAudioDevices();
     doProfileElection();
