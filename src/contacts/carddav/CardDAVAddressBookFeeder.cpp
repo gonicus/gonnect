@@ -158,7 +158,6 @@ CardDAVAddressBookFeeder::syncContactsCollection(const QString &collectionPath, 
     }
 
     // Gather paths of all listed cards
-    QStringList hrefsToFetch;
     QSet<QString> normalizedHrefs;
     for (const auto &item : items) {
         if (!item.isCollection()) {
