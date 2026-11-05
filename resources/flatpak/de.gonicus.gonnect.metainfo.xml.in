@@ -5,19 +5,19 @@
   <project_license>GPL-2.0-or-later</project_license>
   <metadata_license>MIT</metadata_license>
 
-  <summary>Make phone calls and hold video conferences</summary>
-  <summary xml:lang="de">Telefoniere und halte Videokonferenzen ab</summary>
+  <summary>Phone calls, video conferences and chat</summary>
+  <summary xml:lang="de">Telefonie, Videokonferenzen und Chat</summary>
   <developer id="de.gonicus">
     <name>GONICUS GmbH</name>
   </developer>
   <content_rating type="oars-1.1" />
   <description>
     <p>
-      GOnnect combines telephony and video conferencing in one application. It offers
+      GOnnect combines telephony, video conferencing and chat in one application. It offers
       seamless integration with your desktop and supports the buttons on your headset.
     </p>
     <p xml:lang="de">
-      GOnnect vereint Telefonie und Videokonferenzen in einer Anwendung. Es bietet
+      GOnnect vereint Telefonie, Videokonferenzen und Chat in einer Anwendung. Es bietet
       eine nahtlose Integration in deinen Desktop und unterstützt die Tasten an deinem Headset.
     </p>
     <p>
@@ -30,6 +30,22 @@
       Du kannst auch Jitsi Meet Videokonferenzen starten oder ihnen beitreten oder sogar ein
       Telefonat in eine Videokonferenz überführen.
     </p>
+    <p>
+      Chat features (via plugin, e.g. Matrix):
+    </p>
+    <p xml:lang="de">
+      Chat-Funktionen (über Plugin, z.B. Matrix):
+    </p>
+    <ul>
+      <li>Chat with colleagues next to your phone calls and conferences</li>
+      <li xml:lang="de">Chatte mit Kollegen direkt neben Telefonaten und Konferenzen</li>
+      <li>Call a chat partner with one click</li>
+      <li xml:lang="de">Rufe Chat-Partner mit einem Klick an</li>
+      <li>Reactions, replies, pinned messages and file attachments</li>
+      <li xml:lang="de">Reaktionen, Antworten, angepinnte Nachrichten und Dateianhänge</li>
+      <li>Presence status combined from phone and chat</li>
+      <li xml:lang="de">Präsenzstatus aus Telefonie und Chat kombiniert</li>
+    </ul>
     <p>
       Phone features:
     </p>
@@ -69,6 +85,10 @@
       <li xml:lang="de">Die gleiche Benutzeroberfläche wie für die Telefonie</li>
       <li>Make enquiries between other video conference or phone call</li>
       <li xml:lang="de">Rückfrage in andere Videokonferenz oder anderes Telefonat</li>
+      <li>Admit or reject waiting participants</li>
+      <li xml:lang="de">Wartende Teilnehmer zulassen oder ablehnen</li>
+      <li>Join conferences directly from your calendar</li>
+      <li xml:lang="de">Konferenzen direkt aus dem Kalender betreten</li>
     </ul>
     <p>
       More features:
@@ -77,6 +97,8 @@
       Weitere Funktionen:
     </p>
     <ul>
+      <li>Dashboard with configurable widgets</li>
+      <li xml:lang="de">Dashboard mit konfigurierbaren Widgets</li>
       <li>Support for various hardware headsets (i.e. Yealink, Jabra)</li>
       <li xml:lang="de">Unterstützung für diverse Headsets (z.B. Yealink, Jabra)</li>
       <li>Support for various busylights</li>
@@ -90,11 +112,11 @@
       <li>GNOME Search-Provider support</li>
       <li xml:lang="de">GNOME Such-Provider Unterstützung</li>
       <li>KRunner search plugin (requires latest flatpak version)</li>
-      <li xml:lang="de">KRunner Such-Plugin</li>
+      <li xml:lang="de">KRunner Such-Plugin (benötigt aktuelle Flatpak-Version)</li>
       <li>Desktop Actions / Autostart</li>
       <li xml:lang="de">Desktop-Aktionen / Autostart</li>
       <li>Global Keyboard Shortcuts (if supported by your Desktop environment)</li>
-      <li xml:lang="de">Globale Tatstatur-Kurzbefehle (wenn diese vom Desktop unterstützt werden)</li>
+      <li xml:lang="de">Globale Tastatur-Kurzbefehle (wenn diese vom Desktop unterstützt werden)</li>
       <li>Do not activate the screensaver when using the phone</li>
       <li xml:lang="de">Verhindert, dass sich der Bildschirmschoner während eines Gesprächs aktiviert</li>
       <li>Mime-Type registration for `tel:` / `sip:` URLs</li>
@@ -144,13 +166,33 @@
   <screenshots>
     <screenshot type="default">
       <image>https://raw.githubusercontent.com/gonicus/gonnect/refs/heads/release/media/main-screen.png</image>
-      <caption>Main screen, history and favorites</caption>
-      <caption xml:lang="de">Hauptfenster, aktueller Verlauf und Favoriten</caption>
+      <caption>Dashboard with events, favorites, call history and chat</caption>
+      <caption xml:lang="de">Dashboard mit Terminen, Favoriten, Anrufverlauf und Chat</caption>
     </screenshot>
     <screenshot>
       <image>https://raw.githubusercontent.com/gonicus/gonnect/refs/heads/release/media/call-screen.png</image>
-      <caption>Call screen</caption>
-      <caption xml:lang="de">Anruffenster</caption>
+      <caption>Phone call with the chat of the caller next to it</caption>
+      <caption xml:lang="de">Telefonat mit dem Chat des Gesprächspartners</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://raw.githubusercontent.com/gonicus/gonnect/refs/heads/release/media/chat-screen.png</image>
+      <caption>Chat with call button</caption>
+      <caption xml:lang="de">Chat mit Anruf-Button</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://raw.githubusercontent.com/gonicus/gonnect/refs/heads/release/media/conference-screen.png</image>
+      <caption>Video conference with Jitsi Meet</caption>
+      <caption xml:lang="de">Videokonferenz mit Jitsi Meet</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://raw.githubusercontent.com/gonicus/gonnect/refs/heads/release/media/search-screen.png</image>
+      <caption>Central search across contacts, chat rooms and call history</caption>
+      <caption xml:lang="de">Zentrale Suche in Kontakten, Chat-Räumen und Anrufverlauf</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://raw.githubusercontent.com/gonicus/gonnect/refs/heads/release/media/main-screen-dark.png</image>
+      <caption>Dashboard in dark mode</caption>
+      <caption xml:lang="de">Dashboard im Darkmode</caption>
     </screenshot>
   </screenshots>
 

@@ -1,0 +1,8 @@
+versions:
+  '0.13.0':
+    folder: all
+updater:
+  source: github
+  id: qcoro/qcoro
+  branch: master
+  url-pattern: https://github.com/qcoro/qcoro/archive/${sha}.zip
