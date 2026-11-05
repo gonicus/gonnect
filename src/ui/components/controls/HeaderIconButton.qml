@@ -17,10 +17,16 @@ Item {
 
     signal clicked
 
+    activeFocusOnTab: control.enabled
+
     Accessible.role: Accessible.Button
     Accessible.name: control.accessiblePurpose
     Accessible.focusable: true
     Accessible.onPressAction: () => control.clicked()
+
+    Keys.onReturnPressed: () => control.clicked()
+    Keys.onEnterPressed: () => control.clicked()
+    Keys.onSpacePressed: () => control.clicked()
 
     Rectangle {
         visible: hoverHandler.hovered
@@ -28,9 +34,7 @@ Item {
         radius: parent.width / 2
         color: Theme.backgroundHeaderIconHovered
         border.width: 1
-        border.color: Theme.borderHeaderIconHovered
-
-        Accessible.ignored: true
+        border.color: Theme.borderColor
     }
 
     IconLabel {

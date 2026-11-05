@@ -2,7 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Controls.Material
-import Qt5Compat.GraphicalEffects
+import QtQuick.Effects
 import base
 
 Window {
@@ -18,18 +18,72 @@ Window {
     property bool useOwnDecoration: Theme.useOwnDecoration
     property bool showMinimizeButton: true
     property bool showMaximizeButton: true
+    property bool windowHeaderOverlapsContent: false
 
-    property int windowHeaderPadding: control.useOwnDecoration
-                                      ? windowHeaderLoader.height + 2 * control.shadowMargin
-                                      : 0
+    WindowPixelRatio {
+        id: pixelRatio
+        window: control
+    }
+
+    WindowShadowMargins {
+        window: control
+        margin: control.useOwnDecoration && !control.isMaximized ? control.shadowMargin : 0
+    }
+
+    readonly property real devicePixelRatio: pixelRatio.ratio
+
+    function snapToPixelGrid(value : real) : real {
+        return Util.snapToPixelGrid(value, pixelRatio.quantum)
+    }
+
+    function snapWindowSize() {
+        if (!control.resizable || pixelRatio.quantum <= 1 || control.isMaximized) {
+            return
+        }
+
+        const quantum = pixelRatio.quantum
+        const width = Math.round(control.width / quantum) * quantum
+        const height = Math.round(control.height / quantum) * quantum
+
+        if (width !== control.width) {
+            control.width = width
+        }
+        if (height !== control.height) {
+            control.height = height
+        }
+    }
+
+    onWidthChanged: () => control.snapWindowSize()
+    onHeightChanged: () => control.snapWindowSize()
+
+    Connections {
+        target: pixelRatio
+        function onRatioChanged() {
+            control.snapWindowSize()
+        }
+    }
+
+    readonly property real windowHeaderHeight: control.snapToPixelGrid(4 * Theme.d + 6)
+
+    property real windowHeaderPadding: control.useOwnDecoration
+                                       ? windowHeaderLoader.height + 2 * control.shadowMargin
+                                       : 0
+
 
     default property alias content: innerContainer.children
 
     readonly property bool isMaximized: [ Window.Maximized, Window.FullScreen ].includes(control.visibility)
 
-    readonly property int shadowMargin: 11
+    readonly property int shadowMargin: control.snapToPixelGrid(2 * Theme.d)
+    readonly property int windowRadius: 15
+
+    property Item activeSearchBox
 
     function focusSearchBox() {
+        if (typeof control.activeSearchBox?.focusSearchBox === "function") {
+            control.activeSearchBox.focusSearchBox()
+            return
+        }
         if (typeof windowHeaderLoader.item?.focusSearchBox === "function") {
             windowHeaderLoader.item.focusSearchBox()
         }
@@ -43,24 +97,59 @@ Window {
         background: Item {
             visible: control.useOwnDecoration
 
+            // Shadow and outline taken from libadwaita
+            RectangularShadow {
+                id: ambientShadow
+                anchors.fill: bgRect
+                visible: !control.isMaximized
+                radius: bgRect.radius
+                color: Qt.rgba(0, 0, 0, control.active ? 0.16 : 0.10)
+                blur: control.active ? 17 : 14
+                spread: control.active ? 5 : 4
+            }
+
+            RectangularShadow {
+                id: keyShadow
+                anchors.fill: bgRect
+                visible: !control.isMaximized && control.active
+                radius: bgRect.radius
+                color: Qt.rgba(0, 0, 0, 0.14)
+                blur: 8
+                spread: 1
+            }
+
+            RectangularShadow {
+                id: outlineShadow
+                anchors.fill: bgRect
+                visible: !control.isMaximized
+                radius: bgRect.radius
+                color: Qt.rgba(0, 0, 0, 0.05)
+                blur: 0
+                spread: 1
+            }
+
             Rectangle {
                 id: bgRect
                 color: Theme.backgroundColor
-                radius: 8
+                radius: control.windowRadius
                 anchors {
                     fill: parent
                     margins: control.isMaximized ? 0 : control.shadowMargin
                 }
             }
 
-            DropShadow {
+            // This "copy" of bgRect is required such that the window remains crisp and does not require the layer
+            Rectangle {
+                id: bgMaskRect
+                color: "black"
+                visible: false
+                radius: bgRect.radius
                 anchors.fill: bgRect
-                horizontalOffset: 0
-                verticalOffset: 3
-                radius: 8.0
-                color: Theme.shadowColor
-                visible: !control.isMaximized
-                source: bgRect
+                antialiasing: true
+                layer {
+                    enabled: true
+                    smooth: true
+                }
             }
 
             Item {
@@ -92,9 +181,7 @@ Window {
 
                     LayoutMirroring.enabled: false
 
-                    Accessible.role: Accessible.Border
-                    Accessible.name: qsTr("Drag border")
-                    Accessible.description: qsTr("Top left drag border for window resize operations")
+                    Accessible.id: "window.border.top-left"
 
                     HoverHandler {
                         cursorShape: Qt.SizeFDiagCursor
@@ -123,9 +210,7 @@ Window {
 
                     LayoutMirroring.enabled: false
 
-                    Accessible.role: Accessible.Border
-                    Accessible.name: qsTr("Drag border")
-                    Accessible.description: qsTr("Top drag border for window resize operations")
+                    Accessible.id: "window.border.top"
 
                     HoverHandler {
                         cursorShape: Qt.SizeVerCursor
@@ -151,9 +236,7 @@ Window {
                     }
                     LayoutMirroring.enabled: false
 
-                    Accessible.role: Accessible.Border
-                    Accessible.name: qsTr("Drag border")
-                    Accessible.description: qsTr("Top right border for window resize operations")
+                    Accessible.id: "window.border.top-right"
 
                     HoverHandler {
                         cursorShape: Qt.SizeBDiagCursor
@@ -181,9 +264,7 @@ Window {
                     }
                     LayoutMirroring.enabled: false
 
-                    Accessible.role: Accessible.Border
-                    Accessible.name: qsTr("Drag border")
-                    Accessible.description: qsTr("Right drag border for window resize operations")
+                    Accessible.id: "window.border.right"
 
                     HoverHandler {
                         cursorShape: Qt.SizeHorCursor
@@ -209,9 +290,7 @@ Window {
                     }
                     LayoutMirroring.enabled: false
 
-                    Accessible.role: Accessible.Border
-                    Accessible.name: qsTr("Drag border")
-                    Accessible.description: qsTr("Bottom right drag border for window resize operations")
+                    Accessible.id: "window.border.bottom-right"
 
                     HoverHandler {
                         cursorShape: Qt.SizeFDiagCursor
@@ -239,9 +318,7 @@ Window {
                     }
                     LayoutMirroring.enabled: false
 
-                    Accessible.role: Accessible.Border
-                    Accessible.name: qsTr("Drag border")
-                    Accessible.description: qsTr("Bottom drag border for window resize operations")
+                    Accessible.id: "window.border.bottom"
 
                     HoverHandler {
                         cursorShape: Qt.SizeVerCursor
@@ -267,9 +344,7 @@ Window {
                     }
                     LayoutMirroring.enabled: false
 
-                    Accessible.role: Accessible.Border
-                    Accessible.name: qsTr("Drag border")
-                    Accessible.description: qsTr("Bottom left drag border for window resize operations")
+                    Accessible.id: "window.border.bottom-left"
 
                     HoverHandler {
                         cursorShape: Qt.SizeBDiagCursor
@@ -297,9 +372,7 @@ Window {
                     }
                     LayoutMirroring.enabled: false
 
-                    Accessible.role: Accessible.Border
-                    Accessible.name: qsTr("Drag border")
-                    Accessible.description: qsTr("Left drag border for window resize operations")
+                    Accessible.id: "window.border.left"
 
                     HoverHandler {
                         cursorShape: Qt.SizeHorCursor
@@ -320,10 +393,19 @@ Window {
         contentItem: Item {
             id: outerContainer
 
+            layer.enabled: control.useOwnDecoration && !control.isMaximized
+            layer.effect: MultiEffect {
+                maskSource: bgMaskRect
+                maskEnabled: true
+                maskThresholdMin: 0.5
+                maskSpreadAtMin: 1.0
+            }
+
             Loader {
                 id: windowHeaderLoader
                 active: control.useOwnDecoration
-                height: 44
+                z: control.windowHeaderOverlapsContent ? 1 : 0
+                height: control.windowHeaderHeight
                 anchors {
                     top: parent.top
                     left: parent.left
@@ -356,7 +438,9 @@ Window {
                 id: innerContainer
                 clip: true
                 anchors {
-                    top: control.useOwnDecoration ? windowHeaderLoader.bottom : parent.top
+                    top: control.windowHeaderOverlapsContent
+                         ? parent.top
+                         : (control.useOwnDecoration ? windowHeaderLoader.bottom : parent.top)
                     bottom: parent.bottom
                     left: parent.left
                     right: parent.right

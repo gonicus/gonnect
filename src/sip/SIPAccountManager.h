@@ -1,4 +1,6 @@
 #pragma once
+
+#include <QQmlEngine>
 #include <QObject>
 #include <QtQml/qqml.h>
 #include <QtQml/qqmlregistration.h>
@@ -79,6 +81,7 @@ class SIPAccountManagerWrapper
 public:
     static SIPAccountManager *create(QQmlEngine *, QJSEngine *)
     {
+        QQmlEngine::setObjectOwnership(&SIPAccountManager::instance(), QQmlEngine::CppOwnership);
         return &SIPAccountManager::instance();
     }
 

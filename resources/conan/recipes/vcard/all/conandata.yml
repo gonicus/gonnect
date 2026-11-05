@@ -6,3 +6,5 @@ patches:
   "cci.20250408":
     - patch_file: "patches/002-cmake-install.patch"
     - patch_file: "patches/003-cmake-static-libs.patch"
+    - patch_file: "patches/004-fix-group-property-name.patch"
+    - patch_file: "patches/005-do-not-skip-photo.patch"

@@ -1,11 +1,13 @@
 #pragma once
 
+#include "SecretResponse.h"
+
 #include <QObject>
 #include <QTimer>
 #include <QTime>
 #include <QDateTime>
 #include <QHash>
-#include <QMutex>
+#include <QCoroCore>
 
 class IDateEventFeeder;
 
@@ -25,13 +27,14 @@ public:
 
     void initFeederConfigs();
     void reloadCalendar();
-    void acquireSecret(bool forcePrompt, const QString &configId,
-                       std::function<void(const QString &secret)> callback);
+    [[nodiscard]] QCoro::Task<SecretResponse> acquireSecret(bool forcePrompt,
+                                                            const QString &configId);
 
 private:
     explicit DateEventFeederManager(QObject *parent = nullptr);
 
-    QMutex m_queueMutex;
+    QTimer m_retryTimer;
+    bool m_isProcessing = false;
 
     QDateTime m_currentTime;
     QDateTime m_timeRangeStart;
@@ -47,6 +50,7 @@ private:
     void setupReconnectSignal();
 
     QHash<QString, QMetaObject::Connection> m_viewHelperConnections;
+    QMetaObject::Connection m_connectivityConnection;
     QHash<QString, IDateEventFeeder *> m_dateEventFeeders;
     QStringList m_feederConfigIds;
     bool m_isReconnectSignalSetup = false;

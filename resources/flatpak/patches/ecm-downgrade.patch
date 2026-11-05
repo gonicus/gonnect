@@ -1,0 +1,12 @@
+diff -Naur a/CMakeLists.txt b/CMakeLists.txt
+--- a/CMakeLists.txt	2026-05-01 13:56:50.000000000 +0200
++++ b/CMakeLists.txt	2026-05-12 09:40:10.464565639 +0200
+@@ -3,7 +3,7 @@
+ set(KF_VERSION "6.26.0")
+ project(KSyntaxHighlighting VERSION ${KF_VERSION})
+ 
+-find_package(ECM 6.26.0 REQUIRED NO_MODULE)
++find_package(ECM 6.24.0 REQUIRED NO_MODULE)
+ set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH})
+ 
+ include(KDEInstallDirs)

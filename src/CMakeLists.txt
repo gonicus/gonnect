@@ -3,19 +3,24 @@ find_package(Qt6 REQUIRED COMPONENTS
     CorePrivate
     GuiPrivate
     Concurrent
-    Core5Compat
     Quick
     QuickControls2
     Multimedia
     Sql
     Network
     NetworkAuth
+    Protobuf
     Widgets
     WebEngineCore
     WebEngineQuick
     Xml)
 
 find_package(logfault CONFIG REQUIRED)
+#find_package(hunspell REQUIRED)
+find_package(cmark REQUIRED)
+find_package(KF6SyntaxHighlighting REQUIRED)
+find_package(ICU REQUIRED COMPONENTS uc i18n data)
+find_package(QCoro6 REQUIRED COMPONENTS Core Network)
 
 if(UNIX)
     include(FindPkgConfig)
@@ -30,10 +35,24 @@ if(UNIX)
         PkgConfig::LIBUSB1
         PkgConfig::LIBHIDAPI)
 
+    if(FLATPAK)
+        list(APPEND PLATFORM_LIBRARIES
+            sqlcipher
+            stemmer)
+    else()
+        find_package(sqlcipher REQUIRED)
+        find_package(SnowballStem REQUIRED)
+        list(APPEND PLATFORM_LIBRARIES
+            sqlcipher::sqlcipher
+            SnowballStem::libstemmer)
+    endif()
+
     add_definitions(${PJSIP_STATIC_CFLAGS})
     include_directories(${PJSIP_STATIC_INCLUDE_DIRS})
     link_directories(${PJSIP_STATIC_LIBRARY_DIRS})
 else()
+    find_package(SnowballStem REQUIRED)
+    find_package(sqlcipher REQUIRED)
     find_package(pjproject REQUIRED)
     find_package(hidapi REQUIRED)
     find_package(libusb REQUIRED)
@@ -41,6 +60,8 @@ else()
     find_package(QHotkey REQUIRED)
 
     list(APPEND PLATFORM_LIBRARIES
+        SnowballStem::libstemmer
+        sqlcipher::sqlcipher
         pjproject::pjproject
         hidapi::hidapi
         libusb::libusb
@@ -67,10 +88,16 @@ if(APPLE)
 elseif(LINUX)
     pkg_check_modules(LIBNOTIFY REQUIRED libnotify IMPORTED_TARGET)
     pkg_check_modules(LIBPULSE REQUIRED libpulse IMPORTED_TARGET)
-
+    pkg_check_modules(LIBPIPEWIRE REQUIRED libpipewire-0.3 IMPORTED_TARGET)
+    pkg_check_modules(XCB REQUIRED xcb IMPORTED_TARGET)
+    pkg_check_modules(WAYLAND_CLIENT REQUIRED wayland-client IMPORTED_TARGET)
+       
     list(APPEND PLATFORM_LIBRARIES
         PkgConfig::LIBPULSE
+        PkgConfig::LIBPIPEWIRE
         PkgConfig::LIBNOTIFY
+        PkgConfig::XCB
+        PkgConfig::WAYLAND_CLIENT
         Qt6::DBus)
 
     set(DBUS_SOURCES)
@@ -131,14 +158,15 @@ elseif(LINUX)
     )
 
 elseif(WIN32)
-    list(APPEND PLATFORM_LIBRARIES Iphlpapi.lib)
-    list(APPEND APP_SOURCES gonnect.rc)
+    find_package(Qt6 REQUIRED COMPONENTS ProtobufPrivate)
+    list(APPEND PLATFORM_LIBRARIES Iphlpapi.lib Qt6::ProtobufPrivate)
+    list(APPEND APP_SOURCES platform/windows/QtProtobufMsvcLinkFix.cpp gonnect.rc)
 endif()
 
-qt_add_big_resources(APP_SOURCES application.qrc)
-qt_add_big_resources(APP_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/icons.qrc)
+qt_add_resources(APP_SOURCES application.qrc)
+qt_add_resources(APP_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/icons.qrc)
 qt_add_resources(APP_SOURCES ../migrate/migrationscripts.qrc)
-qt_add_resources(APP_SOURCES ../resources/templates/templates.qrc)
+qt_add_resources(APP_SOURCES ${PROJECT_BINARY_DIR}/resources/templates/templates.qrc)
 
 qt_add_executable(gonnect
     ${app_icon_macos}
@@ -146,6 +174,9 @@ qt_add_executable(gonnect
     ${DBUS_SOURCES}
 )
 
+set_source_files_properties(platform/linux/LinuxPlatformSession.cpp
+    PROPERTIES COMPILE_OPTIONS "-Wno-gnu-statement-expression-from-macro-expansion")
+       
 set_target_properties(gonnect PROPERTIES
     QT_QMLCACHEGEN_ARGUMENTS "--only-bytecode"
     WIN32_EXECUTABLE TRUE
@@ -157,6 +188,7 @@ set_target_properties(gonnect PROPERTIES
 
 set(gonnect_qml_singletons
     ui/components/dialogs/DialogFactory.qml
+    ui/CertificateProfile.qml
 )
 set_source_files_properties(${gonnect_qml_singletons} PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
 
@@ -174,6 +206,7 @@ add_subdirectory(calendar/msgraph)
 find_package(Qt6Keychain REQUIRED)
 
 set_source_files_properties(ui/scripts/util.js PROPERTIES QT_QML_SOURCE_TYPENAME Util)
+set_source_files_properties(ui/scripts/phoneNumberUtil.js PROPERTIES QT_QML_SOURCE_TYPENAME PhoneNumberUtil)
 
 configure_file(MSOAuthManagerConfig.h.in MSOAuthManagerConfig.h)
 
@@ -185,6 +218,8 @@ if(FLATPAK)
         dbus/portal/AccountPortal.cpp
         dbus/portal/BackgroundPortal.h
         dbus/portal/BackgroundPortal.cpp
+        dbus/portal/CameraPortal.h
+        dbus/portal/CameraPortal.cpp
         dbus/portal/GlobalShortcutPortal.h
         dbus/portal/GlobalShortcutPortal.cpp
         dbus/portal/InhibitPortal.h
@@ -216,7 +251,11 @@ if(FLATPAK)
         platform/flatpak/FlatpakGlobalShortcuts.h
         platform/flatpak/FlatpakGlobalShortcuts.cpp
         platform/linux/LinuxDesktopSearchProvider.h
-        platform/linux/LinuxDesktopSearchProvider.cpp)
+        platform/linux/LinuxDesktopSearchProvider.cpp
+        platform/linux/LinuxPlatformSession.h
+        platform/linux/LinuxPlatformSession.cpp
+        platform/linux/PipeWireCameraDevices.h
+        platform/linux/PipeWireCameraDevices.cpp)
 
 elseif(LINUX)
     set(PLATFORM_SOURCES
@@ -245,7 +284,9 @@ elseif(LINUX)
         platform/dummy/DummyInhibitHelper.cpp
 
         platform/linux/LinuxDesktopSearchProvider.h
-        platform/linux/LinuxDesktopSearchProvider.cpp)
+        platform/linux/LinuxDesktopSearchProvider.cpp
+        platform/linux/LinuxPlatformSession.h
+        platform/linux/LinuxPlatformSession.cpp)
 
 elseif(APPLE)
     set(PLATFORM_SOURCES
@@ -266,7 +307,9 @@ elseif(APPLE)
         platform/dummy/DummyGlobalShortcuts.h
         platform/dummy/DummyGlobalShortcuts.cpp
         platform/dummy/DummySearchProvider.h
-        platform/dummy/DummySearchProvider.cpp)
+        platform/dummy/DummySearchProvider.cpp
+        platform/dummy/DummyPlatformSession.h
+        platform/dummy/DummyPlatformSession.cpp)
 elseif(WIN32)
     set(PLATFORM_SOURCES
         platform/windows/WindowsUserInfo.cpp
@@ -289,6 +332,8 @@ elseif(WIN32)
         platform/windows/WindowsGlobalShortcuts.cpp
         platform/dummy/DummySearchProvider.h
         platform/dummy/DummySearchProvider.cpp
+        platform/dummy/DummyPlatformSession.h
+        platform/dummy/DummyPlatformSession.cpp
     )
 else()
     set(PLATFORM_SOURCES
@@ -309,7 +354,9 @@ else()
         platform/dummy/DummyGlobalShortcuts.h
         platform/dummy/DummyGlobalShortcuts.cpp
         platform/dummy/DummySearchProvider.h
-        platform/dummy/DummySearchProvider.cpp)
+        platform/dummy/DummySearchProvider.cpp
+        platform/dummy/DummyPlatformSession.h
+        platform/dummy/DummyPlatformSession.cpp)
 endif()
 
 qt_add_qml_module(gonnect
@@ -320,62 +367,120 @@ qt_add_qml_module(gonnect
 
         ${gonnect_qml_singletons}
 
+        ui/components/chat/AddReactionButton.qml
+        ui/components/chat/Chat.qml
+        ui/components/chat/ChatButtonBar.qml
+        ui/components/chat/ChatMessageAttachmentRectangle.qml
         ui/components/chat/ChatMessageBox.qml
         ui/components/chat/ChatMessageList.qml
         ui/components/chat/ChatMessageListItem.qml
+        ui/components/chat/ChatMessageListItemContent.qml
+        ui/components/chat/ChatMessageListItemRelatedContent.qml
+        ui/components/chat/ChatUserPresenceStatusIndicator.qml
+        ui/components/chat/ChatRoomContextMenu.qml
         ui/components/chat/ChatRoomList.qml
         ui/components/chat/ChatRoomListItem.qml
+        ui/components/chat/ChatRoomListSectionHeader.qml
+        ui/components/chat/ChatRoomListThreadItem.qml
+        ui/components/chat/ChatUnjoinedPage.qml
+        ui/components/chat/CodeBlock.qml
+        ui/components/chat/DeviceVerification.qml
+        ui/components/chat/FileAttachment.qml
+        ui/components/chat/MultiText.qml
+        ui/components/chat/PinnedChatMessagesList.qml
+        ui/components/chat/ReactionButton.qml
+        ui/components/chat/ReadMarker.qml
 
+        ui/components/controls/AudioFileSelector.qml
         ui/components/controls/AudioLevelButton.qml
+        ui/components/controls/AudioPlayer.qml
         ui/components/controls/BarButton.qml
+        ui/components/controls/BottomButtonBar.qml
+        ui/components/controls/BottomButtonBarButton.qml
+        ui/components/controls/BusyIndicator.qml
         ui/components/controls/Button.qml
+        ui/components/controls/ButtonBarSeparator.qml
         ui/components/controls/CheckBox.qml
         ui/components/controls/ClipboardButton.qml
+        ui/components/controls/ComboBox.qml
         ui/components/controls/ControlBar.qml
         ui/components/controls/DtmfDialer.qml
         ui/components/controls/EmojiButton.qml
         ui/components/controls/EmojiPicker.qml
         ui/components/controls/FavIcon.qml
         ui/components/controls/FavoriteListItemBig.qml
-        ui/components/controls/FavoriteListItemSmall.qml
-        ui/components/controls/FirstAidButton.qml
+        ui/components/controls/FileDropArea.qml
         ui/components/controls/HeaderIconButton.qml
+        ui/components/controls/HideableMenuItem.qml
+        ui/components/controls/HideableMenuSeparator.qml
+        ui/components/controls/JoinRuleComboBox.qml
         ui/components/controls/Label.qml
+        ui/components/controls/LabeledItem.qml
         ui/components/controls/MenuContactInfo.qml
         ui/components/controls/SearchField.qml
         ui/components/controls/Switch.qml
         ui/components/controls/TabBar.qml
         ui/components/controls/TabButton.qml
+        ui/components/controls/TextEdit.qml
         ui/components/controls/TextField.qml
+        ui/components/controls/VideoPlayer.qml
         ui/components/controls/VoiceMailField.qml
+        ui/components/controls/VolumeSlider.qml
 
         ui/components/dialogs/CredentialsDialog.qml
         ui/components/dialogs/BaseDialog.qml
         ui/components/dialogs/ConfirmDialog.qml
+        ui/components/dialogs/ConfirmDialogWithText.qml
         ui/components/dialogs/InfoDialog.qml
         ui/components/dialogs/OauthLoginDialog.qml
         # Dynamic UI
         ui/components/BaseWidget.qml
+        ui/components/ActivitiesWidget.qml
         ui/components/DateEventsWidget.qml
         ui/components/FavoritesWidget.qml
         ui/components/HistoryWidget.qml
         ui/components/WebViewWidget.qml
+        ui/components/ChatWidget.qml
         ui/components/AdditionalSettings.qml
 
         ui/components/pages/Call.qml
         ui/components/pages/Chats.qml
         ui/components/pages/Conference.qml
+        ui/components/pages/Emergency.qml
         # Dynamic UI
         ui/components/pages/BasePage.qml
 
         ui/components/popups/AudioDeviceMenu.qml
         ui/components/popups/BurgerMenu.qml
+        ui/components/popups/CallMoreMenu.qml
+        ui/components/popups/ChatUserSearch.qml
+        ui/components/popups/ConferenceMoreMenu.qml
+        ui/components/popups/CreateChatRoom.qml
         ui/components/popups/DialInInfo.qml
-        ui/components/popups/FirstAid.qml
+        ui/components/popups/EditChatRoom.qml
+        ui/components/popups/EditChatMessage.qml
+        ui/components/popups/EditStatusText.qml
+        ui/components/popups/EditUrlDialog.qml
+        ui/components/popups/EmojiPickerPopup.qml
+        ui/components/popups/FileSelectionOverview.qml
+        ui/components/popups/FilteredEmojis.qml
         ui/components/popups/HistoryListContextMenu.qml
+        ui/components/popups/ImageSendPreview.qml
+        ui/components/popups/InviteChatRoom.qml
+        ui/components/popups/InvitedToChatRoom.qml
         ui/components/popups/JitsiHistoryListContextMenu.qml
+        ui/components/popups/KnockChatRoom.qml
+        ui/components/popups/KnockedParticipant.qml
+        ui/components/popups/LargeImage.qml
+        ui/components/popups/LargeVideo.qml
         ui/components/popups/Menu.qml
+        ui/components/popups/OwnAvatarContextMenu.qml
+        ui/components/popups/PublicRoomSearch.qml
+        ui/components/popups/Popup.qml
+        ui/components/popups/PopupBackgroundOverlay.qml
         ui/components/popups/SearchResultPopup.qml
+        ui/components/popups/UrlCopyDialog.qml
+        ui/components/popups/UserSelect.qml
         ui/components/popups/VideoDeviceMenu.qml
         ui/components/popups/StreamingLightPopup.qml
 
@@ -403,15 +508,21 @@ qt_add_qml_module(gonnect
         ui/components/CallSideBar.qml
         ui/components/Card.qml
         ui/components/CardHeading.qml
+        ui/components/CardHeadingMoreMenuButton.qml
         ui/components/CardList.qml
+        ui/components/CardShadow.qml
         ui/components/ChatSideBar.qml
         ui/components/ConferenceButtonBar.qml
         ui/components/CustomWindowHeader.qml
+        ui/components/ActivitiesList.qml
         ui/components/DateEventsList.qml
         ui/components/FavoritesList.qml
         ui/components/HistoryList.qml
+        ui/components/IndicatorIcon.qml
         ui/components/MainTabBar.qml
-        ui/components/ParticipantsList.qml
+        ui/components/PresenceStatusIndicator.qml
+        ui/components/UsersList.qml
+        ui/components/RoomAvatar.qml
         ui/components/RTTDisplay.qml
         ui/components/SettingsPage.qml
         ui/components/TogglerList.qml
@@ -420,6 +531,7 @@ qt_add_qml_module(gonnect
         # Dynamic UI
         ui/components/EditModeOptions.qml
 
+        ui/scripts/phoneNumberUtil.js
         ui/scripts/util.js
 
         ui/AboutWindow.qml
@@ -464,6 +576,12 @@ qt_add_qml_module(gonnect
         ReadOnlyConfdSettings.h
         KeychainSettings.cpp
         KeychainSettings.h
+        MainPageSelection.h
+        PluginManager.h
+        PluginManager.cpp
+        SecretResponse.h
+        SelectionState.h
+        SelectionState.cpp
         StateManager.cpp
         StateManager.h
         Ticker.h
@@ -472,6 +590,7 @@ qt_add_qml_module(gonnect
         UISettings.h
         MSOAuthManager.cpp
         MSOAuthManager.h
+        WaiterHelper.h
 
         sip/CallHistory.h
         sip/CallHistory.cpp
@@ -493,6 +612,8 @@ qt_add_qml_module(gonnect
         sip/SIPAudioDevice.cpp
         sip/SIPBuddy.h
         sip/SIPBuddy.cpp
+        sip/SIPCallRoutingHop.h
+        sip/SIPCallRoutingHop.cpp
         sip/SIPCall.h
         sip/SIPCall.cpp
         sip/SIPCallManager.h
@@ -513,6 +634,8 @@ qt_add_qml_module(gonnect
         sip/SIPTemplateController.cpp
         sip/SIPUserAgentConfig.h
         sip/SIPUserAgentConfig.cpp
+        sip/Pinger.h
+        sip/Pinger.cpp
         sip/PreferredIdentity.h
         sip/PreferredIdentity.cpp
         sip/PreferredIdentityValidator.h
@@ -537,27 +660,91 @@ qt_add_qml_module(gonnect
         calendar/IDateEventFeeder.h
         calendar/IDateEventFeederFactory.h
 
+        chat/AllChatProvidersRoomProxyModel.h
+        chat/AllChatProvidersRoomProxyModel.cpp
+        chat/AllChatProvidersRoomSearchProxyModel.h
+        chat/AllChatProvidersRoomSearchProxyModel.cpp
         chat/IChatProvider.h
         chat/IChatProvider.cpp
         chat/IChatRoom.h
         chat/IChatRoom.cpp
+        chat/IpcChatRoom.h
+        chat/IpcChatRoom.cpp
+        chat/IpcConfig.h
+        chat/IpcDispatcher.h
+        chat/IpcDispatcher.cpp
+        chat/IpcInterface.h
+        chat/IpcInterface.cpp
         chat/ChatConnectorManager.h
         chat/ChatConnectorManager.cpp
         chat/ChatMessage.h
         chat/ChatMessage.cpp
+        chat/ChatMessageContainer.h
+        chat/ChatMessageContainer.cpp
+        chat/ChatMessageContentAudioFile.h
+        chat/ChatMessageContentImage.h
+        chat/ChatMessageContentImage.cpp
+        chat/ChatMessageContentFile.h
+        chat/ChatMessageContentFile.cpp
+        chat/ChatMessageContentText.h
+        chat/ChatMessageContentText.cpp
+        chat/ChatMessageContentUserStateChange.h
+        chat/ChatMessageContentUserStateChange.cpp
+        chat/ChatMessageContentVideoFile.h
+        chat/ChatMessageContentVideoFile.cpp
+        chat/ChatMessageContentPart.h
+        chat/ChatMessageContentPart.cpp
+        chat/ChatMessageContentRemoved.h
+        chat/ChatMessageContentRemoved.cpp
+        chat/ChatMessageReaction.h
+        chat/ChatMessageReaction.cpp
+        # FTS5
+        chat/ChatMessageSearchIndexer.h
+        chat/ChatMessageSearchIndexer.cpp
+        chat/ChatMessageSearchModel.h
+        chat/ChatMessageSearchModel.cpp
+        chat/ChatMessageSearchPreprocessor.h
+        chat/ChatMessageSearchPreprocessor.cpp
+        chat/ChatMessageSearchProvider.h
+        chat/ChatMessageSearchProvider.cpp
         chat/ChatModel.h
         chat/ChatModel.cpp
+        chat/ChatThreadModel.h
+        chat/ChatThreadModel.cpp
+        chat/ChatUser.h
+        chat/ChatUser.cpp
+        chat/ChatUsersModel.h
+        chat/ChatUsersModel.cpp
+        chat/ChatUsersProxyModel.h
+        chat/ChatUsersProxyModel.cpp
         chat/ChatProxyModel.h
         chat/ChatProxyModel.cpp
         chat/ChatRoomModel.h
         chat/ChatRoomModel.cpp
         chat/ChatRoomProxyModel.h
         chat/ChatRoomProxyModel.cpp
+        chat/ChatRoomSearchModel.h
+        chat/ChatRoomSearchModel.cpp
+        chat/ChatRoomUsers.h
+        chat/ChatRoomUsers.cpp
+        chat/ChatRoomUsersProxyModel.h
+        chat/ChatRoomUsersProxyModel.cpp
+        chat/ChatUserSearchModel.h
+        chat/ChatUserSearchModel.cpp
         chat/ConferenceChatRoom.h
         chat/ConferenceChatRoom.cpp
+        chat/CrossSigningSecret.h
+        chat/CrossSigningSymbol.h
+        chat/MessageJumpInfo.h
+        chat/NotificationSetting.h
+        chat/PinnedChatMessages.h
+        chat/PinnedChatMessages.cpp
+        chat/PublicChatRoom.h
 
-        conference/ConferenceParticipant.h
-        conference/ConferenceParticipant.cpp
+        conference/ConferenceLinkedRoomsProxyModel.h
+        conference/ConferenceLinkedRoomsProxyModel.cpp
+        conference/ConferenceUser.h
+        conference/ConferenceUser.cpp
         conference/IConferenceConnector.h
 
         contacts/AddressBook.cpp
@@ -593,12 +780,46 @@ qt_add_qml_module(gonnect
         contacts/ResponseTreeModel.cpp
         contacts/IAddressBookFactory.h
 
+        helper/AggregatedDirectRoomsOfContact.h
+        helper/AggregatedDirectRoomsOfContact.cpp
+        helper/AudioHelper.h
+        helper/AudioHelper.cpp
+        helper/AvatarPrioHelper.h
+        helper/AvatarPrioHelper.cpp
+        helper/CertHelper.h
+        helper/CertHelper.cpp
+        helper/ChatMessageTransformer.h
+        helper/ChatMessageTransformer.cpp
+        helper/CodeHighlighter.h
+        helper/CodeHighlighter.cpp
+        helper/ConferenceFavoriteHelper.h
+        helper/ConferenceFavoriteHelper.cpp
+        helper/ContactHelper.h
+        helper/ContactHelper.cpp
+        helper/FileContentHelper.h
+        helper/FileContentHelper.cpp
+        helper/GenericFavoriteHelper.h
+        helper/GenericFavoriteHelper.cpp
+        helper/SecretGenerator.h
+        helper/SecretGenerator.cpp
+        helper/SipFavoriteHelper.h
+        helper/SipFavoriteHelper.cpp
+        # helper/SpellCheckHighlighter.h
+        # helper/SpellCheckHighlighter.cpp
+        helper/TextFormatHelper.h
+        helper/TextFormatHelper.cpp
+        helper/VideoCallHelper.h
+        helper/VideoCallHelper.cpp
+
         media/AudioManager.h
         media/AudioManager.cpp
         media/AudioPort.h
         media/AudioPort.cpp
+        media/AudioProcessor.h
+        media/AudioProcessor.cpp
         media/Sniffer.h
         media/Sniffer.cpp
+        media/VideoDevice.h
         media/VideoManager.h
         media/VideoManager.cpp
 
@@ -619,7 +840,24 @@ qt_add_qml_module(gonnect
         platform/InhibitHelper.h
         platform/GlobalShortcuts.h
         platform/SearchProvider.h
+        platform/PlatformSession.h
         ${PLATFORM_SOURCES}
+
+        presence/ChatUserPresenceStateProvider.h
+        presence/ChatUserPresenceStateProvider.cpp
+        presence/GlobalStateAggregator.h
+        presence/GlobalStateAggregator.cpp
+        presence/IPresenceStateProvider.h
+        presence/IPresenceStateProvider.cpp
+        presence/PresenceState.h
+        presence/PresenceStateAggregator.h
+        presence/PresenceStateAggregator.cpp
+        presence/PresenceStateObjectManager.h
+        presence/PresenceStateObjectManager.cpp
+        presence/PresenceStateProxy.h
+        presence/PresenceStateProxy.cpp
+        presence/SIPBuddyPresenceStateProvider.h
+        presence/SIPBuddyPresenceStateProvider.cpp
 
         rtt/RTTProvider.h
         rtt/RTTProvider.cpp
@@ -628,8 +866,17 @@ qt_add_qml_module(gonnect
         rtt/RTTModel.h
         rtt/RTTModel.cpp
 
+        ui/ActivitiesModel.h
+        ui/ActivitiesModel.cpp
+        ui/ActivitiesProxyModel.h
+        ui/ActivitiesProxyModel.cpp
         ui/CallsModel.h
         ui/CallsModel.cpp
+        ui/CallRoutingHelper.h
+        ui/CallRoutingHelper.cpp
+        ui/CallRoutingHopInfo.h
+        ui/ClipboardHelper.h
+        ui/ClipboardHelper.cpp
         ui/DateEventsModel.h
         ui/DateEventsModel.cpp
         ui/EmojiInfo.h
@@ -652,6 +899,8 @@ qt_add_qml_module(gonnect
         ui/FavoritesModel.cpp
         ui/FavoritesProxyModel.h
         ui/FavoritesProxyModel.cpp
+        ui/FileHelper.h
+        ui/FileHelper.cpp
         ui/HistoryContactSearchModel.h
         ui/HistoryContactSearchModel.cpp
         ui/HistoryContactSearchProxyModel.h
@@ -674,8 +923,12 @@ qt_add_qml_module(gonnect
         ui/NumberStatsProxyModel.cpp
         ui/RandomRoomNameGenerator.h
         ui/RandomRoomNameGenerator.cpp
-        ui/ParticipantsModel.h
-        ui/ParticipantsModel.cpp
+        ui/UsersModel.h
+        ui/UsersModel.cpp
+        ui/PersonCoinProvider.h
+        ui/PersonCoinProvider.cpp
+        ui/PhoneNumbersModel.h
+        ui/PhoneNumbersModel.cpp
         ui/SearchListModel.h
         ui/SearchListModel.cpp
         ui/SearchListProxyModel.h
@@ -696,6 +949,12 @@ qt_add_qml_module(gonnect
         ui/TogglerProxyModel.cpp
         ui/ViewHelper.h
         ui/ViewHelper.cpp
+        ui/WebEngineKeyEventFilter.h
+        ui/WebEngineKeyEventFilter.cpp
+        ui/WindowPixelRatio.h
+        ui/WindowPixelRatio.cpp
+        ui/WindowShadowMargins.h
+        ui/WindowShadowMargins.cpp
 
         usb/IHeadsetDevice.h
         usb/HeadsetDevice.cpp
@@ -725,10 +984,34 @@ qt_add_qml_module(gonnect
         usb/busylight/LitraGlow.cpp
         usb/busylight/BlinkStick.h
         usb/busylight/BlinkStick.cpp
+
+        webdav/WebDavClient.h
+        webdav/WebDavClient.cpp
+        webdav/WebDavItem.h
+        webdav/WebDavItem.cpp
+        webdav/WebDavMultiStatus.h
+        webdav/WebDavPropertyRequest.h
+        webdav/WebDavPropertyValue.h
+        webdav/WebDavPropfindParser.h
+        webdav/WebDavPropfindParser.cpp
+        webdav/WebDavSyncChanges.h
+        webdav/WebDavSyncResult.h
+)
+
+set_source_files_properties(webdav/WebDavClient.cpp PROPERTIES COMPILE_OPTIONS "$<$<CXX_COMPILER_ID:GNU>:-Wno-subobject-linkage>")
+
+qt_add_protobuf(gonnect
+    PROTO_FILES
+        ../external/protos/chat.proto
 )
 
 if(LINUX)
     set_target_properties(gonnect PROPERTIES LINK_FLAGS_RELEASE -s)
+    target_link_options(gonnect PRIVATE
+        "-Wl,--exclude-libs,libcrypto.a"
+        "-Wl,--exclude-libs,libssl.a"
+        "-Wl,--exclude-libs,libldap.a"
+        "-Wl,--exclude-libs,liblber.a")
 endif()
 
 qt_extract_metatypes(gonnect)
@@ -756,13 +1039,21 @@ target_link_libraries(gonnect
         Qt6::Sql
         Qt6::Network
         Qt6::NetworkAuth
+        Qt6::Protobuf
         Qt6::WebEngineCore
         Qt6::WebEngineQuick
-        Qt6::Core5Compat
         GOnnectVersion
         ${PLATFORM_LIBRARIES}
         qt6keychain
         hid-rp
+        #hunspell::hunspell
+        cmark::cmark
+        KF6::SyntaxHighlighting
+        ICU::uc
+        ICU::i18n
+        ICU::data
+        QCoro6::Core
+        QCoro6::Network
         ${AKONADI_CONTACT_FACTORY}
         ${AKONADI_CALENDAR_FACTORY}
         ${CARDDAV_CONTACT_FACTORY}
@@ -792,10 +1083,12 @@ target_include_directories(gonnect
     chat
     dbus
     dbus/portal
+    helper
     sip
     calendar
     contacts
     conference
+    presence
     ui
     ui/chat
     usb
@@ -803,13 +1096,15 @@ target_include_directories(gonnect
     media
     platform
     rtt
+    webdav
     ${logfault_INCLUDE_DIRS}
     ${CMAKE_CURRENT_BINARY_DIR}
 )
 
 target_compile_definitions(gonnect
    PRIVATE
-    QT_DISABLE_DEPRECATED_BEFORE=0x060900
+    SQLITE_HAS_CODEC
+    QT_DISABLE_DEPRECATED_BEFORE=0x060B00
     QT_NO_KEYWORDS)
 
 # Add hid-rp header only stuff as "isystem" so that we have a chance

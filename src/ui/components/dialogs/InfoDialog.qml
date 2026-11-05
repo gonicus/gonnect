@@ -12,6 +12,10 @@ BaseDialog {
 
     property alias text: contentLabel.text
 
+    // Exposes the description label so that derived dialogs can place
+    // additional controls (e.g. input fields) right below the text.
+    property Item contentText: contentLabel
+
     Label {
         id: contentLabel
         elide: Label.ElideRight
@@ -23,9 +27,6 @@ BaseDialog {
             bottom: okButton.top
             margins: 20
         }
-
-        Accessible.role: Accessible.StaticText
-        Accessible.name: contentLabel.text
     }
 
     Button {
@@ -43,10 +44,5 @@ BaseDialog {
             control.accepted()
             control.close()
         }
-
-        Accessible.role: Accessible.Button
-        Accessible.name: okButton.text
-        Accessible.focusable: true
-        Accessible.onPressAction: () => okButton.click()
     }
 }

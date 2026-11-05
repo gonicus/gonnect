@@ -11,6 +11,8 @@ if(ENABLE_MSGRAPH)
     target_include_directories(MSGraphAddressBookFactory
       PRIVATE
         ${PROJECT_SOURCE_DIR}/src/contacts
+        ${PROJECT_SOURCE_DIR}/src/presence
+        ${PROJECT_SOURCE_DIR}/src/dbus/portal
         ${PROJECT_SOURCE_DIR}/src/ui
         ${PROJECT_SOURCE_DIR}/src
         ${PROJECT_SOURCE_DIR}
@@ -22,7 +24,10 @@ if(ENABLE_MSGRAPH)
       Qt6::Gui
       Qt6::Quick
       Qt6::Xml
-      Qt6::NetworkAuth)
+      Qt6::NetworkAuth
+      QCoro6::Core
+      QCoro6::Network
+    )
 
     set(MSGRAPH_ADDRESSBOOK_FACTORY MSGraphAddressBookFactory PARENT_SCOPE)
 endif()

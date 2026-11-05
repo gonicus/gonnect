@@ -3,9 +3,9 @@
 #include <QObject>
 #include <QQmlEngine>
 #include <QNetworkRequestFactory>
-#include <QSslCertificate>
 
 class QOAuth2AuthorizationCodeFlow;
+class QOAuthHttpServerReplyHandler;
 
 class AuthManager : public QObject
 {
@@ -66,10 +66,6 @@ public:
     /// Whether the authentication process has started and it is waited for it to finish
     bool isWaitingForAuth() const { return m_isWaitingForAuth; }
 
-    /// Get a list of the configured CA certificates; empty when none are configured or could be
-    /// loaded
-    const QList<QSslCertificate> &sslCAs();
-
 private Q_SLOTS:
     void authenticateJitsiImpl(const QString &roomName);
     void authRoomWaiting();
@@ -80,7 +76,9 @@ private:
     void init();
     void storeRefreshToken(const QString &token) const;
     void setIsWaitingForAuth(bool value);
+    void startBrowserAuth();
     QDateTime tokenExpiry(const QString &token) const;
+    void clearReplyHandler();
 
     bool m_isAuthManagerInitialized = false;
     bool m_isJitsiAuthRequired = false;
@@ -88,10 +86,10 @@ private:
     QString m_oauthToken;
     QString m_jitsiRoomWaitingForAuth;
     QHash<QString, Token> m_jitsiTokens;
-    bool m_isCAsInitialized = false;
-    QList<QSslCertificate> m_cas;
+    QOAuthHttpServerReplyHandler *m_replyHandler = nullptr;
 
     QDateTime m_expireDateTime;
+    bool m_isRefreshInProgress = false;
     QOAuth2AuthorizationCodeFlow *m_authFlow = nullptr;
     QObject *m_authWaitingContext = nullptr;
     QNetworkRequestFactory m_reqFactory;
@@ -112,7 +110,11 @@ class AuthManagerWrapper
     QML_SINGLETON
 
 public:
-    static AuthManager *create(QQmlEngine *, QJSEngine *) { return &AuthManager::instance(); }
+    static AuthManager *create(QQmlEngine *, QJSEngine *)
+    {
+        QQmlEngine::setObjectOwnership(&AuthManager::instance(), QQmlEngine::CppOwnership);
+        return &AuthManager::instance();
+    }
 
 private:
     AuthManagerWrapper() = default;

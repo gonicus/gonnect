@@ -4,7 +4,8 @@
 CallHistoryItem::CallHistoryItem(const QDateTime &time, const QString &remoteUrl,
                                  const QString &account, const QString &contactId,
                                  bool isSipSubscriptable, qint64 dataBaseId,
-                                 quint16 durationSeconds, Types type, CallHistory *parent)
+                                 quint16 durationSeconds, Types type, const QStringList &hops,
+                                 CallHistory *parent)
     : QObject{ parent },
       m_dataBaseId{ dataBaseId },
       m_time{ time },
@@ -12,6 +13,7 @@ CallHistoryItem::CallHistoryItem(const QDateTime &time, const QString &remoteUrl
       m_remoteUrl{ remoteUrl },
       m_account{ account },
       m_contactId{ contactId },
+      m_hops{ hops },
       m_isSipSubscriptable{ isSipSubscriptable },
       m_type{ type }
 {
@@ -19,12 +21,14 @@ CallHistoryItem::CallHistoryItem(const QDateTime &time, const QString &remoteUrl
 
 CallHistoryItem::CallHistoryItem(const QString &remoteUrl, const QString &account,
                                  const QString &contactId, bool isSipSubscriptable,
-                                 CallHistoryItem::Types type, CallHistory *parent)
+                                 CallHistoryItem::Types type, const QStringList &hops,
+                                 CallHistory *parent)
     : QObject{ parent },
       m_time{ QDateTime::currentDateTime() },
       m_remoteUrl{ remoteUrl },
       m_account{ account },
       m_contactId{ contactId },
+      m_hops{ hops },
       m_isSipSubscriptable{ isSipSubscriptable },
       m_type{ type }
 {
@@ -47,6 +51,12 @@ void CallHistoryItem::setContactId(const QString &contactId)
     flushToDatabase();
 }
 
+void CallHistoryItem::setHops(const QStringList &hops)
+{
+    m_hops = hops;
+    flushToDatabase();
+}
+
 void CallHistoryItem::endCall()
 {
     const auto now = QDateTime::currentDateTime();
@@ -64,11 +74,12 @@ void CallHistoryItem::flushToDatabase()
 QDebug operator<<(QDebug debug, const CallHistoryItem &historyItem)
 {
     QDebugStateSaver saver(debug);
-    debug.nospace() << "CallHistoryItem (" << historyItem.time()
-                    << ", account: " << historyItem.account()
+    debug.nospace() << "CallHistoryItem (id: " << historyItem.dataBaseId()
+                    << ", time: " << historyItem.time() << ", account: " << historyItem.account()
                     << ", contactId: " << historyItem.contactId()
                     << ", remote: " << historyItem.remoteUrl()
                     << ", duration: " << historyItem.durationSeconds() << " seconds"
+                    << ", hops: " << historyItem.hops()
                     << ", isSipSubscriptable: " << historyItem.isSipSubscriptable() << ")";
     return debug;
 }

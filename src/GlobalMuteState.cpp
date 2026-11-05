@@ -9,6 +9,17 @@ void GlobalMuteState::toggleMute(const QString &tag)
     Q_EMIT isMutedChanged();
 }
 
+void GlobalMuteState::setMuted(bool muted, const QString &tag)
+{
+    if (m_isMuted == muted) {
+        return;
+    }
+
+    m_isMuted = muted;
+    Q_EMIT isMutedChangedWithTag(m_isMuted, tag);
+    Q_EMIT isMutedChanged();
+}
+
 void GlobalMuteState::reset()
 {
     m_isMuted = false;

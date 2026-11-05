@@ -30,8 +30,10 @@ BaseWidget {
 
     onCleanupRequested: {
         // INFO: Avoid WebEngineView freezes on deletion, especially with invalid URL's
-        webView.stop()
-        webView.url = "about:blank"
+        if (webViewLoader.item) {
+            webViewLoader.item.stop()
+            webViewLoader.item.url = "about:blank"
+        }
     }
 
     Rectangle {
@@ -53,8 +55,12 @@ BaseWidget {
             }
         }
 
-        WebEngineView {
-            id: webView
+        Loader {
+            id: webViewLoader
+            active: !!CertificateProfile.profile
+            asynchronous: true
+            sourceComponent: webViewComponent
+
             anchors {
                 top: webviewHeading.bottom
                 bottom: parent.bottom
@@ -66,37 +72,64 @@ BaseWidget {
                 leftMargin: 15
                 rightMargin: 15
             }
+        }
 
-            url: Theme.isDarkMode ? control.darkModeUrl : control.lightModeUrl
-            backgroundColor: Theme.backgroundColor
-            settings {
-                autoLoadImages: true
-                errorPageEnabled: true
-                javascriptEnabled: true
-                localStorageEnabled: true
-                localContentCanAccessFileUrls: true
-            }
+        Component {
+            id: webViewComponent
 
-            onLoadingChanged: function(loadRequest) {
-                if (loadRequest.status === WebEngineView.LoadFailedStatus) {
-                    console.error("Failed to load page:", loadRequest.url,
-                                  ", error message:", loadRequest.errorString)
+            WebEngineView {
+                id: webView
+                backgroundColor: Theme.backgroundColor
+                profile: CertificateProfile.profile
+                url: {
+                    if (!CertHelper.clientCertsInitialized) {
+                        return ""
+                    }
+
+                    if (Theme.isDarkMode) {
+                        return !!control.darkModeUrl.trim() ? control.darkModeUrl : control.lightModeUrl
+                    } else {
+                        return !!control.lightModeUrl.trim() ? control.lightModeUrl : control.darkModeUrl
+                    }
+                }
+                settings {
+                    autoLoadImages: true
+                    errorPageEnabled: true
+                    javascriptEnabled: true
+                    localStorageEnabled: true
+                    localContentCanAccessFileUrls: true
+                }
+
+                onLoadingChanged: function(loadRequest) {
+                    if (loadRequest.status === WebEngineView.LoadFailedStatus) {
+                        console.error("Failed to load page:", loadRequest.url,
+                                      ", error message:", loadRequest.errorString)
+                    }
+                }
+
+                onSelectClientCertificate: selection => {
+                                               console.log("WebViewWidget client certificate requested, have", selection.certificates.length)
+
+                                               if (selection.certificates.length > 0) {
+                                                   selection.select(selection.certificates[0])
+                                               }
+                                           }
+
+                onCertificateError: function(error) {
+                    console.log("Certificate error encountered:", error.description);
+
+                    if (control.acceptAllCerts) {
+                        // Self hosted stuff
+                        error.acceptCertificate()
+
+                        // Do not jump to default behaviour
+                        return true
+                    }
+
+                    return false
                 }
             }
 
-            onCertificateError: function(error) {
-                console.log("Certificate error encountered:", error.description);
-
-                if (control.acceptAllCerts) {
-                    // Self hosted stuff
-                    error.acceptCertificate()
-
-                    // Do not jump to default behaviour
-                    return true
-                }
-
-                return false
-            }
         }
     }
 }

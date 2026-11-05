@@ -7,6 +7,7 @@
 #include "NetworkHelper.h"
 #include "Credentials.h"
 #include "ErrorBus.h"
+#include "WaiterHelper.h"
 
 #include <QTimer>
 #include <QUrl>
@@ -14,14 +15,24 @@
 #include <QLoggingCategory>
 #include <QCryptographicHash>
 #include <QPluginLoader>
-#include <QMutexLocker>
 
 using namespace std::chrono_literals;
 using namespace Qt::Literals::StringLiterals;
 
 Q_LOGGING_CATEGORY(lcAddressBookManager, "gonnect.app.addressbook")
 
-AddressBookManager::AddressBookManager(QObject *parent) : QObject{ parent } { }
+AddressBookManager::AddressBookManager(QObject *parent) : QObject{ parent }
+{
+    m_retryTimer.setSingleShot(true);
+    m_retryTimer.setInterval(10s);
+    m_retryTimer.callOnTimeout(this, [this]() {
+        if (m_reconnectScheduled) {
+            m_reconnectScheduled = false;
+            disconnect(m_connectivityConnection);
+            processAddressBookQueue();
+        }
+    });
+}
 
 QString AddressBookManager::secret(const QString &group) const
 {
@@ -71,6 +82,8 @@ void AddressBookManager::initAddressBookConfigs()
             }
         }
     }
+
+    Q_EMIT configsLoaded();
 }
 
 void AddressBookManager::reloadAddressBook()
@@ -82,13 +95,13 @@ void AddressBookManager::reloadAddressBook()
 
 void AddressBookManager::processAddressBookQueue()
 {
-    bool networkAvailable = true;
-    auto &nh = NetworkHelper::instance();
-
-    if (!m_queueMutex.tryLock()) {
-        qCFatal(lcAddressBookManager) << "Failed to acquire lock for the feeder queue";
+    if (m_isProcessing) {
         return;
     }
+    m_isProcessing = true;
+
+    bool networkAvailable = true;
+    auto &nh = NetworkHelper::instance();
 
     QMutableStringListIterator it(m_addressBookQueue);
     while (it.hasNext()) {
@@ -130,6 +143,9 @@ void AddressBookManager::processAddressBookQueue()
                 nh.isReachable(checkURL).then(
                         this, [this, feeder, group, checkURL](bool isReachable) {
                             if (isReachable) {
+                                if (feeder->isProcessing()) {
+                                    return;
+                                }
                                 feeder->process();
                                 Q_EMIT AddressBook::instance().contactsReady();
                             } else {
@@ -146,12 +162,11 @@ void AddressBookManager::processAddressBookQueue()
         }
     }
 
-    m_queueMutex.unlock();
+    m_isProcessing = false;
 }
 
 void AddressBookManager::requeueGroup(const QString &group)
 {
-    QMutexLocker locker(&m_queueMutex);
     if (!m_addressBookQueue.contains(group)) {
         m_addressBookQueue.append(group);
     }
@@ -164,17 +179,22 @@ void AddressBookManager::scheduleReconnect()
     }
 
     m_reconnectScheduled = true;
-    connect(
+    m_retryTimer.stop();
+    m_retryTimer.start();
+
+    disconnect(m_connectivityConnection);
+    m_connectivityConnection = connect(
             &NetworkHelper::instance(), &NetworkHelper::connectivityChanged, this,
             [this]() {
                 m_reconnectScheduled = false;
+                m_retryTimer.stop();
                 processAddressBookQueue();
             },
             Qt::ConnectionType::SingleShotConnection);
 }
 
 void AddressBookManager::acquireSecret(bool forcePrompt, const QString &group,
-                                       std::function<void(const QString &secret)> callback)
+                                       std::function<void(SecretResponse)> callback)
 {
     ReadOnlyConfdSettings settings;
 
@@ -186,17 +206,18 @@ void AddressBookManager::acquireSecret(bool forcePrompt, const QString &group,
             [this, forcePrompt, group, secretKey,
              callback](QKeychain::Error error, const QString &secret, const QString &) {
                 if (error == QKeychain::NoError && !forcePrompt) {
-                    callback(secret);
+                    callback({ secret });
                 } else if (error == QKeychain::EntryNotFound || forcePrompt) {
                     auto &viewHelper = ViewHelper::instance();
 
+                    disconnect(m_viewHelperConnections.take(group));
+
                     auto conn = connect(
                             &viewHelper, &ViewHelper::passwordResponded, this,
-                            [secretKey, group, callback, this](const QString &id,
+                            [this, secretKey, group, callback](const QString &id,
                                                                const QString &password) {
                                 if (id == group) {
-                                    QObject::disconnect(m_viewHelperConnections.value(group));
-                                    m_viewHelperConnections.remove(group);
+                                    disconnect(m_viewHelperConnections.take(group));
 
                                     Credentials::instance().set(
                                             secretKey + "/secret", password,
@@ -210,7 +231,7 @@ void AddressBookManager::acquireSecret(bool forcePrompt, const QString &group,
                                                 }
                                             });
 
-                                    callback(password);
+                                    callback({ password });
                                 }
                             });
 
@@ -218,8 +239,30 @@ void AddressBookManager::acquireSecret(bool forcePrompt, const QString &group,
 
                     ReadOnlyConfdSettings settings;
                     settings.beginGroup(group);
-                    viewHelper.requestPassword(group, settings.value("host", "").toString());
+
+                    auto name = settings.value("host", "").toString();
+                    if (name.isEmpty()) {
+                        name = settings.value("url", "").toString();
+                    }
+                    if (name.isEmpty()) {
+                        name = group;
+                    }
+
+                    viewHelper.requestPassword(group, name);
                     settings.endGroup();
+                } else {
+                    callback({ QString(), true });
                 }
             });
+}
+
+QCoro::Task<SecretResponse> AddressBookManager::acquireSecretAsync(bool forcePrompt,
+                                                                   const QString &group)
+{
+    auto waiter = std::make_unique<SecretWaiter>();
+    acquireSecret(forcePrompt, group, [raw = waiter.get()](SecretResponse response) {
+        Q_EMIT raw->received(response);
+    });
+
+    co_return co_await qCoro(waiter.get(), &SecretWaiter::received);
 }

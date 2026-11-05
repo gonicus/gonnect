@@ -1,6 +1,7 @@
 #include <libnotify/notify.h>
 #include <QApplication>
 #include "LinuxNotificationManager.h"
+#include "Pinger.h"
 
 NotificationManager &NotificationManager::instance()
 {
@@ -44,10 +45,9 @@ QString LinuxNotificationManager::add(Notification *notification)
                                         notification->iconName().toStdString().c_str());
     } else {
         QByteArray iconData = notification->iconData();
-
         internalNotification = notify_notification_new(notification->title().toStdString().c_str(),
                                                        notification->body().toStdString().c_str(),
-                                                       iconData.isEmpty() ? "dummy" : nullptr);
+                                                       iconData.isEmpty() ? NULL : "dummy");
 
         if (!iconData.isEmpty()) {
             GdkPixbufLoader *loader = gdk_pixbuf_loader_new();
@@ -57,6 +57,8 @@ QString LinuxNotificationManager::add(Notification *notification)
 
             auto icon = gdk_pixbuf_loader_get_pixbuf(loader);
             notify_notification_set_image_from_pixbuf(internalNotification, icon);
+
+            g_object_unref(loader);
         }
     }
 
@@ -136,16 +138,29 @@ QString LinuxNotificationManager::add(Notification *notification)
     m_notifications.insert(id, notification);
     m_internalNotifications.insert(id, internalNotification);
 
+    // Ping sound
+    if (notification->playPing()) {
+        auto *pinger = new Pinger(this);
+        connect(pinger, &Pinger::stopped, this, [pinger]() { pinger->deleteLater(); });
+        pinger->ping();
+    }
+
     return notification->id();
 }
 
 bool LinuxNotificationManager::remove(const QString &id)
 {
+    if (m_isShuttingDown) {
+        return false;
+    }
+
     if (m_notifications.contains(id)) {
         m_notifications.value(id)->deleteLater();
-        notify_notification_close(m_internalNotifications.value(id), NULL);
 
-        m_internalNotifications.remove(id);
+        if (auto *internalNotification = m_internalNotifications.take(id)) {
+            notify_notification_close(internalNotification, NULL);
+            g_object_unref(internalNotification);
+        }
     }
 
     return m_notifications.remove(id);
@@ -153,6 +168,8 @@ bool LinuxNotificationManager::remove(const QString &id)
 
 void LinuxNotificationManager::shutdown()
 {
+    m_isShuttingDown = true;
+
     // Close notifications
     for (auto iter = m_internalNotifications.constBegin();
          iter != m_internalNotifications.constEnd(); ++iter) {
@@ -160,7 +177,11 @@ void LinuxNotificationManager::shutdown()
     }
 
     qDeleteAll(m_notifications);
-    qDeleteAll(m_internalNotifications);
+
+    for (auto *notification : std::as_const(m_internalNotifications)) {
+        g_object_unref(notification);
+    }
+
     m_notifications.clear();
     m_internalNotifications.clear();
 }

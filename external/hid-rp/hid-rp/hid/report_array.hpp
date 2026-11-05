@@ -1,18 +1,9 @@
-/// @file
-///
-/// @author Benedek Kupper
-/// @date   2024
-///
-/// @copyright
-///         This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
-///         If a copy of the MPL was not distributed with this file, You can obtain one at
-///         https://mozilla.org/MPL/2.0/.
-///
-#ifndef __HID_REPORT_ARRAY_HPP_
-#define __HID_REPORT_ARRAY_HPP_
+// SPDX-License-Identifier: MPL-2.0
+#pragma once
 
 #include <algorithm>
 #include <array>
+#include "hid/rdf/descriptor.hpp"
 #include "sized_unsigned.hpp"
 
 namespace hid
@@ -29,13 +20,29 @@ class report_array
         std::conditional_t<std::is_same_v<T, TStorage>, T, sized_unsigned_t<sizeof(T)>>;
 
   public:
+    template <report::type TYPE, UsageType TUsage>
+    [[nodiscard]] static constexpr auto descriptor(TUsage max_usage)
+    {
+        using namespace hid::page;
+        using namespace hid::rdf;
+        return rdf::descriptor(
+            // clang-format off
+            report_size(sizeof(T) * 8),
+            report_count(SIZE),
+            logical_limits<1, sizeof(T)>(0, max_usage),
+            usage_limits(nullusage, max_usage),
+            main::data_field<TYPE>::array()
+            // clang-format on
+        );
+    }
+
     bool set(T usage, bool value = true)
     {
-        auto n = static_cast<numeric_type>(usage);
-        auto it = std::find(arr_.begin(), arr_.end(), value ? static_cast<numeric_type>(0) : n);
+        auto num = static_cast<numeric_type>(usage);
+        auto* it = std::find(arr_.begin(), arr_.end(), value ? static_cast<numeric_type>(0) : num);
         if (it != arr_.end())
         {
-            *it = value ? n : static_cast<numeric_type>(0);
+            *it = value ? num : static_cast<numeric_type>(0);
             return true;
         }
         return false;
@@ -43,7 +50,7 @@ class report_array
     constexpr void reset() { arr_.fill(static_cast<numeric_type>(0)); }
     constexpr bool reset(T usage) { return set(usage, false); }
     constexpr bool flip(T usage) { return set(usage, !test(usage)); }
-    bool test(T usage) const
+    [[nodiscard]] constexpr bool test(T usage) const
     {
         return std::find(arr_.begin(), arr_.end(), static_cast<numeric_type>(usage)) != arr_.end();
     }
@@ -52,10 +59,11 @@ class report_array
     constexpr bool operator==(const report_array&) const = default;
     constexpr bool operator!=(const report_array&) const = default;
 
+    // exposes the raw storage for test-only printing (see test/report_printers.hpp)
+    [[nodiscard]] constexpr const auto& raw() const { return arr_; }
+
   private:
     std::array<TStorage, SIZE> arr_{};
 };
 
 } // namespace hid
-
-#endif // __HID_REPORT_ARRAY_HPP_

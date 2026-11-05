@@ -1,41 +1,36 @@
-/// @file
-///
-/// @author Benedek Kupper
-/// @date   2022
-///
-/// @copyright
-///         This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
-///         If a copy of the MPL was not distributed with this file, You can obtain one at
-///         https://mozilla.org/MPL/2.0/.
-///
-#ifndef __HID_RDF_EXCEPTION_HPP_
-#define __HID_RDF_EXCEPTION_HPP_
+// SPDX-License-Identifier: MPL-2.0
+#pragma once
 
+#include <cassert>
 #include "hid/rdf/constants.hpp"
 
-#ifndef HID_RDF_ASSERT
-#if defined(__EXCEPTIONS) // TODO: add other toolchains
-#define HID_RDF_ASSERT(CONDITION, EXCEPTION)                                                       \
+#ifndef HID_RP_ASSERT
+#if defined(__EXCEPTIONS) or defined(_CPPUNWIND)
+#define HID_RP_ASSERT(CONDITION, EXCEPTION, ...)                                                   \
     {                                                                                              \
         if (!(CONDITION))                                                                          \
         {                                                                                          \
             using namespace hid::rdf;                                                              \
-            throw(EXCEPTION());                                                                    \
+            throw(EXCEPTION(__VA_ARGS__));                                                         \
         }                                                                                          \
     }
+#elif NDEBUG
+#define HID_RP_ASSERT(CONDITION, EXCEPTION, ...) (void)sizeof(CONDITION)
 #else
-#define HID_RDF_ASSERT(CONDITION, EXCEPTION) (void)sizeof(CONDITION)
+#define HID_RP_ASSERT(CONDITION, EXCEPTION, ...) assert(CONDITION)
 #endif
 #endif
 
 namespace hid::rdf
 {
+/// @brief This is the base class for all exceptions in this library.
+/// It doesn't subclass std::exception as it doesn't have a constexpr constructor.
 class exception
 {
   public:
     using string_type = const char*;
 
-    string_type what() const { return name_; }
+    [[nodiscard]] constexpr string_type what() const { return name_; }
 
   protected:
     constexpr exception(string_type name)
@@ -43,7 +38,7 @@ class exception
     {}
 
   private:
-    string_type const name_;
+    string_type name_;
 };
 
 struct ex_item_invalid_tag_type : public exception
@@ -53,6 +48,22 @@ struct ex_item_invalid_tag_type : public exception
     {}
 };
 
+struct ex_report_table_invalid_size : public exception
+{
+    constexpr ex_report_table_invalid_size()
+        : exception("report table size invalid")
+    {}
+};
+
+struct ex_report_invalid_size : public exception
+{
+    constexpr ex_report_invalid_size()
+        : exception("report size invalid")
+    {}
+};
+
+/// @brief This class is trying to follow the conventions established by this document:
+/// https://usb.org/sites/default/files/hidpar.pdf
 class parser_exception : public exception
 {
   public:
@@ -72,7 +83,7 @@ class parser_exception : public exception
     {}
 
   private:
-    code_type const code_;
+    [[maybe_unused]] code_type code_;
 
     static constexpr code_type ERROR_FLAG = 1 << 15;
     static constexpr code_type VENDOR_DEFINED_FLAG = 1 << 14;
@@ -80,8 +91,7 @@ class parser_exception : public exception
     constexpr parser_exception(string_type name, code_type subcode, code_type tag,
                                code_type tag_type)
         : exception(name),
-          code_(ERROR_FLAG | ((static_cast<code_type>(subcode) & 0xcf) << 8) |
-                (static_cast<code_type>(tag) << 4) | (static_cast<code_type>(tag_type) << 2))
+          code_(ERROR_FLAG | ((subcode & 0xcf) << 8) | (tag << 4) | (tag_type << 2))
     {}
 };
 
@@ -239,6 +249,22 @@ struct ex_logical_limits_crossed : public parser_exception
     {}
 };
 
+struct ex_physical_limit_missing : public parser_exception
+{
+    constexpr ex_physical_limit_missing()
+        : parser_exception("physical min and max must either be both defined or both missing",
+                           global::tag::PHYSICAL_MAXIMUM, 1)
+    {}
+};
+
+struct ex_physical_limits_crossed : public parser_exception
+{
+    constexpr ex_physical_limits_crossed()
+        : parser_exception("physical min must be less than or equal to max",
+                           global::tag::PHYSICAL_MAXIMUM, 1)
+    {}
+};
+
 struct ex_usage_page_zero : public parser_exception
 {
     constexpr ex_usage_page_zero()
@@ -265,6 +291,97 @@ struct ex_usage_missing : public parser_exception
 {
     constexpr ex_usage_missing()
         : parser_exception("usage must be defined before any main items", local::tag::USAGE, 2)
+    {}
+};
+
+struct ex_usage_min_duplicate : public parser_exception
+{
+    constexpr ex_usage_min_duplicate()
+        : parser_exception("usage min must be unique within a main section",
+                           local::tag::USAGE_MINIMUM, 3)
+    {}
+};
+
+struct ex_usage_max_duplicate : public parser_exception
+{
+    constexpr ex_usage_max_duplicate()
+        : parser_exception("usage max must be unique within a main section",
+                           local::tag::USAGE_MAXIMUM, 3)
+    {}
+};
+
+struct ex_usage_limit_missing : public parser_exception
+{
+    constexpr ex_usage_limit_missing()
+        : parser_exception("usage min and max must be both defined", local::tag::USAGE_MAXIMUM, 0)
+    {}
+};
+
+struct ex_usage_limits_crossed : public parser_exception
+{
+    constexpr ex_usage_limits_crossed()
+        : parser_exception("usage min must be less than or equal to max", local::tag::USAGE_MAXIMUM,
+                           1)
+    {}
+};
+
+struct ex_usage_limits_size_mismatch : public parser_exception
+{
+    constexpr ex_usage_limits_size_mismatch()
+        : parser_exception("usage min and max must be both extended", local::tag::USAGE_MAXIMUM, 4)
+    {}
+};
+
+struct ex_usage_limits_page_mismatch : public parser_exception
+{
+    constexpr ex_usage_limits_page_mismatch()
+        : parser_exception("extended usage min and max pages aren't matching",
+                           local::tag::USAGE_MAXIMUM, 2)
+    {}
+};
+
+struct ex_delimiter_invalid : public parser_exception
+{
+    constexpr ex_delimiter_invalid()
+        : parser_exception("delimiter must be open(0) or close(1)", local::tag::DELIMITER, 0)
+    {}
+};
+
+struct ex_delimiter_nesting : public parser_exception
+{
+    constexpr ex_delimiter_nesting()
+        : parser_exception("delimiters must not be nested", local::tag::DELIMITER, 1)
+    {}
+};
+
+struct ex_delimiter_unmatched : public parser_exception
+{
+    constexpr ex_delimiter_unmatched()
+        : parser_exception("open delimiters must be closed", local::tag::DELIMITER, 2)
+    {}
+};
+
+struct ex_delimiter_invalid_content : public parser_exception
+{
+    constexpr ex_delimiter_invalid_content()
+        : parser_exception("delimiters must only contain usage local items", local::tag::DELIMITER,
+                           3)
+    {}
+};
+
+struct ex_delimiter_invalid_location : public parser_exception
+{
+    constexpr ex_delimiter_invalid_location()
+        : parser_exception("delimiters must not be in top level collection or end collection",
+                           local::tag::DELIMITER, 4)
+    {}
+};
+
+struct ex_delimiter_invalid_main_item : public parser_exception
+{
+    constexpr ex_delimiter_invalid_main_item()
+        : parser_exception("delimiters must not be applied to an array data item",
+                           local::tag::DELIMITER, 5)
     {}
 };
 
@@ -306,6 +423,11 @@ struct ex_report_total_size_invalid : public parser_exception
     {}
 };
 
-} // namespace hid::rdf
+struct ex_buffered_bytes_misaligned : public parser_exception
+{
+    constexpr ex_buffered_bytes_misaligned(main::tag tag)
+        : parser_exception("buffered bytes field is not aligned on a byte boundary", tag, 0)
+    {}
+};
 
-#endif // __HID_RDF_EXCEPTION_HPP_
+} // namespace hid::rdf

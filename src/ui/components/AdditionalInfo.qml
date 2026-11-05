@@ -51,8 +51,6 @@ Item {
                 required property variant output
 
                 Accessible.role: Accessible.Section
-                Accessible.name: qsTr("Expandable response section")
-                Accessible.focusable: true
                 Accessible.onPressAction: () => treeViewDelegate.toggleSection()
 
                 function toggleSection() {
@@ -78,8 +76,6 @@ Item {
                     anchors.fill: parent
                     color: hoverArea.hovered ? Theme.highlightColor : Theme.backgroundColor
                     z: 0
-
-                    Accessible.ignored: true
                 }
 
                 contentItem: TextEdit {
@@ -95,8 +91,6 @@ Item {
                     z: 1
 
                     Accessible.role: Accessible.TreeItem
-                    Accessible.name: treeItem.text
-                    Accessible.focusable: true
                 }
 
                 indentation: 10
@@ -116,8 +110,6 @@ Item {
                         }
                         rotation: treeViewDelegate.expanded ? 270 : 0
                     }
-
-                    Accessible.ignored: true
                 }
             }
         }

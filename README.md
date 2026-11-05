@@ -3,6 +3,10 @@
 </p>
 
 <p align="center">
+  <strong>Telephony · Video conferencing · Chat</strong>
+</p>
+
+<p align="center">
   <a href="https://docs.gonicus.de/gonnect">Documentation</a> |
   <a href="https://github.com/gonicus/gonnect/issues">Issues</a> |
   <a href="https://flathub.org/apps/de.gonicus.gonnect">Install</a>
@@ -13,33 +17,51 @@
 
 # Overview
 
-_GOnnect_ is a simple, easy to use UC client, designed for
+_GOnnect_ is a simple, easy to use UC client that brings telephony (SIP),
+video conferencing (Jitsi Meet) and chat (Matrix) together. It is designed for
 Linux / _Flatpak_ based installations and Microsoft Windows.
 It is designed to integrate seamlessly into modern desktop
 environments.
 
 ![Overview](media/main-screen.png)
 
-What is special about _GOnnect_ is that is meant to be provisioned. For
-that reason it has no configuration wizard or settings dialog and
-requires a working configuration file in place.
+What is special about _GOnnect_ is that it is meant to be provisioned. For
+that reason it has no general settings dialog and requires a working
+configuration file in place. Only if none is found, a small template wizard
+helps to set up common SIP providers and PBXs.
 
 Here's a short feature list:
 
- * Call forwarding
- * Conference calls with three parties
- * Real-Time Text (RTT) over SIP
- * Busy state for supported sources
- * Configurable busy on active call
+ * **Telephony (SIP)**
+   * Attended call transfer via drag & drop, multiple calls with hold/resume
+   * Display of call forwarding info (Diversion / History-Info)
+   * Conference calls with three parties
+   * Real-Time Text (RTT) over SIP
+   * Call quality and security indicator
+   * Call history, block list, emergency call menu
+   * Busy state for supported sources
+   * Configurable busy on active call
+   * Configurable identities for outgoing calls
+   * Configurable Togglers (i.e. for call queues, CFNL, etc.)
+   * Echo cancellation, noise suppression and gain control (WebRTC AEC3)
+ * **Jitsi Meet Integration: Upgrade call to Videoconference**
+   * Admit or reject waiting participants (knock), tile view, screen sharing
+   * Join conferences straight from your calendar
+ * Pluggable **chat support** via [GOuda](https://github.com/gonicus/gouda-proto)
+   * [Matrix chat](https://github.com/gonicus/gouda-matrix) as a Flatpak plugin
+   * Direct chat next to a call, call button in the chat
+   * Reactions, replies, editing, pinned messages, attachments via drag & drop
+   * Device verification
+ * **Presence**: SIP buddy and chat presence combined, own status and status text
+ * Dashboard with widgets (appointments, favorites, history, chat, activities, web view)
+ * Central search for contacts, chat rooms/messages and history (Ctrl+F)
  * Address sources
    * LDAP
    * CardDAV
-   * CSV
    * GNOME Contacts / Evolution Data Service
    * Microsoft 365 Contacts (on Windows)
- * Configurable identities for outgoing calls
- * Configurable Togglers (i.e. for call queues, CFNL, etc.)
- * **Jitsi Meet Integration: Upgrade call to Videoconference**
+   * Unified avatars from address sources and chat
+   * CSV
  * Calendar sources for upcoming conferences
    * CalDAV
    * GNOME Calendar / Evolution Data Service
@@ -128,7 +150,7 @@ or KDE's _discover_.
 
 After you have installed _GOnnect_, either adjust the provided
 `docs/modules/ROOT/examples/sample.conf` and place it in `~/.var/app/de.gonicus.gonnect/config/gonnect/99-user.conf`,
-or head over to [the documentation](https://github.com/gonicus/gonnect/wiki).
+or head over to [the documentation](https://docs.gonicus.de/gonnect).
 
 # Non-goals
 
@@ -148,6 +170,37 @@ that the initializing participant will be a router for the audio streams of the 
 our experience, having more than three endpoints will produce bad sound quality, delays and
 other performance issues. Bigger conferences would require a specific configuration on the
 SIP server or another platform (like [Jitsi Meet](https://meet.jit.si/)).
+
+# Installation
+
+## Linux
+
+The main distribution channel is [flathub](https://flathub.org/en/apps/de.gonicus.gonnect).
+Depending on your setup, go to your software center (i.e. GNOME Software, KDE Discover) or
+the flathub website, search for GOnnect and click install.
+
+If you prefere the shell, make sure you've set up the [flathub remote](https://flathub.org/en/setup)
+and run:
+
+```
+flatpak install de.gonicus.gonnect
+```
+
+Plugins can be listed via:
+
+```
+flatpak search de.gonicus.gonnect.plugin
+```
+
+Install them as desired with their flatpak ID (i.e. `flatpak install de.gonicus.gonnect.plugin.Matrix//3`
+for matrix chat support) and restart GOnnect. For plugin configuration, refer to the
+plugin documentation. On Windows, a chat backend can only be used by pointing
+`generic/headlessClientPath` to it.
+
+## Windows
+
+Download the NSIS installer from the github [releases](https://github.com/gonicus/gonnect/releases)
+and run the installer.
 
 # Translations
 
@@ -201,7 +254,7 @@ distrobox enter gonnect
 cd <to where you've cloned this repository>
 conan config install resources/conan
 conan export-dependencies .
-conan install . --build=missing
+conan install . --build=missing -s compiler.cppstd=20
 cmake --preset conan-release .
 cmake --build --preset conan-release --parallel $(nproc --all)
 ```
@@ -234,7 +287,7 @@ choco install -y git git-lfs python3 conan nsis cmake strawberryperl aqt
 choco install -y visualstudio2022buildtools --package-parameters "--add Microsoft.VisualStudio.Workload.MSBuildTools;includeRecommended --add Microsoft.VisualStudio.Workload.VCTools;includeRecommended --quiet"
 
 # install qt in users home folder
-aqt install-qt windows desktop 6.10.1 win64_msvc2022_64 -m qt5compat qtmultimedia qtwebengine qtwebchannel qtnetworkauth qtpositioning qtwebsockets qtgrpc qtshadertools -O $env:USERPROFILE\Qt
+aqt install-qt windows desktop 6.10.1 win64_msvc2022_64 -m qtmultimedia qtwebengine qtwebchannel qtnetworkauth qtpositioning qtwebsockets qtgrpc qtshadertools -O $env:USERPROFILE\Qt
 
 [System.Environment]::SetEnvironmentVariable('Qt6_Dir', $env:USERPROFILE + '\Qt\6.10.1\msvc2022_64\', 'User')
 ```
@@ -248,7 +301,7 @@ cd <to where you have cloned this repository>
 conan config install resources/conan
 conan export-dependencies .
 conan profile detect
-conan install . --build=missing -s compiler.cppstd=17
+conan install . --build=missing -s compiler.cppstd=20
 
 # build gonnect
 cmake --preset conan-default .

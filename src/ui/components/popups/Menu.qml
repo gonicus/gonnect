@@ -1,23 +1,25 @@
 pragma ComponentBehavior: Bound
 
-
 import QtQuick
 import QtQuick.Templates as T
 import QtQuick.Controls.Material
 import QtQuick.Controls.Material.impl
 import QtQuick.Window
+import base as Base
 
 T.Menu {
     id: control
 
     implicitWidth: {
         let v = 0
-        for (const child of control.contentChildren) {
+        for (let i = 0; i < control.count; ++i) {
+            const child = control.itemAt(i)
             if (child instanceof MenuItem) {
                 v = Math.max(v, child.implicitWidth)
             }
         }
-        return v
+        return Math.max(v + control.leftPadding + control.rightPadding,
+                             control.Material.menuItemHeight)
     }
     implicitHeight: Math.max(implicitBackgroundHeight + topInset + bottomInset,
                              implicitContentHeight + topPadding + bottomPadding)
@@ -71,13 +73,6 @@ T.Menu {
         }
     }
 
-    T.Overlay.modal: Rectangle {
-        color: control.Material.backgroundDimColor
-        Behavior on opacity { NumberAnimation { duration: 150 } }
-    }
-
-    T.Overlay.modeless: Rectangle {
-        color: control.Material.backgroundDimColor
-        Behavior on opacity { NumberAnimation { duration: 150 } }
-    }
+    T.Overlay.modal: Base.PopupBackgroundOverlay {}
+    T.Overlay.modeless: Base.PopupBackgroundOverlay {}
 }

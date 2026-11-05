@@ -1,6 +1,8 @@
 option(ENABLE_GOW_001 "Enable hook off timer for headsets" OFF)
 option(ENABLE_GOW_002 "Disable web engine GPU support" OFF)
 option(ENABLE_GOW_003 "Disable web engine renderer accessibility support" OFF)
+option(ENABLE_GOW_004 "Disable web engine pipewire camera" OFF)
+option(ENABLE_GOW_005 "Disable new screensharing API" OFF)
 
 set(ENABLED_WORKAROUNDS "")
 

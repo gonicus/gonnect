@@ -13,7 +13,7 @@ if(ENABLE_LDAP)
 
     qt_add_plugin(LDAPAddressBookFactory STATIC
       CLASS_NAME LDAPAddressBookFactory
-    
+
       LDAPAddressBookFactory.cpp
       LDAPAddressBookFactory.h
       LDAPAddressBookFeeder.cpp
@@ -29,6 +29,7 @@ if(ENABLE_LDAP)
     target_include_directories(LDAPAddressBookFactory
       PRIVATE
         ${PROJECT_SOURCE_DIR}/src/contacts
+        ${PROJECT_SOURCE_DIR}/src/presence
         ${PROJECT_SOURCE_DIR}/src/dbus/portal
         ${PROJECT_SOURCE_DIR}/src/ui
         ${PROJECT_SOURCE_DIR}/src/sip
@@ -36,14 +37,16 @@ if(ENABLE_LDAP)
         ${PROJECT_SOURCE_DIR}
         ${PROJECT_BINARY_DIR}/src
     )
-    
+
     target_link_libraries(LDAPAddressBookFactory
     PRIVATE
       Qt6::Core
       Qt6::Gui
       Qt6::Quick
+      QCoro6::Core
+      QCoro6::Network
       ${LDAP_PLATFORM_LIBS}
     )
-    
+
     set(LDAP_ADDRESSBOOK_FACTORY LDAPAddressBookFactory PARENT_SCOPE)
 endif()

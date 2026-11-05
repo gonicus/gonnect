@@ -1,0 +1,52 @@
+Do not drop lines containing PHOTO, SOUND or X-CUSTOM
+
+The parser skipped every line containing one of these substrings
+anywhere (e.g. "FN:PHOTOGRAPHER Bob"), so PHOTO was never delivered.
+Only skip continuation lines that were not unfolded instead.
+
+diff --git a/src/text_io.cpp b/src/text_io.cpp
+index 73aa952..31f034f 100644
+--- a/src/text_io.cpp
++++ b/src/text_io.cpp
+@@ -219,7 +219,6 @@ std::vector<vCard> TextReader::parseCards()
+     std::vector<vCard> vcards;
+     vCard current;
+     bool started = false;
+-    bool trySkipContent = false;
+     std::string line;
+     while(!safeGetline(m_is, line)->eof())
+     {
+@@ -230,7 +229,6 @@ std::vector<vCard> TextReader::parseCards()
+         else if((line == VC_END_TOKEN) && started)
+         {
+             vcards.push_back(current);
+-            trySkipContent = false;
+             started = false;
+             // Empty the current card
+             current = vCard();
+@@ -252,13 +250,9 @@ std::vector<vCard> TextReader::parseCards()
+         }
+         else if(started)
+         {
+-            // Check data (PHOTO), (SOUND)
+-            if(line.find("X-CUSTOM") != std::string::npos || line.find("PHOTO") != std::string::npos || line.find("SOUND") != std::string::npos)
+-            {
+-                trySkipContent = true;
+-                continue;
+-            }
+-            if(line.empty() || trySkipContent && line.at(0) == ' ')
++            // Skip empty lines and continuation lines that were not unfolded
++            // (e.g. LF-only line endings) - a property never starts with whitespace
++            if(line.empty() || line.at(0) == ' ' || line.at(0) == '\t')
+             {
+                 continue;
+             }
+@@ -271,8 +265,6 @@ std::vector<vCard> TextReader::parseCards()
+             {
+                 continue;
+             }
+-
+-            trySkipContent = false;
+         }
+     }
+ 

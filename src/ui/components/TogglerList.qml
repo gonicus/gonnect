@@ -8,10 +8,11 @@ import base
 ListView {
     id: togglerList
     implicitHeight: 30
-    leftMargin: 20
-    rightMargin: 20
-    spacing: 20
+    leftMargin: 2 * Theme.d
+    rightMargin: 2 * Theme.d
+    spacing: Theme.d
     orientation: ListView.Horizontal
+    flickableDirection: Flickable.AutoFlickIfNeeded
     model: TogglerProxyModel {
         displayFilter: Toggler.STATUS
         TogglerModel {}
@@ -36,11 +37,8 @@ ListView {
         required property bool isActive
         required property bool isBusy
 
-        Accessible.role: Accessible.ListItem
-        Accessible.name: qsTr("Toggle %1").arg(delg.name)
+        Accessible.id: `toggler.${delg.id}`
         Accessible.description: delg.description
-        Accessible.focusable: true
-        Accessible.onPressAction: () => TogglerManager.toggleToggler(delg.id)
 
         onToggled: () => TogglerManager.toggleToggler(delg.id)
 
@@ -58,8 +56,6 @@ ListView {
             Behavior on color { ColorAnimation { duration: 100 } }
             Behavior on border.color { ColorAnimation { duration: 100 } }
 
-            Accessible.ignored: true
-
             Rectangle {
                 x: delg.checked ? (parent.width - width - 2) : 2
                 y: parent.height / 2 - height / 2
@@ -70,8 +66,6 @@ ListView {
 
                 Behavior on x { NumberAnimation { duration: 100 } }
                 Behavior on color { ColorAnimation { duration: 100 } }
-
-                Accessible.ignored: true
             }
         }
 
@@ -94,8 +88,6 @@ ListView {
 
                 Accessible.ignored: true
             }
-
-            Accessible.ignored: true
         }
     }
 }

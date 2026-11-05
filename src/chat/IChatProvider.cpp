@@ -12,3 +12,11 @@ void IChatProvider::setIsConnected(bool value)
         Q_EMIT isConnectedChanged();
     }
 }
+
+void IChatProvider::setUnreadNotificationsCount(qsizetype count)
+{
+    if (m_unreadNotificationsCount != count) {
+        m_unreadNotificationsCount = count;
+        Q_EMIT unreadNotificationsCountChanged();
+    }
+}

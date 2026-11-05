@@ -7,6 +7,9 @@
 #include "BlinkStick.h"
 #include "GlobalCallState.h"
 #include "GlobalMuteState.h"
+#include "GlobalStateAggregator.h"
+#include "EnumTranslation.h"
+#include "AppSettings.h"
 
 #include <QSet>
 
@@ -16,6 +19,8 @@ BusylightDeviceManager::BusylightDeviceManager(QObject *parent) : QObject{ paren
     connect(&GlobalCallState::instance(), &GlobalCallState::globalCallStateChanged, this,
             &BusylightDeviceManager::updateBusylightState);
     connect(&GlobalMuteState::instance(), &GlobalMuteState::isMutedChangedWithTag, this,
+            &BusylightDeviceManager::updateBusylightState);
+    connect(&GlobalStateAggregator::instance(), &GlobalStateAggregator::presenceStateChanged, this,
             &BusylightDeviceManager::updateBusylightState);
     updateBusylightState();
 }
@@ -45,6 +50,7 @@ bool BusylightDeviceManager::createBusylightDevice(const hid_device_info &device
     if (device) {
         device->open();
         m_devices.append(device);
+        updateBusylightState();
     }
     return device;
 }
@@ -139,8 +145,20 @@ void BusylightDeviceManager::updateBusylightState()
 
     if (!isCallActive) {
         stopBlinking();
-        switchOff();
         switchStreamlightOff();
+
+        AppSettings settings;
+        const bool shallMirror =
+                settings.value("generic/busylightMirrorPresenceState", true).toBool();
+        const auto presenceState = GlobalStateAggregator::instance().presenceState();
+
+        if (!shallMirror || presenceState == PresenceState::State::Unknown
+            || presenceState == PresenceState::State::Offline) {
+            switchOff();
+        } else {
+            switchOn(EnumTranslation::instance().presenceStateColor(presenceState));
+        }
+
         return;
     }
 

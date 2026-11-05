@@ -2,6 +2,7 @@
 #include "ReadOnlyConfdSettings.h"
 #include "Credentials.h"
 #include "ErrorBus.h"
+#include "CertHelper.h"
 
 #include <QtNetworkAuth/QtNetworkAuth>
 #include <QLoggingCategory>
@@ -44,7 +45,7 @@ void AuthManager::init()
     if (!settings.value("generic/verifyServer", true).toBool()) {
         sslConfig.setPeerVerifyMode(QSslSocket::PeerVerifyMode::VerifyNone);
     }
-    sslConfig.addCaCertificates(sslCAs());
+    sslConfig.addCaCertificates(CertHelper::instance().caCerts());
     m_reqFactory.setSslConfiguration(sslConfig);
 
     settings.beginGroup("jitsi");
@@ -60,6 +61,7 @@ void AuthManager::init()
 
     QObject::connect(m_authFlow, &QOAuth2AuthorizationCodeFlow::tokenChanged, this,
                      [this](const QString &token) {
+                         m_isRefreshInProgress = false;
                          qCInfo(lcAuthManager)
                                  << "Received new OAuth access token - updating bearer";
                          m_reqFactory.setBearerToken(token.toLatin1());
@@ -86,6 +88,18 @@ void AuthManager::init()
                          qCInfo(lcAuthManager).nospace().noquote()
                                  << "OAuth error reported by server: " << error << " ("
                                  << errorDescription << ", " << uri << ")";
+                     });
+
+    QObject::connect(m_authFlow, &QOAuth2AuthorizationCodeFlow::requestFailed, this,
+                     [this](const QAbstractOAuth::Error error) {
+                         qCCritical(lcAuthManager) << "OAuth2 request failed:" << error;
+
+                         if (m_isRefreshInProgress) {
+                             m_isRefreshInProgress = false;
+                             qCInfo(lcAuthManager) << "Refresh failed - starting browser auth";
+                             QMetaObject::invokeMethod(this, &AuthManager::startBrowserAuth,
+                                                       Qt::QueuedConnection);
+                         }
                      });
 
     QObject::connect(m_authFlow, &QOAuth2AuthorizationCodeFlow::authorizeWithBrowser, this,
@@ -156,30 +170,13 @@ bool AuthManager::ensureOAuthAuthenticated()
 
         if (expirationDate.isValid()
             && QDateTime::currentDateTime() < expirationDate.addSecs(-60)) {
+            m_isRefreshInProgress = true;
             m_authFlow->refreshTokens();
             return false;
         }
     }
 
-    auto replyHandler = new QOAuthHttpServerReplyHandler(this);
-
-    QObject::connect(replyHandler, &QOAuthHttpServerReplyHandler::tokenRequestErrorOccurred, this,
-                     [replyHandler](QAbstractOAuth::Error error, const QString &errorString) {
-                         Q_UNUSED(error);
-                         qCCritical(lcAuthManager) << "Error on receiving token:" << errorString;
-                         replyHandler->close();
-                         replyHandler->deleteLater();
-                     });
-
-    QObject::connect(replyHandler, &QOAuthHttpServerReplyHandler::tokensReceived, this,
-                     [replyHandler](const QVariantMap &) {
-                         replyHandler->close();
-                         replyHandler->deleteLater();
-                     });
-
-    m_authFlow->setReplyHandler(replyHandler);
-    m_authFlow->grant();
-
+    startBrowserAuth();
     return false;
 }
 
@@ -189,6 +186,36 @@ void AuthManager::setIsWaitingForAuth(bool value)
         m_isWaitingForAuth = value;
         Q_EMIT isWaitingForAuthChanged();
     }
+}
+
+void AuthManager::startBrowserAuth()
+{
+    if (m_authFlow->status() == QAbstractOAuth::Status::RefreshingToken) {
+        return;
+    }
+
+    clearReplyHandler();
+
+    m_replyHandler = new QOAuthHttpServerReplyHandler(this);
+
+    QObject::connect(
+            m_replyHandler, &QOAuthHttpServerReplyHandler::tokenRequestErrorOccurred, this,
+            [this, handler = m_replyHandler](QAbstractOAuth::Error, const QString &errorString) {
+                qCCritical(lcAuthManager) << "Error on receiving token:" << errorString;
+                if (handler == m_replyHandler) {
+                    clearReplyHandler();
+                }
+            });
+
+    QObject::connect(m_replyHandler, &QOAuthHttpServerReplyHandler::tokensReceived, this,
+                     [this, handler = m_replyHandler](const QVariantMap &) {
+                         if (handler == m_replyHandler) {
+                             clearReplyHandler();
+                         }
+                     });
+
+    m_authFlow->setReplyHandler(m_replyHandler);
+    m_authFlow->grant();
 }
 
 QDateTime AuthManager::tokenExpiry(const QString &token) const
@@ -236,6 +263,15 @@ QDateTime AuthManager::tokenExpiry(const QString &token) const
     return QDateTime::fromSecsSinceEpoch(expValue.toInt());
 }
 
+void AuthManager::clearReplyHandler()
+{
+    if (m_replyHandler) {
+        m_replyHandler->close();
+        m_replyHandler->deleteLater();
+        m_replyHandler = nullptr;
+    }
+}
+
 void AuthManager::authenticateJitsiRoom(const QString &roomName)
 {
     if (!roomName.isEmpty()) {
@@ -278,30 +314,6 @@ QByteArray AuthManager::jitsiTokenForRoom(const QString &roomName) const
 QString AuthManager::userUid() const
 {
     return qgetenv("LOGNAME");
-}
-
-const QList<QSslCertificate> &AuthManager::sslCAs()
-{
-    if (!m_isCAsInitialized) {
-        m_isCAsInitialized = true;
-
-        ReadOnlyConfdSettings settings;
-        const auto pathList = settings.value("generic/caFiles").toStringList();
-
-        for (const auto &path : pathList) {
-            QFile file(path);
-            if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-                qCCritical(lcAuthManager) << "Unable to read CA file" << path;
-                continue;
-            }
-
-            QSslCertificate cert(file.readAll());
-            file.close();
-
-            m_cas.append(cert);
-        }
-    }
-    return m_cas;
 }
 
 void AuthManager::authenticateJitsiImpl(const QString &roomName)
@@ -378,7 +390,7 @@ void AuthManager::authenticateJitsiImpl(const QString &roomName)
     if (!settings.value("generic/verifyServer", true).toBool()) {
         sslConfig.setPeerVerifyMode(QSslSocket::PeerVerifyMode::VerifyNone);
     }
-    sslConfig.addCaCertificates(sslCAs());
+    sslConfig.addCaCertificates(CertHelper::instance().caCerts());
     request.setSslConfiguration(sslConfig);
 
     QNetworkReply *reply = manager->get(request);

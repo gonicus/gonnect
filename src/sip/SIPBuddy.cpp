@@ -8,7 +8,7 @@
 #include "Notification.h"
 #include "NotificationManager.h"
 #include "PhoneNumberUtil.h"
-#include "AvatarManager.h"
+#include "PlatformSession.h"
 
 Q_LOGGING_CATEGORY(lcSIPBuddy, "gonnect.sip.buddy")
 
@@ -28,16 +28,29 @@ bool SIPBuddy::initialize()
 
     try {
         create(*m_account, cfg);
-        subscribePresence(true);
     } catch (pj::Error &err) {
         qCCritical(lcSIPBuddy) << "failed to create buddy" << m_uri << ":" << err.info(false);
         return false;
+    }
+
+    // Subscribe if we're already registered
+    if (m_account->isRegistered()) {
+        subscribe();
     }
 
     return true;
 }
 
 SIPBuddy::~SIPBuddy() { }
+
+void SIPBuddy::subscribe()
+{
+    try {
+        subscribePresence(true);
+    } catch (pj::Error &err) {
+        qCWarning(lcSIPBuddy) << "failed to subscribe to buddy" << m_uri << ":" << err.info(false);
+    }
+}
 
 void SIPBuddy::onBuddyState()
 {
@@ -88,6 +101,10 @@ void SIPBuddy::subscribeToBuddyStatus()
 
 void SIPBuddy::notifyOnceWhenBuddyAvailable()
 {
+    if (PlatformSession::instance().isScreenShareActive()) {
+        return;
+    }
+
     // Create notification text
     const auto contactInfo = PhoneNumberUtil::instance().contactInfoBySipUrl(m_uri);
     const Contact *c = contactInfo.contact;
@@ -111,10 +128,10 @@ void SIPBuddy::notifyOnceWhenBuddyAvailable()
     }
 
     // Create notification object
-    auto n = new Notification(title, bodyParts.join("\n"), Notification::Priority::normal, this);
+    auto n = new Notification(title, bodyParts.join("\n"), Notification::Priority::normal, true,
+                              this);
 
-    auto &am = AvatarManager::instance();
-    QString avatar = c ? am.avatarPathFor(c->id()) : "";
+    QString avatar = c ? c->avatarPath() : "";
 
     if (avatar.isEmpty()) {
         n->setIcon("help-about-symbolic");

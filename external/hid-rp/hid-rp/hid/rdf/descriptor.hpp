@@ -1,15 +1,5 @@
-/// @file
-///
-/// @author Benedek Kupper
-/// @date   2022
-///
-/// @copyright
-///         This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
-///         If a copy of the MPL was not distributed with this file, You can obtain one at
-///         https://mozilla.org/MPL/2.0/.
-///
-#ifndef __HID_RDF_DESCRIPTOR_HPP_
-#define __HID_RDF_DESCRIPTOR_HPP_
+// SPDX-License-Identifier: MPL-2.0
+#pragma once
 
 #include "hid/rdf/global_items.hpp"
 #include "hid/rdf/local_items.hpp"
@@ -23,11 +13,9 @@ namespace hid::rdf
 /// @return The HID report descriptor as an std::array
 template <std::size_t... sz>
 constexpr auto descriptor(array<sz>... items)
+    requires(sizeof...(items) > 0)
 {
-    static_assert(sizeof...(items) > 0);
     return (items, ...);
 }
 
 } // namespace hid::rdf
-
-#endif // __HID_RDF_DESCRIPTOR_HPP_

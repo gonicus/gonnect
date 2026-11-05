@@ -6,7 +6,9 @@
 #include "AudioManager.h"
 #include "Ringer.h"
 #include "AppSettings.h"
+#include "FileHelper.h"
 #include "SystemTrayMenu.h"
+#include "AudioHelper.h"
 
 Q_LOGGING_CATEGORY(lcRinger, "gonnect.sip.ringer")
 
@@ -27,19 +29,32 @@ void Ringer::start(qreal customVolume)
 
     SystemTrayMenu::instance().setRinging(true);
 
-    // Prefer headset ringer?
-    if (settings.value(QString("audio%1/preferExternalRinger").arg(currentProfile), false)
-                .toBool()) { }
-
     if (!m_player) {
         m_player = new QMediaPlayer(this);
         connect(m_player, &QMediaPlayer::playbackStateChanged, this, &Ringer::playbackStateChanged);
+        connect(m_player, &QMediaPlayer::errorOccurred, this, &Ringer::onPlayerError);
     }
 
     // Determine ring tone path
     auto source = settings.value(QString("audio%1/ringtone").arg(currentProfile), "").toString();
     if (source.isEmpty()) {
         source = "qrc:/audio/phone-incoming-call.mp3";
+    } else {
+        const QString expectedPath =
+                FileHelper::instance().persistentFolderPath("sounds") + "/ringtone";
+        const QUrl sourceUrl(source);
+        const QString sourceLocalPath = sourceUrl.isLocalFile() ? sourceUrl.toLocalFile() : source;
+
+        if (sourceLocalPath != expectedPath) {
+            // Migrate old ring tone
+            const auto migratedPath =
+                    FileHelper::instance().persistFile(sourceUrl, "sounds", "ringtone");
+            if (!migratedPath.isEmpty()) {
+                qCInfo(lcRinger) << "Migrated ring tone by copying:" << migratedPath;
+                source = migratedPath;
+                settings.setValue(QString("audio%1/ringtone").arg(currentProfile), source);
+            }
+        }
     }
 
     if (source.isEmpty()) {
@@ -57,35 +72,15 @@ void Ringer::start(qreal customVolume)
         m_delay = DEFAULT_RINGTONE_DELAY;
     }
 
+    // Setup player and volume
     QString ringerHash = settings.value(QString("audio%1/ringing").arg(currentProfile)).toString();
-    QAudioOutput *dev = nullptr;
-
-    if (!ringerHash.isEmpty()) {
-        const QList<QAudioDevice> audioDevices = QMediaDevices::audioOutputs();
-        for (const QAudioDevice &device : audioDevices) {
-            auto calculatedHash = SIPAudioDevice::makeHash(device.description(), false);
-            if (calculatedHash == ringerHash) {
-                dev = new QAudioOutput(device, m_player);
-                break;
-            }
-        }
-
-        if (!dev) {
-            qCCritical(lcRinger) << "unknown ringing device in config - using default";
-            dev = new QAudioOutput(QMediaDevices::defaultAudioOutput(), m_player);
-        }
-
-    } else {
-        dev = new QAudioOutput(QMediaDevices::defaultAudioOutput(), m_player);
-    }
+    QAudioOutput *dev = AudioHelper::createAudioOutput(ringerHash, m_player);
 
     m_player->setAudioOutput(dev);
-    dev->setVolume(
-            (0.0 <= customVolume && customVolume <= 1.0)
-                    ? customVolume
-                    : settings.value(QString("audio%1/ringtoneVolume").arg(currentProfile), 90.0)
-                                    .toFloat()
-                            / 100.0);
+
+    qreal configVol =
+            settings.value(QString("audio%1/ringtoneVolume").arg(currentProfile), 90.0).toFloat();
+    dev->setVolume(AudioHelper::calculateVolume(customVolume, configVol));
 
     m_player->setSource(source);
     m_player->play();
@@ -103,6 +98,16 @@ void Ringer::playbackStateChanged(QMediaPlayer::PlaybackState state)
                 m_player->play();
             }
         }
+    }
+}
+
+void Ringer::onPlayerError(QMediaPlayer::Error, const QString &errorString)
+{
+    static const QUrl fallback("qrc:/audio/phone-incoming-call.mp3");
+    if (m_player && m_player->source() != fallback) {
+        qCWarning(lcRinger) << "Failed to play ring tone (using fallback now):" << errorString;
+        m_player->setSource(fallback);
+        m_player->play();
     }
 }
 

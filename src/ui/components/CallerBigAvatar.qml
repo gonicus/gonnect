@@ -24,18 +24,19 @@ Item {
 
     Rectangle {
         id: volumeMeterBg
-        anchors.centerIn: avatarImage
         width: 1.15 * avatarImage.size
         height: volumeMeterBg.width
         radius: volumeMeterBg.width / 2
         color: Theme.backgroundOffsetHoveredColor
         opacity: control.isIncomingAudioLevel ? 1.0  : 0.0
+        anchors {
+            horizontalCenter: parent.horizontalCenter
+            verticalCenter: avatarImage.verticalCenter
+        }
 
         Behavior on opacity {
             NumberAnimation { duration: 300 }
         }
-
-        Accessible.ignored: true
     }
 
     AvatarImage {
@@ -49,7 +50,7 @@ Item {
 
     Label {
         id: otherName
-        font.pixelSize: 26
+        font.pixelSize: Theme.fontSizeExtraLarge
         anchors {
             horizontalCenter: parent.horizontalCenter
             top: avatarImage.bottom
@@ -61,7 +62,7 @@ Item {
 
     Label {
         id: isCallingLabel
-        font.pixelSize: 22
+        font.pixelSize: Theme.fontSizeLarge
         text: qsTr("is calling...")
         color: Theme.secondaryTextColor
         visible: control.isIncoming && !control.isEstablished
@@ -76,7 +77,7 @@ Item {
 
     Label {
         id: callingLabel
-        font.pixelSize: 22
+        font.pixelSize: Theme.fontSizeLarge
         text: control.isInProgress ? qsTr("In progress...") :  qsTr("Calling...")
         color: Theme.secondaryTextColor
         visible: !control.isIncoming && !control.isEstablished

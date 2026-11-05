@@ -12,10 +12,13 @@ public:
     Q_REQUIRED_RESULT static NotificationManager &instance();
 
     explicit NotificationManager() : QObject() { }
-    ~NotificationManager() = default;
+    virtual ~NotificationManager() = default;
 
     virtual QString add(Notification *notification) = 0;
     virtual bool remove(const QString &id) = 0;
 
     virtual void shutdown() = 0;
+
+protected:
+    bool m_isShuttingDown = false;
 };

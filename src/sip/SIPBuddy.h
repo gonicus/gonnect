@@ -34,6 +34,7 @@ public:
     virtual ~SIPBuddy();
 
     bool initialize();
+    void subscribe();
 
     virtual void onBuddyState();
 
@@ -55,7 +56,7 @@ private:
     QString m_statusText;
     QString m_uri;
 
-    SIPBuddyState::STATUS m_status;
+    SIPBuddyState::STATUS m_status = SIPBuddyState::UNKNOWN;
 
     SIPAccount *m_account = nullptr;
 

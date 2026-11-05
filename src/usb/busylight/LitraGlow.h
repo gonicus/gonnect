@@ -19,5 +19,5 @@ public:
 protected:
     void send(bool on) override;
 
-    bool m_state = false;
+    bool m_state = true;
 };

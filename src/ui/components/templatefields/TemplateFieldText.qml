@@ -12,8 +12,6 @@ TextField {
     readonly property alias value: control.text
     property var regex
 
-    Accessible.role: Accessible.EditableText
     Accessible.name: qsTr("Text input")
     Accessible.description: qsTr("Enter the desired value for %1").arg(control.templateFieldName)
-    Accessible.focusable: true
 }

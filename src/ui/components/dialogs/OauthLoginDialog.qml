@@ -28,7 +28,6 @@ BaseDialog {
             margins: 20
         }
 
-        Accessible.role: Accessible.StaticText
         Accessible.name: control.title + ", " + contentLabel.text
     }
 
@@ -44,7 +43,6 @@ BaseDialog {
             margins: 20
         }
 
-        Accessible.role: Accessible.StaticText
         Accessible.name: control.title + ", " + flowLabel.text
     }
 
@@ -62,11 +60,6 @@ BaseDialog {
             startButton.enabled = false
             control.startOauthLogin()
         }
-
-        Accessible.role: Accessible.Button
-        Accessible.name: startButton.text
-        Accessible.focusable: true
-        Accessible.onPressAction: () => startButton.click()
     }
 
     Label {
@@ -98,11 +91,6 @@ BaseDialog {
             control.closeDialog()
             control.close()
         }
-
-        Accessible.role: Accessible.Button
-        Accessible.name: closeButton.text
-        Accessible.focusable: true
-        Accessible.onPressAction: () => closeButton.click()
     }
 
     function setStatus(status : string, canRetry: bool) {

@@ -10,17 +10,32 @@ class FavoritesProxyModel : public QSortFilterProxyModel
     QML_ELEMENT
     Q_CLASSINFO("DefaultProperty", "sourceModel")
 
+    Q_PROPERTY(bool showPhone MEMBER m_showPhone NOTIFY showPhoneChanged FINAL)
     Q_PROPERTY(bool showJitsi MEMBER m_showJitsi NOTIFY showJitsiChanged FINAL)
+    Q_PROPERTY(bool showChatRooms MEMBER m_showChatRooms NOTIFY showChatRoomsChanged FINAL)
 
 public:
     explicit FavoritesProxyModel(QObject *parent = nullptr);
 
+    virtual QVariant data(const QModelIndex &index, int role) const override;
+
 protected:
-    bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const override;
+    virtual bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const override;
+
+private Q_SLOTS:
+    void triggerUpdate();
 
 private:
+    bool isPhoneAddr(const QVariantMap &addr) const;
+    bool isJitsiAddr(const QVariantMap &addr) const;
+    bool isChatAddr(const QVariantMap &addr) const;
+
+    bool m_showPhone = true;
     bool m_showJitsi = true;
+    bool m_showChatRooms = true;
 
 Q_SIGNALS:
+    void showPhoneChanged();
     void showJitsiChanged();
+    void showChatRoomsChanged();
 };
