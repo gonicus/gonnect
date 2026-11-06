@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QObject>
+#include <QCoroCore>
 #include "IAddressBookFeeder.h"
 #include "BlockInfo.h"
 
@@ -18,7 +19,7 @@ public:
     void process() override;
 
 private:
-    void feedAddressBook();
+    QCoro::Task<> feedAddressBook();
 
     QString m_filePath;
     QString m_group;

@@ -22,6 +22,7 @@ public:
                                  const QStringList &hrefs);
     QByteArray buildSyncCollectionBody(const QString &syncToken,
                                        const QList<WebDavPropertyRequest> &properties);
+    QByteArray buildAddressbookQueryBody(const QList<WebDavPropertyRequest> &properties);
 
     QList<WebDavItem> parseMultiStatus(const QByteArray &xmlData);
     WebDavMultiStatus parseMultiStatusDocument(const QByteArray &xmlData);
