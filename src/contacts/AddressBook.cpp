@@ -33,6 +33,82 @@ AddressBook::AddressBook(QObject *parent) : QObject{ parent }
 #endif
 }
 
+void AddressBook::indexPhoneNumbers(Contact *contact)
+{
+    if (!contact) {
+        qCWarning(lcAddressBook) << "Cannot index phone numbers of nullptr";
+        return;
+    }
+
+    for (const auto &phoneNumber : contact->phoneNumbers()) {
+        auto &contactsWithNumber = m_contactsByNumber[phoneNumber.number];
+        if (!contactsWithNumber.contains(contact)) {
+            contactsWithNumber.append(contact);
+        }
+    }
+}
+
+void AddressBook::unindexPhoneNumbers(Contact *contact)
+{
+    if (!contact) {
+        qCWarning(lcAddressBook) << "Cannot unindex phone numbers of nullptr";
+        return;
+    }
+
+    for (const auto &phoneNumber : contact->phoneNumbers()) {
+        const auto it = m_contactsByNumber.find(phoneNumber.number);
+        if (it == m_contactsByNumber.end()) {
+            continue;
+        }
+
+        it->removeAll(contact);
+        if (it->isEmpty()) {
+            m_contactsByNumber.erase(it);
+        }
+    }
+}
+
+void AddressBook::indexEmail(Contact *contact)
+{
+    if (!contact) {
+        qCWarning(lcAddressBook) << "Cannot index email address of nullptr";
+        return;
+    }
+
+    const auto mail = contact->mail();
+    if (mail.isEmpty()) {
+        return;
+    }
+
+    auto &contactsWithMail = m_contactsByEmail[mail];
+    if (!contactsWithMail.contains(contact)) {
+        contactsWithMail.append(contact);
+    }
+}
+
+void AddressBook::unindexEmail(Contact *contact)
+{
+    if (!contact) {
+        qCWarning(lcAddressBook) << "Cannot unindex email address of nullptr";
+        return;
+    }
+
+    const auto mail = contact->mail();
+    if (mail.isEmpty()) {
+        return;
+    }
+
+    const auto it = m_contactsByEmail.find(mail);
+    if (it == m_contactsByEmail.cend()) {
+        return;
+    }
+
+    it->removeAll(contact);
+    if (it->isEmpty()) {
+        m_contactsByEmail.erase(it);
+    }
+}
+
 #ifndef APP_TESTS
 void AddressBook::initContactSignals(Contact *contact)
 {
@@ -123,9 +199,7 @@ Contact *AddressBook::addContact(const QString &dn, const QString &sourceUid,
                                  const QList<Contact::PhoneNumber> &phoneNumbers,
                                  BlockInfo blockInfo)
 {
-
     const auto hid = hashifyCn(dn);
-
     bool newContactCreated = false;
 
     QMutexLocker lock(&m_feederMutex);
@@ -136,15 +210,20 @@ Contact *AddressBook::addContact(const QString &dn, const QString &sourceUid,
         contact = new Contact(hid, dn, sourceUid, contactSourceInfo, name, blockInfo, this);
         m_contacts.insert(hid, contact);
         m_contactsBySourceId.insert(sourceUid, contact);
+
 #ifndef APP_TESTS
         initContactSignals(contact);
 #endif
     }
 
     contact->setCompany(company);
+    unindexEmail(contact);
     contact->setMail(mail);
+    indexEmail(contact);
     contact->setLastModified(lastModified);
+
     contact->addPhoneNumbers(phoneNumbers);
+    indexPhoneNumbers(contact);
 
     if (!newContactCreated) {
         const auto &oldSourceInfo = contact->contactSourceInfo();
@@ -166,10 +245,12 @@ void AddressBook::addContact(Contact *contact)
         contact->setParent(this);
         m_contacts.insert(contact->id(), contact);
         m_contactsBySourceId.insert(contact->sourceUid(), contact);
+        indexPhoneNumbers(contact);
+        indexEmail(contact);
+
 #ifndef APP_TESTS
         initContactSignals(contact);
 #endif
-
         Q_EMIT contactAdded(contact);
     }
 }
@@ -187,10 +268,16 @@ Contact *AddressBook::modifyContact(const QString &dn, const QString &sourceUid,
         contact->setDisplayName(dn);
         contact->setName(name);
         contact->setCompany(company);
-        contact->setMail(mail);
         contact->setLastModified(lastModified);
+
+        unindexEmail(contact);
+        contact->setMail(mail);
+        indexEmail(contact);
+
+        unindexPhoneNumbers(contact);
         contact->clearPhoneNumbers();
         contact->addPhoneNumbers(phoneNumbers);
+        indexPhoneNumbers(contact);
 
         Q_EMIT contactModified(contact);
 
@@ -211,6 +298,8 @@ void AddressBook::removeContact(const QString &sourceUid)
         contact->disconnect(this);
         m_contacts.remove(contactId);
         m_contactsBySourceId.remove(contact->sourceUid());
+        unindexPhoneNumbers(contact);
+        unindexEmail(contact);
 
 #ifndef APP_TESTS
         const auto &chatUsers = contact->chatUsers();
@@ -225,12 +314,16 @@ void AddressBook::removeContact(const QString &sourceUid)
 
 void AddressBook::resetContacts()
 {
+    Q_EMIT contactsAboutToBeCleared();
+
     QMutexLocker lock(&m_feederMutex);
 
     qDeleteAll(m_contacts);
     m_contacts.clear();
     m_contactsBySourceId.clear();
     m_contactsByChatUser.clear();
+    m_contactsByNumber.clear();
+    m_contactsByEmail.clear();
     Q_EMIT contactsCleared();
 }
 
@@ -260,6 +353,8 @@ void AddressBook::removeContactsBySource(const QString &source)
             const auto contactId = contact->id();
             contact->disconnect(this);
             m_contactsBySourceId.remove(sourceUid);
+            unindexPhoneNumbers(contact);
+            unindexEmail(contact);
 
 #ifndef APP_TESTS
             const auto &chatUsers = contact->chatUsers();
@@ -329,24 +424,20 @@ Contact *AddressBook::lookupByNumber(const QString &number) const
     Contact *result = nullptr;
     unsigned bestPrio = 0;
 
-    for (auto contact : std::as_const(m_contacts)) {
-        const auto &numbers = contact->phoneNumbers();
-        for (const auto &phoneNumber : numbers) {
-            if (phoneNumber.number == number) {
-                const unsigned currPrio = contact->contactSourceInfo().prio;
-                const int nameCompare = result
-                        ? contact->contactSourceInfo().displayName.localeAwareCompare(
-                                  result->contactSourceInfo().displayName)
-                        : -1;
-                if (!result || currPrio > bestPrio
-                    || (currPrio == bestPrio
-                        && (nameCompare < 0
-                            || (nameCompare == 0 && contact->id() < result->id())))) {
-                    result = contact;
-                    bestPrio = currPrio;
-                }
-                break;
-            }
+    const auto candidates = m_contactsByNumber.value(number);
+    for (auto *contact : candidates) {
+        const auto currPrio = contact->contactSourceInfo().prio;
+        const auto nameCompare = result
+                ? contact->contactSourceInfo().displayName.localeAwareCompare(
+                          result->contactSourceInfo().displayName)
+                : -1;
+
+        if (!result || currPrio > bestPrio
+            || (currPrio == bestPrio
+                && (nameCompare < 0 || (nameCompare == 0 && contact->id() < result->id())))) {
+
+            result = contact;
+            bestPrio = currPrio;
         }
     }
 
@@ -355,12 +446,8 @@ Contact *AddressBook::lookupByNumber(const QString &number) const
 
 Contact *AddressBook::lookupByEmail(const QString &emailAddr) const
 {
-    for (auto contact : std::as_const(m_contacts)) {
-        if (contact->mail() == emailAddr) {
-            return contact;
-        }
-    }
-    return nullptr;
+    const auto contactsWithMail = m_contactsByEmail.value(emailAddr);
+    return contactsWithMail.isEmpty() ? nullptr : contactsWithMail.first();
 }
 
 Contact *AddressBook::lookupByContactId(const QString &contactId) const

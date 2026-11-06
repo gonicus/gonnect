@@ -7,8 +7,12 @@
 #include <QDebug>
 #include <QLoggingCategory>
 #include <QFile>
+#include <QElapsedTimer>
+#include <QScopeGuard>
 
 Q_LOGGING_CATEGORY(lcCsvAddressBookFeeder, "gonnect.app.feeder.CsvAddressBookFeeder")
+
+using namespace std::chrono_literals;
 
 CsvFileAddressBookFeeder::CsvFileAddressBookFeeder(const QString &group, const int retryCount,
                                                    const int retryInterval,
@@ -42,23 +46,30 @@ void CsvFileAddressBookFeeder::process()
     settings.endGroup();
 }
 
-void CsvFileAddressBookFeeder::feedAddressBook()
+QCoro::Task<> CsvFileAddressBookFeeder::feedAddressBook()
 {
+    m_isProcessing = true;
+    const auto finishProcessing = qScopeGuard([this]() { m_isProcessing = false; });
+
     auto &addressbook = AddressBook::instance();
 
     QFile file(m_filePath);
     if (!file.exists()) {
         qCCritical(lcCsvAddressBookFeeder)
                 << "File path" << m_filePath << "does not exist - aborting";
-        return;
+        co_return;
     }
 
     qCInfo(lcCsvAddressBookFeeder) << "Loading csv file" << m_filePath;
 
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         qCCritical(lcCsvAddressBookFeeder) << "Unable to open file" << m_filePath << "- aborting";
-        return;
+        co_return;
     }
+
+    static constexpr qint64 maxSliceDurationMs = 50;
+    QElapsedTimer sliceTimer;
+    sliceTimer.start();
 
     quint32 contactCount = 0;
     QTextStream in(&file);
@@ -74,7 +85,7 @@ void CsvFileAddressBookFeeder::feedAddressBook()
             qCCritical(lcCsvAddressBookFeeder)
                     << "Expected 8 elements in line, but found" << splitted.length() << "at line"
                     << line << "- aborting";
-            return;
+            co_return;
         }
 
         // Create contact out of line
@@ -95,9 +106,17 @@ void CsvFileAddressBookFeeder::feedAddressBook()
         addressbook.addContact(splitted.at(0) + splitted.at(1), "",
                                { m_priority, m_displayName, m_group }, splitted.at(0),
                                splitted.at(1), "", QDateTime(), phoneNumbers, m_blockInfo);
+
         ++contactCount;
+
+        if (sliceTimer.elapsed() >= maxSliceDurationMs) {
+            co_await QCoro::sleepFor(0ms);
+            sliceTimer.restart();
+        }
     }
 
     qCInfo(lcCsvAddressBookFeeder) << "Finished processing csv file" << m_filePath << "loaded"
                                    << contactCount << "contacts";
+
+    Q_EMIT addressbook.contactsReady();
 }

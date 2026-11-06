@@ -165,7 +165,7 @@ CalDAVEventFeeder::syncCalendarCollection(const QString &collectionPath, int dep
     }
 
     const QString requestedPath = WebDavItem::normalizedPath(reply->url());
-    const auto items = WebDavPropfindParser{}.parseMultiStatus(reply->readAll());
+    const auto items = co_await WebDavClient::parseMultiStatusInBackground(reply->readAll());
     reply->deleteLater();
 
     const auto concreteSource = registerConcreteSource(collectionPath);
@@ -353,7 +353,8 @@ QCoro::Task<WebDavSyncResult> CalDAVEventFeeder::fetchCalendarData(const QString
         }
 
         // Process response
-        const auto results = WebDavPropfindParser{}.parseMultiStatus(multigetReply->readAll());
+        const auto results =
+                co_await WebDavClient::parseMultiStatusInBackground(multigetReply->readAll());
         multigetReply->deleteLater();
 
         qCDebug(lcCalDAVEventFeeder) << "Received calendar-multiget response" << offset << "to"

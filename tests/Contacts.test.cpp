@@ -16,6 +16,23 @@ void ContactsTest::testCleanPhoneNumber()
     // Handle URL encoded numbers
     QCOMPARE(PhoneNumberUtil::cleanPhoneNumber("callto:+49%202932%209160"), QString("+4929329160"));
     QCOMPARE(PhoneNumberUtil::cleanPhoneNumber("%2B49%202932%209160"), QString("+4929329160"));
+    // Dial characters are kept, everything else is dropped
+    QCOMPARE(PhoneNumberUtil::cleanPhoneNumber("*31#0123"), QString("*31#0123"));
+    QCOMPARE(PhoneNumberUtil::cleanPhoneNumber("tel: (0)123 / 45"), QString("012345"));
+    // Only ASCII digits count as digits
+    QCOMPARE(PhoneNumberUtil::cleanPhoneNumber(QString::fromUtf8("١٢٣ 456")), QString("456"));
+}
+
+void ContactsTest::testNormalizeNumber()
+{
+    // No national/regional prefix is configured in the test environment
+    QCOMPARE(PhoneNumberUtil::normalizeNumber(""), QString(""));
+    QCOMPARE(PhoneNumberUtil::normalizeNumber("0001234"), QString("+1234"));
+
+    // Number part of SIP URIs
+    QCOMPARE(PhoneNumberUtil::normalizeNumber("sip:1234@example.com"), QString("1234"));
+    QCOMPARE(PhoneNumberUtil::normalizeNumber("\"Alice\" <SIPS:0001234@example.com>"),
+             QString("+1234"));
 }
 
 void ContactsTest::testLevenshteinDistance()

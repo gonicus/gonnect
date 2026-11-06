@@ -14,6 +14,7 @@
 #include <QFile>
 #include <QDir>
 #include <QStandardPaths>
+#include <QScopeGuard>
 
 #include <vcard.h>
 #include <text_io.h>
@@ -27,6 +28,9 @@ Q_LOGGING_CATEGORY(lcCardDAVAddressBookFeeder, "gonnect.app.feeder.CardDAVAddres
 // multiget.
 static constexpr qsizetype addressbookQueryThreshold = 500;
 
+// Maximum time large loops work before handing control back to the event loop
+static constexpr qint64 maxTimeSliceMs = 50;
+
 using namespace std::chrono_literals;
 
 CardDAVAddressBookFeeder::CardDAVAddressBookFeeder(const QString &group, const int retryCount,
@@ -35,21 +39,22 @@ CardDAVAddressBookFeeder::CardDAVAddressBookFeeder(const QString &group, const i
     : QObject(parent), m_group(group), m_retryCount(retryCount), m_retryInterval(retryInterval)
 {
     m_manager = qobject_cast<AddressBookManager *>(parent);
+
+    // Forget contacts which will be deleted by AddressBook
+    connect(&AddressBook::instance(), &AddressBook::contactsAboutToBeCleared, this, [this]() {
+        m_cachedContacts.removeIf([](QHash<QString, Contact *>::iterator it) {
+            return it.value()->parent() == &AddressBook::instance();
+        });
+    });
 }
 
-// Defined here so WebDavClient can be used as forward declaration in header file
-CardDAVAddressBookFeeder::~CardDAVAddressBookFeeder() = default;
+CardDAVAddressBookFeeder::~CardDAVAddressBookFeeder()
+{
+    deleteOwnedCachedContacts();
+}
 
 void CardDAVAddressBookFeeder::init()
 {
-    if (!m_areWebDavConnectionsInitialized) {
-        m_areWebDavConnectionsInitialized = true;
-
-        m_cacheWriteTimer.setSingleShot(true);
-        m_cacheWriteTimer.setInterval(3s);
-        m_cacheWriteTimer.callOnTimeout(this, &CardDAVAddressBookFeeder::flushCacheImpl);
-    }
-
     loadCachedData(m_settingsHash);
 }
 
@@ -61,6 +66,15 @@ void CardDAVAddressBookFeeder::resetContacts()
 QCoro::Task<> CardDAVAddressBookFeeder::run()
 {
     m_isProcessing = true;
+    m_timeSliceTimer.start();
+
+    // Runs on every co_return of this coroutine
+    const auto finishRun = qScopeGuard([this]() {
+        flushCacheIfDirty();
+        Q_EMIT AddressBook::instance().contactsReady();
+        m_isProcessing = false;
+    });
+
     bool forcePrompt = false;
     int retriesLeft = m_retryCount;
 
@@ -70,7 +84,6 @@ QCoro::Task<> CardDAVAddressBookFeeder::run()
         const auto secret = co_await m_manager->acquireSecretAsync(forcePrompt, m_group);
         if (secret.hasError) {
             ErrorBus::instance().addError(tr("Authentication error for %1").arg(m_group));
-            m_isProcessing = false;
             co_return;
         }
 
@@ -98,7 +111,6 @@ QCoro::Task<> CardDAVAddressBookFeeder::run()
             if (retriesLeft-- <= 0) {
                 ErrorBus::instance().addError(
                         tr("CardDAV source %1 repeatedly failed - retries exhausted").arg(m_group));
-                m_isProcessing = false;
                 co_return;
             }
 
@@ -111,8 +123,6 @@ QCoro::Task<> CardDAVAddressBookFeeder::run()
 
         break;
     }
-
-    m_isProcessing = false;
 }
 
 QCoro::Task<WebDavSyncResult>
@@ -136,7 +146,8 @@ CardDAVAddressBookFeeder::syncContactsCollection(const QString &collectionPath, 
 
     const QUrl requestedUrl = reply->url();
     const QString requestedPath = WebDavItem::normalizedPath(requestedUrl);
-    const auto items = WebDavPropfindParser{}.parseMultiStatus(reply->readAll());
+
+    const auto items = co_await WebDavClient::parseMultiStatusInBackground(reply->readAll());
     reply->deleteLater();
 
     // Check if sync-collection is supported (i.e. sync-token not empty)
@@ -172,7 +183,7 @@ CardDAVAddressBookFeeder::syncContactsCollection(const QString &collectionPath, 
 
     if (!needsFullSync && storedSyncToken == collectionSyncToken) {
         qCDebug(lcCardDAVAddressBookFeeder) << "Collection" << requestedPath << "is unchanged";
-        readdCachedContacts(requestedPath);
+        co_await readdCachedContacts(requestedPath);
 
     } else if (!needsFullSync) {
         result = co_await syncCollection(collectionPath, requestedPath, storedSyncToken);
@@ -185,7 +196,7 @@ CardDAVAddressBookFeeder::syncContactsCollection(const QString &collectionPath, 
         } else if (result == WebDavSyncResult::OtherError) {
             qCWarning(lcCardDAVAddressBookFeeder)
                     << "sync-collection for" << requestedPath << "failed - using cached contacts";
-            readdCachedContacts(requestedPath);
+            co_await readdCachedContacts(requestedPath);
         }
     }
 
@@ -213,7 +224,7 @@ CardDAVAddressBookFeeder::syncContactsCollection(const QString &collectionPath, 
 
             qCDebug(lcCardDAVAddressBookFeeder)
                     << "Sync token for" << requestedPath << "is now" << collectionSyncToken;
-            scheduleCacheWrite();
+            markCacheDirty();
         }
     }
 
@@ -229,7 +240,7 @@ CardDAVAddressBookFeeder::syncContactsCollection(const QString &collectionPath, 
             if (item.isCollection() && item.isContactCollection()) {
                 knownCollectionPaths.insert(item.normalizedPath());
 
-                const auto childResult = co_await syncContactsCollection(item.href, depth + 1);
+                const auto childResult = co_await syncChildAddressBook(item, depth + 1);
                 if (childResult == WebDavSyncResult::AuthRequired) {
                     co_return WebDavSyncResult::AuthRequired;
                 }
@@ -284,17 +295,63 @@ QCoro::Task<WebDavSyncResult> CardDAVAddressBookFeeder::fetchContacts(const QStr
         qCDebug(lcCardDAVAddressBookFeeder) << "Received addressbook-multiget response" << offset
                                             << "to" << std::min(offset + batchSize, hrefs.size());
 
-        processContactResults(results, hrefsAreKnownChanged);
+        co_await processContactResults(results, hrefsAreKnownChanged);
     }
 
     co_return anyBatchFailed ? WebDavSyncResult::OtherError : WebDavSyncResult::Success;
+}
+
+QCoro::Task<WebDavSyncResult> CardDAVAddressBookFeeder::syncChildAddressBook(const WebDavItem &item,
+                                                                             int depth)
+{
+    const auto addressBookPath = item.normalizedPath();
+    const auto serverSyncToken = item.syncToken();
+    const auto storedSyncToken = m_syncTokens.value(addressBookPath);
+
+    // Own PROPFIND for initial or full sync
+    if (serverSyncToken.isEmpty() || storedSyncToken.isEmpty()) {
+        co_return co_await syncContactsCollection(item.href, depth);
+    }
+
+    if (storedSyncToken == serverSyncToken) {
+        qCDebug(lcCardDAVAddressBookFeeder) << "Collection" << addressBookPath << "is unchanged";
+        co_await readdCachedContacts(addressBookPath);
+        co_return WebDavSyncResult::Success;
+    }
+
+    const auto result = co_await syncCollection(item.href, addressBookPath, storedSyncToken);
+
+    if (result == WebDavSyncResult::AuthRequired) {
+        co_return WebDavSyncResult::AuthRequired;
+    }
+
+    if (result == WebDavSyncResult::InvalidSyncToken) {
+        qCInfo(lcCardDAVAddressBookFeeder) << "Sync token for" << addressBookPath
+                                           << "was rejected - falling back to full sync";
+        m_syncTokens.remove(addressBookPath);
+        co_return co_await syncContactsCollection(item.href, depth);
+    }
+
+    if (result == WebDavSyncResult::OtherError) {
+        qCWarning(lcCardDAVAddressBookFeeder)
+                << "sync-collection for" << addressBookPath << "failed - using cached contacts";
+        co_await readdCachedContacts(addressBookPath);
+        co_return WebDavSyncResult::OtherError;
+    }
+
+    m_syncTokens.insert(addressBookPath, serverSyncToken);
+    qCDebug(lcCardDAVAddressBookFeeder)
+            << "Sync token for" << addressBookPath << "is now" << serverSyncToken;
+    markCacheDirty();
+
+    co_return WebDavSyncResult::Success;
 }
 
 QCoro::Task<WebDavSyncResult>
 CardDAVAddressBookFeeder::fetchChangedContacts(const QString &collectionPath,
                                                const QList<WebDavItem> &items)
 {
-    auto hrefsToFetch = readdUnchangedCachedContacts(items);
+    auto hrefsToFetch = co_await readdUnchangedCachedContacts(items);
 
     if (hrefsToFetch.size() >= addressbookQueryThreshold) {
         const auto queryResult = co_await queryContacts(collectionPath);
@@ -346,8 +403,8 @@ CardDAVAddressBookFeeder::queryContacts(const QString &collectionPath)
         co_return std::unexpected(WebDavSyncResult::OtherError);
     }
 
-    const auto results = WebDavPropfindParser{}.parseMultiStatus(responseBody);
-    processContactResults(results, false);
+    const auto results = co_await WebDavClient::parseMultiStatusInBackground(responseBody);
+    co_await processContactResults(results, false);
 
     QSet<QString> receivedPaths;
     for (const auto &result : results) {
@@ -386,21 +443,25 @@ CardDAVAddressBookFeeder::syncCollection(const QString &collectionPath,
     });
 
     if (!changes.removedPaths.isEmpty()) {
-        scheduleCacheWrite();
+        markCacheDirty();
     }
 
     // Cache -> unchanged cards; fetch -> changed cards
     const auto changedPaths =
             QSet<QString>(changes.changedHrefs.keyBegin(), changes.changedHrefs.keyEnd());
-    readdCachedContacts(requestedPath, changedPaths);
+    co_await readdCachedContacts(requestedPath, changedPaths);
 
     co_return co_await fetchContacts(collectionPath, changes.changedHrefs.values(), true);
 }
 
-void CardDAVAddressBookFeeder::processContactResults(const QList<WebDavItem> &results,
-                                                     bool hrefsAreKnownChanged)
+QCoro::Task<> CardDAVAddressBookFeeder::processContactResults(const QList<WebDavItem> &results,
+                                                              bool hrefsAreKnownChanged)
 {
     for (const auto &result : results) {
+        if (isTimeSliceExhausted()) {
+            co_await yieldToEventLoop();
+        }
+
         const auto contactData =
                 result.property("urn:ietf:params:xml:ns:carddav", "address-data").text.toUtf8();
         if (contactData.isEmpty()) {
@@ -428,11 +489,16 @@ void CardDAVAddressBookFeeder::processContactResults(const QList<WebDavItem> &re
     }
 }
 
-QStringList CardDAVAddressBookFeeder::readdUnchangedCachedContacts(const QList<WebDavItem> &items)
+QCoro::Task<QStringList>
+CardDAVAddressBookFeeder::readdUnchangedCachedContacts(const QList<WebDavItem> &items)
 {
     QStringList hrefsToFetch;
 
     for (const auto &item : items) {
+        if (isTimeSliceExhausted()) {
+            co_await yieldToEventLoop();
+        }
+
         if (item.isCollection()) {
             continue;
         }
@@ -458,20 +524,35 @@ QStringList CardDAVAddressBookFeeder::readdUnchangedCachedContacts(const QList<W
     }
 
     qCDebug(lcCardDAVAddressBookFeeder) << hrefsToFetch.size() << "listed cards must be fetched";
-    return hrefsToFetch;
+    co_return hrefsToFetch;
 }
 
-void CardDAVAddressBookFeeder::readdCachedContacts(const QString &collectionPath,
-                                                   const QSet<QString> &excludedPaths)
+QCoro::Task<> CardDAVAddressBookFeeder::readdCachedContacts(const QString &collectionPath,
+                                                            const QSet<QString> &excludedPaths)
 {
     QHashIterator it(m_cachedContacts);
     while (it.hasNext()) {
+        if (isTimeSliceExhausted()) {
+            co_await yieldToEventLoop();
+        }
+
         it.next();
         if (WebDavItem::collectionPathOf(it.key()) == collectionPath
             && !excludedPaths.contains(it.key())) {
             AddressBook::instance().addContact(it.value());
         }
     }
+}
+
+bool CardDAVAddressBookFeeder::isTimeSliceExhausted() const
+{
+    return m_timeSliceTimer.elapsed() >= maxTimeSliceMs;
+}
+
+QCoro::Task<> CardDAVAddressBookFeeder::yieldToEventLoop()
+{
+    co_await QCoro::sleepFor(0ms);
+    m_timeSliceTimer.restart();
 }
 
 void CardDAVAddressBookFeeder::pruneCachedContacts(const QString &collectionPath,
@@ -499,7 +580,7 @@ void CardDAVAddressBookFeeder::pruneCachedContacts(const QString &collectionPath
                 << "Pruned" << removedContacts << "contacts and" << removedIgnoredIds
                 << "ignored ids from cache for" << collectionPath;
 
-        scheduleCacheWrite();
+        markCacheDirty();
     }
 }
 
@@ -531,7 +612,7 @@ void CardDAVAddressBookFeeder::pruneVanishedCollections(const QSet<QString> &kno
                 << "Pruned vanished collections:" << removedContacts << "contacts,"
                 << removedIgnoredIds << "ignored ids," << removedSyncTokens << "sync tokens";
 
-        scheduleCacheWrite();
+        markCacheDirty();
     }
 }
 
@@ -671,7 +752,7 @@ void CardDAVAddressBookFeeder::processVcard(QByteArray data, const QString &uuid
         }
     }
 
-    scheduleCacheWrite();
+    markCacheDirty();
 }
 
 void CardDAVAddressBookFeeder::loadCachedData(const size_t hash)
@@ -679,6 +760,11 @@ void CardDAVAddressBookFeeder::loadCachedData(const size_t hash)
     if (!hash) {
         return;
     }
+
+    deleteOwnedCachedContacts();
+    m_cachedContacts.clear();
+    m_ignoredIds.clear();
+    m_syncTokens.clear();
 
     const auto filePath = cacheFilePath(hash);
     QFile cacheFile(filePath);
@@ -725,7 +811,7 @@ void CardDAVAddressBookFeeder::loadCachedData(const size_t hash)
 
     for (qsizetype i = 0; i < numberOfContacts; ++i) {
         QString key;
-        Contact *contact = new Contact(this);
+        Contact *contact = new Contact;
         in >> key;
         in >> *contact;
 
@@ -753,6 +839,16 @@ void CardDAVAddressBookFeeder::loadCachedData(const size_t hash)
             << "sync tokens from cache with hash" << hash;
 }
 
+void CardDAVAddressBookFeeder::deleteOwnedCachedContacts()
+{
+    // Cached contacts have not the address book as parent
+    for (auto *contact : std::as_const(m_cachedContacts)) {
+        if (!contact->parent()) {
+            delete contact;
+        }
+    }
+}
+
 QString CardDAVAddressBookFeeder::cacheFilePath(const size_t hash, bool createPath)
 {
     const QString path =
@@ -767,11 +863,19 @@ QString CardDAVAddressBookFeeder::cacheFilePath(const size_t hash, bool createPa
     return QString("%1/%2.dat").arg(path).arg(hash);
 }
 
-void CardDAVAddressBookFeeder::scheduleCacheWrite()
+void CardDAVAddressBookFeeder::markCacheDirty()
 {
-    if (!m_cacheWriteTimer.isActive()) {
-        m_cacheWriteTimer.start();
+    m_isCacheDirty = true;
+}
+
+void CardDAVAddressBookFeeder::flushCacheIfDirty()
+{
+    if (!m_isCacheDirty) {
+        return;
     }
+
+    m_isCacheDirty = false;
+    flushCache();
 }
 
 void CardDAVAddressBookFeeder::processPhotoProperty(const QString &id, const QByteArray &data,
@@ -784,7 +888,7 @@ void CardDAVAddressBookFeeder::processPhotoProperty(const QString &id, const QBy
     }
 }
 
-void CardDAVAddressBookFeeder::flushCacheImpl()
+void CardDAVAddressBookFeeder::flushCache()
 {
     const auto filePath = cacheFilePath(m_settingsHash, true);
     QFile cacheFile(filePath);
@@ -811,8 +915,6 @@ void CardDAVAddressBookFeeder::flushCacheImpl()
     qCInfo(lcCardDAVAddressBookFeeder)
             << m_cachedContacts.size() << "contacts written to CardDAV cache with hash"
             << m_settingsHash;
-
-    Q_EMIT AddressBook::instance().contactsReady();
 }
 
 void CardDAVAddressBookFeeder::process()

@@ -9,6 +9,7 @@
 
 #include <QObject>
 #include <QSet>
+#include <QElapsedTimer>
 #include <QCoroCore>
 
 #include <expected>
@@ -31,9 +32,6 @@ public:
     void process() override;
     QUrl networkCheckURL() const override;
 
-private Q_SLOTS:
-    void flushCacheImpl();
-
 private:
     void init();
 
@@ -44,6 +42,10 @@ private:
     [[nodiscard]] QCoro::Task<WebDavSyncResult> fetchContacts(const QString &collectionPath,
                                                               const QStringList &hrefs,
                                                               bool hrefsAreKnownChanged = false);
+
+    /// Sync address book found in parent.
+    [[nodiscard]] QCoro::Task<WebDavSyncResult> syncChildAddressBook(const WebDavItem &item,
+                                                                     int depth);
 
     /// Full sync - unchanged cards from cache, rest fetched from backend.
     [[nodiscard]] QCoro::Task<WebDavSyncResult>
@@ -58,17 +60,27 @@ private:
                                                                const QString &requestedPath,
                                                                const QString &syncToken);
 
-    void processContactResults(const QList<WebDavItem> &results, bool hrefsAreKnownChanged);
-    QStringList readdUnchangedCachedContacts(const QList<WebDavItem> &items);
-    void readdCachedContacts(const QString &collectionPath,
-                             const QSet<QString> &excludedPaths = {});
+    [[nodiscard]] QCoro::Task<> processContactResults(const QList<WebDavItem> &results,
+                                                      bool hrefsAreKnownChanged);
+    [[nodiscard]] QCoro::Task<QStringList>
+    readdUnchangedCachedContacts(const QList<WebDavItem> &items);
+    [[nodiscard]] QCoro::Task<> readdCachedContacts(const QString &collectionPath,
+                                                    const QSet<QString> &excludedPaths = {});
+
+    /// Large loops hand control back to the event loop regularly to keep the UI responsive
+    bool isTimeSliceExhausted() const;
+    [[nodiscard]] QCoro::Task<> yieldToEventLoop();
+
     void pruneCachedContacts(const QString &collectionPath, const QSet<QString> &existingPaths);
     void pruneVanishedCollections(const QSet<QString> &knownCollectionPaths);
 
     void processVcard(QByteArray data, const QString &uuid, const QDateTime &modifiedDate);
     void loadCachedData(const size_t hash);
+    void deleteOwnedCachedContacts();
     QString cacheFilePath(const size_t hash, bool createPath = false);
-    void scheduleCacheWrite();
+    void markCacheDirty();
+    void flushCacheIfDirty();
+    void flushCache();
     void processPhotoProperty(const QString &id, const QByteArray &data,
                               const QDateTime &modifiedDate) const;
 
@@ -78,7 +90,8 @@ private:
     std::unique_ptr<WebDavClient> m_webdavClient;
 
     size_t m_settingsHash = 0;
-    QTimer m_cacheWriteTimer;
+    bool m_isCacheDirty = false;
+    QElapsedTimer m_timeSliceTimer;
     QHash<QString, Contact *> m_cachedContacts;
     QHash<QString, QDateTime> m_ignoredIds;
 
@@ -93,6 +106,4 @@ private:
 
     int m_retryCount = 0;
     int m_retryInterval = 0;
-
-    bool m_areWebDavConnectionsInitialized = false;
 };
