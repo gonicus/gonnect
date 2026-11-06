@@ -6,6 +6,7 @@
 #include <QCryptographicHash>
 #include <QRegularExpression>
 #include <QLoggingCategory>
+#include <QtConcurrentMap>
 
 #ifndef APP_TESTS
 #  include "AvatarPrioHelper.h"
@@ -382,27 +383,28 @@ void AddressBook::reserve(qsizetype size)
 
 QList<Contact *> AddressBook::search(const QString &searchString, bool includeBlocked) const
 {
-    QList<Contact *> results;
-    QList<qreal> weights;
-
-    results.reserve(m_contacts.size());
-    weights.reserve(m_contacts.size());
-
     const auto cleanSearchString = PhoneNumberUtil::clearInternationalChars(searchString);
+    const auto contacts = m_contacts.values();
 
-    for (auto contact : std::as_const(m_contacts)) {
-        if (!includeBlocked && contact->blockInfo().isBlocking) {
-            continue;
-        }
+    const auto weights = QtConcurrent::blockingMapped<QList<qreal>>(
+            contacts, [&cleanSearchString, includeBlocked](const Contact *contact) {
+                if (!includeBlocked && contact->blockInfo().isBlocking) {
+                    return 0.0;
+                }
+                return contact->matchesSearch(cleanSearchString);
+            });
 
-        const qreal weight = contact->matchesSearch(cleanSearchString);
-        if (weight > 0.863) {
-            weights.append(1.0 - weight);
-            results.append(contact);
+    QList<Contact *> results;
+    QList<qreal> resultWeights;
+
+    for (qsizetype i = 0; i < contacts.size(); ++i) {
+        if (weights.at(i) > 0.863) {
+            resultWeights.append(1.0 - weights.at(i));
+            results.append(contacts.at(i));
         }
     }
 
-    FuzzyCompare::sortListByWeight(results, weights);
+    FuzzyCompare::sortListByWeight(results, resultWeights);
 
     return results;
 }
