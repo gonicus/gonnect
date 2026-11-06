@@ -99,7 +99,7 @@ void AddressBook::unindexEmail(Contact *contact)
     }
 
     const auto it = m_contactsByEmail.find(mail);
-    if (it == m_contactsByEmail.cend()) {
+    if (it == m_contactsByEmail.end()) {
         return;
     }
 
