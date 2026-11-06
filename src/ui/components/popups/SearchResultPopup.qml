@@ -226,7 +226,6 @@ Popup {
                 contentHeight: flickableContainer.implicitHeight
                 anchors {
                     top: parent.top
-                    // bottom: showAllContactsButton.top
                     bottom: parent.bottom
                     left: parent.left
                     right: parent.right
@@ -580,7 +579,7 @@ Popup {
                                     property int buddyStatus: SIPBuddyState.UNKNOWN
 
                                     function updateBuddyStatus() {
-                                        contactDelg.buddyStatus = contactDelg.subscriptableNumber !== 0
+                                        contactDelg.buddyStatus = contactDelg.subscriptableNumber !== ""
                                                 ? SIPManager.buddyStatus(contactDelg.subscriptableNumber)
                                                 : SIPBuddyState.UNKNOWN
                                     }
@@ -705,6 +704,19 @@ Popup {
                         }
                     }
 
+                    Label {
+                        id: omittedResultsHint
+                        visible: (searchCategories.selectedCategories & SearchCategoryList.Category.Contacts)
+                                 && searchListModel.omittedResultsCount > 0
+                        text: qsTr("%n more contact(s) found", "", searchListModel.omittedResultsCount)
+                        color: Theme.secondaryTextColor
+                        horizontalAlignment: Text.AlignHCenter
+                        anchors {
+                            left: parent.left
+                            right: parent.right
+                        }
+                    }
+
                     SearchResultCategory {
                         id: messageResultList
                         headerText: qsTr("Messages")
@@ -778,29 +790,6 @@ Popup {
                     }
                 }
             }
-
-            // Keep for later when we know what to show when clicking on this
-
-            // Label {
-            //     id: showAllContactsButton
-            //     color: showAllContactsButtonHoverHandler.hovered ? Theme.primaryTextColor : Theme.secondaryTextColor
-            //     text: qsTr('Show all phone contacts')
-            //     anchors {
-            //         horizontalCenter: parent.horizontalCenter
-            //         bottom: parent.bottom
-            //         bottomMargin: 10
-            //     }
-
-            //     Behavior on color { ColorAnimation {} }
-
-            //     HoverHandler {
-            //         id: showAllContactsButtonHoverHandler
-            //     }
-
-            //     TapHandler {
-            //         onTapped: () => console.log(category, 'TODO')
-            //     }
-            // }
         }
     }
 
