@@ -625,6 +625,8 @@ qt_add_qml_module(gonnect
         sip/SIPCallManager.cpp
         sip/SIPSharedLine.h
         sip/SIPSharedLine.cpp
+        sip/SIPRemoteCc.h
+        sip/SIPRemoteCc.cpp
         sip/SIPRemotePartyId.h
         sip/SIPRemotePartyId.cpp
         sip/SIPEventLoop.h

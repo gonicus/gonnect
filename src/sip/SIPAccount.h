@@ -64,6 +64,13 @@ public:
     QList<SIPCall *> calls() const { return m_calls; }
     QList<SIPBuddy *> buddies() const { return m_buddies; };
 
+    Q_INVOKABLE bool ciscoToggleHuntGroupLogin();
+    QString ciscoRemoteCcTarget() const;
+    QString ciscoContactParams() const
+    {
+        return QString::fromStdString(m_accountConfig.regConfig.contactParams);
+    }
+
     Q_INVOKABLE QString bargeIntoSharedLine(bool useConferenceBridge = false);
 
     SIPCall *getCallById(const int callId);

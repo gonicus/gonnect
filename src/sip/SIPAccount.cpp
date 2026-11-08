@@ -5,6 +5,7 @@
 #include "SIPManager.h"
 #include "SIPCallManager.h"
 #include "SIPBuddy.h"
+#include "SIPRemoteCc.h"
 #include "SIPSharedLine.h"
 #include "PreferredIdentity.h"
 #include "PhoneNumberUtil.h"
@@ -1260,6 +1261,8 @@ void SIPAccount::ciscoSetup()
                     .arg(m_ciscoDeviceModel)
                     .toStdString();
 
+    SIPRemoteCc::registerModule();
+
     // Announce support of Call-Info security status (X-cisco-callinfo),
     // sRTP to RTP fallback (X-cisco-srtp-fallback) and the SIP interface
     // specification 5.1.0.
@@ -1389,6 +1392,28 @@ void SIPAccount::ciscoSetupSharedLine()
         delete m_sharedLine;
         m_sharedLine = nullptr;
     }
+}
+
+QString SIPAccount::ciscoRemoteCcTarget() const
+{
+    return addTransport("sip:" + m_domain);
+}
+
+bool SIPAccount::ciscoToggleHuntGroupLogin()
+{
+    if (!isCiscoDevice()) {
+        qCWarning(lcSIPAccount) << "hunt group login requires a Cisco device setup for account"
+                                << m_account;
+        return false;
+    }
+
+    if (!m_isRegistered) {
+        qCWarning(lcSIPAccount) << "account" << m_account
+                                << "is not registered - not toggling hunt group login";
+        return false;
+    }
+
+    return SIPRemoteCc::sendSoftKeyEvent(this, "HLog");
 }
 
 void SIPAccount::registerCiscoSupportedCapability()
