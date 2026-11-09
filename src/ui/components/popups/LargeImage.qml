@@ -7,10 +7,10 @@ import base
 
 Item {
     id: control
-    implicitWidth: Math.max(imageItem.sourceSize.width, buttonRow.implicitWidth + 2 * Theme.d)
-    implicitHeight: imageItem.sourceSize.height
+    implicitWidth: Math.max(imageLoader.originSize.width + 2 * Theme.d, buttonRow.implicitWidth + 2 * Theme.d)
+    implicitHeight: imageLoader.originSize.height + buttonRow.implicitHeight + 3 * Theme.d
 
-    property alias source: imageItem.source
+    property url source
 
     Item {
         id: imageContainer
@@ -22,19 +22,47 @@ Item {
             margins: 20
         }
 
-        AnimatedImage {
-            id: imageItem
+        Loader {
+            id: imageLoader
+            sourceComponent: FileHelper.isAnimatedImage(control.source) ? animatedImageComponent : imageComponent
             anchors.centerIn: parent
-            fillMode: Image.PreserveAspectFit
-            width: Math.min(imageContainer.width, imageItem.sourceSize.width)
-            height: Math.min(imageContainer.height, imageItem.sourceSize.height)
 
-            TapHandler {
-                grabPermissions: PointerHandler.TakeOverForbidden
-                gesturePolicy: TapHandler.WithinBounds
-                onSingleTapped: () => {
-                    control.StackView.view.popCurrentItem(StackView.Immediate)
-                }
+            readonly property size originSize: imageLoader.item?.sourceSize ?? Qt.size(0, 0)
+        }
+
+        TapHandler {
+            grabPermissions: PointerHandler.TakeOverForbidden
+            gesturePolicy: TapHandler.WithinBounds
+            onSingleTapped: () => {
+                control.StackView.view.popCurrentItem(StackView.Immediate)
+            }
+        }
+
+        Component {
+            id: imageComponent
+
+            Image {
+                id: imageItem
+                autoTransform: true
+                source: control.source
+                anchors.centerIn: parent
+                fillMode: Image.PreserveAspectFit
+                width: Math.min(imageContainer.width, imageItem.sourceSize.width)
+                height: Math.min(imageContainer.height, imageItem.sourceSize.height)
+            }
+        }
+
+        Component {
+            id: animatedImageComponent
+
+            AnimatedImage {
+                id: animatedImageItem
+                autoTransform: true
+                source: control.source
+                anchors.centerIn: parent
+                fillMode: Image.PreserveAspectFit
+                width: Math.min(imageContainer.width, animatedImageItem.sourceSize.width)
+                height: Math.min(imageContainer.height, animatedImageItem.sourceSize.height)
             }
         }
     }

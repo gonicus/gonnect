@@ -38,6 +38,8 @@ Item {
 
     property int toggleColorMode: BarButton.ToggleColorMode.Normal
 
+    readonly property alias hovered: buttonHoverHandler.hovered
+
     activeFocusOnTab: control.enabled
 
     Accessible.role: Accessible.Button
