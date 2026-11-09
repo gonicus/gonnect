@@ -72,6 +72,12 @@ QString WebDavItem::name() const
     return QUrl(href).fileName();
 }
 
+QString WebDavItem::displayName() const
+{
+    const auto text = property("DAV:", "displayname").text.trimmed();
+    return text.isEmpty() ? normalizedPath().section('/', -1) : text;
+}
+
 QDateTime WebDavItem::lastModified() const
 {
     const auto text = property("DAV:", "getlastmodified").text.trimmed();

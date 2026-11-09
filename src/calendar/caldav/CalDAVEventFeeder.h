@@ -39,13 +39,18 @@ private:
         QHash<QString, QByteArray> calendarData;
     };
 
+    struct PendingCalendar
+    {
+        QString path;
+        QString concreteSource;
+    };
+
     QCoro::Task<> run();
 
     [[nodiscard]] QCoro::Task<WebDavSyncResult>
-    syncCalendarCollection(const QString &collectionPath, int depth, uint &successCount,
-                           uint &failCount);
-    [[nodiscard]] QCoro::Task<WebDavSyncResult>
-    syncChildCalendar(const WebDavItem &item, int depth, uint &successCount, uint &failCount);
+    syncCalendarCollection(const QString &collectionPath, int depth);
+    [[nodiscard]] QCoro::Task<WebDavSyncResult> syncChildCalendar(const WebDavItem &item,
+                                                                  int depth);
     [[nodiscard]] QCoro::Task<WebDavSyncResult> fetchCalendarData(const QString &collectionPath,
                                                                   const QString &requestedPath,
                                                                   const QStringList &hrefs);
@@ -53,7 +58,8 @@ private:
                                                                     const QString &requestedPath,
                                                                     const QString &syncToken);
 
-    QString registerConcreteSource(const QString &collectionPath);
+    QString concreteSourceOf(const QString &collectionPath) const;
+    void publishCalendars();
     void processCalendarData(const QString &requestedPath, const QString &concreteSource,
                              uint &successCount, uint &failCount);
     void pruneCalendarData(const QString &requestedPath, const QSet<QString> &existingPaths);
@@ -70,6 +76,9 @@ private:
     CalDAVEventFeederConfig m_config;
     QTimer m_calendarRefreshTimer;
     QStringList m_concreteSources;
+
+    // Calendards currently being loaded but are not published yet
+    QList<PendingCalendar> m_pendingCalendars;
 
     // Normalized collection path -> state (kept for sync-collection)
     QHash<QString, CollectionState> m_collectionStates;

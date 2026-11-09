@@ -504,6 +504,8 @@ void IpcDispatcher::sendFile(const QString &roomId, const QString &filePath,
         msgReq.setThreadId(threadId);
     }
 
+    qCDebug(lcIpcDispatcher) << "Sending file" << filePath << "threadId:" << threadId;
+
     req->setMessageSendRequest(msgReq);
 
     const auto tag = req->tag();
