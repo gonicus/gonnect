@@ -25,6 +25,8 @@ AvatarManager::AvatarManager(QObject *parent) : QObject{ parent }
         qCInfo(lcAvatarManager) << "Created avatar image directory" << m_avatarImageDirPath;
     }
 
+    m_avatarContactIds = readContactIdsFromDir();
+
     m_updateContactsTimer.setSingleShot(true);
     m_updateContactsTimer.setInterval(5ms);
     m_updateContactsTimer.callOnTimeout(this, &AvatarManager::updateContacts);
@@ -52,10 +54,8 @@ void AvatarManager::updateContacts()
         return;
     }
 
-    const auto contactIds = readContactIdsFromDir();
-
     for (auto contactPtr : std::as_const(m_contactsWithPendingUpdates)) {
-        if (contactPtr && contactIds.contains(contactPtr->id())) {
+        if (contactPtr && m_avatarContactIds.contains(contactPtr->id())) {
             contactPtr->setHasAvatar(true);
         }
     }
@@ -124,6 +124,8 @@ void AvatarManager::addExternalImage(const QString &id, const QByteArray &data,
         addIdsToDb(tmp);
     }
 
+    m_avatarContactIds.insert(id);
+
     if (auto contact = AddressBook::instance().lookupByContactId(id)) {
         contact->setHasAvatar(true);
     }
@@ -134,6 +136,8 @@ void AvatarManager::addExternalImage(const QString &id, const QByteArray &data,
 void AvatarManager::removeExternalImage(const QString &id)
 {
     removeFile(id);
+    m_avatarContactIds.remove(id);
+
     QList<QString> tmp;
     tmp.append(id);
     removeIdsFromDb(tmp);
@@ -298,7 +302,7 @@ QHash<QString, QDateTime> AvatarManager::readIdsFromDb() const
     return result;
 }
 
-QStringList AvatarManager::readContactIdsFromDir() const
+QSet<QString> AvatarManager::readContactIdsFromDir() const
 {
     QMimeDatabase db;
 
@@ -306,15 +310,15 @@ QStringList AvatarManager::readContactIdsFromDir() const
     const auto fileList = avatarDir.entryList(QDir::Files | QDir::Readable | QDir::NoDotAndDotDot
                                               | QDir::NoSymLinks);
 
-    QStringList resultList;
+    QSet<QString> result;
 
     for (const auto &fileName : fileList) {
 
         QMimeType mime = db.mimeTypeForFile(m_avatarImageDirPath + "/" + fileName);
         if (mime.inherits("image/jpeg") || mime.inherits("image/png")) {
-            resultList.append(fileName);
+            result.insert(fileName);
         }
     }
 
-    return resultList;
+    return result;
 }
