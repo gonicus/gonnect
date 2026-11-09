@@ -16,7 +16,7 @@ Item {
         } else if (control.isRemoved || (control.isText && control.content.isSimpleText)) {
             return messageLabel.implicitHeight
         } else if (control.content instanceof ChatMessageContentImage) {
-            return messageImage.height
+            return messageLoader.height
         } else if (attachmentLoader.item) {
             return attachmentLoader.height
         }
@@ -108,26 +108,62 @@ Item {
     }
 
     // Image
-    AnimatedImage {
-        id: messageImage
+    // AnimatedImage cannot do autoTransform and is slower - so only use if really needed for animated image
+    Loader {
+        id: messageLoader
         visible: false
-        source: control.content?.imagePath ?? ""
-        height: control.maxContentHeight > 0 ? Math.min(messageImage.sourceSize.height, 200, control.maxContentHeight) : Math.min(messageImage.sourceSize.height, 200)
-        width: Math.min(messageImage.sourceSize.width, parent.width)
-        fillMode: Image.PreserveAspectFit
-        verticalAlignment: Image.AlignTop
-        horizontalAlignment: Image.AlignLeft
+        active: control.content instanceof ChatMessageContentImage
+        sourceComponent: FileHelper.isAnimatedImage(messageLoader.imagePath) ? animatedImageComponent : imageComponent
+
+        readonly property url imagePath: control.content?.imagePath ?? ""
+        readonly property int maxWidth: parent.width
+        readonly property int maxHeight: control.maxContentHeight > 0 ? Math.min(200, control.maxContentHeight) : 200
+
+        readonly property int paintedWidth: messageLoader.item?.paintedWidth ?? 0
+        readonly property int paintedHeight: messageLoader.item?.paintedHeight ?? 0
+
         anchors {
             top: messageLabel.top
             left: messageLabel.left
         }
+
+        Component {
+            id: imageComponent
+
+            Image {
+                id: messageImage
+                autoTransform: true
+                source: messageLoader.imagePath
+                width: Math.min(messageImage.sourceSize.width, messageLoader.maxWidth)
+                height: Math.min(messageImage.sourceSize.height, messageLoader.maxHeight)
+                fillMode: Image.PreserveAspectFit
+                verticalAlignment: Image.AlignTop
+                horizontalAlignment: Image.AlignLeft
+            }
+        }
+
+        Component {
+            id: animatedImageComponent
+
+            AnimatedImage {
+                id: animatedMessageImage
+                autoTransform: true
+                source: messageLoader.imagePath
+                width: Math.min(animatedMessageImage.sourceSize.width, messageLoader.maxWidth)
+                height: Math.min(animatedMessageImage.sourceSize.height, messageLoader.maxHeight)
+                fillMode: Image.PreserveAspectFit
+                verticalAlignment: Image.AlignTop
+                horizontalAlignment: Image.AlignLeft
+            }
+        }
     }
+
 
     // Load on demand
     Loader {
         id: messageImageMask
         active: control.content instanceof ChatMessageContentImage
-        anchors.fill: messageImage
+        anchors.fill: messageLoader
 
         sourceComponent: Item {
             Rectangle {
@@ -145,7 +181,7 @@ Item {
             MultiEffect {
                 id: messageImageOpacityMask
                 anchors.fill: parent
-                source: messageImage
+                source: messageLoader
                 maskSource: messageImageCornerCropper
                 maskEnabled: true
                 maskThresholdMin: 0.5
@@ -221,10 +257,10 @@ Item {
                                       || control.content instanceof ChatMessageContentFile
                                       || control.content instanceof ChatMessageContentAudioFile
                                       || control.content instanceof ChatMessageContentVideoFile)
-        x: uploadingOverlay.hasAttachment ? attachmentLoader.x : messageImage.x
-        y: uploadingOverlay.hasAttachment ? attachmentLoader.y : messageImage.y
-        width: uploadingOverlay.hasAttachment ? attachmentLoader.item.width : messageImage.paintedWidth
-        height: uploadingOverlay.hasAttachment ? attachmentLoader.item.height : messageImage.paintedHeight
+        x: uploadingOverlay.hasAttachment ? attachmentLoader.x : messageLoader.x
+        y: uploadingOverlay.hasAttachment ? attachmentLoader.y : messageLoader.y
+        width: uploadingOverlay.hasAttachment ? attachmentLoader.item.width : messageLoader.paintedWidth
+        height: uploadingOverlay.hasAttachment ? attachmentLoader.item.height : messageLoader.paintedHeight
         z: 100
 
         readonly property bool hasAttachment: attachmentLoader.visible && !!attachmentLoader.item

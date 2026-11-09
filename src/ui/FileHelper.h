@@ -48,11 +48,17 @@ public:
     /// Return the summed size all files.
     Q_INVOKABLE qint64 fileSizesFromPaths(const QList<QUrl> &urls) const;
 
+    /// Whether the file the url points to is a valid image that is animated
+    Q_INVOKABLE bool isAnimatedImage(const QUrl &imageUrl);
+
 private:
     explicit FileHelper(QObject *parent = nullptr);
 
     void removeOldLogs(const QDir &dir, const QString &prefix) const;
     void normalizeFileName(QString &name) const;
+
+    /// File url -> bool value whether the image is animated or not
+    QHash<QUrl, bool> m_animatedImageCache;
 };
 
 class FileHelperWrapper
