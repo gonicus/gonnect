@@ -67,6 +67,8 @@ public:
                 + "/gonnect/99-user.conf";
     }
 
+    Q_INVOKABLE void ciscoToggleHuntGroupLogin(const QString &accountId = "") const;
+
     Q_INVOKABLE bool isToday(const QDate date) const;
     Q_INVOKABLE bool isTomorrow(const QDate date) const;
     Q_INVOKABLE QString minutesToNiceText(uint minutes) const;

@@ -1160,6 +1160,15 @@ Item {
                     }
 
                     Button {
+                        id: testButton
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        text: 'Toggle Cisco hunt group'
+                        onClicked: () => {
+                            ViewHelper.ciscoToggleHuntGroupLogin()
+                        }
+                    }
+
+                    Button {
                         id: debugRunbutton
                         visible: !ViewHelper.isDebugRun
                         anchors.horizontalCenter: parent.horizontalCenter
