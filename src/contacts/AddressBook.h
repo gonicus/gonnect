@@ -71,9 +71,21 @@ private:
     void removeChatUserMapping(const ChatUser *chatUser);
 #endif
 
+    void indexPhoneNumbers(Contact *contact);
+    void unindexPhoneNumbers(Contact *contact);
+    void indexEmail(Contact *contact);
+    void unindexEmail(Contact *contact);
+
     QHash<QString, Contact *> m_contacts;
     QHash<QString, Contact *> m_contactsBySourceId;
     QHash<const ChatUser *, Contact *> m_contactsByChatUser;
+
+    /// Canonical phone number -> contacts having that number
+    QHash<QString, QList<Contact *>> m_contactsByNumber;
+
+    /// email address -> contacts having that address
+    QHash<QString, QList<Contact *>> m_contactsByEmail;
+
     QList<Contact::ContactSourceInfo> m_contactSourceInfos;
 
     QMutex m_feederMutex;
@@ -86,6 +98,7 @@ Q_SIGNALS:
     void contactModified(Contact *contact);
     void contactRemoved(QString contactId);
     void contactsCleared();
+    void contactsAboutToBeCleared();
     void contactsReady();
     void contactSourceInfosChanged();
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QObject>
+#include <QSet>
 #include <QTimer>
 #include "Contact.h"
 
@@ -34,12 +35,15 @@ private:
     QDateTime modifiedTimeInDb(const QString &id) const;
     QHash<QString, QDateTime> readIdsFromDb() const;
 
-    QStringList readContactIdsFromDir() const;
+    QSet<QString> readContactIdsFromDir() const;
     explicit AvatarManager(QObject *parent = nullptr);
 
     QString m_avatarImageDirPath;
     QTimer m_updateContactsTimer;
     QList<QPointer<Contact>> m_contactsWithPendingUpdates;
+
+    // Ids of contacts with avatar file
+    QSet<QString> m_avatarContactIds;
 
 private Q_SLOTS:
     void updateContacts();

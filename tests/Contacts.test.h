@@ -10,6 +10,7 @@ public:
 
 private slots:
     void testCleanPhoneNumber();
+    void testNormalizeNumber();
 
     void testLevenshteinDistance();
     void testJaroWinklerDistance();

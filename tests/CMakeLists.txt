@@ -3,7 +3,7 @@ set(CMAKE_AUTORCC ON)
 
 include(FindPkgConfig)
 
-find_package(Qt6 REQUIRED COMPONENTS Core Quick Test)
+find_package(Qt6 REQUIRED COMPONENTS Core Quick Test Concurrent)
 
 add_definitions(-DAPP_TESTS)
 enable_testing(true)
@@ -41,6 +41,7 @@ target_link_libraries(contactsTest
         Qt6::Core
         Qt6::Quick
         Qt6::Test
+        Qt6::Concurrent
 )
 
 qt_add_executable(callRoutingTest

@@ -4,6 +4,8 @@
 
 #include <QAuthenticator>
 #include <QLoggingCategory>
+#include <QtConcurrent>
+#include <QCoroFuture>
 
 Q_LOGGING_CATEGORY(lcWebDavClient, "gonnect.app.webdav.WebDavClient")
 
@@ -144,6 +146,13 @@ QCoro::Task<WebDavSyncChanges> WebDavClient::syncCollection(const QString &path,
 
     changes.result = WebDavSyncResult::OtherError;
     co_return changes;
+}
+
+QCoro::Task<QList<WebDavItem>> WebDavClient::parseMultiStatusInBackground(QByteArray xmlData)
+{
+    co_return co_await QtConcurrent::run([xmlData = std::move(xmlData)]() {
+        return WebDavPropfindParser{}.parseMultiStatus(xmlData);
+    });
 }
 
 void WebDavClient::onAuthenticationRequired(QNetworkReply *, QAuthenticator *authenticator)

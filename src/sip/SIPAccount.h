@@ -76,7 +76,11 @@ public:
     long sendMessage(const QString &recipient, const QString &message,
                      const QString &mimeType = "text/plain");
 
+    /// Status of a buddy; creates a new one with subscription if does not already exist
     SIPBuddyState::STATUS buddyStatus(const QString &var);
+
+    /// Status of an already existing buddy but does not create a new subscription
+    SIPBuddyState::STATUS knownBuddyStatus(const QString &var) const;
 
     void setCredentials(const QString &password);
 
@@ -104,9 +108,19 @@ private:
 
     void reinitBuddies();
 
+    /// Moves buddy to most recently used position, if found
+    SIPBuddy *lookupBuddy(const QString &sipUrl);
+    SIPBuddy *createBuddy(const QString &sipUrl);
+
+    /// Removes the least recently used buddy if PJSUA limit is reached
+    bool makeSpaceForBuddy();
+
     pj::PresenceStatus createPresenceStatusFromGlobal() const;
 
+    static constexpr qsizetype maxBuddies = PJSUA_MAX_BUDDIES;
     QList<SIPCall *> m_calls;
+
+    /// Buddies ordered by the most recently looked up one (oldest to newest)
     QList<SIPBuddy *> m_buddies;
     QList<pjsua_transport_id> m_transportIds;
 
