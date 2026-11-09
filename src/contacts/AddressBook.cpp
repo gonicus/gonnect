@@ -333,7 +333,12 @@ void AddressBook::removeContactsBySource(const QString &source)
     QMutexLocker lock(&m_feederMutex);
 
     QString sourceUid;
-    bool sourceInfoCleared = false;
+    const auto removedInfos = m_contactSourceInfos.removeIf(
+            [&source](const Contact::ContactSourceInfo &info) { return info.configId == source; });
+
+    if (removedInfos > 0) {
+        Q_EMIT contactSourceInfosChanged();
+    }
 
     QMutableHashIterator it(m_contacts);
     while (it.hasNext()) {
@@ -342,14 +347,6 @@ void AddressBook::removeContactsBySource(const QString &source)
         const auto contact = it.value();
         if (contact->contactSourceInfo().configId == source) {
             sourceUid = contact->sourceUid();
-
-            // Remove the ContactSourceInfo of the contact source
-            if (!sourceInfoCleared) {
-                m_contactSourceInfos.removeAll(contact->contactSourceInfo());
-                sourceInfoCleared = true;
-
-                Q_EMIT contactSourceInfosChanged();
-            }
 
             const auto contactId = contact->id();
             contact->disconnect(this);

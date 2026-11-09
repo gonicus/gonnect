@@ -130,6 +130,7 @@ CardDAVAddressBookFeeder::syncContactsCollection(const QString &collectionPath, 
 {
     auto *reply = co_await m_webdavClient->propfind(collectionPath, 1,
                                                     { { "D", "DAV:", "resourcetype" },
+                                                      { "D", "DAV:", "displayname" },
                                                       { "D", "DAV:", "getetag" },
                                                       { "D", "DAV:", "getlastmodified" },
                                                       { "D", "DAV:", "sync-token" } });
@@ -224,6 +225,13 @@ CardDAVAddressBookFeeder::syncContactsCollection(const QString &collectionPath, 
             qCDebug(lcCardDAVAddressBookFeeder)
                     << "Sync token for" << requestedPath << "is now" << collectionSyncToken;
             markCacheDirty();
+        }
+    }
+
+    // Collect display names
+    for (const auto &item : items) {
+        if (item.isContactCollection()) {
+            m_collectionNames.insert(item.normalizedPath(), item.displayName());
         }
     }
 
@@ -606,6 +614,10 @@ void CardDAVAddressBookFeeder::pruneVanishedCollections(const QSet<QString> &kno
                 return !knownCollectionPaths.contains(it.key());
             });
 
+    m_collectionNames.removeIf([knownCollectionPaths](QHash<QString, QString>::iterator it) {
+        return !knownCollectionPaths.contains(it.key());
+    });
+
     if (removedContacts || removedIgnoredIds || removedSyncTokens) {
         qCDebug(lcCardDAVAddressBookFeeder)
                 << "Pruned vanished collections:" << removedContacts << "contacts,"
@@ -728,8 +740,8 @@ void CardDAVAddressBookFeeder::processVcard(QByteArray data, const QString &uuid
 
         if (!uuid.isEmpty() && !name.isEmpty() && !phoneNumbers.isEmpty()) {
             Contact *contact = AddressBook::instance().addContact(
-                    uuid, remoteUid, { m_priority, m_displayName, m_group }, name, org, email,
-                    modifiedDate, phoneNumbers, m_blockInfo);
+                    uuid, remoteUid, sourceInfoFor(uuid), name, org, email, modifiedDate,
+                    phoneNumbers, m_blockInfo);
 
             // Replaced cache entry -> not part of addressbook any more
             if (Contact *prevContact = m_cachedContacts.value(uuid, nullptr);
@@ -885,6 +897,16 @@ void CardDAVAddressBookFeeder::processPhotoProperty(const QString &id, const QBy
         const QByteArray decoded = QByteArray::fromBase64(data);
         AvatarManager::instance().addExternalImage(id, decoded, modifiedDate);
     }
+}
+
+Contact::ContactSourceInfo CardDAVAddressBookFeeder::sourceInfoFor(const QString &cardPath) const
+{
+    const auto collectionName = m_collectionNames.value(WebDavItem::collectionPathOf(cardPath));
+
+    if (m_collectionNames.size() < 2 || collectionName.isEmpty()) {
+        return { m_priority, m_displayName, m_group };
+    }
+    return { m_priority, QString("%1-%2").arg(m_displayName, collectionName), m_group };
 }
 
 void CardDAVAddressBookFeeder::flushCache()

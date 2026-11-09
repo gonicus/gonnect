@@ -22,6 +22,7 @@ struct WebDavItem
     bool supportsComponent(const QString &componentName) const;
 
     QString name() const;
+    QString displayName() const;
     QDateTime lastModified() const;
     QString syncToken() const;
 

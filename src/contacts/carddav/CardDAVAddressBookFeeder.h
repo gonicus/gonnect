@@ -84,6 +84,8 @@ private:
     void processPhotoProperty(const QString &id, const QByteArray &data,
                               const QDateTime &modifiedDate) const;
 
+    Contact::ContactSourceInfo sourceInfoFor(const QString &cardPath) const;
+
     void resetContacts();
 
     AddressBookManager *m_manager = nullptr;
@@ -94,6 +96,7 @@ private:
     QElapsedTimer m_timeSliceTimer;
     QHash<QString, Contact *> m_cachedContacts;
     QHash<QString, QDateTime> m_ignoredIds;
+    QHash<QString, QString> m_collectionNames;
 
     /// Normalized collection path -> DAV:sync-token
     QHash<QString, QString> m_syncTokens;
