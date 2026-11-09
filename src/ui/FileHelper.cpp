@@ -234,3 +234,23 @@ qint64 FileHelper::fileSizesFromPaths(const QList<QUrl> &urls) const
 
     return sum;
 }
+
+bool FileHelper::isAnimatedImage(const QUrl &imageUrl)
+{
+    // Cache lookup
+    if (const auto it = m_animatedImageCache.constFind(imageUrl);
+        it != m_animatedImageCache.cend()) {
+        return *it;
+    }
+
+    const QString path = imageUrl.scheme() == QLatin1String("qrc") ? (':' + imageUrl.path())
+                                                                   : imageUrl.toLocalFile();
+
+    QImageReader reader(path);
+    reader.setDecideFormatFromContent(true);
+
+    const bool isAnimated =
+            reader.canRead() && reader.supportsAnimation() && reader.imageCount() > 1;
+    m_animatedImageCache.insert(imageUrl, isAnimated);
+    return isAnimated;
+}
