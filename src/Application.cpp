@@ -18,6 +18,7 @@
 #include <QQmlEngine>
 #include <QQmlContext>
 #include <QDesktopServices>
+#include <QTimer>
 #include <QtWebEngineQuick>
 
 #ifdef Q_OS_MACOS

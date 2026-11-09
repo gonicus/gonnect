@@ -87,7 +87,7 @@ QStringList LinuxDesktopSearchProvider::GetSubsearchResultSet(const QStringList 
         for (auto &uri : std::as_const(uris)) {
             QString id = contact->company() + "#" + uri.number;
             if (uri.isSipSubscriptable) {
-                id += QString("#%1").arg(SIPManager::instance().buddyStatus(uri.number));
+                id += QString("#%1").arg(SIPManager::instance().knownBuddyStatus(uri.number));
             }
 
             if (!m_searchResults.contains(id)) {

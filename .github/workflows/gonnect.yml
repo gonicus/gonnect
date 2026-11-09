@@ -216,11 +216,6 @@ jobs:
           lfs: 'true'
           submodules: 'recursive'
 
-      - name: Install action dependencies
-        shell: bash
-        run: npm install
-        working-directory: ./.github/actions/get-qt-version
-
       - name: Get QT-Version
         id: get-qt
         uses: ./.github/actions/get-qt-version

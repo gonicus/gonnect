@@ -1,8 +1,13 @@
 #include "WebDavItem.h"
 
 #include <QUrl>
-#include <QLocale>
 #include <QTimeZone>
+#include <QLoggingCategory>
+
+#include <array>
+#include <algorithm>
+
+Q_LOGGING_CATEGORY(lcWebDavItem, "gonnect.app.webdav.WebDavItem")
 
 WebDavPropertyValue WebDavItem::property(const QString &namespaceUri, const QString &name) const
 {
@@ -67,18 +72,32 @@ QString WebDavItem::name() const
     return QUrl(href).fileName();
 }
 
+QString WebDavItem::displayName() const
+{
+    const auto text = property("DAV:", "displayname").text.trimmed();
+    return text.isEmpty() ? normalizedPath().section('/', -1) : text;
+}
+
 QDateTime WebDavItem::lastModified() const
 {
-    // RFC 1123 date string (according to RFC 4918 sec. 15.7)
     const auto text = property("DAV:", "getlastmodified").text.trimmed();
-    auto dateTime = QLocale::c().toDateTime(text, "ddd, dd MMM yyyy HH:mm:ss 'GMT'");
-    if (dateTime.isValid()) {
-        dateTime.setTimeZone(QTimeZone::UTC);
-        return dateTime;
+    if (text.isEmpty()) {
+        // getlastmodified is optional, thus may be empty
+        return QDateTime();
     }
 
-    // Fallback for date string with numeric zone instead of "GMT"
-    return QDateTime::fromString(text, Qt::RFC2822Date);
+    auto dateTime = parseHttpDate(text);
+    if (!dateTime.isValid()) {
+        // Fallback for date string with numeric zone instead of "GMT"
+        dateTime = QDateTime::fromString(text, Qt::RFC2822Date);
+    }
+
+    if (!dateTime.isValid()) {
+        qCDebug(lcWebDavItem) << "Unable to parse date string" << text;
+    }
+
+    // Some servers report epoch for unknown modification time
+    return dateTime.isValid() && dateTime.toSecsSinceEpoch() == 0 ? QDateTime() : dateTime;
 }
 
 QString WebDavItem::syncToken() const
@@ -100,4 +119,47 @@ QString WebDavItem::normalizedPath(const QUrl &url)
 QString WebDavItem::collectionPathOf(const QString &path)
 {
     return path.left(path.lastIndexOf('/'));
+}
+
+int WebDavItem::parseDigits(QStringView digits)
+{
+    int value = 0;
+    for (const QChar c : digits) {
+        if (c < u'0' || c > u'9') {
+            return -1;
+        }
+        value = value * 10 + (c.unicode() - u'0');
+    }
+    return value;
+}
+
+QDateTime WebDavItem::parseHttpDate(QStringView text)
+{
+    // Sample string: "Sun, 06 Nov 1994 08:49:37 GMT" (RFC 4918 section 15.7)
+
+    static constexpr std::array<QStringView, 12> monthNames = {
+        u"Jan", u"Feb", u"Mar", u"Apr", u"May", u"Jun",
+        u"Jul", u"Aug", u"Sep", u"Oct", u"Nov", u"Dec",
+    };
+
+    if (text.size() != 29 || text.at(3) != u',' || text.sliced(25) != QLatin1StringView(" GMT")) {
+        return QDateTime();
+    }
+
+    const auto monthIt = std::ranges::find(monthNames, text.sliced(8, 3));
+    if (monthIt == monthNames.end()) {
+        return QDateTime();
+    }
+
+    const QDate date(parseDigits(text.sliced(12, 4)),
+                     static_cast<int>(std::distance(monthNames.begin(), monthIt)) + 1,
+                     parseDigits(text.sliced(5, 2)));
+    const QTime time(parseDigits(text.sliced(17, 2)), parseDigits(text.sliced(20, 2)),
+                     parseDigits(text.sliced(23, 2)));
+
+    if (!date.isValid() || !time.isValid()) {
+        return QDateTime();
+    }
+
+    return QDateTime(date, time, QTimeZone::UTC);
 }

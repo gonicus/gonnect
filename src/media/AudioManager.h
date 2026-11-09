@@ -114,6 +114,7 @@ private:
 
     AudioProcessor *audioProcessor();
 
+    void updateAudioDevices();
     void refreshAudioDevices();
     void doProfileElection();
     bool isDeviceAvailable(const QString &hash);
@@ -132,6 +133,7 @@ private:
 
     AudioProcessor *m_audioProcessor = nullptr;
     bool m_audioProcessorInitialized = false;
+    bool m_initialized = false;
 
     unsigned m_captureDeviceId = 0;
     unsigned m_currentAudioProfile = 0;

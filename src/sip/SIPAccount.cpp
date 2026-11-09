@@ -727,34 +727,34 @@ void SIPAccount::onInstantMessage(pj::OnInstantMessageParam &prm)
 
 SIPBuddyState::STATUS SIPAccount::buddyStatus(const QString &var)
 {
-    QString sipUrl = toSipUri(var);
+    const QString sipUrl = toSipUri(var);
 
     if (sipUrl.isEmpty()) {
         return SIPBuddyState::STATUS::UNKNOWN;
     }
 
-    // Do we have such a buddy already?
-    for (auto buddy : std::as_const(m_buddies)) {
+    if (const auto buddy = lookupBuddy(sipUrl)) {
+        return buddy->status();
+    }
+
+    if (!makeSpaceForBuddy()) {
+        qCWarning(lcSIPAccount) << "No space for SIP buddy" << sipUrl << "- all" << m_buddies.size()
+                                << "buddies wait for availability";
+        return SIPBuddyState::STATUS::UNKNOWN;
+    }
+
+    createBuddy(sipUrl);
+    return SIPBuddyState::STATUS::UNKNOWN;
+}
+
+SIPBuddyState::STATUS SIPAccount::knownBuddyStatus(const QString &var) const
+{
+    const QString sipUrl = toSipUri(var);
+
+    for (const auto *buddy : std::as_const(m_buddies)) {
         if (buddy->uri().compare(sipUrl, Qt::CaseInsensitive) == 0) {
             return buddy->status();
         }
-    }
-
-    // We don't have a buddy yet - try to subscribe
-    qCInfo(lcSIPAccount) << "Creating SIPBuddy for" << sipUrl << m_buddies.size();
-    auto buddy = new SIPBuddy(this, sipUrl);
-    QString uri = buddy->uri();
-    qCInfo(lcSIPAccount) << "subscribing to buddy" << uri;
-
-    m_buddies.push_back(buddy);
-    if (buddy->initialize()) {
-        connect(buddy, &SIPBuddy::destroyed, this, [buddy, uri, this]() {
-            qCCritical(lcSIPAccount) << "removing buddy" << uri;
-            m_buddies.removeAll(buddy);
-        });
-    } else {
-        m_buddies.removeAll(buddy);
-        buddy->deleteLater();
     }
 
     return SIPBuddyState::STATUS::UNKNOWN;
@@ -1139,20 +1139,60 @@ void SIPAccount::reinitBuddies()
     }
 
     for (const auto &uri : std::as_const(uris)) {
-        auto buddy = new SIPBuddy(this, uri);
-        m_buddies.push_back(buddy);
-        if (buddy->initialize()) {
-            connect(buddy, &SIPBuddy::destroyed, this, [buddy, uri, this]() {
-                qCCritical(lcSIPAccount) << "removing buddy" << uri;
-                m_buddies.removeAll(buddy);
-            });
-        } else {
-            m_buddies.removeAll(buddy);
-            buddy->deleteLater();
-        }
+        createBuddy(uri);
     }
 
     Q_EMIT SIPManager::instance().buddyStateChanged("", SIPBuddyState::UNKNOWN);
+}
+
+SIPBuddy *SIPAccount::lookupBuddy(const QString &sipUrl)
+{
+    for (qsizetype i = 0; i < m_buddies.size(); ++i) {
+        if (m_buddies.at(i)->uri().compare(sipUrl, Qt::CaseInsensitive) == 0) {
+            m_buddies.move(i, m_buddies.size() - 1);
+            return m_buddies.last();
+        }
+    }
+
+    return nullptr;
+}
+
+SIPBuddy *SIPAccount::createBuddy(const QString &sipUrl)
+{
+    qCDebug(lcSIPAccount) << "Creating SIPBuddy for" << sipUrl << m_buddies.size();
+    auto *buddy = new SIPBuddy(this, sipUrl);
+
+    m_buddies.append(buddy);
+    if (!buddy->initialize()) {
+        m_buddies.removeAll(buddy);
+        buddy->deleteLater();
+        return nullptr;
+    }
+
+    connect(buddy, &SIPBuddy::destroyed, this, [buddy, this]() { m_buddies.removeAll(buddy); });
+    return buddy;
+}
+
+bool SIPAccount::makeSpaceForBuddy()
+{
+    if (m_buddies.size() < maxBuddies) {
+        return true;
+    }
+
+    // Cannot destroy buddies waiting for "notify when available"
+    const auto it = std::ranges::find_if(
+            m_buddies, [](SIPBuddy *buddy) { return !buddy->isSubscribedToStatus(); });
+    if (it == m_buddies.end()) {
+        return false;
+    }
+
+    const auto *buddy = *it;
+    qCDebug(lcSIPAccount) << "Removing least recently used SIP buddy" << buddy->uri();
+    m_buddies.erase(it);
+
+    // No deleteLater() to free PJSUA slot immediately
+    delete buddy;
+    return true;
 }
 
 SIPAccount::~SIPAccount()

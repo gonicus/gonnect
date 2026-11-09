@@ -72,6 +72,7 @@ public:
     Q_INVOKABLE void removePreferredIdentity(PreferredIdentity *preferredIdentity);
 
     Q_INVOKABLE SIPBuddyState::STATUS buddyStatus(const QString &var);
+    Q_INVOKABLE SIPBuddyState::STATUS knownBuddyStatus(const QString &var) const;
 
     Q_INVOKABLE bool isConfigured() const;
 

@@ -351,6 +351,7 @@ modules:
       - type: git
         url: https://github.com/snowballstem/snowball.git
         tag: v3.1.1
+        commit: cd195b51e948a902a4312f023f4a14392516a543
         x-checker-data:
           type: git
           tag-pattern: ^v([0-9.]+)$
