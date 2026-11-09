@@ -20,9 +20,11 @@
 #include <text_io.h>
 
 #define CARDDAV_MAGIC 0x0891
-#define CARDDAV_VERSION 0x02
+#define CARDDAV_VERSION 0x03
 
 Q_LOGGING_CATEGORY(lcCardDAVAddressBookFeeder, "gonnect.app.feeder.CardDAVAddressBookFeeder")
+
+namespace {
 
 // If more cards than this threshold should be fetched, address-book query is preferred over
 // multiget.
@@ -30,6 +32,27 @@ static constexpr qsizetype addressbookQueryThreshold = 500;
 
 // Maximum time large loops work before handing control back to the event loop
 static constexpr qint64 maxTimeSliceMs = 50;
+
+// Sanitize backslash escapes in vCard
+static QString unescapeVcardText(const QString &text)
+{
+    QString result;
+    result.reserve(text.size());
+
+    for (qsizetype i = 0; i < text.size(); ++i) {
+        const QChar current = text.at(i);
+        if (current != '\\' || i + 1 == text.size()) {
+            result.append(current);
+            continue;
+        }
+
+        const QChar escaped = text.at(++i);
+        result.append((escaped == 'n' || escaped == 'N') ? QChar('n') : escaped);
+    }
+
+    return result;
+}
+} // namespace
 
 using namespace std::chrono_literals;
 
@@ -683,11 +706,11 @@ void CardDAVAddressBookFeeder::processVcard(QByteArray data, const QString &uuid
             if (propName == "UID") {
                 remoteUid = QString::fromStdString(prop.getValue());
             } else if (propName == "FN") {
-                name = QString::fromStdString(prop.getValue());
+                name = unescapeVcardText(QString::fromStdString(prop.getValue()));
             } else if (propName == "ORG") {
-                org = QString::fromStdString(prop.getValue());
+                org = unescapeVcardText(QString::fromStdString(prop.getValue()));
             } else if (propName == "EMAIL") {
-                email = QString::fromStdString(prop.getValue());
+                email = unescapeVcardText(QString::fromStdString(prop.getValue()));
             } else if (propName == "TEL") {
                 bool subscriptable = false;
                 auto propParams = prop.params();
