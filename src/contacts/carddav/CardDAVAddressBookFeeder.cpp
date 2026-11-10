@@ -929,7 +929,7 @@ Contact::ContactSourceInfo CardDAVAddressBookFeeder::sourceInfoFor(const QString
     if (m_collectionNames.size() < 2 || collectionName.isEmpty()) {
         return { m_priority, m_displayName, m_group };
     }
-    return { m_priority, QString("%1-%2").arg(m_displayName, collectionName), m_group };
+    return { m_priority, QString("%1 - %2").arg(m_displayName, collectionName), m_group };
 }
 
 void CardDAVAddressBookFeeder::flushCache()
