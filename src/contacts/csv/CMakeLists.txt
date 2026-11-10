@@ -8,6 +8,8 @@ if(ENABLE_CSV)
       CSVFileAddressBookFeeder.h
     )
 
+    set_source_files_properties(CSVFileAddressBookFeeder.cpp PROPERTIES COMPILE_OPTIONS "$<$<CXX_COMPILER_ID:GNU>:-Wno-subobject-linkage>")
+
     target_include_directories(CSVAddressBookFactory
       PRIVATE
         ${PROJECT_SOURCE_DIR}/src/contacts

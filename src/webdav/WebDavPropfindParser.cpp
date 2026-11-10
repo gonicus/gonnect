@@ -119,6 +119,39 @@ WebDavPropfindParser::buildSyncCollectionBody(const QString &syncToken,
     return body;
 }
 
+QByteArray
+WebDavPropfindParser::buildAddressbookQueryBody(const QList<WebDavPropertyRequest> &properties)
+{
+    QHash<QString, QString> namespaces;
+    namespaces.insert("CARD", "urn:ietf:params:xml:ns:carddav");
+    for (const auto &p : properties) {
+        namespaces.insert(p.prefix, p.namespaceUri);
+    }
+
+    QByteArray body =
+            R"(<?xml version="1.0" encoding="utf-8"?><CARD:addressbook-query xmlns:D="DAV:")"_ba;
+
+    QHashIterator it(namespaces);
+    while (it.hasNext()) {
+        it.next();
+        if (it.key() == "D") {
+            continue;
+        }
+        body += QString(" xmlns:%1=\"%2\"").arg(it.key(), it.value()).toUtf8();
+    }
+
+    body += "><D:prop>";
+
+    for (const auto &p : properties) {
+        body += QString("<%1:%2 />").arg(p.prefix, p.name).toUtf8();
+    }
+
+    // Empty filter <==> all addresse objects
+    body += "</D:prop><CARD:filter/></CARD:addressbook-query>";
+
+    return body;
+}
+
 QList<WebDavItem> WebDavPropfindParser::parseMultiStatus(const QByteArray &xmlData)
 {
     return parseMultiStatusDocument(xmlData).items;

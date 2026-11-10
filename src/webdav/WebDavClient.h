@@ -38,6 +38,10 @@ public:
     [[nodiscard]] QCoro::Task<WebDavSyncChanges> syncCollection(const QString &path,
                                                                 QString syncToken);
 
+    /// Parses multitatus response in worker thread, resumes in calling thread
+    [[nodiscard]] static QCoro::Task<QList<WebDavItem>>
+    parseMultiStatusInBackground(QByteArray xmlData);
+
 private Q_SLOTS:
     void onAuthenticationRequired(QNetworkReply *reply, QAuthenticator *authenticator);
 

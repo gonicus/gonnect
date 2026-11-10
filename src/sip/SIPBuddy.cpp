@@ -87,8 +87,15 @@ void SIPBuddy::onBuddyState()
         m_statusText = statusText;
         Q_EMIT statusChanged(m_status);
 
-        qCInfo(lcSIPBuddy) << "Buddy" << m_uri << "changed state to:" << m_status;
-        Q_EMIT SIPManager::instance().buddyStateChanged(m_uri, status);
+        qCDebug(lcSIPBuddy) << "Buddy" << m_uri << "changed state to:" << m_status;
+
+        // Queued to prevent creation/destruction of buddies during PJSUA callback
+        QMetaObject::invokeMethod(
+                &SIPManager::instance(),
+                [uri = m_uri, status]() {
+                    Q_EMIT SIPManager::instance().buddyStateChanged(uri, status);
+                },
+                Qt::QueuedConnection);
     }
 }
 

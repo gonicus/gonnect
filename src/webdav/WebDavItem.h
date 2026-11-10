@@ -22,6 +22,7 @@ struct WebDavItem
     bool supportsComponent(const QString &componentName) const;
 
     QString name() const;
+    QString displayName() const;
     QDateTime lastModified() const;
     QString syncToken() const;
 
@@ -30,4 +31,11 @@ struct WebDavItem
     static QString normalizedPath(const QUrl &url);
 
     static QString collectionPathOf(const QString &path);
+
+private:
+    // Returns -1 if digits contain non-ASCII digit char
+    static int parseDigits(QStringView digits);
+
+    // Parse RFC 1123 date string
+    static QDateTime parseHttpDate(QStringView text);
 };

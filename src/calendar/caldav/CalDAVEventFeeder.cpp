@@ -99,14 +99,9 @@ QCoro::Task<> CalDAVEventFeeder::run()
 
         qCDebug(lcCalDAVEventFeeder) << "Created WebDavClient with url" << webdavUrl.toString();
 
-        resetCalendar();
-        m_concreteSources.clear();
-        m_checksums.clear();
+        m_pendingCalendars.clear();
 
-        uint successCount = 0;
-        uint failCount = 0;
-
-        const auto result = co_await syncCalendarCollection("", 0, successCount, failCount);
+        const auto result = co_await syncCalendarCollection("", 0);
 
         if (result == WebDavSyncResult::AuthRequired) {
             qCWarning(lcCalDAVEventFeeder) << "Failed to process CalDAV source: invalid password";
@@ -129,8 +124,7 @@ QCoro::Task<> CalDAVEventFeeder::run()
             continue;
         }
 
-        qCDebug(lcCalDAVEventFeeder)
-                << "Processed, successful:" << successCount << "failed:" << failCount;
+        publishCalendars();
 
         break;
     }
@@ -139,8 +133,7 @@ QCoro::Task<> CalDAVEventFeeder::run()
 }
 
 QCoro::Task<WebDavSyncResult>
-CalDAVEventFeeder::syncCalendarCollection(const QString &collectionPath, int depth,
-                                          uint &successCount, uint &failCount)
+CalDAVEventFeeder::syncCalendarCollection(const QString &collectionPath, int depth)
 {
     auto *reply = co_await m_webdavClient->propfind(
             collectionPath, 1,
@@ -165,10 +158,10 @@ CalDAVEventFeeder::syncCalendarCollection(const QString &collectionPath, int dep
     }
 
     const QString requestedPath = WebDavItem::normalizedPath(reply->url());
-    const auto items = WebDavPropfindParser{}.parseMultiStatus(reply->readAll());
+    const auto items = co_await WebDavClient::parseMultiStatusInBackground(reply->readAll());
     reply->deleteLater();
 
-    const auto concreteSource = registerConcreteSource(collectionPath);
+    const auto concreteSource = concreteSourceOf(collectionPath);
 
     // Non-empty sync-token indicates that sync-collection is supported
     QString serverSyncToken;
@@ -241,12 +234,7 @@ CalDAVEventFeeder::syncCalendarCollection(const QString &collectionPath, int dep
                 << "Sync token for" << requestedPath << "is now" << serverSyncToken;
     }
 
-    processCalendarData(requestedPath, concreteSource, successCount, failCount);
-
-    // No token - no state
-    if (serverSyncToken.isEmpty()) {
-        m_collectionStates.remove(requestedPath);
-    }
+    m_pendingCalendars.append({ requestedPath, concreteSource });
 
     // Descent one level in tree
     if (depth == 0) {
@@ -264,8 +252,7 @@ CalDAVEventFeeder::syncCalendarCollection(const QString &collectionPath, int dep
 
                 knownCollectionPaths.insert(item.normalizedPath());
 
-                const auto childResult =
-                        co_await syncChildCalendar(item, depth + 1, successCount, failCount);
+                const auto childResult = co_await syncChildCalendar(item, depth + 1);
                 if (childResult == WebDavSyncResult::AuthRequired) {
                     co_return WebDavSyncResult::AuthRequired;
                 }
@@ -282,8 +269,7 @@ CalDAVEventFeeder::syncCalendarCollection(const QString &collectionPath, int dep
 }
 
 QCoro::Task<WebDavSyncResult> CalDAVEventFeeder::syncChildCalendar(const WebDavItem &item,
-                                                                   int depth, uint &successCount,
-                                                                   uint &failCount)
+                                                                   int depth)
 {
     const auto calendarPath = item.normalizedPath();
     const auto serverSyncToken = item.syncToken();
@@ -291,14 +277,14 @@ QCoro::Task<WebDavSyncResult> CalDAVEventFeeder::syncChildCalendar(const WebDavI
 
     // Either initial or full sync
     if (serverSyncToken.isEmpty() || storedSyncToken.isEmpty()) {
-        co_return co_await syncCalendarCollection(item.href, depth, successCount, failCount);
+        co_return co_await syncCalendarCollection(item.href, depth);
     }
 
-    const auto concreteSource = registerConcreteSource(item.href);
+    const auto concreteSource = concreteSourceOf(item.href);
 
     if (storedSyncToken == serverSyncToken) {
         qCDebug(lcCalDAVEventFeeder) << "Calendar" << calendarPath << "is unchanged";
-        processCalendarData(calendarPath, concreteSource, successCount, failCount);
+        m_pendingCalendars.append({ calendarPath, concreteSource });
         co_return WebDavSyncResult::Success;
     }
 
@@ -312,13 +298,13 @@ QCoro::Task<WebDavSyncResult> CalDAVEventFeeder::syncChildCalendar(const WebDavI
                 << "sync-collection for" << calendarPath << "failed - full sync fallback";
 
         m_collectionStates[calendarPath].syncToken.clear();
-        co_return co_await syncCalendarCollection(item.href, depth, successCount, failCount);
+        co_return co_await syncCalendarCollection(item.href, depth);
     }
 
     m_collectionStates[calendarPath].syncToken = serverSyncToken;
     qCDebug(lcCalDAVEventFeeder) << "Sync token for" << calendarPath << "is now" << serverSyncToken;
 
-    processCalendarData(calendarPath, concreteSource, successCount, failCount);
+    m_pendingCalendars.append({ calendarPath, concreteSource });
     co_return WebDavSyncResult::Success;
 }
 
@@ -353,7 +339,8 @@ QCoro::Task<WebDavSyncResult> CalDAVEventFeeder::fetchCalendarData(const QString
         }
 
         // Process response
-        const auto results = WebDavPropfindParser{}.parseMultiStatus(multigetReply->readAll());
+        const auto results =
+                co_await WebDavClient::parseMultiStatusInBackground(multigetReply->readAll());
         multigetReply->deleteLater();
 
         qCDebug(lcCalDAVEventFeeder) << "Received calendar-multiget response" << offset << "to"
@@ -394,13 +381,34 @@ QCoro::Task<WebDavSyncResult> CalDAVEventFeeder::syncCalendarChanges(const QStri
                                          changes.changedHrefs.values());
 }
 
-QString CalDAVEventFeeder::registerConcreteSource(const QString &collectionPath)
+void CalDAVEventFeeder::publishCalendars()
 {
-    const QString concreteSource = QString("%1_%2").arg(m_config.source, collectionPath);
-    if (!m_concreteSources.contains(concreteSource)) {
-        m_concreteSources.append(concreteSource);
+    resetCalendar();
+    m_concreteSources.clear();
+    m_checksums.clear();
+
+    uint successCount = 0;
+    uint failCount = 0;
+
+    for (const auto &calendar : std::as_const(m_pendingCalendars)) {
+        m_concreteSources.append(calendar.concreteSource);
+        processCalendarData(calendar.path, calendar.concreteSource, successCount, failCount);
+
+        // Without sync token there is no delta sync later, so the raw data is not needed
+        if (m_collectionStates.value(calendar.path).syncToken.isEmpty()) {
+            m_collectionStates.remove(calendar.path);
+        }
     }
-    return concreteSource;
+
+    m_pendingCalendars.clear();
+
+    qCDebug(lcCalDAVEventFeeder) << "Processed, successful:" << successCount
+                                 << "failed:" << failCount;
+}
+
+QString CalDAVEventFeeder::concreteSourceOf(const QString &collectionPath) const
+{
+    return QString("%1_%2").arg(m_config.source, collectionPath);
 }
 
 void CalDAVEventFeeder::processCalendarData(const QString &requestedPath,
