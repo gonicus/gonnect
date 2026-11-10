@@ -89,12 +89,14 @@ elseif(LINUX)
     pkg_check_modules(LIBNOTIFY REQUIRED libnotify IMPORTED_TARGET)
     pkg_check_modules(LIBPULSE REQUIRED libpulse IMPORTED_TARGET)
     pkg_check_modules(LIBPIPEWIRE REQUIRED libpipewire-0.3 IMPORTED_TARGET)
+    pkg_check_modules(LIBAV REQUIRED libavutil libswscale IMPORTED_TARGET)
     pkg_check_modules(XCB REQUIRED xcb IMPORTED_TARGET)
     pkg_check_modules(WAYLAND_CLIENT REQUIRED wayland-client IMPORTED_TARGET)
        
     list(APPEND PLATFORM_LIBRARIES
         PkgConfig::LIBPULSE
         PkgConfig::LIBPIPEWIRE
+        PkgConfig::LIBAV
         PkgConfig::LIBNOTIFY
         PkgConfig::XCB
         PkgConfig::WAYLAND_CLIENT
@@ -254,8 +256,11 @@ if(FLATPAK)
         platform/linux/LinuxDesktopSearchProvider.cpp
         platform/linux/LinuxPlatformSession.h
         platform/linux/LinuxPlatformSession.cpp
-        platform/linux/PipeWireCameraDevices.h
-        platform/linux/PipeWireCameraDevices.cpp)
+        platform/linux/PipeWireCameraSource.h
+        platform/linux/PipeWireCameraSource.cpp
+        platform/linux/PipeWireFrameConverter.h
+        platform/linux/PipeWireFrameConverter.cpp
+    )
 
 elseif(LINUX)
     set(PLATFORM_SOURCES
@@ -286,7 +291,12 @@ elseif(LINUX)
         platform/linux/LinuxDesktopSearchProvider.h
         platform/linux/LinuxDesktopSearchProvider.cpp
         platform/linux/LinuxPlatformSession.h
-        platform/linux/LinuxPlatformSession.cpp)
+        platform/linux/LinuxPlatformSession.cpp
+        platform/linux/PipeWireCameraSource.h
+        platform/linux/PipeWireCameraSource.cpp
+        platform/linux/PipeWireFrameConverter.h
+        platform/linux/PipeWireFrameConverter.cpp
+    )
 
 elseif(APPLE)
     set(PLATFORM_SOURCES
@@ -817,6 +827,12 @@ qt_add_qml_module(gonnect
         media/AudioPort.cpp
         media/AudioProcessor.h
         media/AudioProcessor.cpp
+        media/CameraSource.h
+        media/CameraSource.cpp
+        media/FramePump.h
+        media/FramePump.cpp
+        media/QtCameraSource.h
+        media/QtCameraSource.cpp
         media/Sniffer.h
         media/Sniffer.cpp
         media/VideoDevice.h

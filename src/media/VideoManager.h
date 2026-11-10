@@ -2,17 +2,14 @@
 
 #include <QObject>
 #include <QTimer>
-#include <QMediaDevices>
-#include <QCameraDevice>
 #include <QQmlEngine>
 #include <qqmlintegration.h>
 
 #include "AppSettings.h"
 #include "VideoDevice.h"
+#include "CameraSource.h"
 
-#ifdef Q_OS_FLATPAK
-#  include "linux/PipeWireCameraDevices.h"
-#endif
+#include <memory>
 
 class VideoManager : public QObject
 {
@@ -59,18 +56,15 @@ private Q_SLOTS:
 
 private:
     explicit VideoManager(QObject *parent = nullptr);
+    void setCameraSource(std::unique_ptr<CameraSource> source);
     bool isDeviceAvailable(const QString &deviceId) const;
     VideoDevice deviceById(const QString &deviceId) const;
-    QList<VideoDevice> devicesFromMediaDevices() const;
     void setCameraAccessState(CameraAccessState value);
 
     QTimer m_debounceUpdateTimer;
-    QMediaDevices m_mediaDevices;
+    std::unique_ptr<CameraSource> m_cameraSource;
 
     QList<VideoDevice> m_devices;
-#ifdef Q_OS_FLATPAK
-    PipeWireCameraDevices m_pipewireCameras;
-#endif
 
     QString m_selectedDeviceId;
     std::unique_ptr<AppSettings> m_settings = nullptr;

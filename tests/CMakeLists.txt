@@ -212,3 +212,31 @@ target_link_libraries(chatMessageTransformerTest
         Qt6::Test
         cmark::cmark
 )
+
+if(LINUX)
+    find_package(Qt6 REQUIRED COMPONENTS Multimedia)
+    pkg_check_modules(LIBSPA REQUIRED libspa-0.2 IMPORTED_TARGET)
+    pkg_check_modules(LIBAV REQUIRED libavutil libswscale IMPORTED_TARGET)
+
+    qt_add_executable(pipeWireFrameConverterTest
+        PipeWireFrameConverter.test.cpp
+        PipeWireFrameConverter.test.h
+        ${PROJECT_SOURCE_DIR}/src/platform/linux/PipeWireFrameConverter.cpp
+        ${PROJECT_SOURCE_DIR}/src/platform/linux/PipeWireFrameConverter.h
+    )
+
+    add_test(NAME pipeWireFrameConverterTest COMMAND pipeWireFrameConverterTest)
+
+    target_include_directories(pipeWireFrameConverterTest
+        PRIVATE
+            ${PROJECT_SOURCE_DIR}/src/platform/linux
+    )
+    target_link_libraries(pipeWireFrameConverterTest
+        PRIVATE
+            Qt6::Core
+            Qt6::Multimedia
+            Qt6::Test
+            PkgConfig::LIBSPA
+            PkgConfig::LIBAV
+    )
+endif()
