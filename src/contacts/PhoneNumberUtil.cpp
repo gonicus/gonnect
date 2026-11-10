@@ -7,6 +7,8 @@
 #include "PhoneCodeLookup.h"
 #include "AddressBook.h"
 
+#include <algorithm>
+
 #ifndef APP_TESTS
 #  include "AvatarManager.h"
 #endif
@@ -45,10 +47,18 @@ bool ContactInfo::operator!=(const ContactInfo &other)
 
 QString PhoneNumberUtil::cleanPhoneNumber(const QString &number)
 {
-    QString result(QUrl::fromPercentEncoding(number.toLocal8Bit()));
+    const QString decoded =
+            number.contains(u'%') ? QUrl::fromPercentEncoding(number.toLocal8Bit()) : number;
 
-    static const QRegularExpression stripRegEx("[^0-9#+*]");
-    result.replace(stripRegEx, "");
+    // Keep ASCII digits and dial chars (# + *) only
+    QString result;
+    result.reserve(decoded.size());
+
+    for (const QChar c : decoded) {
+        if ((c >= u'0' && c <= u'9') || c == u'#' || c == u'+' || c == u'*') {
+            result.append(c);
+        }
+    }
 
     return result;
 }
@@ -69,21 +79,20 @@ QString PhoneNumberUtil::normalizeNumber(const QString &number)
         regionalPrefix = settings.value("generic/regionalPrefix").toString();
     }
 
-    static const QRegularExpression sipNumberRegex("^.*sips?:(.*)@.*$",
-                                                   QRegularExpression::CaseInsensitiveOption);
-    result.replace(sipNumberRegex, "\\1");
-
-    static const QRegularExpression international("^000(.*)$");
-    result.replace(international, "+\\1");
-
-    static const QRegularExpression national("^00(.*)$");
-    if (!nationalPrefix.isEmpty()) {
-        result.replace(national, nationalPrefix + "\\1");
+    if (result.contains(QLatin1String("sip"), Qt::CaseInsensitive)) {
+        static const QRegularExpression sipNumberRegex("^.*sips?:(.*)@.*$",
+                                                       QRegularExpression::CaseInsensitiveOption);
+        result.replace(sipNumberRegex, "\\1");
     }
 
-    static const QRegularExpression regional("^0(.*)$");
-    if (!regionalPrefix.isEmpty()) {
-        result.replace(regional, regionalPrefix + "\\1");
+    if (result.startsWith(QLatin1String("000"))) {
+        result = u'+' + result.sliced(3);
+    }
+    if (!nationalPrefix.isEmpty() && result.startsWith(QLatin1String("00"))) {
+        result = nationalPrefix + result.sliced(2);
+    }
+    if (!regionalPrefix.isEmpty() && result.startsWith(u'0')) {
+        result = regionalPrefix + result.sliced(1);
     }
 
     return result;
@@ -292,6 +301,12 @@ PhoneNumberUtil::PhoneNumberUtil() : QObject()
 
 QString PhoneNumberUtil::clearInternationalChars(const QString &str)
 {
+    // Performance enhancement: do not do regex replace if all chars are ASCII
+    const bool isAscii = std::ranges::all_of(str, [](QChar c) { return c.unicode() < 0x80; });
+    if (isAscii) {
+        return str;
+    }
+
     auto s = str; // Ensure copy of str
 
     static QList<std::pair<const QRegularExpression, const QString>> replacements = {

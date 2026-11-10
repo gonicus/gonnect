@@ -38,6 +38,8 @@ Item {
 
     property int toggleColorMode: BarButton.ToggleColorMode.Normal
 
+    readonly property alias hovered: buttonHoverHandler.hovered
+
     activeFocusOnTab: control.enabled
 
     Accessible.role: Accessible.Button
@@ -96,7 +98,9 @@ Item {
         Label {
             id: buttonLabel
             Accessible.ignored: true
-            color: Theme.isDarkMode ? Theme.secondaryTextColor : Theme.inactiveTextColor
+            color: control.enabled
+                   ? (Theme.isDarkMode ? Theme.secondaryTextColor : Theme.inactiveTextColor)
+                   : Theme.secondaryInactiveTextColor
             font.pixelSize: Theme.fontSizeSmall
             horizontalAlignment: Label.AlignHCenter
             anchors {

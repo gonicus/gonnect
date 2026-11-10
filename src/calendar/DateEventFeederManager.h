@@ -7,6 +7,7 @@
 #include <QTime>
 #include <QDateTime>
 #include <QHash>
+#include <QCoroCore>
 
 class IDateEventFeeder;
 
@@ -26,8 +27,8 @@ public:
 
     void initFeederConfigs();
     void reloadCalendar();
-    void acquireSecret(bool forcePrompt, const QString &configId,
-                       std::function<void(SecretResponse response)> callback);
+    [[nodiscard]] QCoro::Task<SecretResponse> acquireSecret(bool forcePrompt,
+                                                            const QString &configId);
 
 private:
     explicit DateEventFeederManager(QObject *parent = nullptr);

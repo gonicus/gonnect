@@ -245,7 +245,8 @@ Item {
             showIndicatorBadge: (control.conferenceConnector?.chatRoom()?.notificationCount ?? 0) > 0
             labelElide: control.extended ? Text.ElideNone : Text.ElideRight
 
-            readonly property bool isConferenceChatSource: control.conferenceConnector?.hasCapability(IConferenceConnector.Capability.ChatInCall) ?? false
+            readonly property bool isConferenceChatSource: control.conferenceConnector
+                                                           && (control.conferenceChatInUse || control.conferenceConnector > 2)
 
             onClicked: () => {
                 if (control.selectedSideBarMode === CallSideBar.Chat && !headerBar.isLinkedRoomShown) {

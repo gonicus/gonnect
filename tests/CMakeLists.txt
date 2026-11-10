@@ -3,7 +3,7 @@ set(CMAKE_AUTORCC ON)
 
 include(FindPkgConfig)
 
-find_package(Qt6 REQUIRED COMPONENTS Core Quick Test)
+find_package(Qt6 REQUIRED COMPONENTS Core Quick Test Concurrent)
 
 add_definitions(-DAPP_TESTS)
 enable_testing(true)
@@ -41,6 +41,7 @@ target_link_libraries(contactsTest
         Qt6::Core
         Qt6::Quick
         Qt6::Test
+        Qt6::Concurrent
 )
 
 qt_add_executable(callRoutingTest
@@ -162,6 +163,28 @@ target_compile_definitions(usbTest
 )
 
 target_link_libraries(usbTest
+    PRIVATE
+        Qt6::Core
+        Qt6::Test
+)
+
+qt_add_executable(webdavPropfindParserTest
+    WebDavPropfinderParser.test.cpp
+    WebDavPropfinderParser.test.h
+    ${PROJECT_SOURCE_DIR}/src/webdav/WebDavPropfindParser.cpp
+    ${PROJECT_SOURCE_DIR}/src/webdav/WebDavPropfindParser.h
+    ${PROJECT_SOURCE_DIR}/src/webdav/WebDavItem.cpp
+    ${PROJECT_SOURCE_DIR}/src/webdav/WebDavItem.h
+)
+
+add_test(NAME webdavPropfindParserTest COMMAND webdavPropfindParserTest)
+
+target_include_directories(webdavPropfindParserTest
+    PRIVATE
+        ${PROJECT_SOURCE_DIR}/src
+        ${PROJECT_SOURCE_DIR}/src/webdav
+)
+target_link_libraries(webdavPropfindParserTest
     PRIVATE
         Qt6::Core
         Qt6::Test

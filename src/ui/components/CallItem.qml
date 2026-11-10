@@ -195,7 +195,10 @@ Rectangle {
 
         TapHandler {
             id: hangupButtonTapHandler
-            onTapped: SIPCallManager.endCall(control.accountId, control.callId)
+            gesturePolicy: TapHandler.WithinBounds
+            grabPermissions: PointerHandler.ApprovesTakeOverByAnything
+
+            onTapped: () => SIPCallManager.endCall(control.accountId, control.callId)
         }
     }
 

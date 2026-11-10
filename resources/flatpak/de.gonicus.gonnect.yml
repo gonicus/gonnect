@@ -170,26 +170,13 @@ modules:
       - /share/man
     sources:
       - type: archive
-        url: https://www.openldap.org/software/download/OpenLDAP/openldap-release/openldap-2.7.1.tgz
-        sha256: 253db80f301258ea69cda1184766d57395b836aaabf41157eb0316eb0fac1341
+        url: https://www.openldap.org/software/download/OpenLDAP/openldap-release/openldap-2.7.2.tgz
+        sha256: aad731aa22118ff327b9b4ddfc4b6f18ef9476586205da88a532e90940b523d2
         x-checker-data:
           type: anitya
           stable-only: true
           project-id: 2551
           url-template: https://www.openldap.org/software/download/OpenLDAP/openldap-release/openldap-${major}.${minor}.${patch}.tgz
-
-  - name: qtwebdav
-    buildsystem: cmake-ninja
-    config-opts:
-      - -DBUILD_WITH_QT6=ON
-    sources:
-      - type: git
-        url: https://github.com/PikachuHy/QtWebDAV.git
-        commit: ac39687b8ae16118d385d3694e900becd108a0f2
-      - type: patch
-        path: patches/qtwebdav-cmake.patch
-      - type: patch
-        path: patches/qtwebdav-ssl-certificates.patch
 
   - name: qtkeychain
     buildsystem: cmake-ninja
@@ -274,6 +261,10 @@ modules:
         commit: 9e6a5349d27733c931815b2e236807f3414ab251
       - type: patch
         path: patches/vcard-cmake.patch
+      - type: patch
+        path: patches/vcard-do-not-skip-photo.patch
+      - type: patch
+        path: patches/vcard-fix-group-property-name.patch
 
   - name: hidapi
     buildsystem: cmake-ninja
@@ -338,9 +329,13 @@ modules:
       - mv /app/lib/libsqlite3.a /app/lib/libsqlcipher.a
       - rm -f /app/lib/pkgconfig/sqlite3.pc /app/bin/sqlite3
     sources:
-      - type: archive
-        url: https://github.com/sqlcipher/sqlcipher/archive/refs/tags/v4.16.0.tar.gz
-        sha256: d687bf981199ac019c6c87b11f92a5900aec777855e7ba5b30e5e1192933ce8a
+      - type: git
+        url: https://github.com/sqlcipher/sqlcipher.git
+        tag: v4.19.0
+        commit: c4b275a47932888216bade83aff2bbc73df0ff85
+        x-checker-data:
+          type: git
+          tag-pattern: ^v([0-9.]+)$
 
   - name: libstemmer
     buildsystem: simple
@@ -352,6 +347,10 @@ modules:
       - type: git
         url: https://github.com/snowballstem/snowball.git
         tag: v3.1.1
+        commit: cd195b51e948a902a4312f023f4a14392516a543
+        x-checker-data:
+          type: git
+          tag-pattern: ^v([0-9.]+)$
 
   - name: gonnect
     buildsystem: cmake-ninja
@@ -364,9 +363,6 @@ modules:
       - -DCMAKE_UNITY_BUILD=ON
       - -DCMAKE_OPTIMIZE_DEPENDENCIES=ON
       - -DENABLE_GOW_001=ON
-      - -DENABLE_GOW_002=ON
-      - -DENABLE_GOW_004=ON
-      - -DENABLE_GOW_005=ON
       - -DENABLE_PCH=ON
     sources:
       - type: dir

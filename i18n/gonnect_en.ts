@@ -4,7 +4,7 @@
 <context>
     <name>CallSideBar</name>
     <message numerus="yes">
-        <location filename="../src/ui/components/CallSideBar.qml" line="231"/>
+        <location filename="../src/ui/components/CallSideBar.qml" line="296"/>
         <source>Person(s)</source>
         <translation>
             <numerusform>Person</numerusform>
@@ -15,11 +15,22 @@
 <context>
     <name>Chat</name>
     <message numerus="yes">
-        <location filename="../src/ui/components/chat/Chat.qml" line="223"/>
+        <location filename="../src/ui/components/chat/Chat.qml" line="224"/>
         <source>%1 is/are typing</source>
         <translation type="unfinished">
             <numerusform>%1 is typing</numerusform>
             <numerusform>%1 are typing</numerusform>
+        </translation>
+    </message>
+</context>
+<context>
+    <name>ChatRoomListItem</name>
+    <message numerus="yes">
+        <location filename="../src/ui/components/chat/ChatRoomListItem.qml" line="29"/>
+        <source>%n unread message(s)</source>
+        <translation>
+            <numerusform>%n unread message</numerusform>
+            <numerusform>%n unread messages</numerusform>
         </translation>
     </message>
 </context>
@@ -93,7 +104,7 @@
 <context>
     <name>SettingsPage</name>
     <message numerus="yes">
-        <location filename="../src/ui/components/SettingsPage.qml" line="300"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="272"/>
         <source>day(s) of history</source>
         <translation>
             <numerusform>day of history</numerusform>

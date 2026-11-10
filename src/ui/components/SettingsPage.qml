@@ -395,7 +395,7 @@ Item {
                                 font.weight: darkModeComboBox.font.weight
                                 font.pixelSize: darkModeComboBox.font.pixelSize
 
-                                Accessible.id: "settings.theme.select." + darkModeDlg.index
+                                Accessible.id: "settings.theme.select." + darkModeDelg.index
                                 Accessible.name: darkModeDelg.displayName
                                 Accessible.description: qsTr("Currently selected theme option")
 

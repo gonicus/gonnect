@@ -333,6 +333,18 @@ SIPBuddyState::STATUS SIPManager::buddyStatus(const QString &var)
     return SIPBuddyState::STATUS::UNKNOWN;
 }
 
+SIPBuddyState::STATUS SIPManager::knownBuddyStatus(const QString &var) const
+{
+    auto accounts = SIPAccountManager::instance().accounts();
+
+    // Hard code to the one and only account for now
+    if (accounts.count()) {
+        return accounts.first()->knownBuddyStatus(var);
+    }
+
+    return SIPBuddyState::STATUS::UNKNOWN;
+}
+
 void SIPManager::updatePreferredIdentities()
 {
     // Build up an enrolled identities list for SIPAccount lookup

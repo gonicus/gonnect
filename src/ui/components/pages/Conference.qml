@@ -119,7 +119,7 @@ Item {
             if (!AuthManager.isAuthManagerInitialized) {
                 return undefined
             }
-            if (internal.isWebViewLoaded) {
+            if (internal.isWebViewLoaded && CertificateProfile.profile) {
                 return jitsiViewComponent
             }
             if (AuthManager.isJitsiAuthRequired && AuthManager.isWaitingForAuth) {
@@ -374,11 +374,7 @@ Item {
                         localStorageEnabled: true
                         screenCaptureEnabled: true
                     }
-                    profile {
-                        offTheRecord: false
-                        // This line let's the app crash all of a sudden...
-                        // storageName: "gonnect_jitsi_meet"
-                    }
+                    profile: CertificateProfile.profile
                     webChannel: WebChannel {
                         registeredObjects: [ confConn ]
                     }
@@ -403,11 +399,32 @@ Item {
                         permission.grant()
                     }
 
+                    onSelectClientCertificate: selection => {
+                                                   console.log("WebViewWidget client certificate requested, have", selection.certificates.length)
+
+                                                   if (selection.certificates.length > 0) {
+                                                       selection.select(selection.certificates[0])
+                                                   }
+                                               }
+
                     onLoadingChanged: (info) => {
                         if (info.status === WebEngineView.LoadSucceededStatus) {
                             jitsiView.runJavaScript(confConn.jitsiJavascriptInternal())
                         } else {
                             console.error(category, `failed to load HTML: ${info.errorString} (domain: ${info.errorDomain}, code: ${info.errorCode}, status: ${info.status}, url: ${info.url})`)
+                        }
+                    }
+
+                    function loadJitsiSite() {
+                        if (CertHelper.clientCertsInitialized) {
+                            jitsiView.loadHtml(confConn.jitsiHtmlInternal(), GlobalInfo.jitsiUrl())
+                        }
+                    }
+
+                    Connections {
+                        target: CertHelper
+                        function onClientCertsInitializedChanged() {
+                            jitsiView.loadJitsiSite()
                         }
                     }
 
@@ -825,8 +842,8 @@ Item {
                     }
                 }
 
-                Component.onCompleted: {
-                    jitsiView.loadHtml(confConn.jitsiHtmlInternal(), GlobalInfo.jitsiUrl())
+                Component.onCompleted: () => {
+                    jitsiView.loadJitsiSite()
                 }
             }
         }

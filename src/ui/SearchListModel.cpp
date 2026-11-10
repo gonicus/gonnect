@@ -8,6 +8,8 @@
 
 #include <QRegularExpression>
 
+#include <algorithm>
+
 SearchListModel::SearchListModel(QObject *parent) : QAbstractListModel{ parent }
 {
     connect(this, &SearchListModel::searchPhraseChanged, this,
@@ -28,6 +30,11 @@ void SearchListModel::updateSearchResults()
         results = AddressBook::instance().search(searchPhrase);
     }
 
+    const auto omittedResultsCount = std::max<qsizetype>(results.size() - maxResults, 0);
+    if (omittedResultsCount > 0) {
+        results.resize(maxResults);
+    }
+
     if (results != m_model) {
         beginResetModel();
         m_model = results;
@@ -44,6 +51,11 @@ void SearchListModel::updateSearchResults()
         }
 
         endResetModel();
+    }
+
+    if (omittedResultsCount != m_omittedResultsCount) {
+        m_omittedResultsCount = omittedResultsCount;
+        Q_EMIT omittedResultsCountChanged();
     }
 }
 

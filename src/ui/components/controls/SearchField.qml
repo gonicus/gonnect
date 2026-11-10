@@ -143,6 +143,8 @@ Item {
         }
 
         TapHandler {
+            gesturePolicy: TapHandler.WithinBounds
+            grabPermissions: PointerHandler.ApprovesTakeOverByAnything
             onTapped: () => searchInputField.clear()
         }
     }
