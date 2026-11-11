@@ -82,7 +82,7 @@ class GOnnectRecipe(ConanFile):
             self.requires("wayland/1.24.0", override=True)
 
         self.requires("openssl/3.6.3", override=True)
-        self.requires("qtkeychain/0.17.0")
+        self.requires("qtkeychain/0.18.0")
         self.requires("qcoro6/0.13.0")
         self.requires("libusb/1.0.30")
         self.requires("sqlcipher/4.17.0")
