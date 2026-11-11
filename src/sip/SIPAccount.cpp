@@ -1075,6 +1075,7 @@ void SIPAccount::reinitBuddies()
     for (auto buddy : std::as_const(m_buddies)) {
         uris.push_back(buddy->uri());
     }
+    uris.removeDuplicates();
 
     qCInfo(lcSIPAccount) << "re-subscribing to" << uris.size() << "buddies after re-registration";
 
@@ -1082,13 +1083,13 @@ void SIPAccount::reinitBuddies()
     m_buddies.clear();
     qDeleteAll(savedBuddies);
 
+    for (const auto &uri : std::as_const(uris)) {
+        createBuddy(uri);
+    }
+
     // Reset state while re-subscribing buddies
     for (const auto &uri : std::as_const(uris)) {
         Q_EMIT SIPManager::instance().buddyStateChanged(uri, SIPBuddyState::UNKNOWN);
-    }
-
-    for (const auto &uri : std::as_const(uris)) {
-        createBuddy(uri);
     }
 
     Q_EMIT SIPManager::instance().buddyStateChanged("", SIPBuddyState::UNKNOWN);
