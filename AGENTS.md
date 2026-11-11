@@ -141,6 +141,7 @@ is prefered over "plain Linux" style packages and as much as possible should be 
 * C++ header and source files must be written in (upper) camel case.
 * A .cpp file should correspond to a single header file with the exact same name.
 * Specific casts (like `static_cast<int>(x)`) should be used. C-style casts (like `(int) x` should be avoided.
+* Predicates and bool flags should start with "is", "has" or sim. indicating its boolean nature.
 * The QML code follows standard code format as invoked by the auto-format function of Qt Creator.
 * Each QML file should start with `pragma ComponentBehavior: Bound`. The general import is `import base`.
 * Properties in QML must be referenced fully-qualified (i.e. preceeded with the items id), except for `parent`.

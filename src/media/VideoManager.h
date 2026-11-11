@@ -11,6 +11,8 @@
 
 #include <memory>
 
+class FramePump;
+
 class VideoManager : public QObject
 {
     Q_OBJECT
@@ -46,6 +48,10 @@ public:
     VideoManager::CameraAccessState cameraAccessState() const { return m_cameraAccessState; }
     bool isCameraAccessDenied() const;
 
+    /// Camera runs whilst consumer(s) registered
+    void addConsumer(FramePump *consumer);
+    void removeConsumer(FramePump *consumer);
+
     Q_INVOKABLE void acquireCameras();
 
 public Q_SLOTS:
@@ -57,12 +63,14 @@ private Q_SLOTS:
 private:
     explicit VideoManager(QObject *parent = nullptr);
     void setCameraSource(std::unique_ptr<CameraSource> source);
+    void updateFrameHandler();
     bool isDeviceAvailable(const QString &deviceId) const;
     VideoDevice deviceById(const QString &deviceId) const;
     void setCameraAccessState(CameraAccessState value);
 
     QTimer m_debounceUpdateTimer;
     std::unique_ptr<CameraSource> m_cameraSource;
+    QList<FramePump *> m_consumers;
 
     QList<VideoDevice> m_devices;
 

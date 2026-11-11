@@ -1,4 +1,5 @@
 #include "VideoManager.h"
+#include "FramePump.h"
 #include "QtCameraSource.h"
 
 #include <QLoggingCategory>
@@ -51,6 +52,12 @@ VideoManager::VideoManager(QObject *parent) : QObject{ parent }
         }
     });
 
+    connect(this, &VideoManager::selectedDeviceIdChanged, this, [this]() {
+        if (!m_consumers.isEmpty()) {
+            m_cameraSource->start(m_selectedDeviceId);
+        }
+    });
+
     connect(this, &VideoManager::devicesChanged, this, &VideoManager::updateProfile);
 
     updateDevices();
@@ -61,6 +68,21 @@ void VideoManager::setCameraSource(std::unique_ptr<CameraSource> source)
     m_cameraSource = std::move(source);
     connect(m_cameraSource.get(), &CameraSource::devicesChanged, this,
             [this]() { m_debounceUpdateTimer.start(); });
+
+    updateFrameHandler();
+    if (!m_consumers.isEmpty()) {
+        m_cameraSource->start(m_selectedDeviceId);
+    }
+}
+
+void VideoManager::updateFrameHandler()
+{
+    // Must copy consumer list because running on camera's thread
+    m_cameraSource->setFrameHandler([consumers = m_consumers](const QVideoFrame &frame) {
+        for (auto *consumer : consumers) {
+            consumer->push(frame);
+        }
+    });
 }
 
 void VideoManager::acquireCameras()
@@ -72,9 +94,15 @@ void VideoManager::acquireCameras()
         return;
     }
 
+<<<<<<< HEAD
     if (!portal.isValid()) {
         qCInfo(lcVideoManager) << "camera portal unavailable - falling back to QMediaDevices";
         setCameraAccessState(CameraAccessState::Granted);
+=======
+    if (!portal.isValid() || !portal.isCameraPresent()) {
+        qCInfo(lcVideoManager) << "camera portal unavailable or no camera present - falling "
+                                  "back to QMediaDevices";
+>>>>>>> fe95c86a (refactor: use PipeWire source for VideoManager)
         return;
     }
 
@@ -184,6 +212,43 @@ void VideoManager::setCameraAccessState(CameraAccessState value)
     if (m_cameraAccessState != value) {
         m_cameraAccessState = value;
         Q_EMIT cameraAccessStateChanged();
+    }
+}
+
+void VideoManager::addConsumer(FramePump *consumer)
+{
+    if (!consumer) {
+        qCWarning(lcVideoManager) << "Ignoring nullptr consumer";
+        return;
+    }
+
+    if (m_consumers.contains(consumer)) {
+        return;
+    }
+
+    m_consumers.append(consumer);
+    updateFrameHandler();
+
+    if (m_consumers.size() == 1) {
+        m_cameraSource->start(m_selectedDeviceId);
+    }
+}
+
+void VideoManager::removeConsumer(FramePump *consumer)
+{
+    if (!consumer) {
+        qCWarning(lcVideoManager) << "Ignoring nullptr consumer";
+        return;
+    }
+
+    if (!m_consumers.removeOne(consumer)) {
+        return;
+    }
+
+    updateFrameHandler();
+
+    if (m_consumers.isEmpty()) {
+        m_cameraSource->stop();
     }
 }
 

@@ -827,6 +827,8 @@ qt_add_qml_module(gonnect
         media/AudioPort.cpp
         media/AudioProcessor.h
         media/AudioProcessor.cpp
+        media/CameraPreview.h
+        media/CameraPreview.cpp
         media/CameraSource.h
         media/CameraSource.cpp
         media/FramePump.h
