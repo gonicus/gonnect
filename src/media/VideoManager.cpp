@@ -57,17 +57,23 @@ void VideoManager::acquireCameras()
     if (!portal.isValid() || !portal.isCameraPresent()) {
         qCInfo(lcVideoManager)
                 << "camera portal unavailable or no camera present - falling back to QMediaDevices";
+        setCameraAccessState(CameraAccessState::Granted);
         return;
     }
 
+    setCameraAccessState(CameraAccessState::Pending);
+
     portal.AccessCamera([this, &portal](uint code, const QVariantMap &response) {
         if (code != AbstractPortal::ResponseCode::SUCCESS) {
-            qCInfo(lcVideoManager)
+            m_portalPending = false;
+            setCameraAccessState(CameraAccessState::Denied);
+            qCWarning(lcVideoManager)
                     << "camera access not granted:" << response.value("error").toString();
             return;
         }
 
         m_portalPending = true;
+        setCameraAccessState(CameraAccessState::Granted);
 
         portal.OpenPipeWireRemote([this](int fd, const QString &error) {
             m_portalPending = false;
@@ -86,6 +92,8 @@ void VideoManager::acquireCameras()
             m_debounceUpdateTimer.start();
         });
     });
+#else
+    setCameraAccessState(CameraAccessState::Granted);
 #endif
 }
 
@@ -137,6 +145,14 @@ QList<VideoDevice> VideoManager::devicesFromMediaDevices() const
     }
 
     return devices;
+}
+
+void VideoManager::setCameraAccessState(CameraAccessState value)
+{
+    if (m_cameraAccessState != value) {
+        m_cameraAccessState = value;
+        Q_EMIT cameraAccessStateChanged();
+    }
 }
 
 void VideoManager::updateDevices()

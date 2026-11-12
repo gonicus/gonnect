@@ -18,8 +18,6 @@ Item {
         property bool isWebViewLoaded: false
     }
 
-    Component.onCompleted: () => VideoManager.acquireCameras()
-
     LoggingCategory {
         id: category
         name: "gonnect.qml.Conference"
@@ -93,6 +91,8 @@ Item {
 
         function onIsInConferenceChanged() {
             if (confConn.isInConference) {
+                VideoManager.acquireCameras()
+
                 webViewShutdownTimer.stop()
 
                 // Toggle flag if we're still loaded to force a fresh view
@@ -120,6 +120,10 @@ Item {
                 return undefined
             }
             if (internal.isWebViewLoaded && CertificateProfile.profile) {
+                if ([ VideoManager.CameraAccessState.Unknown, VideoManager.CameraAccessState.Pending ].includes(VideoManager.cameraAccessState)) {
+                    return waitingForCameraAccessComponent
+                }
+
                 return jitsiViewComponent
             }
             if (AuthManager.isJitsiAuthRequired && AuthManager.isWaitingForAuth) {
@@ -282,6 +286,24 @@ Item {
     }
 
     Component {
+        id: waitingForCameraAccessComponent
+
+        Item {
+            Accessible.id: "conference.cameraAccess"
+            Accessible.role: Accessible.StaticText
+            Accessible.name: cameraAccessMessage.text
+
+            Label {
+                id: cameraAccessMessage
+                anchors.centerIn: parent
+                text: qsTr("Please answer the system dialog about camera access permission...")
+
+                Accessible.ignored: true
+            }
+        }
+    }
+
+    Component {
         id: jitsiViewComponent
 
         Item {
@@ -386,17 +408,29 @@ Item {
                     }
 
                     onJavaScriptConsoleMessage: (level, message, line, source) => {
+                        // Prevent writing JWT to log
+                        const sourceWithoutQuery = source.split("?")[0]
                         if (level >= 2) {
-                            console.error(category, message + ": " + source + " +" + line)
+                            console.error(category, message + ": " + sourceWithoutQuery + " +" + line)
                         } else if (level === 1) {
-                            console.warn(category, message + ": " + source + " +" + line)
+                            console.warn(category, message + ": " + sourceWithoutQuery + " +" + line)
                         } else {
-                            console.log(category, message + ": " + source + " +" + line)
+                            console.log(category, message + ": " + sourceWithoutQuery + " +" + line)
                         }
                     }
 
                     onPermissionRequested: (permission) => {
-                        permission.grant()
+                        console.debug(category, "Permission requested:", permission.permissionType)
+
+                        const isCameraRequest = permission.permissionType === WebEnginePermission.PermissionType.MediaVideoCapture
+                                             || permission.permissionType === WebEnginePermission.PermissionType.MediaAudioVideoCapture
+
+                        if (isCameraRequest && VideoManager.cameraAccessState === VideoManager.CameraAccessState.Denied) {
+                            console.warn(category, "Denying camera permission request in WebEngine because it is denied by VideoManager")
+                            permission.deny()
+                        } else {
+                            permission.grant()
+                        }
                     }
 
                     onSelectClientCertificate: selection => {
