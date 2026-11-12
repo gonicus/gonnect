@@ -230,4 +230,5 @@ private:
 
     bool m_signalingEncrypted = false;
     bool m_mediaEncrypted = false;
+    bool m_disconnected = false;
 };

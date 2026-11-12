@@ -313,7 +313,13 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
         break;
 
     case PJSIP_INV_STATE_DISCONNECTED:
+        m_disconnected = true;
         m_statsTimer.stop();
+
+        if (!m_notificationRef.isEmpty()) {
+            NotificationManager::instance().remove(m_notificationRef);
+            m_notificationRef.clear();
+        }
 
         if (!m_isEstablished && m_incoming) {
             Q_EMIT missed();
@@ -657,13 +663,23 @@ void SIPCall::accept()
         return;
     }
 
+    if (m_isDisconnected) {
+        qCWarning(lcSIPCall) << "Call has already been disconnected";
+        return;
+    }
+
     m_hasAccepted = true;
 
     pj::CallOpParam prm(true);
     prm.opt.textCount = m_account && m_account->isRTTEnabled() ? 1 : 0;
 
     prm.statusCode = PJSIP_SC_OK;
-    answer(prm);
+
+    try {
+        answer(prm);
+    } catch (const pj::Error &err) {
+        qCWarning(lcSIPCall) << "failed to accept call:" << err.info();
+    }
 }
 
 void SIPCall::reject()
@@ -683,10 +699,20 @@ void SIPCall::reject()
         return;
     }
 
+    if (m_isDisconnected) {
+        qCWarning(lcSIPCall) << "Call has already been disconnected";
+        return;
+    }
+
     m_hasRejected = true;
     pj::CallOpParam prm;
     prm.statusCode = PJSIP_SC_DECLINE;
-    answer(prm);
+
+    try {
+        answer(prm);
+    } catch (const pj::Error &err) {
+        qCWarning(lcSIPCall) << "failed to reject call:" << err.info();
+    }
 }
 
 void SIPCall::toggleHoldImpl()
