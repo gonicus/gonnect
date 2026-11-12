@@ -44,7 +44,7 @@ class KSyntaxHighlightingConan(ConanFile):
         tc.generate()
 
     def build_requirements(self):
-        self.tool_requires("extra-cmake-modules/[>=6.26]")
+        self.tool_requires("extra-cmake-modules/[>=6.31]")
 
     def build(self):
         apply_conandata_patches(self)
