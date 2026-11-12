@@ -2,10 +2,13 @@
 #include "FramePump.h"
 #include "QtCameraSource.h"
 
+#include <QGuiApplication>
 #include <QLoggingCategory>
 #include <QRegularExpression>
 
 #include <algorithm>
+
+#include <QCoroSignal>
 
 #ifdef Q_OS_FLATPAK
 #  include "CameraPortal.h"
@@ -88,64 +91,20 @@ void VideoManager::updateFrameHandler()
 void VideoManager::acquireCameras()
 {
 #ifdef Q_OS_FLATPAK
-    auto &portal = CameraPortal::instance();
-
-    if (qobject_cast<PipeWireCameraSource *>(m_cameraSource.get()) || m_portalPending) {
+    if (m_cameraAccessState == CameraAccessState::Pending
+        || m_cameraAccessState == CameraAccessState::Granted) {
         return;
     }
 
-<<<<<<< HEAD
+    auto &portal = CameraPortal::instance();
     if (!portal.isValid()) {
-        qCInfo(lcVideoManager) << "camera portal unavailable - falling back to QMediaDevices";
+        qCInfo(lcVideoManager) << "camera portal unavailable - staying with Qt cameras";
         setCameraAccessState(CameraAccessState::Granted);
-=======
-    if (!portal.isValid() || !portal.isCameraPresent()) {
-        qCInfo(lcVideoManager) << "camera portal unavailable or no camera present - falling "
-                                  "back to QMediaDevices";
->>>>>>> fe95c86a (refactor: use PipeWire source for VideoManager)
         return;
     }
 
     setCameraAccessState(CameraAccessState::Pending);
-    m_portalPending = true;
-
-    portal.AccessCamera([this, &portal](uint code, const QVariantMap &response) {
-        if (code != AbstractPortal::ResponseCode::SUCCESS) {
-            m_portalPending = false;
-            m_settings->setValue("video/cameraAccessDenied", true);
-
-            const bool isPipeWireCameraActive =
-                    qgetenv("QTWEBENGINE_CHROMIUM_FLAGS").contains("WebRtcPipeWireCamera");
-            setCameraAccessState(isPipeWireCameraActive ? CameraAccessState::DeniedRestartRequired
-                                                        : CameraAccessState::Denied);
-
-            qCWarning(lcVideoManager)
-                    << "camera access not granted:" << response.value("error").toString();
-            return;
-        }
-
-        m_settings->remove("video/cameraAccessDenied");
-        setCameraAccessState(CameraAccessState::Granted);
-
-        portal.OpenPipeWireRemote([this](int fd, const QString &error) {
-            m_portalPending = false;
-
-            if (fd < 0) {
-                qCWarning(lcVideoManager) << "could not open PipeWire remote:" << error;
-                return;
-            }
-
-            auto source = std::make_unique<PipeWireCameraSource>();
-            if (!source->open(fd)) {
-                qCWarning(lcVideoManager) << "Cannot connect to PipeWire camera remove - "
-                                             "staying with Qt cameras";
-                return;
-            }
-
-            setCameraSource(std::move(source));
-            m_debounceUpdateTimer.start();
-        });
-    });
+    requestCameraAccess();
 #elif defined(Q_OS_LINUX)
     setCameraAccessState(CameraAccessState::Granted);
 
@@ -165,6 +124,44 @@ void VideoManager::acquireCameras()
     setCameraAccessState(CameraAccessState::Granted);
 #endif
 }
+
+#ifdef Q_OS_FLATPAK
+QCoro::Task<> VideoManager::requestCameraAccess()
+{
+    // Make sure dialog is shown when window focused
+    if (!qGuiApp->focusWindow()) {
+        qCInfo(lcVideoManager) << "Waiting for focus to request camera access";
+        co_await qCoro(qGuiApp, &QGuiApplication::focusWindowChanged);
+    }
+
+    auto &portal = CameraPortal::instance();
+
+    const AbstractPortal::Response access = co_await portal.AccessCamera();
+    if (access.code != AbstractPortal::ResponseCode::SUCCESS) {
+        m_settings->setValue("video/cameraAccessDenied", true);
+
+        const bool isPipeWireCameraActive =
+                qgetenv("QTWEBENGINE_CHROMIUM_FLAGS").contains("WebRtcPipeWireCamera");
+        setCameraAccessState(isPipeWireCameraActive ? CameraAccessState::DeniedRestartRequired
+                                                    : CameraAccessState::Denied);
+        co_return;
+    }
+
+    m_settings->remove("video/cameraAccessDenied");
+    setCameraAccessState(CameraAccessState::Granted);
+
+    // No open() with negative fd - would connect to PipeWire directly
+    const int fd = co_await portal.OpenPipeWireRemote();
+    auto source = std::make_unique<PipeWireCameraSource>();
+    if (fd < 0 || !source->open(fd)) {
+        qCWarning(lcVideoManager) << "Cannot connect to camera portal - staying with Qt cameras";
+        co_return;
+    }
+
+    setCameraSource(std::move(source));
+    m_debounceUpdateTimer.start();
+}
+#endif
 
 bool VideoManager::isDeviceAvailable(const QString &deviceId) const
 {

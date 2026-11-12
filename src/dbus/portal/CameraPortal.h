@@ -36,7 +36,7 @@ public:
     /**
      * Request to gain access to the camera.
      */
-    void AccessCamera(PortalResponse callback);
+    QCoro::Task<AbstractPortal::Response> AccessCamera();
 
     /**
      * Open a file descriptor to the PipeWire remote where the camera nodes
@@ -44,9 +44,9 @@ public:
      * ``pw_core`` object, by using ``pw_context_connect_fd()``.
      *
      * This method will only succeed if the application already has permission
-     * to access camera devices.
+     * to access camera devices. Returns -1 on failure.
      */
-    void OpenPipeWireRemote(std::function<void(int fd, const QString &error)> callback);
+    QCoro::Task<int> OpenPipeWireRemote();
 
 Q_SIGNALS:
     void isCameraPresentChanged();

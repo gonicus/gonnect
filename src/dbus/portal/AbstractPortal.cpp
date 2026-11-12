@@ -3,6 +3,8 @@
 #include <QDBusPendingCallWatcher>
 #include <QDBusPendingReply>
 #include <QRandomGenerator>
+#include <QCoroSignal>
+
 #if QT_VERSION >= QT_VERSION_CHECK(6, 9, 0)
 #  include <private/qdesktopunixservices_p.h>
 #else
@@ -10,6 +12,9 @@
 #endif
 #include <private/qguiapplication_p.h>
 #include <qpa/qplatformintegration.h>
+
+#include <optional>
+
 #include "AbstractPortal.h"
 #include "Application.h"
 
@@ -96,6 +101,24 @@ QString AbstractPortal::portalCall(const QString &handle, const QDBusMessage &me
             });
 
     return preCalculatedReplyPath;
+}
+
+QCoro::Task<AbstractPortal::Response> AbstractPortal::portalCallAsync(const QString &handle, const QDBusMessage &message)
+{
+    std::optional<Response> result;
+    PortalResponseWaiter waiter;
+
+    portalCall(handle, message, [&result, &waiter](uint code, const QVariantMap& results) {
+        result = Response{ static_cast<ResponseCode>(code), results };
+        Q_EMIT waiter.received();
+    });
+
+    // Errors are synchronous
+    if (!result) {
+        co_await qCoro(&waiter, &PortalResponseWaiter::received);
+    }
+
+    co_return *result;
 }
 
 QString AbstractPortal::generateHandleToken() const

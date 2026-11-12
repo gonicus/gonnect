@@ -3,6 +3,7 @@
 #include <QObject>
 #include <QDBusMessage>
 #include <QDBusInterface>
+#include <QCoroCore>
 #include "PortalSession.h"
 
 #define FREEDESKTOP_DBUS_PORTAL_PATH "/org/freedesktop/portal/desktop"
@@ -26,6 +27,14 @@ private Q_SLOTS:
     void responseReceived(uint state, const QVariantMap &map);
 };
 
+class PortalResponseWaiter : public QObject
+{
+    Q_OBJECT
+
+Q_SIGNALS:
+    void received();
+};
+
 class AbstractPortal : public QObject
 {
     Q_OBJECT
@@ -42,12 +51,18 @@ public:
     enum ResponseCode { SUCCESS = 0, CANCELED = 1, ERROR = 2 };
     Q_ENUM(ResponseCode)
 
+    struct Response {
+        AbstractPortal::ResponseCode code = ResponseCode::ERROR;
+        QVariantMap results;
+    };
+
     bool isValid() { return m_interface->isValid() && !version().isEmpty(); }
 
     inline QString version() const { return m_interface->property("version").toString(); }
 
 protected:
     QString portalCall(const QString &handle, const QDBusMessage &message, PortalResponse callback);
+    QCoro::Task<Response> portalCallAsync(const QString& handle, const QDBusMessage& message);
     QString generateHandleToken() const;
     QString parentId() const;
 

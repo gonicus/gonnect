@@ -4,6 +4,7 @@
 #include <QtProtobuf>
 #include "Application.h"
 #include "AppSettings.h"
+#include "CameraFrameSchemeHandler.h"
 #include "GlobalInfo.h"
 #include "PersonCoinProvider.h"
 #include "WebEngineKeyEventFilter.h"
@@ -63,6 +64,7 @@ int main(int argc, char *argv[])
                        "%{if-fatal}\033[31m%{backtrace depth=3}%{endif}\033[0m %{message}");
     setup_unix_signal_handlers();
 
+    CameraFrameSchemeHandler::registerScheme();
     QtWebEngineQuick::initialize();
 
 #ifdef Q_OS_LINUX

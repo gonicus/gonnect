@@ -452,6 +452,17 @@ Item {
                         right: parent.right
                     }
 
+                    Component.onCompleted:
+                        () => {
+                            const script = WebEngine.script()
+                            script.name = "gonnectCamera"
+                            script.sourceUrl = "qrc:/webengine/gonnectCamera.js"
+                            script.injectionPoint = WebEngineScript.DocumentCreation
+                            script.worldId = WebEngineScript.MainWorld
+                            script.runsOnSubFrames = true
+                            jitsiView.userScripts.insert(script)
+                        }
+
                     onJavaScriptConsoleMessage: (level, message, line, source) => {
                         // Prevent writing JWT to log
                         const sourceWithoutQuery = source.split("?")[0]

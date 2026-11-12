@@ -20,7 +20,7 @@ find_package(logfault CONFIG REQUIRED)
 find_package(cmark REQUIRED)
 find_package(KF6SyntaxHighlighting REQUIRED)
 find_package(ICU REQUIRED COMPONENTS uc i18n data)
-find_package(QCoro6 REQUIRED COMPONENTS Core Network)
+find_package(QCoro6 REQUIRED COMPONENTS Core Network DBus)
 
 if(UNIX)
     include(FindPkgConfig)
@@ -893,6 +893,8 @@ qt_add_qml_module(gonnect
         ui/CallRoutingHelper.h
         ui/CallRoutingHelper.cpp
         ui/CallRoutingHopInfo.h
+        ui/CameraFrameSchemeHandler.h
+        ui/CameraFrameSchemeHandler.cpp
         ui/ClipboardHelper.h
         ui/ClipboardHelper.cpp
         ui/DateEventsModel.h
@@ -1016,7 +1018,12 @@ qt_add_qml_module(gonnect
         webdav/WebDavSyncResult.h
 )
 
-set_source_files_properties(webdav/WebDavClient.cpp PROPERTIES COMPILE_OPTIONS "$<$<CXX_COMPILER_ID:GNU>:-Wno-subobject-linkage>")
+# Prevent false GCC errors with QCoro
+set_source_files_properties(
+    webdav/WebDavClient.cpp
+    dbus/portal/CameraPortal.cpp
+    media/VideoManager.cpp
+    PROPERTIES COMPILE_OPTIONS "$<$<CXX_COMPILER_ID:GNU>:-Wno-subobject-linkage>")
 
 qt_add_protobuf(gonnect
     PROTO_FILES
@@ -1072,6 +1079,7 @@ target_link_libraries(gonnect
         ICU::data
         QCoro6::Core
         QCoro6::Network
+        QCoro6::DBus
         ${AKONADI_CONTACT_FACTORY}
         ${AKONADI_CALENDAR_FACTORY}
         ${CARDDAV_CONTACT_FACTORY}

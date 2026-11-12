@@ -11,11 +11,15 @@
 
 #include <memory>
 
+#include <QCoroCore>
+
 class FramePump;
 
 class VideoManager : public QObject
 {
     Q_OBJECT
+    Q_CLASSINFO("RegisterEnumClassesUnscoped", "false")
+
     Q_PROPERTY(QList<VideoDevice> devices READ devices NOTIFY devicesChanged FINAL)
     Q_PROPERTY(
             QString selectedDeviceId MEMBER m_selectedDeviceId NOTIFY selectedDeviceIdChanged FINAL)
@@ -68,6 +72,10 @@ private:
     VideoDevice deviceById(const QString &deviceId) const;
     void setCameraAccessState(CameraAccessState value);
 
+#ifdef Q_OS_FLATPAK
+    QCoro::Task<> requestCameraAccess();
+#endif
+
     QTimer m_debounceUpdateTimer;
     std::unique_ptr<CameraSource> m_cameraSource;
     QList<FramePump *> m_consumers;
@@ -78,7 +86,6 @@ private:
     std::unique_ptr<AppSettings> m_settings = nullptr;
     unsigned m_currentProfile = 0;
 
-    bool m_portalPending = false;
     CameraAccessState m_cameraAccessState = CameraAccessState::Unknown;
 
 Q_SIGNALS:
