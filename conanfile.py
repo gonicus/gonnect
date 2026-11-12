@@ -65,7 +65,7 @@ class GOnnectRecipe(ConanFile):
         #self.requires("hunspell/1.7.2")
         self.requires("snowballstem/3.1.1")
         self.requires("cmark/0.31.2")
-        self.requires("ksyntaxhighlighting/6.26.0")
+        self.requires("ksyntaxhighlighting/6.31.0")
         self.requires("icu/78.2")
 
         if self.settings.os != "Windows":
@@ -82,7 +82,7 @@ class GOnnectRecipe(ConanFile):
             self.requires("wayland/1.24.0", override=True)
 
         self.requires("openssl/3.6.3", override=True)
-        self.requires("qtkeychain/0.17.0")
+        self.requires("qtkeychain/0.18.0")
         self.requires("qcoro6/0.13.0")
         self.requires("libusb/1.0.30")
         self.requires("sqlcipher/4.17.0")
