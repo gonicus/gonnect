@@ -65,7 +65,7 @@ class GOnnectRecipe(ConanFile):
         #self.requires("hunspell/1.7.2")
         self.requires("snowballstem/3.1.1")
         self.requires("cmark/0.31.2")
-        self.requires("ksyntaxhighlighting/6.26.0")
+        self.requires("ksyntaxhighlighting/6.31.0")
         self.requires("icu/78.2")
 
         if self.settings.os != "Windows":

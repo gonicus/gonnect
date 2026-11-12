@@ -186,8 +186,8 @@ modules:
     sources:
       - type: git
         url: https://github.com/frankosterfeld/qtkeychain.git
-        tag: 0.17.0
-        commit: 875f77d9f61bd97fd84cca47ce3bc71186dfbd09
+        tag: 0.18.0
+        commit: e86bc3cbb50b172be61ed857803a372412b6ad85
         x-checker-data:
           type: git
           tag-pattern: ^([0-9]+\.[0-9]+\.[0-9]+)$
@@ -305,8 +305,8 @@ modules:
     sources:
       - type: git
         url: https://invent.kde.org/frameworks/syntax-highlighting.git
-        tag: v6.26.0
-        commit: 8a8789ca55c1209109f97a34b18e633c4240bee0
+        tag: v6.31.0
+        commit: 6d8ab7945958e7354295db7f399cce06f7de7571
         x-checker-data:
           type: git
           tag-pattern: ^v([0-9.]+)$
