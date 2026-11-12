@@ -3,6 +3,7 @@ versions:
     folder: all
 
 updater:
-  source: anitya
-  id: 9159
-  url-pattern: https://github.com/commonmark/cmark/archive/refs/tags/${version}.tar.gz
+  source: github
+  id: KDE/syntax-highlighting
+  branch: master
+  url-pattern: https://github.com/KDE/syntax-highlighting/archive/${sha}.zip
