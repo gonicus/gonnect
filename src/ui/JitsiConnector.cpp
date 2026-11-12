@@ -295,6 +295,7 @@ const options = {
     }
 }
 
+let myUserId = ""
 let jitsiUrl = "%1"
 
 if (jitsiUrl.startsWith("https://")) {
@@ -423,7 +424,8 @@ new QWebChannel(qt.webChannelTransport, function(channel) {
 })
 
 api.addListener("videoConferenceJoined", data => {
-    jitsiConn.setJitsiId(api._myUserID)
+    myUserId = data.id
+    jitsiConn.setJitsiId(myUserId)
 
     api.executeCommand("setTileView", %8)
 
@@ -498,7 +500,7 @@ api.addListener("knockingParticipant", data => {
 })
 
 api.addListener("raiseHandUpdated", data => {
-    if (data.id === api.getMyUserId()) {
+    if (data.id === myUserId) {
         jitsiConn.setIsHandRaisedInternal(!!data.handRaised)
     }
 })

@@ -46,6 +46,7 @@ QtObject {
                     return
                 }
                 profile.offTheRecord = false
+                profile.httpCacheType = WebEngineProfile.MemoryHttpCache
 
                 const systemLocale = Qt.locale().name.replace("_", "-")
                 const mainLang = systemLocale.split("-")[0]
