@@ -788,12 +788,12 @@
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="611"/>
         <source>Share window</source>
-        <translation type="unfinished">Поділитися вікном</translation>
+        <translation>Демонстрація вікна</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="619"/>
         <source>Share screen</source>
-        <translation type="unfinished">Поділитися екраном</translation>
+        <translation>Демонстрація екрана</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="631"/>
@@ -818,7 +818,7 @@
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="655"/>
         <source>Accept call</source>
-        <translation type="unfinished">Прийняти дзвінок</translation>
+        <translation>Прийняти дзвінок</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="656"/>
@@ -833,7 +833,7 @@
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="670"/>
         <source>Hangup call</source>
-        <translation type="unfinished">Завершити дзвінок</translation>
+        <translation>Завершити дзвінок</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="671"/>
@@ -2925,12 +2925,12 @@
     <message>
         <location filename="../src/ui/components/FavoritesWidget.qml" line="100"/>
         <source>Conference</source>
-        <translation type="unfinished">Конференція</translation>
+        <translation>Конференція</translation>
     </message>
     <message>
         <location filename="../src/ui/components/FavoritesWidget.qml" line="111"/>
         <source>Chat</source>
-        <translation type="unfinished">Чат</translation>
+        <translation>Чат</translation>
     </message>
     <message>
         <location filename="../src/ui/components/FavoritesWidget.qml" line="148"/>
@@ -6121,43 +6121,43 @@
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="895"/>
         <source>Currently selected audio output device</source>
-        <translation type="unfinished">Вибраний пристрій виведення звуку</translation>
+        <translation>Вибраний пристрій виведення звуку</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="946"/>
         <source>Audio output device for ring tone</source>
-        <translation type="unfinished">Пристрій виведення звуку для мелодії дзвінка</translation>
+        <translation>Пристрій виведення звуку для мелодії дзвінка</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="1036"/>
         <source>Pause between ring tones [s]</source>
-        <translation type="unfinished">Пауза між дзвінками [с]</translation>
+        <translation>Пауза між дзвінками [с]</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="1069"/>
         <source>%1 s</source>
         <extracomment>Label for showing seconds</extracomment>
-        <translation type="unfinished">%1 c</translation>
+        <translation>%1 c</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="1143"/>
         <source>Debugging</source>
-        <translation type="unfinished">Налагодження</translation>
+        <translation>Налагодження</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="1153"/>
         <source>Use this button to start a debug run. The App will restart and then begin to record additional information that can be useful for debugging purposes. During this run, come back here to download the information. A debug run is limited to 5 minutes, after which the App will automatically restart again in normal mode.</source>
-        <translation type="unfinished">Натисніть для запуску сеансу налагодження. Застосунок перезапуститься і почне записувати додаткову інформацію. Сеанс обмежено 5 хвилинами.</translation>
+        <translation>Натисніть цю кнопку, щоб розпочати сеанс налагодження. Застосунок перезапуститься та почне записувати додаткову інформацію, яка може бути корисною для налагодження. Під час сеансу поверніться сюди, щоб завантажити цю інформацію. Сеанс налагодження обмежений 5 хвилинами, після чого застосунок автоматично перезапуститься у звичайному режимі.</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="1166"/>
         <source>Start debug run (restart app)</source>
-        <translation type="unfinished">Почати налагодження (перезапустити застосунок)</translation>
+        <translation>Почати налагодження (перезапустити застосунок)</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="1177"/>
         <source>Download debug information</source>
-        <translation type="unfinished">Завантажити інформацію налагодження</translation>
+        <translation>Завантажити інформацію налагодження</translation>
     </message>
 </context>
 <context>
@@ -6165,7 +6165,7 @@
     <message>
         <location filename="../src/ui/ShortcutsWindow.qml" line="14"/>
         <source>Shortcuts</source>
-        <translation type="unfinished">Гарячі клавіші</translation>
+        <translation>Гарячі клавіші</translation>
     </message>
     <message>
         <location filename="../src/ui/ShortcutsWindow.qml" line="34"/>
@@ -6175,52 +6175,52 @@
     <message>
         <location filename="../src/ui/ShortcutsWindow.qml" line="86"/>
         <source>Local shortcuts (work only when app is focused)</source>
-        <translation type="unfinished">Локальні сполучення (працюють лише при фокусі на застосунку)</translation>
+        <translation>Локальні сполучення (працюють лише при фокусі на застосунку)</translation>
     </message>
     <message>
         <location filename="../src/ui/ShortcutsWindow.qml" line="97"/>
         <source>Local shortcuts</source>
-        <translation type="unfinished">Локальні сполучення</translation>
+        <translation>Локальні сполучення</translation>
     </message>
     <message>
         <location filename="../src/ui/ShortcutsWindow.qml" line="102"/>
         <source>Ctrl + F</source>
-        <translation type="unfinished">Ctrl + F</translation>
+        <translation>Ctrl + F</translation>
     </message>
     <message>
         <location filename="../src/ui/ShortcutsWindow.qml" line="103"/>
         <source>Activates the global search field</source>
-        <translation type="unfinished">Активує глобальне поле пошуку</translation>
+        <translation>Активує глобальне поле пошуку</translation>
     </message>
     <message>
         <location filename="../src/ui/ShortcutsWindow.qml" line="106"/>
         <source>F11</source>
-        <translation type="unfinished">F11</translation>
+        <translation>F11</translation>
     </message>
     <message>
         <location filename="../src/ui/ShortcutsWindow.qml" line="107"/>
         <source>Toggles between fullsceen and normal window mode</source>
-        <translation type="unfinished">Перемикає між повноекранним і звичайним режимом</translation>
+        <translation>Перемикає між повноекранним і звичайним режимом</translation>
     </message>
     <message>
         <location filename="../src/ui/ShortcutsWindow.qml" line="110"/>
         <source>Ctrl + Shift + M</source>
-        <translation type="unfinished">Ctrl + Shift + M</translation>
+        <translation>Ctrl + Shift + M</translation>
     </message>
     <message>
         <location filename="../src/ui/ShortcutsWindow.qml" line="111"/>
         <source>Toggles audio mute</source>
-        <translation type="unfinished">Вмикає/вимикає звук</translation>
+        <translation>Вмикає/вимикає звук</translation>
     </message>
     <message>
         <location filename="../src/ui/ShortcutsWindow.qml" line="122"/>
         <source>Global shortcuts (work from anywhere)</source>
-        <translation type="unfinished">Глобальні сполучення (працюють будь-де)</translation>
+        <translation>Глобальні сполучення (працюють будь-де)</translation>
     </message>
     <message>
         <location filename="../src/ui/ShortcutsWindow.qml" line="133"/>
         <source>Global shortcuts</source>
-        <translation type="unfinished">Глобальні сполучення</translation>
+        <translation>Глобальні сполучення</translation>
     </message>
 </context>
 <context>
@@ -6228,72 +6228,72 @@
     <message>
         <location filename="../src/ui/SipTemplateWizard.qml" line="15"/>
         <source>Initial configuration</source>
-        <translation type="unfinished">Початкова конфігурація</translation>
+        <translation>Початкова конфігурація</translation>
     </message>
     <message>
         <location filename="../src/ui/SipTemplateWizard.qml" line="32"/>
         <source>Error: %1</source>
-        <translation type="unfinished">Помилка: %1</translation>
+        <translation>Помилка: %1</translation>
     </message>
     <message>
         <location filename="../src/ui/SipTemplateWizard.qml" line="110"/>
         <source>SIP wizard notification</source>
-        <translation type="unfinished">Сповіщення майстра SIP</translation>
+        <translation>Сповіщення майстра SIP</translation>
     </message>
     <message>
         <location filename="../src/ui/SipTemplateWizard.qml" line="122"/>
         <source>GOnnect cannot find a SIP configuration. To get started, pick one of the templates below and modify the resulting configuration file if required.</source>
-        <translation type="unfinished">GOnnect не може знайти конфігурацію SIP. Виберіть шаблон нижче та за потреби змініть файл.</translation>
+        <translation>GOnnect не може знайти конфігурацію SIP. Виберіть шаблон нижче та за потреби змініть файл.</translation>
     </message>
     <message>
         <location filename="../src/ui/SipTemplateWizard.qml" line="131"/>
         <source>Please pick:</source>
-        <translation type="unfinished">Будь ласка, виберіть:</translation>
+        <translation>Будь ласка, виберіть:</translation>
     </message>
     <message>
         <location filename="../src/ui/SipTemplateWizard.qml" line="154"/>
         <source>Select SIP template</source>
-        <translation type="unfinished">Вибрати шаблон SIP</translation>
+        <translation>Вибрати шаблон SIP</translation>
     </message>
     <message>
         <location filename="../src/ui/SipTemplateWizard.qml" line="155"/>
         <source>Select the SIP template to be used</source>
-        <translation type="unfinished">Вибрати шаблон SIP</translation>
+        <translation>Вибрати шаблон SIP</translation>
     </message>
     <message>
         <location filename="../src/ui/SipTemplateWizard.qml" line="168"/>
         <source>Currently selected SIP template</source>
-        <translation type="unfinished">Поточний шаблон SIP</translation>
+        <translation>Поточний шаблон SIP</translation>
     </message>
     <message>
         <location filename="../src/ui/SipTemplateWizard.qml" line="177"/>
         <source>Next</source>
-        <translation type="unfinished">Далі</translation>
+        <translation>Далі</translation>
     </message>
     <message>
         <location filename="../src/ui/SipTemplateWizard.qml" line="187"/>
         <source>Continue setup</source>
-        <translation type="unfinished">Продовжити налаштування</translation>
+        <translation>Продовжити налаштування</translation>
     </message>
     <message>
         <location filename="../src/ui/SipTemplateWizard.qml" line="188"/>
         <source>Confirmation button to continue the setup</source>
-        <translation type="unfinished">Кнопка підтвердження для продовження</translation>
+        <translation>Кнопка підтвердження для продовження</translation>
     </message>
     <message>
         <location filename="../src/ui/SipTemplateWizard.qml" line="210"/>
         <source>Template field list</source>
-        <translation type="unfinished">Список полів шаблону</translation>
+        <translation>Список полів шаблону</translation>
     </message>
     <message>
         <location filename="../src/ui/SipTemplateWizard.qml" line="211"/>
         <source>List of all the available SIP template options</source>
-        <translation type="unfinished">Список усіх доступних параметрів шаблону SIP</translation>
+        <translation>Список усіх доступних параметрів шаблону SIP</translation>
     </message>
     <message>
         <location filename="../src/ui/SipTemplateWizard.qml" line="452"/>
         <source>Close</source>
-        <translation type="unfinished">Закрити</translation>
+        <translation>Закрити</translation>
     </message>
     <message>
         <location filename="../src/ui/SipTemplateWizard.qml" line="462"/>
@@ -6308,57 +6308,57 @@
     <message>
         <location filename="../src/ui/SipTemplateWizard.qml" line="252"/>
         <source>Display name of the SIP template option</source>
-        <translation type="unfinished">Відображуване ім&apos;я параметра шаблону SIP</translation>
+        <translation>Відображуване ім&apos;я параметра шаблону SIP</translation>
     </message>
     <message>
         <location filename="../src/ui/SipTemplateWizard.qml" line="266"/>
         <source>Description of the SIP template option</source>
-        <translation type="unfinished">Опис параметра шаблону SIP</translation>
+        <translation>Опис параметра шаблону SIP</translation>
     </message>
     <message>
         <location filename="../src/ui/SipTemplateWizard.qml" line="337"/>
         <source>Back</source>
-        <translation type="unfinished">Назад</translation>
+        <translation>Назад</translation>
     </message>
     <message>
         <location filename="../src/ui/SipTemplateWizard.qml" line="346"/>
         <source>Back button to return to the template selection menu</source>
-        <translation type="unfinished">Кнопка повернення до меню вибору шаблону</translation>
+        <translation>Кнопка повернення до меню вибору шаблону</translation>
     </message>
     <message>
         <location filename="../src/ui/SipTemplateWizard.qml" line="351"/>
         <source>Finish</source>
-        <translation type="unfinished">Завершити</translation>
+        <translation>Завершити</translation>
     </message>
     <message>
         <location filename="../src/ui/SipTemplateWizard.qml" line="362"/>
         <source>Confirmation button to apply the changes to the SIP template</source>
-        <translation type="unfinished">Кнопка підтвердження застосування змін</translation>
+        <translation>Кнопка підтвердження застосування змін</translation>
     </message>
     <message>
         <location filename="../src/ui/SipTemplateWizard.qml" line="383"/>
         <source>Successful configuration file creation</source>
-        <translation type="unfinished">Файл конфігурації успішно створено</translation>
+        <translation>Файл конфігурації успішно створено</translation>
     </message>
     <message>
         <location filename="../src/ui/SipTemplateWizard.qml" line="398"/>
         <source>We have created a configuration file for you. Please check if any changes are required to meet your needs and restart GOnnect to activate them.</source>
-        <translation type="unfinished">Файл конфігурації створено. Перевірте, чи потрібні зміни, та перезапустіть GOnnect.</translation>
+        <translation>Файл конфігурації створено. Перевірте, чи потрібні зміни, та перезапустіть GOnnect.</translation>
     </message>
     <message>
         <location filename="../src/ui/SipTemplateWizard.qml" line="410"/>
         <source>The configuration has been saved to:</source>
-        <translation type="unfinished">Конфігурацію збережено до:</translation>
+        <translation>Конфігурацію збережено до:</translation>
     </message>
     <message>
         <location filename="../src/ui/SipTemplateWizard.qml" line="444"/>
         <source>Copy to clipboard</source>
-        <translation type="unfinished">Скопіювати до буфера обміну</translation>
+        <translation>Скопіювати до буфера обміну</translation>
     </message>
     <message>
         <location filename="../src/ui/SipTemplateWizard.qml" line="445"/>
         <source>Copy the full path of the configuration file to the clipboard</source>
-        <translation type="unfinished">Скопіювати повний шлях до файлу конфігурації</translation>
+        <translation>Скопіювати повний шлях до файлу конфігурації</translation>
     </message>
 </context>
 <context>
@@ -6366,27 +6366,27 @@
     <message>
         <location filename="../src/StateManager.cpp" line="67"/>
         <source>Show dial window and focus search field</source>
-        <translation type="unfinished">Показати вікно набору та перейти до поля пошуку</translation>
+        <translation>Показати вікно набору та перейти до поля пошуку</translation>
     </message>
     <message>
         <location filename="../src/StateManager.cpp" line="70"/>
         <source>End all calls</source>
-        <translation type="unfinished">Завершити всі дзвінки</translation>
+        <translation>Завершити всі дзвінки</translation>
     </message>
     <message>
         <location filename="../src/StateManager.cpp" line="72"/>
         <source>Redial last outgoing call</source>
-        <translation type="unfinished">Повторити останній вихідний дзвінок</translation>
+        <translation>Повторити останній вихідний дзвінок</translation>
     </message>
     <message>
         <location filename="../src/StateManager.cpp" line="75"/>
         <source>Toggle hold</source>
-        <translation type="unfinished">Перемкнути утримання</translation>
+        <translation>Перемкнути утримання</translation>
     </message>
     <message>
         <location filename="../src/StateManager.cpp" line="140"/>
         <source>Phone calls are active</source>
-        <translation type="unfinished">Дзвінки активні</translation>
+        <translation>Дзвінки активні</translation>
     </message>
 </context>
 <context>
@@ -6394,22 +6394,22 @@
     <message>
         <location filename="../src/ui/components/popups/StreamingLightPopup.qml" line="42"/>
         <source>Adjust the volume</source>
-        <translation type="unfinished">Налаштувати гучність</translation>
+        <translation>Налаштувати гучність</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/StreamingLightPopup.qml" line="77"/>
         <source>Unmute</source>
-        <translation type="unfinished">Увімкнути звук</translation>
+        <translation>Увімкнути звук</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/StreamingLightPopup.qml" line="77"/>
         <source>Mute</source>
-        <translation type="unfinished">Вимкнути звук</translation>
+        <translation>Вимкнути звук</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/StreamingLightPopup.qml" line="111"/>
         <source>Open audio settings</source>
-        <translation type="unfinished">Відкрити налаштування звуку</translation>
+        <translation>Відкрити налаштування звуку</translation>
     </message>
 </context>
 <context>
@@ -6418,52 +6418,52 @@
         <location filename="../src/ui/SystemTrayMenu.cpp" line="109"/>
         <location filename="../src/ui/SystemTrayMenu.cpp" line="206"/>
         <source>Open...</source>
-        <translation type="unfinished">Відкрити...</translation>
+        <translation>Відкрити...</translation>
     </message>
     <message>
         <location filename="../src/ui/SystemTrayMenu.cpp" line="149"/>
         <source>Set status text...</source>
-        <translation type="unfinished">Задати текст статусу...</translation>
+        <translation>Задати текст статусу...</translation>
     </message>
     <message>
         <location filename="../src/ui/SystemTrayMenu.cpp" line="187"/>
         <source>Leave conference &apos;%1&apos;</source>
-        <translation type="unfinished">Залишити конференцію &apos;%1&apos;</translation>
+        <translation>Залишити конференцію &apos;%1&apos;</translation>
     </message>
     <message>
         <location filename="../src/ui/SystemTrayMenu.cpp" line="218"/>
         <source>Settings</source>
-        <translation type="unfinished">Налаштування</translation>
+        <translation>Налаштування</translation>
     </message>
     <message>
         <location filename="../src/ui/SystemTrayMenu.cpp" line="221"/>
         <source>About</source>
-        <translation type="unfinished">Про програму</translation>
+        <translation>Про програму</translation>
     </message>
     <message>
         <location filename="../src/ui/SystemTrayMenu.cpp" line="224"/>
         <source>Quit</source>
-        <translation type="unfinished">Вийти</translation>
+        <translation>Вийти</translation>
     </message>
     <message>
         <location filename="../src/ui/SystemTrayMenu.cpp" line="362"/>
         <source>End conference</source>
-        <translation type="unfinished">Завершити конференцію</translation>
+        <translation>Завершити конференцію</translation>
     </message>
     <message>
         <location filename="../src/ui/SystemTrayMenu.cpp" line="392"/>
         <source>Call with %1 has ended</source>
-        <translation type="unfinished">Дзвінок з %1 завершено</translation>
+        <translation>Дзвінок з %1 завершено</translation>
     </message>
     <message>
         <location filename="../src/ui/SystemTrayMenu.cpp" line="410"/>
         <source>Hang up call with %1</source>
-        <translation type="unfinished">Завершити дзвінок з %1</translation>
+        <translation>Завершити дзвінок з %1</translation>
     </message>
     <message>
         <location filename="../src/ui/SystemTrayMenu.cpp" line="400"/>
         <source>Accept call with %1</source>
-        <translation type="unfinished">Прийняти дзвінок від %1</translation>
+        <translation>Прийняти дзвінок від %1</translation>
     </message>
 </context>
 <context>
@@ -6471,32 +6471,32 @@
     <message>
         <location filename="../src/ui/components/templatefields/TemplateFieldFile.qml" line="26"/>
         <source>File path</source>
-        <translation type="unfinished">Шлях до файлу</translation>
+        <translation>Шлях до файлу</translation>
     </message>
     <message>
         <location filename="../src/ui/components/templatefields/TemplateFieldFile.qml" line="27"/>
         <source>Enter the file path for %1</source>
-        <translation type="unfinished">Введіть шлях до файлу для %1</translation>
+        <translation>Введіть шлях до файлу для %1</translation>
     </message>
     <message>
         <location filename="../src/ui/components/templatefields/TemplateFieldFile.qml" line="32"/>
         <source>Choose...</source>
-        <translation type="unfinished">Вибрати...</translation>
+        <translation>Вибрати...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/templatefields/TemplateFieldFile.qml" line="39"/>
         <source>Open file picker</source>
-        <translation type="unfinished">Відкрити вибір файлу</translation>
+        <translation>Відкрити вибір файлу</translation>
     </message>
     <message>
         <location filename="../src/ui/components/templatefields/TemplateFieldFile.qml" line="40"/>
         <source>Select the file that should be used for %1</source>
-        <translation type="unfinished">Вибрати файл для %1</translation>
+        <translation>Вибрати файл для %1</translation>
     </message>
     <message>
         <location filename="../src/ui/components/templatefields/TemplateFieldFile.qml" line="45"/>
         <source>Certificate files (%1)</source>
-        <translation type="unfinished">Файли сертифікатів (%1)</translation>
+        <translation>Файли сертифікатів (%1)</translation>
     </message>
 </context>
 <context>
@@ -6504,12 +6504,12 @@
     <message>
         <location filename="../src/ui/components/templatefields/TemplateFieldText.qml" line="15"/>
         <source>Text input</source>
-        <translation type="unfinished">Текстовий ввід</translation>
+        <translation>Текстовий ввід</translation>
     </message>
     <message>
         <location filename="../src/ui/components/templatefields/TemplateFieldText.qml" line="16"/>
         <source>Enter the desired value for %1</source>
-        <translation type="unfinished">Введіть потрібне значення для %1</translation>
+        <translation>Введіть потрібне значення для %1</translation>
     </message>
 </context>
 <context>
@@ -6517,37 +6517,37 @@
     <message>
         <location filename="../src/helper/TextFormatHelper.cpp" line="11"/>
         <source>0 B</source>
-        <translation type="unfinished">0 B</translation>
+        <translation>0 B</translation>
     </message>
     <message>
         <location filename="../src/helper/TextFormatHelper.cpp" line="14"/>
         <source>B</source>
-        <translation type="unfinished">B</translation>
+        <translation>B</translation>
     </message>
     <message>
         <location filename="../src/helper/TextFormatHelper.cpp" line="14"/>
         <source>KB</source>
-        <translation type="unfinished">KB</translation>
+        <translation>KB</translation>
     </message>
     <message>
         <location filename="../src/helper/TextFormatHelper.cpp" line="14"/>
         <source>MB</source>
-        <translation type="unfinished">MB</translation>
+        <translation>MB</translation>
     </message>
     <message>
         <location filename="../src/helper/TextFormatHelper.cpp" line="14"/>
         <source>GB</source>
-        <translation type="unfinished">GB</translation>
+        <translation>GB</translation>
     </message>
     <message>
         <location filename="../src/helper/TextFormatHelper.cpp" line="14"/>
         <source>TB</source>
-        <translation type="unfinished">TB</translation>
+        <translation>TB</translation>
     </message>
     <message>
         <location filename="../src/helper/TextFormatHelper.cpp" line="14"/>
         <source>PB</source>
-        <translation type="unfinished">PB</translation>
+        <translation>PB</translation>
     </message>
 </context>
 <context>
@@ -6555,7 +6555,7 @@
     <message>
         <location filename="../src/sip/Toggler.cpp" line="21"/>
         <source>Failed to toggle the state of %1.</source>
-        <translation type="unfinished">Не вдалося перемкнути стан %1.</translation>
+        <translation>Не вдалося перемкнути стан %1.</translation>
     </message>
 </context>
 <context>
