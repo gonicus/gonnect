@@ -74,10 +74,6 @@ public:
 
     void setFlags(Flags flags) { m_flags = flags; }
 
-    /// Update (add, remove or change count) of a reaction (e.g. an emoji). An empty set will remove
-    /// the reaction.
-    void updateReaction(const QString &reaction, const QSet<ChatUser *> users);
-
     /// Add the reaction for the given user. If it already has the reaction, it does nothing.
     void addReaction(const QString &reaction, ChatUser *user);
 
@@ -87,6 +83,7 @@ public:
 
     /// Current reactions to this message, ordered by their individual count, descending.
     QList<const ChatMessageReaction *> reactions() const;
+    const ChatMessageReaction *reactionObject(const QString &reaction) const;
 
     /// List of users that have been mentioned in the message.
     QSet<ChatUser *> mentionedUsers() const;
