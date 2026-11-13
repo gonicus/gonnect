@@ -264,6 +264,8 @@ void SIPCallManager::onIncomingCall(SIPCall *call)
                 [ref]() { NotificationManager::instance().remove(ref); });
         connect(call, &SIPCall::establishedChanged, this,
                 [ref]() { NotificationManager::instance().remove(ref); });
+        connect(call, &SIPCall::missed, this,
+                [ref]() { NotificationManager::instance().remove(ref); });
     }
 
     if (isEmergency) {
@@ -511,6 +513,11 @@ void SIPCallManager::acceptCall(SIPCall *call)
 {
     Q_CHECK_PTR(call);
 
+    if (call->isDisconnected()) {
+        qCWarning(lcSIPCallManager) << "Cannot accept disconnected call";
+        return;
+    }
+
     if (m_activeCalls) {
         RingToneFactory::instance().zipTone()->stop();
     }
@@ -534,6 +541,11 @@ void SIPCallManager::acceptCall(SIPCall *call)
 void SIPCallManager::rejectCall(SIPCall *call)
 {
     Q_CHECK_PTR(call);
+
+    if (call->isDisconnected()) {
+        qCWarning(lcSIPCallManager) << "Cannot reject disconnected call";
+        return;
+    }
 
     if (m_activeCalls) {
         RingToneFactory::instance().zipTone()->stop();

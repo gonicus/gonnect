@@ -20,8 +20,21 @@ class VideoManager : public QObject
     Q_PROPERTY(QList<VideoDevice> devices READ devices NOTIFY devicesChanged FINAL)
     Q_PROPERTY(
             QString selectedDeviceId MEMBER m_selectedDeviceId NOTIFY selectedDeviceIdChanged FINAL)
+    Q_PROPERTY(VideoManager::CameraAccessState cameraAccessState READ cameraAccessState NOTIFY
+                       cameraAccessStateChanged FINAL)
+    Q_PROPERTY(bool isCameraAccessDenied READ isCameraAccessDenied NOTIFY cameraAccessStateChanged
+                       FINAL)
 
 public:
+    enum class CameraAccessState {
+        Unknown,
+        Pending,
+        Granted, // Either specifically granted or system has no restrictions at all
+        Denied,
+        DeniedRestartRequired // App must be restarted to apply correct state
+    };
+    Q_ENUM(CameraAccessState)
+
     static VideoManager &instance()
     {
         static VideoManager *_instance = nullptr;
@@ -33,6 +46,8 @@ public:
 
     QList<VideoDevice> devices() const { return m_devices; }
     VideoDevice selectedDevice() const;
+    VideoManager::CameraAccessState cameraAccessState() const { return m_cameraAccessState; }
+    bool isCameraAccessDenied() const;
 
     Q_INVOKABLE void acquireCameras();
 
@@ -47,6 +62,7 @@ private:
     bool isDeviceAvailable(const QString &deviceId) const;
     VideoDevice deviceById(const QString &deviceId) const;
     QList<VideoDevice> devicesFromMediaDevices() const;
+    void setCameraAccessState(CameraAccessState value);
 
     QTimer m_debounceUpdateTimer;
     QMediaDevices m_mediaDevices;
@@ -61,10 +77,12 @@ private:
     unsigned m_currentProfile = 0;
 
     bool m_portalPending = false;
+    CameraAccessState m_cameraAccessState = CameraAccessState::Unknown;
 
 Q_SIGNALS:
     void devicesChanged();
     void selectedDeviceIdChanged();
+    void cameraAccessStateChanged();
 };
 
 class VideoManagerWrapper
