@@ -12,7 +12,7 @@ url: "https://github.com/gonicus/gonnect"
 softwareVersion: "2.4.1"
 releaseDate: "2026-07-31"
 
-logo: gonnect-logo.svg
+logo: gonnect-logo-horizontal.svg
 
 platforms:
   - linux
