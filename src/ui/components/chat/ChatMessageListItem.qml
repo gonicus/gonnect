@@ -698,15 +698,9 @@ Item {
 
                 TapHandler {
                     onTapped: () => {
-                        if (rDelg.isOwnReaction) {
-                            control.chatProvider.retractReaction(control.roomId,
-                                                                 control.eventId,
-                                                                 rDelg.reaction)
-                        } else {
-                            control.chatProvider.addReaction(control.roomId,
-                                                             control.eventId,
-                                                             rDelg.reaction)
-                        }
+                        control.chatProvider.toggleReaction(control.roomId,
+                                                            control.eventId,
+                                                            rDelg.reaction)
                     }
                 }
             }
