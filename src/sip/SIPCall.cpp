@@ -564,6 +564,12 @@ void SIPCall::onInstantMessageStatus(pj::OnInstantMessageStatusParam &prm)
     qCWarning(lcSIPCall) << "failed to send message:" << prm.code << prm.reason;
 }
 
+void SIPCall::onDtmfDigit(pj::OnDtmfDigitParam &prm)
+{
+    Q_CHECK_PTR(m_imHandler);
+    m_imHandler->handleDtmfDigit(QString::fromStdString(prm.digit));
+}
+
 pj::AudioMedia *SIPCall::audioMedia() const
 {
     pj::CallInfo callInfo;
@@ -830,6 +836,11 @@ bool SIPCall::triggerCapability(const QString &capability)
         return m_imHandler->triggerCapability(capability, m_historyItem);
     }
     return false;
+}
+
+void SIPCall::markConferenceMigrating()
+{
+    addCallState(ICallState::State::Migrating);
 }
 
 bool SIPCall::isEmergencyCall() const
