@@ -1,0 +1,150 @@
+# publiccode.yml for the openCode software catalogue (https://opencode.de)
+# Standard: https://github.com/publiccodeyml/publiccode.yml
+# Validate with https://editor.opencode.de/ before publishing.
+
+publiccodeYmlVersion: "0.5"
+
+name: GOnnect
+# Development happens on GitHub, openCode only hosts a mirror.
+url: "https://github.com/gonicus/gonnect"
+
+# Keep in sync with the latest stable release (CHANGELOG.md).
+softwareVersion: "2.4.1"
+releaseDate: "2026-07-31"
+
+logo: media/logo.svg
+
+platforms:
+  - linux
+  - windows
+
+categories:
+  - communications
+  - voip
+  - video-conferencing
+  - instant-messaging
+  - contact-management
+
+developmentStatus: stable
+softwareType: standalone/desktop
+
+description:
+  de:
+    genericName: Unified-Communications-Client
+    shortDescription: >-
+      Desktop-Client für Telefonie (SIP), Videokonferenzen (Jitsi Meet) und
+      Chat mit Headset-, Kalender- und Desktop-Integration.
+    longDescription: |
+      GOnnect ist ein Unified-Communications-Client für den Arbeitsplatz. Er
+      vereint Telefonie über SIP, Videokonferenzen mit Jitsi Meet und Chat in
+      einer Anwendung und fügt sich nahtlos in moderne Desktop-Umgebungen unter
+      Linux und Windows ein.
+
+      Ein laufendes Telefonat lässt sich mit einem Klick in eine
+      Videokonferenz überführen. Konferenzen aus dem Kalender werden direkt
+      betreten, und eine zentrale Suche findet Kontakte, Anrufverlauf und
+      Konferenzräume. Kontakte kommen aus LDAP, CardDAV oder dem Adressbuch des
+      Desktops, Termine aus CalDAV oder dem Desktop-Kalender. Chat wird über
+      Plugins angebunden, zum Beispiel Matrix.
+
+      GOnnect arbeitet mit nahezu jeder SIP-Telefonanlage zusammen und
+      unterstützt die Tasten und LEDs gängiger USB-Headsets sowie Busylights.
+
+      GOnnect ist für die zentrale Bereitstellung ausgelegt. Die Konfiguration
+      erfolgt über Konfigurationsdateien, die die IT verteilt, Passwörter
+      liegen im Schlüsselbund des Systems. Unter Linux wird GOnnect als Flatpak
+      verteilt, unter Windows über einen Installer.
+    documentation: "https://docs.gonicus.de/gonnect"
+    features:
+      - Telefonie über SIP mit nahezu jeder Telefonanlage, verschlüsselt per TLS und SRTP
+      - Vermittlung per Drag & Drop, Halten, Makeln und Dreierkonferenz
+      - Telefonat mit einem Klick in eine Jitsi-Meet-Videokonferenz überführen
+      - Jitsi-Meet-Konferenzen direkt aus Kalenderterminen betreten
+      - Chat über Plugins, z. B. Matrix, mit Anruf direkt aus dem Chat
+      - Präsenzstatus aus Telefonie und Chat kombiniert
+      - Zentrale Suche über Kontakte, Anrufverlauf und Konferenzräume
+      - "Adressbücher: LDAP, CardDAV, Evolution Data Server, CSV, Microsoft 365 (Windows)"
+      - "Kalender: CalDAV, Evolution Data Server, Microsoft 365 (Windows)"
+      - Steuerung von USB-Headsets und Busylights
+      - Echtzeittext (RTT) und Anzeige von Gesprächsqualität und Verschlüsselung
+      - Notrufmenü und Sperrliste für Anrufer
+      - Integration in GNOME-Suche, KRunner und Systemtray
+      - Zentrale Provisionierung über Konfigurationsdateien
+    screenshots:
+      - media/main-screen.png
+      - media/call-screen.png
+      - media/conference-screen.png
+      - media/chat-screen.png
+      - media/main-screen-dark.png
+  en:
+    genericName: Unified communications client
+    shortDescription: >-
+      Desktop client for telephony (SIP), video conferencing (Jitsi Meet) and
+      chat with headset, calendar and desktop integration.
+    longDescription: |
+      GOnnect is a unified communications client for the workplace. It combines
+      SIP telephony, video conferencing with Jitsi Meet and chat in one
+      application and integrates seamlessly into modern desktop environments on
+      Linux and Windows.
+
+      An ongoing phone call can be upgraded to a video conference with one
+      click. Conferences from the calendar can be joined directly, and a
+      central search finds contacts, call history and conference rooms.
+      Contacts come from LDAP, CardDAV or the desktop address book, appointments
+      from CalDAV or the desktop calendar. Chat is connected via plugins, for
+      example Matrix.
+
+      GOnnect works with almost any SIP PBX and supports the buttons and LEDs
+      of common USB headsets as well as busylights.
+
+      GOnnect is designed for central provisioning. It is configured through
+      configuration files distributed by IT, and passwords are stored in the
+      system keychain. On Linux, GOnnect is distributed as a Flatpak, on
+      Windows via an installer.
+    documentation: "https://docs.gonicus.de/gonnect"
+    features:
+      - SIP telephony with almost any PBX, encrypted via TLS and SRTP
+      - Call transfer via drag and drop, hold, toggling between calls and three-party conferences
+      - Upgrade a phone call to a Jitsi Meet video conference with one click
+      - Join Jitsi Meet conferences directly from calendar appointments
+      - Chat via plugins, e.g. Matrix, with calls started directly from the chat
+      - Presence status combined from telephony and chat
+      - Central search across contacts, call history and conference rooms
+      - "Address books: LDAP, CardDAV, Evolution Data Server, CSV, Microsoft 365 (Windows)"
+      - "Calendars: CalDAV, Evolution Data Server, Microsoft 365 (Windows)"
+      - Control of USB headsets and busylights
+      - Real-time text (RTT) and display of call quality and encryption
+      - Emergency call menu and caller block list
+      - Integration with GNOME search, KRunner and the system tray
+      - Central provisioning via configuration files
+    screenshots:
+      - media/main-screen.png
+      - media/call-screen.png
+      - media/conference-screen.png
+      - media/chat-screen.png
+      - media/main-screen-dark.png
+
+legal:
+  license: GPL-2.0-or-later
+  mainCopyrightOwner: GONICUS GmbH
+
+maintenance:
+  type: internal
+  contacts:
+    - name: "Aaron Schirmacher"
+      phone: "+492932916165"
+      email: "schirmacher@gonicus.de"
+      affiliation: GONICUS GmbH
+
+localisation:
+  localisationReady: true
+  availableLanguages:
+    - de
+    - en
+    - es
+    - ru
+    - uk
+
+organisation:
+  uri: "https://www.gonicus.de"
+  name: GONICUS GmbH
