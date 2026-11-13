@@ -17,7 +17,7 @@ Please update to the latest release before reporting an issue.
 **Please do not report security vulnerabilities through public GitHub issues,
 discussions or pull requests.**
 
-Report them privately using this channels:
+Report them privately using this channel:
 
 - **GitHub:** [Report a vulnerability](https://github.com/gonicus/gonnect/security/advisories/new)
   (private security advisory)
