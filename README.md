@@ -16,8 +16,8 @@
 [![GOnnect workflow](https://github.com/gonicus/gonnect/actions/workflows/gonnect.yml/badge.svg)](https://github.com/gonicus/gonnect/actions/workflows/gonnect.yml) [![Flathub Version](https://img.shields.io/flathub/v/de.gonicus.gonnect)](https://flathub.org/apps/de.gonicus.gonnect) [![Translations](https://hosted.weblate.org/widget/gonnect/svg-badge.svg)](https://hosted.weblate.org/engage/gonnect/)
 
 > **Note:** Development of _GOnnect_ takes place on [GitHub](https://github.com/gonicus/gonnect).
-> The repository on [openCode](https://gitlab.opencode.de/gonicus/gonnect) is a mirror and
-> shows the same README. Please open issues and pull requests on GitHub.
+> Copies of this repository on other platforms are mirrors and show the same README.
+> Please open issues and pull requests on GitHub.
 
 # Overview
 
