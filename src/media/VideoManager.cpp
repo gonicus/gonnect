@@ -54,25 +54,31 @@ void VideoManager::acquireCameras()
         return;
     }
 
-    if (!portal.isValid() || !portal.isCameraPresent()) {
-        qCInfo(lcVideoManager)
-                << "camera portal unavailable or no camera present - falling back to QMediaDevices";
+    if (!portal.isValid()) {
+        qCInfo(lcVideoManager) << "camera portal unavailable - falling back to QMediaDevices";
         setCameraAccessState(CameraAccessState::Granted);
         return;
     }
 
     setCameraAccessState(CameraAccessState::Pending);
+    m_portalPending = true;
 
     portal.AccessCamera([this, &portal](uint code, const QVariantMap &response) {
         if (code != AbstractPortal::ResponseCode::SUCCESS) {
             m_portalPending = false;
-            setCameraAccessState(CameraAccessState::Denied);
+            m_settings->setValue("video/cameraAccessDenied", true);
+
+            const bool isPipeWireCameraActive =
+                    qgetenv("QTWEBENGINE_CHROMIUM_FLAGS").contains("WebRtcPipeWireCamera");
+            setCameraAccessState(isPipeWireCameraActive ? CameraAccessState::DeniedRestartRequired
+                                                        : CameraAccessState::Denied);
+
             qCWarning(lcVideoManager)
                     << "camera access not granted:" << response.value("error").toString();
             return;
         }
 
-        m_portalPending = true;
+        m_settings->remove("video/cameraAccessDenied");
         setCameraAccessState(CameraAccessState::Granted);
 
         portal.OpenPipeWireRemote([this](int fd, const QString &error) {
@@ -130,6 +136,12 @@ VideoDevice VideoManager::selectedDevice() const
     }
 
     return deviceById(m_selectedDeviceId);
+}
+
+bool VideoManager::isCameraAccessDenied() const
+{
+    return m_cameraAccessState == CameraAccessState::Denied
+            || m_cameraAccessState == CameraAccessState::DeniedRestartRequired;
 }
 
 QList<VideoDevice> VideoManager::devicesFromMediaDevices() const

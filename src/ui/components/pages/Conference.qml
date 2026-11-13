@@ -123,6 +123,9 @@ Item {
                 if ([ VideoManager.CameraAccessState.Unknown, VideoManager.CameraAccessState.Pending ].includes(VideoManager.cameraAccessState)) {
                     return waitingForCameraAccessComponent
                 }
+                if (VideoManager.cameraAccessState === VideoManager.CameraAccessState.DeniedRestartRequired) {
+                    return cameraDeniedRestartRequiredComponent
+                }
 
                 return jitsiViewComponent
             }
@@ -304,6 +307,48 @@ Item {
     }
 
     Component {
+        id: cameraDeniedRestartRequiredComponent
+
+        Item {
+            id: cameraDeniedItem
+
+            Accessible.id: "conference.cameraDenied"
+            Accessible.role: Accessible.Pane
+            Accessible.name: cameraDeniedMessage.text
+
+            Column {
+                id: cameraDeniedCol
+                anchors.centerIn: parent
+                spacing: Theme.d * 3
+
+                Label {
+                    id: cameraDeniedMessage
+                    width: Math.min(cameraDeniedItem.width - 2 * Theme.d, Theme.d * 100)
+                    wrapMode: Label.WordWrap
+                    horizontalAlignment: Label.AlignHCenter
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    text: qsTr("Camera access has been denied. You can still join conferences without a camera, but due to technical intricacies, GOnnect must be restarted once.")
+
+                    Accessible.ignored: true
+                }
+
+                Button {
+                    id: restartButton
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    text: qsTr("Restart GOnnect")
+                    highlighted: true
+
+                    onClicked: () => SM.restart()
+
+                    Accessible.id: "conference.cameraDenied.restart"
+                    Accessible.role: Accessible.Button
+                    Accessible.name: restartButton.text
+                }
+            }
+        }
+    }
+
+    Component {
         id: jitsiViewComponent
 
         Item {
@@ -425,7 +470,7 @@ Item {
                         const isCameraRequest = permission.permissionType === WebEnginePermission.PermissionType.MediaVideoCapture
                                              || permission.permissionType === WebEnginePermission.PermissionType.MediaAudioVideoCapture
 
-                        if (isCameraRequest && VideoManager.cameraAccessState === VideoManager.CameraAccessState.Denied) {
+                        if (isCameraRequest && VideoManager.isCameraAccessDenied) {
                             console.warn(category, "Denying camera permission request in WebEngine because it is denied by VideoManager")
                             permission.deny()
                         } else {

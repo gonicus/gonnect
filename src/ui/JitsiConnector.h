@@ -89,7 +89,7 @@ public:
     void setOnHold(bool shallHold) override;
     void setAudioMuted(bool shallMute) override;
     bool isAudioMuted() const override { return m_isAudioMuted; }
-    bool isVideoAvailable() const override { return m_isVideoAvailable; };
+    bool isVideoAvailable() const override;
     bool isVideoMuted() const override { return m_isVideoMuted; }
     void setVideoMuted(bool shallMute) override;
     void setHandRaised(bool handRaised) override;

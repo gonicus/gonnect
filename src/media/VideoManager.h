@@ -22,13 +22,16 @@ class VideoManager : public QObject
             QString selectedDeviceId MEMBER m_selectedDeviceId NOTIFY selectedDeviceIdChanged FINAL)
     Q_PROPERTY(VideoManager::CameraAccessState cameraAccessState READ cameraAccessState NOTIFY
                        cameraAccessStateChanged FINAL)
+    Q_PROPERTY(bool isCameraAccessDenied READ isCameraAccessDenied NOTIFY cameraAccessStateChanged
+                       FINAL)
 
 public:
     enum class CameraAccessState {
         Unknown,
         Pending,
-        Granted, // Either specifically granted or system has no restriction
-        Denied
+        Granted, // Either specifically granted or system has no restrictions at all
+        Denied,
+        DeniedRestartRequired // App must be restarted to apply correct state
     };
     Q_ENUM(CameraAccessState)
 
@@ -44,6 +47,7 @@ public:
     QList<VideoDevice> devices() const { return m_devices; }
     VideoDevice selectedDevice() const;
     VideoManager::CameraAccessState cameraAccessState() const { return m_cameraAccessState; }
+    bool isCameraAccessDenied() const;
 
     Q_INVOKABLE void acquireCameras();
 
