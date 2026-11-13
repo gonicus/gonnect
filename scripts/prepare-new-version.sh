@@ -114,6 +114,26 @@ function update_antora_module {
     sed -i -r -e "s/^(version: )\S*/\1$1/g" "$ANTORA_FILE"
 }
 
+# update_publiccode sets the given version and the current date in publiccode.yml
+# Arguments:
+# 1 - the version number to set
+function update_publiccode {
+    local PUBLICCODE_FILE
+    PUBLICCODE_FILE="$SCRIPT_DIR/../publiccode.yml"
+    local CURRENT_DATE
+    CURRENT_DATE=$(date +%Y-%m-%d)
+
+    if [ ! -f "$PUBLICCODE_FILE" ]; then
+        show_error 1 "publiccode.yml not found!"
+    fi
+
+    # inline update version and release date using sed
+    sed -i -r \
+        -e "s/^(softwareVersion: ).*/\1\"$1\"/" \
+        -e "s/^(releaseDate: ).*/\1\"$CURRENT_DATE\"/" \
+        "$PUBLICCODE_FILE"
+}
+
 function create_release_notes {
     # Extract messages and remove duplicate entries
     MSG=$(base64 -d <<< "$1" | jq -rc 'map(.subject) | unique | .[]')
@@ -220,3 +240,11 @@ fi
 
 echo "Updating Antora module"
 update_antora_module "$VERSION"
+
+# The software catalogue lists stable releases only, so skip all pre-releases
+if [[ "$VERSION" == *-* ]]; then
+    echo "Skipping publiccode.yml for pre-release"
+else
+    echo "Updating publiccode.yml"
+    update_publiccode "$VERSION"
+fi
