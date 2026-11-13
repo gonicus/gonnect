@@ -456,6 +456,13 @@ api.addListener("audioMuteStatusChanged", data => {
 
 api.addListener("videoAvailabilityChanged", data => {
     jitsiConn.setVideoAvailableInternal(data.available)
+
+    // Camera labels known after access grant
+    if (!data.muted) {
+        api.getAvailableDevices().then(availableDevices => {
+            jitsiConn.setJitsiDevices(availableDevices)
+        })
+    }
 })
 
 api.addListener("videoMuteStatusChanged", data => {
@@ -1310,6 +1317,9 @@ void JitsiConnector::transferVideoManagerDeviceToJitsi()
 
     if (bestMatchingDevice) {
         selectVideoInputDevice(bestMatchingDevice->deviceId());
+    } else {
+        qCInfo(lcJitsiConnector) << "No labeled jitsi video input matches" << deviceName
+                                 << "- retrying once camera is started";
     }
 }
 
