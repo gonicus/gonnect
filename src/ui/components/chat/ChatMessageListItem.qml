@@ -546,7 +546,12 @@ Item {
 
         Menu {
             id: chatMessageContextMenu
-            onClosed: () => chatMessageContextMenu.destroy()
+            onClosed: () => {
+                          chatMessageContextMenu.actionAfterClose?.()
+                          chatMessageContextMenu.destroy()
+                      }
+
+            property var actionAfterClose: null
 
             HideableMenuItem {
                 text: qsTr("Add reaction...")
@@ -619,7 +624,7 @@ Item {
                 visible: !control.isFailed && !control.isPending && !!(control.capabilities & IChatProvider.Capability.MessageRelations)
                 text: qsTr("Reply...")
                 icon.source: Icons.mailReplyCustom
-                onTriggered: () => control.respondTo(control.eventId)
+                onTriggered: () => chatMessageContextMenu.actionAfterClose = () => control.respondInNewThread(control.eventId)
             }
 
             HideableMenuItem {
