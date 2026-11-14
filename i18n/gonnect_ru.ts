@@ -186,7 +186,7 @@
     <message>
         <location filename="../src/ui/components/ActivitiesWidget.qml" line="84"/>
         <source>Chat</source>
-        <translation type="unfinished">Чат</translation>
+        <translation>Чат</translation>
     </message>
     <message>
         <location filename="../src/ui/components/ActivitiesWidget.qml" line="89"/>
@@ -788,17 +788,17 @@
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="611"/>
         <source>Share window</source>
-        <translation type="unfinished">Поделиться окном</translation>
+        <translation>Демонстрация окна</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="619"/>
         <source>Share screen</source>
-        <translation type="unfinished">Поделиться экраном</translation>
+        <translation>Демонстрация экрана</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="631"/>
         <source>More</source>
-        <translation type="unfinished">Ещё</translation>
+        <translation>Ещё</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="638"/>
@@ -813,12 +813,12 @@
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="648"/>
         <source>Accept</source>
-        <translation type="unfinished">Принять</translation>
+        <translation>Принять</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="655"/>
         <source>Accept call</source>
-        <translation type="unfinished">Принять звонок</translation>
+        <translation>Принять звонок</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="656"/>
@@ -828,12 +828,12 @@
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="663"/>
         <source>Hang up</source>
-        <translation type="unfinished">Завершить</translation>
+        <translation>Завершить</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="670"/>
         <source>Hangup call</source>
-        <translation type="unfinished">Завершить звонок</translation>
+        <translation>Завершить звонок</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="671"/>
@@ -1103,17 +1103,17 @@
     <message>
         <location filename="../src/ui/components/chat/ChatButtonBar.qml" line="80"/>
         <source>Direct conversation with %1</source>
-        <translation type="unfinished">Прямой разговор с %1</translation>
+        <translation>Личный разговор с %1</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatButtonBar.qml" line="81"/>
         <source>Chat room %1</source>
-        <translation type="unfinished">Чат-комната %1</translation>
+        <translation>Чат-комната %1</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatButtonBar.qml" line="122"/>
         <source>Messages are loading...</source>
-        <translation type="unfinished">Загрузка сообщений...</translation>
+        <translation>Загрузка сообщений...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatButtonBar.qml" line="137"/>
@@ -1123,17 +1123,17 @@
     <message>
         <location filename="../src/ui/components/chat/ChatButtonBar.qml" line="145"/>
         <source>More</source>
-        <translation type="unfinished">Ещё</translation>
+        <translation>Ещё</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatButtonBar.qml" line="162"/>
         <source>Conference</source>
-        <translation type="unfinished">Конференция</translation>
+        <translation>Конференция</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatButtonBar.qml" line="169"/>
         <source>Start conference</source>
-        <translation type="unfinished">Начать конференцию</translation>
+        <translation>Начать конференцию</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatButtonBar.qml" line="176"/>
@@ -1144,17 +1144,17 @@
         <location filename="../src/ui/components/chat/ChatButtonBar.qml" line="184"/>
         <location filename="../src/ui/components/chat/ChatButtonBar.qml" line="200"/>
         <source>Leave conference</source>
-        <translation type="unfinished">Покинуть конференцию</translation>
+        <translation>Покинуть конференцию</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatButtonBar.qml" line="207"/>
         <source>End conference for all</source>
-        <translation type="unfinished">Завершить конференцию для всех</translation>
+        <translation>Завершить конференцию для всех</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatButtonBar.qml" line="217"/>
         <source>Call</source>
-        <translation type="unfinished">Звонок</translation>
+        <translation>Звонок</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatButtonBar.qml" line="237"/>
@@ -1164,7 +1164,7 @@
     <message>
         <location filename="../src/ui/components/chat/ChatButtonBar.qml" line="242"/>
         <source>Hang up</source>
-        <translation type="unfinished">Завершить</translation>
+        <translation>Завершить</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatButtonBar.qml" line="258"/>
@@ -1179,7 +1179,7 @@
     <message>
         <location filename="../src/ui/components/chat/ChatButtonBar.qml" line="279"/>
         <source>Are you sure you really want to leave this chat?</source>
-        <translation type="unfinished">Вы действительно хотите покинуть этот чат?</translation>
+        <translation>Вы действительно хотите покинуть этот чат?</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatButtonBar.qml" line="324"/>
@@ -1653,7 +1653,7 @@
     <message>
         <location filename="../src/ui/components/ChatWidget.qml" line="118"/>
         <source>Displays the current status of the widget: %1</source>
-        <translation type="unfinished">Отображает текущий статус виджета: %1</translation>
+        <translation>Отображает текущий статус виджета: %1</translation>
     </message>
 </context>
 <context>
@@ -2015,12 +2015,12 @@
     <message>
         <location filename="../src/ui/components/popups/ConferenceMoreMenu.qml" line="73"/>
         <source>Noise supression</source>
-        <translation type="unfinished">Шумоподавление</translation>
+        <translation>Шумоподавление</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/ConferenceMoreMenu.qml" line="79"/>
         <source>Video quality...</source>
-        <translation type="unfinished">Качество видео...</translation>
+        <translation>Качество видео...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/ConferenceMoreMenu.qml" line="88"/>
@@ -2035,37 +2035,37 @@
     <message>
         <location filename="../src/ui/components/popups/ConferenceMoreMenu.qml" line="97"/>
         <source>Toggle whiteboard</source>
-        <translation type="unfinished">Включить/выключить доску</translation>
+        <translation>Включить/выключить доску</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/ConferenceMoreMenu.qml" line="107"/>
         <source>Set room password...</source>
-        <translation type="unfinished">Установить пароль комнаты...</translation>
+        <translation>Установить пароль комнаты...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/ConferenceMoreMenu.qml" line="115"/>
         <source>Mute everyone</source>
-        <translation type="unfinished">Выключить звук у всех</translation>
+        <translation>Выключить звук у всех</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/ConferenceMoreMenu.qml" line="125"/>
         <source>Copy room name</source>
-        <translation type="unfinished">Скопировать имя комнаты</translation>
+        <translation>Скопировать имя комнаты</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/ConferenceMoreMenu.qml" line="132"/>
         <source>Copy room link</source>
-        <translation type="unfinished">Скопировать ссылку на комнату</translation>
+        <translation>Скопировать ссылку на комнату</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/ConferenceMoreMenu.qml" line="139"/>
         <source>Open in browser</source>
-        <translation type="unfinished">Открыть в браузере</translation>
+        <translation>Открыть в браузере</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/ConferenceMoreMenu.qml" line="146"/>
         <source>Show phone number</source>
-        <translation type="unfinished">Показать номер телефона</translation>
+        <translation>Показать номер телефона</translation>
     </message>
 </context>
 <context>
@@ -2540,7 +2540,7 @@
     <message>
         <location filename="../src/ui/components/popups/EditUrlDialog.qml" line="112"/>
         <source>Save</source>
-        <translation type="unfinished">Сохранить</translation>
+        <translation>Сохранить</translation>
     </message>
 </context>
 <context>
@@ -2925,12 +2925,12 @@
     <message>
         <location filename="../src/ui/components/FavoritesWidget.qml" line="100"/>
         <source>Conference</source>
-        <translation type="unfinished">Конференция</translation>
+        <translation>Конференция</translation>
     </message>
     <message>
         <location filename="../src/ui/components/FavoritesWidget.qml" line="111"/>
         <source>Chat</source>
-        <translation type="unfinished">Чат</translation>
+        <translation>Чат</translation>
     </message>
     <message>
         <location filename="../src/ui/components/FavoritesWidget.qml" line="148"/>
@@ -3472,7 +3472,7 @@
     <message>
         <location filename="../src/ui/JitsiConnector.cpp" line="192"/>
         <source>[%1] Message from %2</source>
-        <translation type="unfinished">[%1] Сообщение от %2</translation>
+        <translation>[%1] Сообщение от %2</translation>
     </message>
     <message>
         <location filename="../src/ui/JitsiConnector.cpp" line="244"/>
@@ -6144,7 +6144,7 @@
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="1153"/>
         <source>Use this button to start a debug run. The App will restart and then begin to record additional information that can be useful for debugging purposes. During this run, come back here to download the information. A debug run is limited to 5 minutes, after which the App will automatically restart again in normal mode.</source>
-        <translation>Нажмите для запуска сеанса отладки. Приложение перезапустится и начнёт записывать дополнительную информацию, которая может быть полезна для отладки. Во время сеанса вернитесь сюда, чтобы скачать эту информацию. Сеанс отладки ограничен 5 минутами, после чего приложение автоматически перезапутится в обысном режиме.</translation>
+        <translation>Нажмите для запуска сеанса отладки. Приложение перезапустится и начнёт записывать дополнительную информацию, которая может быть полезна для отладки. Во время сеанса вернитесь сюда, чтобы скачать эту информацию. Сеанс отладки ограничен 5 минутами, после чего приложение автоматически перезапутится в обычном режиме.</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="1166"/>
@@ -6290,7 +6290,7 @@
     <message>
         <location filename="../src/ui/SipTemplateWizard.qml" line="452"/>
         <source>Close</source>
-        <translation type="unfinished">Закрыть</translation>
+        <translation>Закрыть</translation>
     </message>
     <message>
         <location filename="../src/ui/SipTemplateWizard.qml" line="462"/>
@@ -6815,7 +6815,7 @@
     <message>
         <location filename="../src/ui/WidgetSelectionWindow.qml" line="75"/>
         <source>Chat</source>
-        <translation type="unfinished">Чат</translation>
+        <translation>Чат</translation>
     </message>
     <message>
         <location filename="../src/ui/WidgetSelectionWindow.qml" line="76"/>
@@ -6860,7 +6860,7 @@
     <message>
         <location filename="../src/ui/WidgetSelectionWindow.qml" line="258"/>
         <source>Chat room</source>
-        <translation type="unfinished">Комната чата</translation>
+        <translation>Комната чата</translation>
     </message>
     <message>
         <location filename="../src/ui/WidgetSelectionWindow.qml" line="306"/>
@@ -6905,7 +6905,7 @@
     <message>
         <location filename="../src/ui/WidgetSelectionWindow.qml" line="509"/>
         <source>No chat rooms found.</source>
-        <translation type="unfinished">Чат-комнаты не найдены.</translation>
+        <translation>Чат-комнаты не найдены.</translation>
     </message>
     <message>
         <location filename="../src/ui/WidgetSelectionWindow.qml" line="510"/>
