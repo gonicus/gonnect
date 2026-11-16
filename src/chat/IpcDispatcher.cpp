@@ -3182,16 +3182,18 @@ void IpcDispatcher::toggleReaction(const QString &roomId, const QString &message
     const auto *message = room->chatMessageById(messageId);
     GONNECT_ASSERT(message, "Unable to find message for id " + messageId)
 
-    const auto ownId = ownUserId();
-    const auto &reactions = message->reactions();
-    for (const auto *reactionObj : reactions) {
-        if (reactionObj->reaction() == reaction && reactionObj->isUser(ownId)) {
-            retractReaction(roomId, messageId, reaction);
-            return;
-        }
+    const auto *existingReaction = message->reactionObject(reaction);
+    const auto ownVariants =
+            existingReaction ? existingReaction->variantsOfUser(ownUserId()) : QSet<QString>{};
+
+    if (ownVariants.isEmpty()) {
+        addReaction(roomId, messageId, reaction);
+        return;
     }
 
-    addReaction(roomId, messageId, reaction);
+    for (const auto &variant : ownVariants) {
+        retractReaction(roomId, messageId, variant);
+    }
 }
 
 QString IpcDispatcher::uploadFile(const QString &filePath)
