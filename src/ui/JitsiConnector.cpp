@@ -718,6 +718,7 @@ void JitsiConnector::setIsInConference(bool value)
 
         if (value) {
             addCallState(ICallState::State::CallActive | ICallState::State::AudioActive);
+            updateVideoCallState();
             auto &globalMute = GlobalMuteState::instance();
 
             if (m_isAudioMuted != globalMute.isMuted()) {
@@ -777,7 +778,7 @@ void JitsiConnector::setRoomPassword(QString value)
 
 void JitsiConnector::updateVideoCallState()
 {
-    if (isVideoAvailable() && !m_isVideoMuted) {
+    if (m_isInConference && isVideoAvailable() && !m_isVideoMuted) {
         addCallState(ICallState::State::VideoActive);
     } else {
         removeCallState(ICallState::State::VideoActive);
