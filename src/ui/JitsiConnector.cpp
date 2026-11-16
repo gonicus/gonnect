@@ -71,6 +71,10 @@ JitsiConnector::JitsiConnector(QObject *parent) : IConferenceConnector{ parent }
     auto &videoManager = VideoManager::instance();
     connect(&videoManager, &VideoManager::selectedDeviceIdChanged, this,
             &JitsiConnector::transferVideoManagerDeviceToJitsi);
+    connect(&videoManager, &VideoManager::cameraAccessStateChanged, this, [this]() {
+        Q_EMIT isVideoAvailableChanged();
+        updateVideoCallState();
+    });
 
     auto headsetProxy = USBDevices::instance().getHeadsetDeviceProxy();
     connect(headsetProxy, &IHeadsetDevice::hookSwitch, this,
@@ -452,6 +456,13 @@ api.addListener("audioMuteStatusChanged", data => {
 
 api.addListener("videoAvailabilityChanged", data => {
     jitsiConn.setVideoAvailableInternal(data.available)
+
+    // Camera labels known after access grant
+    if (!data.muted) {
+        api.getAvailableDevices().then(availableDevices => {
+            jitsiConn.setJitsiDevices(availableDevices)
+        })
+    }
 })
 
 api.addListener("videoMuteStatusChanged", data => {
@@ -766,7 +777,7 @@ void JitsiConnector::setRoomPassword(QString value)
 
 void JitsiConnector::updateVideoCallState()
 {
-    if (m_isVideoAvailable && !m_isVideoMuted) {
+    if (isVideoAvailable() && !m_isVideoMuted) {
         addCallState(ICallState::State::VideoActive);
     } else {
         removeCallState(ICallState::State::VideoActive);
@@ -1306,6 +1317,9 @@ void JitsiConnector::transferVideoManagerDeviceToJitsi()
 
     if (bestMatchingDevice) {
         selectVideoInputDevice(bestMatchingDevice->deviceId());
+    } else {
+        qCInfo(lcJitsiConnector) << "No labeled jitsi video input matches" << deviceName
+                                 << "- retrying once camera is started";
     }
 }
 
@@ -1608,6 +1622,11 @@ void JitsiConnector::setAudioMuted(bool value)
     }
 
     m_didExecuteAudioMuteToggle = false;
+}
+
+bool JitsiConnector::isVideoAvailable() const
+{
+    return m_isVideoAvailable && !VideoManager::instance().isCameraAccessDenied();
 }
 
 void JitsiConnector::setVideoMuted(bool shallMute)
