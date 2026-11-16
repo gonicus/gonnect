@@ -107,49 +107,20 @@ QString ChatMessage::affectedUserId() const
     return "";
 }
 
-void ChatMessage::updateReaction(const QString &reaction, const QSet<ChatUser *> users)
-{
-    auto r = m_reactions.value(reaction, nullptr);
-    if (r) {
-        if (users.isEmpty()) {
-            m_reactions.remove(reaction);
-            r->deleteLater();
-
-        } else {
-            const auto obsoleteUsers = r->users() - users;
-            for (auto user : obsoleteUsers) {
-                r->removeUser(user);
-            }
-
-            const auto newUsers = users - r->users();
-            for (auto user : newUsers) {
-                r->addUser(user);
-            }
-        }
-
-    } else {
-        r = new ChatMessageReaction(reaction);
-        for (auto user : users) {
-            r->addUser(user);
-        }
-
-        m_reactions.insert(reaction, r);
-    }
-}
-
 void ChatMessage::addReaction(const QString &reaction, ChatUser *user)
 {
     if (!user) {
         return;
     }
 
-    if (auto r = m_reactions.value(reaction, nullptr)) {
-        r->addUser(user);
-    } else {
+    const auto key = ChatMessageReaction::normalizedKey(reaction);
+    auto r = m_reactions.value(key, nullptr);
+    if (!r) {
         r = new ChatMessageReaction(reaction);
-        r->addUser(user);
-        m_reactions.insert(reaction, r);
+        m_reactions.insert(key, r);
     }
+
+    r->addUser(user, reaction);
 }
 
 void ChatMessage::removeReaction(const QString &reaction, ChatUser *user)
@@ -158,11 +129,12 @@ void ChatMessage::removeReaction(const QString &reaction, ChatUser *user)
         return;
     }
 
-    if (auto r = m_reactions.value(reaction, nullptr)) {
-        r->removeUser(user);
+    const auto key = ChatMessageReaction::normalizedKey(reaction);
+    if (auto r = m_reactions.value(key, nullptr)) {
+        r->removeUser(user, reaction);
 
-        if (r->users().isEmpty()) {
-            m_reactions.remove(reaction);
+        if (r->count() == 0) {
+            m_reactions.remove(key);
             r->deleteLater();
         }
     }
@@ -186,6 +158,11 @@ QList<const ChatMessageReaction *> ChatMessage::reactions() const
               });
 
     return result;
+}
+
+const ChatMessageReaction *ChatMessage::reactionObject(const QString &reaction) const
+{
+    return m_reactions.value(ChatMessageReaction::normalizedKey(reaction), nullptr);
 }
 
 QSet<ChatUser *> ChatMessage::mentionedUsers() const
