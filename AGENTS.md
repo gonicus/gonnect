@@ -146,6 +146,7 @@ is prefered over "plain Linux" style packages and as much as possible should be 
 * Sizes, positions, paddings, margins and spaces should be a multiple of Theme.d whenever possible.
 * QML and C++ should be const whenever possible.
 * The command for if/while/for etc. must always be enclosed in curly braces, even if only one line.
+* QCoro should be used for any new code using asynchronous API, if applicable. Existing code can be either refactored or must be supported as is.
 
 
 ## Communication style

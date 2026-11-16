@@ -1,52 +1,88 @@
 #include "ChatMessageReaction.h"
 #include "ChatUser.h"
 
+namespace {
+constexpr QChar textPresentationSelector{ 0xFE0E };
+constexpr QChar emojiPresentationSelector{ 0xFE0F };
+} // namespace
+
 ChatMessageReaction::ChatMessageReaction(const QString &reaction, QObject *parent)
     : QObject{ parent }, m_reaction{ reaction }
 {
 }
 
-void ChatMessageReaction::addUser(ChatUser *user)
+QString ChatMessageReaction::normalizedKey(const QString &reaction)
 {
-    Q_CHECK_PTR(user);
-
-    if (!m_users.contains(user)) {
-
-        connect(user, &ChatUser::destroyed, this, [this](QObject *obj) {
-            if (auto user = qobject_cast<ChatUser *>(obj)) {
-                removeUser(user);
-            }
-        });
-
-        m_users.insert(user);
-        Q_EMIT countChanged(count());
-        Q_EMIT chatUserAdded(user);
-    }
+    QString key = reaction;
+    key.remove(textPresentationSelector);
+    key.remove(emojiPresentationSelector);
+    return key;
 }
 
-void ChatMessageReaction::removeUser(ChatUser *user)
+void ChatMessageReaction::addUser(ChatUser *user, const QString &variant)
 {
     Q_CHECK_PTR(user);
 
-    if (m_users.contains(user)) {
-        m_users.remove(user);
+    const bool isEmojiVariant = variant.contains(emojiPresentationSelector);
+    if (isEmojiVariant && !m_reaction.contains(emojiPresentationSelector)) {
+        m_reaction = variant;
+    }
+
+    if (m_variantsByUser.contains(user)) {
+        m_variantsByUser[user].insert(variant);
+        return;
+    }
+
+    connect(user, &ChatUser::destroyed, this,
+            [this, user](QObject *) { removeUserCompletely(user); });
+
+    m_variantsByUser.insert(user, { variant });
+    Q_EMIT countChanged(count());
+    Q_EMIT chatUserAdded(user);
+}
+
+void ChatMessageReaction::removeUserCompletely(ChatUser *user)
+{
+    Q_CHECK_PTR(user);
+
+    if (m_variantsByUser.remove(user)) {
         user->disconnect(this);
         Q_EMIT countChanged(count());
         Q_EMIT chatUserRemoved(user);
     }
 }
 
+void ChatMessageReaction::removeUser(ChatUser *user, const QString &variant)
+{
+    Q_CHECK_PTR(user);
+
+    const auto it = m_variantsByUser.find(user);
+    if (it == m_variantsByUser.end()) {
+        return;
+    }
+
+    it->remove(variant);
+    if (it->isEmpty()) {
+        removeUserCompletely(user);
+    }
+}
+
 qsizetype ChatMessageReaction::count() const
 {
-    return std::as_const(m_users).size();
+    return m_variantsByUser.size();
 }
 
 bool ChatMessageReaction::isUser(const QString &userId) const
 {
-    for (const auto *user : std::as_const(m_users)) {
+    return !variantsOfUser(userId).isEmpty();
+}
+
+QSet<QString> ChatMessageReaction::variantsOfUser(const QString &userId) const
+{
+    for (const auto &[user, variants] : m_variantsByUser.asKeyValueRange()) {
         if (user->id() == userId) {
-            return true;
+            return variants;
         }
     }
-    return false;
+    return {};
 }
