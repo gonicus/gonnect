@@ -16,7 +16,10 @@ Menu {
         let w = 0
 
         for (let i = 0; i < deviceMenuInstantiator.count; ++i) {
-            w = Math.max(w, deviceMenuInstantiator.objectAt(i).implicitWidth)
+            const item = deviceMenuInstantiator.objectAt(i)
+            if (item) {
+                w = Math.max(w, item.implicitWidth)
+            }
         }
 
         control.width = w

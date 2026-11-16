@@ -72,6 +72,8 @@ public:
 
     bool isInProgress() const { return m_isInProgress; }
     bool isEstablished() const { return m_isEstablished; }
+    bool isDisconnected() const { return m_isDisconnected; }
+
     /// The time when the call was established (i.e. answered); invalid QDateTime if not established
     QDateTime establishedTime() const { return m_establishedTime; }
 
@@ -177,6 +179,7 @@ private:
     bool m_incoming = false;
     bool m_inTransfer = false;
     bool m_isEstablished = false;
+    bool m_isDisconnected = false;
     bool m_wasEstablished = false;
     bool m_managerNotified = false;
     bool m_isHolding = false;
