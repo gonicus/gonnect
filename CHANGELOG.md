@@ -1,3 +1,13 @@
+# [2.5.0-beta.11](https://github.com/gonicus/gonnect/compare/v2.5.0-beta.10...v2.5.0-beta.11) (2026-11-16)
+
+### Bug Fixes
+
+* buddy agglomeration ([#812](https://github.com/gonicus/gonnect/issues/812)) ([da855b4](https://github.com/gonicus/gonnect/commit/da855b467ac44a55672acae64284a649cc8f9290))
+* emergency tooltip ([#804](https://github.com/gonicus/gonnect/issues/804)) ([0592ecc](https://github.com/gonicus/gonnect/commit/0592ecce5f64133e3041d8ba72e9f7c4608bd7d4))
+* fixed web profile usage of jitsi meet ([#810](https://github.com/gonicus/gonnect/issues/810)) ([7d97d37](https://github.com/gonicus/gonnect/commit/7d97d374614d19d4091f6ac9c25636f62ac246a9))
+* fixes on calls and conferences ([#814](https://github.com/gonicus/gonnect/issues/814)) ([816f432](https://github.com/gonicus/gonnect/commit/816f43275c0c1104f5518919476a2aed2318461d))
+* small errors ([#816](https://github.com/gonicus/gonnect/issues/816)) ([1f3768e](https://github.com/gonicus/gonnect/commit/1f3768ea527ee1e8c3474ee379d0a0259730410e))
+
 # [2.5.0-beta.10](https://github.com/gonicus/gonnect/compare/v2.5.0-beta.9...v2.5.0-beta.10) (2026-11-05)
 
 ### Bug Fixes
