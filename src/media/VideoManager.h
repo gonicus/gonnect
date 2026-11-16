@@ -51,6 +51,9 @@ public:
     VideoManager::CameraAccessState cameraAccessState() const { return m_cameraAccessState; }
     bool isCameraAccessDenied() const;
 
+    // Access not denied and ≥ 1 camera existent
+    bool isCameraAvailable() const;
+
     /// Camera runs whilst consumer(s) registered
     void addConsumer(FramePump *consumer);
     void removeConsumer(FramePump *consumer);

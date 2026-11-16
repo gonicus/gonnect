@@ -197,6 +197,11 @@ bool VideoManager::isCameraAccessDenied() const
     return m_cameraAccessState == CameraAccessState::Denied;
 }
 
+bool VideoManager::isCameraAvailable() const
+{
+    return !isCameraAccessDenied() && !m_devices.isEmpty();
+}
+
 void VideoManager::setCameraAccessState(CameraAccessState value)
 {
     if (m_cameraAccessState != value) {

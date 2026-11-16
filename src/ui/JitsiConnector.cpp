@@ -68,10 +68,10 @@ JitsiConnector::JitsiConnector(QObject *parent) : IConferenceConnector{ parent }
             &JitsiConnector::transferAudioManagerDevicesToJitsi);
 
     auto &videoManager = VideoManager::instance();
-    connect(&videoManager, &VideoManager::cameraAccessStateChanged, this, [this]() {
-        Q_EMIT isVideoAvailableChanged();
-        updateVideoCallState();
-    });
+    connect(&videoManager, &VideoManager::cameraAccessStateChanged, this,
+            &JitsiConnector::updateVideoAvailability);
+    connect(&videoManager, &VideoManager::devicesChanged, this,
+            &JitsiConnector::updateVideoAvailability);
 
     auto headsetProxy = USBDevices::instance().getHeadsetDeviceProxy();
     connect(headsetProxy, &IHeadsetDevice::hookSwitch, this,
@@ -1249,6 +1249,12 @@ void JitsiConnector::transferAudioManagerDevicesToJitsi()
     }
 }
 
+void JitsiConnector::updateVideoAvailability()
+{
+    Q_EMIT isVideoAvailableChanged();
+    updateVideoCallState();
+}
+
 void JitsiConnector::setConferenceName(const QString &name)
 {
     if (m_roomName != name) {
@@ -1552,7 +1558,7 @@ void JitsiConnector::setAudioMuted(bool value)
 
 bool JitsiConnector::isVideoAvailable() const
 {
-    return m_isVideoAvailable && !VideoManager::instance().isCameraAccessDenied();
+    return m_isVideoAvailable && VideoManager::instance().isCameraAvailable();
 }
 
 void JitsiConnector::setVideoMuted(bool shallMute)

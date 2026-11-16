@@ -118,7 +118,7 @@ void CameraFrameSchemeHandler::requestStarted(QWebEngineUrlRequestJob *job)
         return;
     }
 
-    if (VideoManager::instance().isCameraAccessDenied()) {
+    if (!VideoManager::instance().isCameraAvailable()) {
         job->fail(QWebEngineUrlRequestJob::RequestDenied);
         return;
     }
@@ -138,6 +138,13 @@ CameraFrameSchemeHandler::CameraFrameSchemeHandler(QObject *parent)
     m_idleTimer.setSingleShot(true);
     m_idleTimer.setInterval(IdleTimeout);
     m_idleTimer.callOnTimeout(this, &CameraFrameSchemeHandler::stopWhenIdle);
+
+    // Waiting requests would never be answered after last camera gone
+    auto &videoManager = VideoManager::instance();
+    connect(&videoManager, &VideoManager::devicesChanged, this,
+            &CameraFrameSchemeHandler::failPendingJobsIfUnavailable);
+    connect(&videoManager, &VideoManager::cameraAccessStateChanged, this,
+            &CameraFrameSchemeHandler::failPendingJobsIfUnavailable);
 }
 
 bool CameraFrameSchemeHandler::isJitsiRequest(const QWebEngineUrlRequestJob *job) const
@@ -177,6 +184,20 @@ void CameraFrameSchemeHandler::answerPendingJobs(const QVideoFrame &frame)
         auto *buffer = new QBuffer(job);
         buffer->setData(data);
         job->reply("application/octet-stream", buffer);
+    }
+}
+
+void CameraFrameSchemeHandler::failPendingJobsIfUnavailable()
+{
+    if (VideoManager::instance().isCameraAvailable()) {
+        return;
+    }
+
+    const auto jobs = std::exchange(m_pendingJobs, {});
+    for (const auto &job : jobs) {
+        if (job) {
+            job->fail(QWebEngineUrlRequestJob::RequestDenied);
+        }
     }
 }
 

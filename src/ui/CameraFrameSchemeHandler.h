@@ -39,6 +39,7 @@ private:
 
     bool isJitsiRequest(const QWebEngineUrlRequestJob *job) const;
     void answerPendingJobs(const QVideoFrame &frame);
+    void failPendingJobsIfUnavailable();
     void stopWhenIdle();
     void setActive(bool active);
 

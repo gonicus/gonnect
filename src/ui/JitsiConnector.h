@@ -133,6 +133,7 @@ protected:
 private Q_SLOTS:
     void onHeadsetHookSwitchChanged();
     void transferAudioManagerDevicesToJitsi();
+    void updateVideoAvailability();
 
 private:
     // Toggles the Jitsi-internal mute. For globally setting the mute state, use GlobalMuteState
