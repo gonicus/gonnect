@@ -43,6 +43,8 @@
       <li xml:lang="de">Rufe Chat-Partner mit einem Klick an</li>
       <li>Reactions, replies, pinned messages and file attachments</li>
       <li xml:lang="de">Reaktionen, Antworten, angepinnte Nachrichten und Dateianhänge</li>
+      <li>Threads and search in chat history</li>
+      <li xml:lang="de">Threads und Suche im Chatverlauf</li>
       <li>Presence status combined from phone and chat</li>
       <li xml:lang="de">Präsenzstatus aus Telefonie und Chat kombiniert</li>
     </ul>
@@ -89,6 +91,8 @@
       <li xml:lang="de">Wartende Teilnehmer zulassen oder ablehnen</li>
       <li>Join conferences directly from your calendar</li>
       <li xml:lang="de">Konferenzen direkt aus dem Kalender betreten</li>
+      <li>Live transcription of conferences</li>
+      <li xml:lang="de">Live-Transkription von Konferenzen</li>
     </ul>
     <p>
       More features:
@@ -132,6 +136,7 @@
     <category>Network</category>
     <category>Telephony</category>
     <category>VideoConference</category>
+    <category>InstantMessaging</category>
   </categories>
 
   <keywords>
@@ -141,6 +146,8 @@
       <keyword>Telephony</keyword>
       <keyword>Softphone</keyword>
       <keyword>Video conference</keyword>
+      <keyword>Chat</keyword>
+      <keyword>Matrix</keyword>
       <keyword>Teams</keyword>
       <keyword>Collaboration</keyword>
       <keyword>Headset</keyword>
