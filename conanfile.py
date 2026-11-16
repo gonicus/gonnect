@@ -56,7 +56,7 @@ class GOnnectRecipe(ConanFile):
         # QT Version marker
         #self.requires("qt/6.12.0");
 
-        self.requires("hidapi/0.15.0")
+        self.requires("hidapi/0.16.0")
         self.requires("pjproject/2.17")
         self.requires("openldap/2.7.2")
         self.requires("libical/3.0.20")

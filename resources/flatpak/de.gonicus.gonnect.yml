@@ -271,8 +271,8 @@ modules:
     sources:
       - type: git
         url: https://github.com/libusb/hidapi.git
-        tag: hidapi-0.15.0
-        commit: d6b2a974608dec3b76fb1e36c189f22b9cf3650c
+        tag: hidapi-0.16.0
+        commit: 750c87abb03282a237297052b84522e6bb3c0616
         x-checker-data:
           type: git
           tag-pattern: ^(hidapi-[0-9.]+)$
