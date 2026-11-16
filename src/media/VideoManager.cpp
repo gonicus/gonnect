@@ -138,16 +138,10 @@ QCoro::Task<> VideoManager::requestCameraAccess()
 
     const AbstractPortal::Response access = co_await portal.AccessCamera();
     if (access.code != AbstractPortal::ResponseCode::SUCCESS) {
-        m_settings->setValue("video/cameraAccessDenied", true);
-
-        const bool isPipeWireCameraActive =
-                qgetenv("QTWEBENGINE_CHROMIUM_FLAGS").contains("WebRtcPipeWireCamera");
-        setCameraAccessState(isPipeWireCameraActive ? CameraAccessState::DeniedRestartRequired
-                                                    : CameraAccessState::Denied);
+        setCameraAccessState(CameraAccessState::Denied);
         co_return;
     }
 
-    m_settings->remove("video/cameraAccessDenied");
     setCameraAccessState(CameraAccessState::Granted);
 
     // No open() with negative fd - would connect to PipeWire directly
@@ -200,8 +194,7 @@ VideoDevice VideoManager::selectedDevice() const
 
 bool VideoManager::isCameraAccessDenied() const
 {
-    return m_cameraAccessState == CameraAccessState::Denied
-            || m_cameraAccessState == CameraAccessState::DeniedRestartRequired;
+    return m_cameraAccessState == CameraAccessState::Denied;
 }
 
 void VideoManager::setCameraAccessState(CameraAccessState value)

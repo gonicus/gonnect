@@ -9,7 +9,6 @@
     const frameUrl = 'gonnect-camera:frame'
     const frameFormats = [ 'I420', 'RGBX' ]
     const headerSize = 12
-    const retryDelayMs = 500
 
     const mediaDevices = navigator.mediaDevices
     if (!mediaDevices) {
@@ -78,8 +77,10 @@
                     break
                 }
 
-                console.warn('GOnnect camera: cannot fetch frame:', error.message)
-                await new Promise(resolve => setTimeout(resolve, retryDelayMs))
+                // Only fail reason: GOnnect refuses frame delivery (e.g. denied access)
+                console.warn('GOnnect camera: frames not available:', error.message)
+                track.stop()
+                break
             }
         }
 

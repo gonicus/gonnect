@@ -133,7 +133,6 @@ protected:
 private Q_SLOTS:
     void onHeadsetHookSwitchChanged();
     void transferAudioManagerDevicesToJitsi();
-    void transferVideoManagerDeviceToJitsi();
 
 private:
     // Toggles the Jitsi-internal mute. For globally setting the mute state, use GlobalMuteState
@@ -155,7 +154,6 @@ private:
     void setIsPasswordRequired(bool value);
     void selectAudioInputDevice(const QString &deviceId);
     void selectAudioOutputDevice(const QString &deviceId);
-    void selectVideoInputDevice(const QString &deviceId);
     void updateVideoCallState();
     JitsiMediaDevice *createJitsiMediaDevice(const QVariantMap &deviceMap);
     JitsiMediaDevice *findDevice(const QList<JitsiMediaDevice *> &deviceList,
@@ -212,7 +210,6 @@ private:
 
     QList<JitsiMediaDevice *> m_audioInputDevices;
     QList<JitsiMediaDevice *> m_audioOutputDevices;
-    QList<JitsiMediaDevice *> m_videoInputDevices;
 
 Q_SIGNALS:
     // Internal API
@@ -233,7 +230,6 @@ Q_SIGNALS:
     void executeAnswerKnockingParticipant(QString id, bool approved);
     void executeSetAudioInputDeviceCommand(QString devicId);
     void executeSetAudioOutputDeviceCommand(QString devicId);
-    void executeSetVideoInputDeviceCommand(QString devicId);
     void executeSetNoiseSupressionCommand(bool value);
     void executeSetLargeVideoUser(QString id);
     void executeKickUserCommand(QString id);

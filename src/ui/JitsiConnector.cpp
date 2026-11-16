@@ -15,7 +15,6 @@
 #include "VideoManager.h"
 #include "SIPAudioDevice.h"
 #include "GlobalMuteState.h"
-#include "FuzzyCompare.h"
 #include "NotificationManager.h"
 #include "GlobalInfo.h"
 #include "ConferenceUser.h"
@@ -69,8 +68,6 @@ JitsiConnector::JitsiConnector(QObject *parent) : IConferenceConnector{ parent }
             &JitsiConnector::transferAudioManagerDevicesToJitsi);
 
     auto &videoManager = VideoManager::instance();
-    connect(&videoManager, &VideoManager::selectedDeviceIdChanged, this,
-            &JitsiConnector::transferVideoManagerDeviceToJitsi);
     connect(&videoManager, &VideoManager::cameraAccessStateChanged, this, [this]() {
         Q_EMIT isVideoAvailableChanged();
         updateVideoCallState();
@@ -382,14 +379,6 @@ new QWebChannel(qt.webChannelTransport, function(channel) {
         api.setAudioOutputDevice(undefined, deviceId)
     })
 
-    jitsiConn.executeSetVideoInputDeviceCommand.connect((deviceId) => {
-        api.getCurrentDevices().then(devices => {
-            if (devices?.videoInput?.deviceId !== deviceId) {
-                api.setVideoInputDevice(undefined, deviceId)
-            }
-        })
-    })
-
     jitsiConn.executeToggleVirtualBackgroundDialogCommand.connect(() => {
         api.executeCommand("toggleVirtualBackgroundDialog")
     })
@@ -456,13 +445,6 @@ api.addListener("audioMuteStatusChanged", data => {
 
 api.addListener("videoAvailabilityChanged", data => {
     jitsiConn.setVideoAvailableInternal(data.available)
-
-    // Camera labels known after access grant
-    if (!data.muted) {
-        api.getAvailableDevices().then(availableDevices => {
-            jitsiConn.setJitsiDevices(availableDevices)
-        })
-    }
 })
 
 api.addListener("videoMuteStatusChanged", data => {
@@ -1053,9 +1035,6 @@ void JitsiConnector::setJitsiDevices(const QVariantMap availableDevices)
     qDeleteAll(m_audioOutputDevices);
     m_audioOutputDevices.clear();
 
-    qDeleteAll(m_videoInputDevices);
-    m_videoInputDevices.clear();
-
     const auto audioInputMap = availableDevices.value("audioInput", {}).toList();
     for (const auto &mapEntry : audioInputMap) {
         if (auto deviceObj = createJitsiMediaDevice(mapEntry.toMap())) {
@@ -1070,23 +1049,11 @@ void JitsiConnector::setJitsiDevices(const QVariantMap availableDevices)
         }
     }
 
-    const auto videoInputMap = availableDevices.value("videoInput", {}).toList();
-    for (const auto &mapEntry : videoInputMap) {
-        if (auto deviceObj = createJitsiMediaDevice(mapEntry.toMap())) {
-            m_videoInputDevices.append(deviceObj);
-        }
-    }
-
-    qCInfo(lcJitsiConnector) << "Found"
-                             << (m_audioInputDevices.size() + m_audioOutputDevices.size()
-                                 + m_videoInputDevices.size())
-                             << "Jitsi devices:" << m_audioInputDevices.size()
-                             << "audio input devices," << m_audioOutputDevices.size()
-                             << "audio output devices and" << m_videoInputDevices.size()
-                             << "video input devices";
+    // Video input is always the GOnnect camera (gonnectCamera.js), selected via VideoManager
+    qCInfo(lcJitsiConnector) << "Found" << m_audioInputDevices.size() << "audio input and"
+                             << m_audioOutputDevices.size() << "audio output devices in Jitsi";
 
     transferAudioManagerDevicesToJitsi();
-    transferVideoManagerDeviceToJitsi();
 }
 
 void JitsiConnector::addKnockingParticipant(QString id, QString name)
@@ -1221,17 +1188,6 @@ void JitsiConnector::selectAudioOutputDevice(const QString &deviceId)
     Q_EMIT executeSetAudioOutputDeviceCommand(deviceId);
 }
 
-void JitsiConnector::selectVideoInputDevice(const QString &deviceId)
-{
-    auto device = findDevice(m_videoInputDevices, deviceId);
-    if (!device) {
-        qCCritical(lcJitsiConnector) << "Unkown device for id" << deviceId;
-        return;
-    }
-
-    Q_EMIT executeSetVideoInputDeviceCommand(deviceId);
-}
-
 void JitsiConnector::toggleHoldImpl()
 {
     setOnHold(!m_isOnHold);
@@ -1290,36 +1246,6 @@ void JitsiConnector::transferAudioManagerDevicesToJitsi()
     } else {
         qCWarning(lcJitsiConnector)
                 << "Could not find jitsi output device equivalent for id" << outputDeviceId;
-    }
-}
-
-void JitsiConnector::transferVideoManagerDeviceToJitsi()
-{
-    const auto videoDevice = VideoManager::instance().selectedDevice();
-
-    if (videoDevice.isNull()) {
-        selectVideoInputDevice("");
-        return;
-    }
-
-    // Find correct Jitsi device id for QCameraDevice
-    const auto deviceName = videoDevice.description;
-    JitsiMediaDevice *bestMatchingDevice = nullptr;
-    qreal maxD = 0.0;
-
-    for (auto jitsiDevice : std::as_const(m_videoInputDevices)) {
-        const qreal d = FuzzyCompare::jaroWinklerDistance(jitsiDevice->label(), deviceName);
-        if (d > maxD) {
-            maxD = d;
-            bestMatchingDevice = jitsiDevice;
-        }
-    }
-
-    if (bestMatchingDevice) {
-        selectVideoInputDevice(bestMatchingDevice->deviceId());
-    } else {
-        qCInfo(lcJitsiConnector) << "No labeled jitsi video input matches" << deviceName
-                                 << "- retrying once camera is started";
     }
 }
 

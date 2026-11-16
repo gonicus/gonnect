@@ -118,6 +118,11 @@ void CameraFrameSchemeHandler::requestStarted(QWebEngineUrlRequestJob *job)
         return;
     }
 
+    if (VideoManager::instance().isCameraAccessDenied()) {
+        job->fail(QWebEngineUrlRequestJob::RequestDenied);
+        return;
+    }
+
     m_pendingJobs.append(job);
     m_idleTimer.start();
     setActive(true);

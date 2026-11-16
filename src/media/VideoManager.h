@@ -33,8 +33,7 @@ public:
         Unknown,
         Pending,
         Granted, // Either specifically granted or system has no restrictions at all
-        Denied,
-        DeniedRestartRequired // App must be restarted to apply correct state
+        Denied
     };
     Q_ENUM(CameraAccessState)
 
