@@ -169,9 +169,9 @@ public:
     Q_INVOKABLE virtual void retractReaction(const QString &roomId, const QString &messageId,
                                              const QString &reaction) = 0;
 
-    /// If the reaction currently exist, it will call retractReaction() with the same parameters,
-    /// and addReaction() if it does not exist. This should only be used if the current state is not
-    /// known to prevent expensive lookups.
+    /// If the own user already reacted with the given reaction or any of its variants (i.e. the
+    /// same emoji with or without variation selectors), all of these variants are retracted.
+    /// Otherwise addReaction() is called with the given reaction.
     Q_INVOKABLE virtual void toggleReaction(const QString &roomId, const QString &messageId,
                                             const QString &reaction) = 0;
 
