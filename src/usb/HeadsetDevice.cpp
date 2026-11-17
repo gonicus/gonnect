@@ -448,7 +448,8 @@ void HeadsetDevice::processEvents()
         }
 
         if (++reportCount > reportMaxCount) {
-            qCWarning(lcHeadset) << "more than" << reportMaxCount << "reports received in a row - aborting";
+            qCWarning(lcHeadset) << "more than" << reportMaxCount
+                                 << "reports received in a row - aborting";
             break;
         }
 
