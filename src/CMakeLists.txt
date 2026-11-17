@@ -893,6 +893,8 @@ qt_add_qml_module(gonnect
         ui/CallRoutingHelper.h
         ui/CallRoutingHelper.cpp
         ui/CallRoutingHopInfo.h
+        ui/CameraFrameSerializer.h
+        ui/CameraFrameSerializer.cpp
         ui/CameraFrameSchemeHandler.h
         ui/CameraFrameSchemeHandler.cpp
         ui/ClipboardHelper.h
