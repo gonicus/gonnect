@@ -434,13 +434,21 @@ void HeadsetDevice::setTeamsUsageMapping(QHash<UsageId, quint16> teamsUsageMappi
 
 void HeadsetDevice::processEvents()
 {
+    constexpr unsigned reportMaxCount = 32;
+
+    unsigned reportCount = 0;
     unsigned char data[64];
 
     while (true) {
         std::ranges::fill(data, 0);
 
-        auto len = hid_read_timeout(m_device, data, sizeof(data), 10);
+        auto len = hid_read_timeout(m_device, data, sizeof(data), reportCount ? 0 : 10);
         if (len <= 0) {
+            break;
+        }
+
+        if (++reportCount > reportMaxCount) {
+            qCWarning(lcHeadset) << "more than" << reportMaxCount << "reports received in a row - aborting";
             break;
         }
 
