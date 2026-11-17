@@ -4,6 +4,7 @@
 #include "VideoManager.h"
 
 #include <QBuffer>
+#include <QCoreApplication>
 #include <QLoggingCategory>
 #include <QQuickWebEngineProfile>
 #include <QWebEngineUrlRequestJob>
@@ -70,21 +71,27 @@ CameraFrameSchemeHandler::CameraFrameSchemeHandler(QObject *parent)
     m_idleTimer.setInterval(IdleTimeout);
     m_idleTimer.callOnTimeout(this, &CameraFrameSchemeHandler::stopWhenIdle);
 
+    connect(qApp, &QCoreApplication::aboutToQuit, this, [this]() { setActive(false); });
+
     // Waiting requests would never be answered after last camera gone
     auto &videoManager = VideoManager::instance();
     connect(&videoManager, &VideoManager::devicesChanged, this,
             &CameraFrameSchemeHandler::failPendingJobsIfUnavailable);
     connect(&videoManager, &VideoManager::cameraAccessStateChanged, this,
             &CameraFrameSchemeHandler::failPendingJobsIfUnavailable);
+    connect(&videoManager, &VideoManager::cameraErrorOccurred, this,
+            &CameraFrameSchemeHandler::failPendingJobs);
 }
 
 bool CameraFrameSchemeHandler::isJitsiRequest(const QWebEngineUrlRequestJob *job) const
 {
     const QUrl jitsiUrl(GlobalInfo::instance().jitsiUrl());
     const QUrl initiator = job->initiator();
+    const int defaultPort = jitsiUrl.scheme() == QLatin1String("https") ? 443 : 80;
 
     return !jitsiUrl.host().isEmpty() && initiator.scheme() == jitsiUrl.scheme()
-            && initiator.host() == jitsiUrl.host() && initiator.port() == jitsiUrl.port();
+            && initiator.host() == jitsiUrl.host()
+            && initiator.port(defaultPort) == jitsiUrl.port(defaultPort);
 }
 
 void CameraFrameSchemeHandler::answerPendingJobs(const QVideoFrame &frame)
@@ -118,17 +125,20 @@ void CameraFrameSchemeHandler::answerPendingJobs(const QVideoFrame &frame)
     }
 }
 
-void CameraFrameSchemeHandler::failPendingJobsIfUnavailable()
+void CameraFrameSchemeHandler::failPendingJobs()
 {
-    if (VideoManager::instance().isCameraAvailable()) {
-        return;
-    }
-
     const auto jobs = std::exchange(m_pendingJobs, {});
     for (const auto &job : jobs) {
         if (job) {
             job->fail(QWebEngineUrlRequestJob::RequestDenied);
         }
+    }
+}
+
+void CameraFrameSchemeHandler::failPendingJobsIfUnavailable()
+{
+    if (!VideoManager::instance().isCameraAvailable()) {
+        failPendingJobs();
     }
 }
 

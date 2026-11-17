@@ -71,6 +71,10 @@ void VideoManager::setCameraSource(std::unique_ptr<CameraSource> source)
     m_cameraSource = std::move(source);
     connect(m_cameraSource.get(), &CameraSource::devicesChanged, this,
             [this]() { m_debounceUpdateTimer.start(); });
+    connect(m_cameraSource.get(), &CameraSource::errorOccurred, this, [this](QString message) {
+        qCWarning(lcVideoManager) << "Camera error:" << message;
+        Q_EMIT cameraErrorOccurred(message);
+    });
 
     updateFrameHandler();
     if (!m_consumers.isEmpty()) {

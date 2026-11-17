@@ -767,7 +767,7 @@ void JitsiConnector::setRoomPassword(QString value)
 
 void JitsiConnector::updateVideoCallState()
 {
-    if (isVideoAvailable() && !m_isVideoMuted) {
+    if (m_isInConference && isVideoAvailable() && !m_isVideoMuted) {
         addCallState(ICallState::State::VideoActive);
     } else {
         removeCallState(ICallState::State::VideoActive);

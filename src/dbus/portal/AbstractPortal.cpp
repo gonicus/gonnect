@@ -2,6 +2,7 @@
 #include <QDBusPendingCall>
 #include <QDBusPendingCallWatcher>
 #include <QDBusPendingReply>
+#include <QPointer>
 #include <QRandomGenerator>
 #include <QCoroSignal>
 
@@ -74,10 +75,22 @@ QString AbstractPortal::portalCall(const QString &handle, const QDBusMessage &me
 
     auto watcher = new QDBusPendingCallWatcher(pendingCall, this);
     connect(watcher, &QDBusPendingCallWatcher::finished, this,
-            [preCalculatedReplyPath, tracker, callback, handle](QDBusPendingCallWatcher *watcher) {
+            [preCalculatedReplyPath, tracker = QPointer(tracker), callback,
+             handle](QDBusPendingCallWatcher *watcher) {
                 watcher->deleteLater();
+                if (!tracker) {
+                    return;
+                }
+
                 QDBusPendingReply<QDBusObjectPath> reply = *watcher;
                 if (reply.isError()) {
+                    // No response will follow -> tracker must not outlive caller
+                    QDBusConnection::sessionBus().disconnect(
+                            "org.freedesktop.portal.Desktop", preCalculatedReplyPath,
+                            "org.freedesktop.portal.Request", "Response", tracker,
+                            SLOT(responseReceived(uint, QVariantMap)));
+                    tracker->deleteLater();
+
                     callback(ResponseCode::ERROR,
                              { { "error",
                                  tr("DBus call failed: %1")

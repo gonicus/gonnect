@@ -94,6 +94,7 @@ Q_SIGNALS:
     void devicesChanged();
     void selectedDeviceIdChanged();
     void cameraAccessStateChanged();
+    void cameraErrorOccurred(QString message);
 };
 
 class VideoManagerWrapper
