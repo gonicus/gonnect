@@ -445,6 +445,13 @@ api.addListener("audioMuteStatusChanged", data => {
 
 api.addListener("videoAvailabilityChanged", data => {
     jitsiConn.setVideoAvailableInternal(data.available)
+
+    // Camera labels known after access grant
+    if (!data.muted) {
+        api.getAvailableDevices().then(availableDevices => {
+            jitsiConn.setJitsiDevices(availableDevices)
+        })
+    }
 })
 
 api.addListener("videoMuteStatusChanged", data => {
@@ -700,6 +707,7 @@ void JitsiConnector::setIsInConference(bool value)
 
         if (value) {
             addCallState(ICallState::State::CallActive | ICallState::State::AudioActive);
+            updateVideoCallState();
             auto &globalMute = GlobalMuteState::instance();
 
             if (m_isAudioMuted != globalMute.isMuted()) {

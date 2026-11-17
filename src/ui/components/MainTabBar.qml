@@ -633,12 +633,17 @@ Item {
             onTriggered: () => deletePageAction.deletePage()
 
             function deletePage() {
-                if (optionMenu.selectedTabButton !== null && SelectionState.selectedPage.id === optionMenu.selectedTabButton.pageId) {
-                    let curIndex
-                    let newIndex = -1
-                    let tabOrder = control.getTabList().filter((button) => button.isEnabled)
+                const tabButton = optionMenu.selectedTabButton
+                if (!tabButton) {
+                    return
+                }
 
-                    curIndex = tabOrder.findIndex(button => button.pageId === optionMenu.selectedTabButton.pageId)
+                // Move to other page before removing this one
+                if (SelectionState.selectedPage.id === tabButton.pageId) {
+                    const tabOrder = control.getTabList().filter((button) => button.isEnabled)
+                    const curIndex = tabOrder.findIndex(button => button.pageId === tabButton.pageId)
+                    let newIndex = -1
+
                     if (curIndex > 0) {
                         newIndex = curIndex - 1
                     } else if (curIndex < tabOrder.length - 1) {
@@ -646,16 +651,17 @@ Item {
                     }
 
                     if (newIndex >= 0) {
-                        mainWindow.showPage(tabOrder[newIndex].pageId,
+                        control.mainWindow.showPage(tabOrder[newIndex].pageId,
                                                       tabOrder[newIndex].pageType)
                     }
-
-                    mainWindow.removePage(optionMenu.selectedTabButton.pageId)
-                    optionMenu.selectedTabButton.destroy()
-
-                    control.dynamicPageCount -= 1
-                    control.saveTabList()
                 }
+
+                // Actually delete
+                control.mainWindow.removePage(optionMenu.selectedTabButton.pageId)
+                tabButton.destroy()
+
+                control.dynamicPageCount -= 1
+                control.saveTabList()
             }
         }
     }
