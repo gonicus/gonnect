@@ -3,7 +3,7 @@ set(CMAKE_AUTORCC ON)
 
 include(FindPkgConfig)
 
-find_package(Qt6 REQUIRED COMPONENTS Core Quick Test Concurrent)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Multimedia Quick Test Concurrent)
 
 add_definitions(-DAPP_TESTS)
 enable_testing(true)
@@ -213,8 +213,28 @@ target_link_libraries(chatMessageTransformerTest
         cmark::cmark
 )
 
+qt_add_executable(cameraFrameSerializerTest
+    CameraFrameSerializer.test.cpp
+    CameraFrameSerializer.test.h
+    ${PROJECT_SOURCE_DIR}/src/ui/CameraFrameSerializer.cpp
+    ${PROJECT_SOURCE_DIR}/src/ui/CameraFrameSerializer.h
+)
+
+add_test(NAME cameraFrameSerializerTest COMMAND cameraFrameSerializerTest)
+
+target_include_directories(cameraFrameSerializerTest
+    PRIVATE
+        ${PROJECT_SOURCE_DIR}/src/ui
+)
+target_link_libraries(cameraFrameSerializerTest
+    PRIVATE
+        Qt6::Core
+        Qt6::Gui
+        Qt6::Multimedia
+        Qt6::Test
+)
+
 if(LINUX)
-    find_package(Qt6 REQUIRED COMPONENTS Multimedia)
     pkg_check_modules(LIBSPA REQUIRED libspa-0.2 IMPORTED_TARGET)
     pkg_check_modules(LIBAV REQUIRED libavcodec libavutil libswscale IMPORTED_TARGET)
 
@@ -234,6 +254,7 @@ if(LINUX)
     target_link_libraries(pipeWireFrameConverterTest
         PRIVATE
             Qt6::Core
+            Qt6::Gui
             Qt6::Multimedia
             Qt6::Test
             PkgConfig::LIBSPA

@@ -13,8 +13,12 @@ private slots:
     void convertsToLimitedRange_data();
     void convertsToLimitedRange();
 
+    void convertsMjpeg_data();
+    void convertsMjpeg();
+
     void rejectsUnsupportedFormat();
     void rejectsBufferWithoutFormat();
     void rejectsShortChunk();
     void rejectsCorruptedChunk();
+    void rejectsBrokenMjpeg();
 };

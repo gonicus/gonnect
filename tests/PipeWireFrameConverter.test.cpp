@@ -1,6 +1,10 @@
 #include "PipeWireFrameConverter.test.h"
 #include "PipeWireFrameConverter.h"
 
+#include <QBuffer>
+#include <QColor>
+#include <QImage>
+#include <QImageWriter>
 #include <QTest>
 #include <QVideoFrame>
 
@@ -125,6 +129,18 @@ QByteArray makeYuy2(int stride)
     return bytes;
 }
 
+QByteArray makeJpeg(const QColor &color)
+{
+    QImage image(FrameSize, QImage::Format_RGB32);
+    image.fill(color);
+
+    QByteArray jpeg;
+    QBuffer buffer(&jpeg);
+    buffer.open(QIODevice::WriteOnly);
+    image.save(&buffer, "JPG", 100);
+    return jpeg;
+}
+
 // Returns a description of the first pixel deviating from the expectation, empty if none
 QString describeMismatch(const QVideoFrame &frame, int plane, const QSize &planeSize,
                          const std::function<int(int, int)> &expected)
@@ -223,6 +239,54 @@ void PipeWireFrameConverterTest::convertsToLimitedRange()
     QCOMPARE(describeMismatch(frame, 2, chromaSize, neutral), QString());
 }
 
+void PipeWireFrameConverterTest::convertsMjpeg_data()
+{
+    QTest::addColumn<QColor>("color");
+    QTest::addColumn<int>("expectedY");
+    QTest::addColumn<int>("expectedU");
+    QTest::addColumn<int>("expectedV");
+
+    // JPEG is full range, the result must be limited range BT.601
+    QTest::newRow("black") << QColor(Qt::black) << 16 << 128 << 128;
+    QTest::newRow("white") << QColor(Qt::white) << 235 << 128 << 128;
+    QTest::newRow("red") << QColor(Qt::red) << 81 << 90 << 240;
+}
+
+void PipeWireFrameConverterTest::convertsMjpeg()
+{
+    QFETCH(QColor, color);
+    QFETCH(int, expectedY);
+    QFETCH(int, expectedU);
+    QFETCH(int, expectedV);
+
+    if (!QImageWriter::supportedImageFormats().contains("jpg")) {
+        QSKIP("No JPEG image plugin available");
+    }
+
+    const QByteArray jpeg = makeJpeg(color);
+    QVERIFY(!jpeg.isEmpty());
+
+    PipeWireFrameConverter converter;
+    QVERIFY(converter.setMjpegFormat());
+
+    const TestBuffer buffer(jpeg, 0);
+    const std::optional<QVideoFrame> converted = converter.convert(buffer.buffer());
+    QVERIFY(converted);
+
+    QVideoFrame frame = *converted;
+    QCOMPARE(frame.pixelFormat(), QVideoFrameFormat::Format_YUV420P);
+    QCOMPARE(frame.size(), FrameSize);
+    QVERIFY(frame.map(QVideoFrame::ReadOnly));
+
+    const QSize chromaSize = FrameSize / 2;
+    const auto luma = [expectedY](int, int) { return expectedY; };
+    const auto u = [expectedU](int, int) { return expectedU; };
+    const auto v = [expectedV](int, int) { return expectedV; };
+    QCOMPARE(describeMismatch(frame, 0, FrameSize, luma), QString());
+    QCOMPARE(describeMismatch(frame, 1, chromaSize, u), QString());
+    QCOMPARE(describeMismatch(frame, 2, chromaSize, v), QString());
+}
+
 void PipeWireFrameConverterTest::rejectsUnsupportedFormat()
 {
     PipeWireFrameConverter converter;
@@ -254,6 +318,15 @@ void PipeWireFrameConverterTest::rejectsCorruptedChunk()
 
     TestBuffer buffer(makeI420(16), 16);
     buffer.chunk().flags |= SPA_CHUNK_FLAG_CORRUPTED;
+    QVERIFY(!converter.convert(buffer.buffer()));
+}
+
+void PipeWireFrameConverterTest::rejectsBrokenMjpeg()
+{
+    PipeWireFrameConverter converter;
+    QVERIFY(converter.setMjpegFormat());
+
+    const TestBuffer buffer(QByteArray(64, static_cast<char>(0x42)), 0);
     QVERIFY(!converter.convert(buffer.buffer()));
 }
 

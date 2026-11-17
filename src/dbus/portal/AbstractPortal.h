@@ -51,7 +51,8 @@ public:
     enum ResponseCode { SUCCESS = 0, CANCELED = 1, ERROR = 2 };
     Q_ENUM(ResponseCode)
 
-    struct Response {
+    struct Response
+    {
         AbstractPortal::ResponseCode code = ResponseCode::ERROR;
         QVariantMap results;
     };
@@ -62,7 +63,7 @@ public:
 
 protected:
     QString portalCall(const QString &handle, const QDBusMessage &message, PortalResponse callback);
-    QCoro::Task<Response> portalCallAsync(const QString& handle, const QDBusMessage& message);
+    QCoro::Task<Response> portalCallAsync(const QString &handle, const QDBusMessage &message);
     QString generateHandleToken() const;
     QString parentId() const;
 

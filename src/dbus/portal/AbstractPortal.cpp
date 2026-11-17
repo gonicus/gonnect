@@ -103,12 +103,13 @@ QString AbstractPortal::portalCall(const QString &handle, const QDBusMessage &me
     return preCalculatedReplyPath;
 }
 
-QCoro::Task<AbstractPortal::Response> AbstractPortal::portalCallAsync(const QString &handle, const QDBusMessage &message)
+QCoro::Task<AbstractPortal::Response> AbstractPortal::portalCallAsync(const QString &handle,
+                                                                      const QDBusMessage &message)
 {
     std::optional<Response> result;
     PortalResponseWaiter waiter;
 
-    portalCall(handle, message, [&result, &waiter](uint code, const QVariantMap& results) {
+    portalCall(handle, message, [&result, &waiter](uint code, const QVariantMap &results) {
         result = Response{ static_cast<ResponseCode>(code), results };
         Q_EMIT waiter.received();
     });
