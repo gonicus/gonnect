@@ -8,6 +8,7 @@
 #include <pipewire/pipewire.h>
 
 #include <atomic>
+#include <optional>
 
 /// Captures camera frames from PipeWire.
 /// Frames and signals are emitted on own thread.
@@ -43,6 +44,9 @@ private:
     void createStream(const QString &deviceId);
     void destroyStream();
     void setActive(bool active);
+
+    /// Returns description of format or nothing if not supported
+    std::optional<QString> setConverterFormat(const spa_pod *format);
 
     pw_thread_loop *m_threadLoop = nullptr;
     pw_context *m_context = nullptr;

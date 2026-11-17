@@ -89,7 +89,7 @@ elseif(LINUX)
     pkg_check_modules(LIBNOTIFY REQUIRED libnotify IMPORTED_TARGET)
     pkg_check_modules(LIBPULSE REQUIRED libpulse IMPORTED_TARGET)
     pkg_check_modules(LIBPIPEWIRE REQUIRED libpipewire-0.3 IMPORTED_TARGET)
-    pkg_check_modules(LIBAV REQUIRED libavutil libswscale IMPORTED_TARGET)
+    pkg_check_modules(LIBAV REQUIRED libavcodec libavutil libswscale IMPORTED_TARGET)
     pkg_check_modules(XCB REQUIRED xcb IMPORTED_TARGET)
     pkg_check_modules(WAYLAND_CLIENT REQUIRED wayland-client IMPORTED_TARGET)
        

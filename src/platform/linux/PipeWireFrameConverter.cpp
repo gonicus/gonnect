@@ -1,11 +1,15 @@
 #include "PipeWireFrameConverter.h"
 
+#include <QScopeGuard>
+
 extern "C" {
 #include <libavutil/imgutils.h>
 #include <libswscale/swscale.h>
+#include <libavcodec/avcodec.h>
 }
 
 #include <algorithm>
+#include <cstring>
 #include <memory>
 
 namespace {
@@ -42,8 +46,81 @@ bool PipeWireFrameConverter::setFormat(const spa_video_info_raw &info)
         return false;
     }
 
-    m_sourceFormat = mapping->avFormat;
-    m_size = QSize(static_cast<int>(info.size.width), static_cast<int>(info.size.height));
+    return createScaler(
+            mapping->avFormat,
+            QSize(static_cast<int>(info.size.width), static_cast<int>(info.size.height)));
+}
+
+bool PipeWireFrameConverter::setMjpegFormat()
+{
+    reset();
+    const AVCodec *codec = avcodec_find_decoder(AV_CODEC_ID_MJPEG);
+    if (!codec) {
+        return false;
+    }
+
+    m_decoder.reset(avcodec_alloc_context3(codec));
+    m_decodedFrame.reset(av_frame_alloc());
+    m_packet.reset(av_packet_alloc());
+
+    if (!m_decoder || !m_decodedFrame || !m_packet
+        || avcodec_open2(m_decoder.get(), codec, nullptr) < 0) {
+        reset();
+        return false;
+    }
+
+    return true;
+}
+
+void PipeWireFrameConverter::reset()
+{
+    m_scaler.reset();
+    m_sourceFormat = AV_PIX_FMT_NONE;
+    m_size = QSize();
+    m_frameFormat = QVideoFrameFormat();
+
+    m_decoder.reset();
+    m_decodedFrame.reset();
+    m_packet.reset();
+    m_packetData.clear();
+}
+
+bool PipeWireFrameConverter::isValid() const
+{
+    return m_scaler != nullptr || m_decoder != nullptr;
+}
+
+std::optional<QVideoFrame> PipeWireFrameConverter::convert(const spa_buffer &buffer)
+{
+    if (!isValid() || buffer.n_datas != 1) {
+        return std::nullopt;
+    }
+
+    const spa_data &data = buffer.datas[0];
+    if (!data.data || !data.chunk || (data.chunk->flags & SPA_CHUNK_FLAG_CORRUPTED)
+        || data.chunk->offset > data.maxsize) {
+        return std::nullopt;
+    }
+
+    const auto *bytes = static_cast<const uint8_t *>(data.data) + data.chunk->offset;
+    const qsizetype size = std::min(static_cast<qsizetype>(data.chunk->size),
+                                    static_cast<qsizetype>(data.maxsize - data.chunk->offset));
+
+    return m_decoder ? convertMjpeg(bytes, size) : convertRaw(bytes, size, data.chunk->stride);
+}
+
+QString PipeWireFrameConverter::formatName(spa_video_format format)
+{
+    if (const auto *mapping = findMapping(format)) {
+        return QString::fromLatin1(mapping->name);
+    }
+    return QString::number(static_cast<int>(format));
+}
+
+bool PipeWireFrameConverter::createScaler(AVPixelFormat sourceFormat, const QSize &size)
+{
+    m_sourceFormat = sourceFormat;
+    m_size = size;
 
     m_frameFormat = QVideoFrameFormat(m_size, QVideoFrameFormat::Format_YUV420P);
     m_frameFormat.setColorSpace(QVideoFrameFormat::ColorSpace_BT601);
@@ -56,39 +133,68 @@ bool PipeWireFrameConverter::setFormat(const spa_video_info_raw &info)
     return m_scaler != nullptr;
 }
 
-void PipeWireFrameConverter::reset()
+bool PipeWireFrameConverter::updateScaler(const AVFrame &frame)
 {
-    m_scaler.reset();
-    m_sourceFormat = AV_PIX_FMT_NONE;
-    m_size = QSize();
-    m_frameFormat = QVideoFrameFormat();
+    const auto format = static_cast<AVPixelFormat>(frame.format);
+    const QSize size(frame.width, frame.height);
+
+    if (m_scaler && format == m_sourceFormat && size == m_size) {
+        return true;
+    }
+
+    if (!createScaler(format, size)) {
+        return false;
+    }
+
+    const int sourceRange = frame.color_range == AVCOL_RANGE_JPEG ? 1 : 0;
+    const int *coefficients = sws_getCoefficients(SWS_CS_ITU601);
+    sws_setColorspaceDetails(m_scaler.get(), coefficients, sourceRange, coefficients, 0, 0, 1 << 16,
+                             1 << 16);
+    return true;
 }
 
-std::optional<QVideoFrame> PipeWireFrameConverter::convert(const spa_buffer &buffer)
+std::optional<QVideoFrame> PipeWireFrameConverter::convertRaw(const uint8_t *bytes, qsizetype size,
+                                                              int32_t chunkStride)
 {
-    if (!m_scaler || buffer.n_datas != 1) {
-        return std::nullopt;
-    }
-
-    const spa_data &data = buffer.datas[0];
-    if (!data.data || !data.chunk || (data.chunk->flags & SPA_CHUNK_FLAG_CORRUPTED)) {
-        return std::nullopt;
-    }
-
-    const auto strides = sourceStrides(data.chunk->stride);
+    const auto strides = sourceStrides(chunkStride);
     std::array<uint8_t *, 4> planes = {};
-    auto *base = static_cast<uint8_t *>(data.data) + data.chunk->offset;
-
     const int requiredBytes = av_image_fill_pointers(planes.data(), m_sourceFormat, m_size.height(),
-                                                     base, strides.data());
-    const qsizetype filledBytes = std::min(static_cast<qsizetype>(data.chunk->size),
-                                           static_cast<qsizetype>(data.maxsize)
-                                                   - static_cast<qsizetype>(data.chunk->offset));
-
-    if (requiredBytes < 0 || requiredBytes > filledBytes) {
+                                                     const_cast<uint8_t *>(bytes), strides.data());
+    if (requiredBytes < 0 || requiredBytes > size) {
         return std::nullopt;
     }
 
+    return scale(planes.data(), strides.data());
+}
+
+std::optional<QVideoFrame> PipeWireFrameConverter::convertMjpeg(const uint8_t *bytes,
+                                                                qsizetype size)
+{
+    m_packetData.resize(static_cast<size_t>(size) + AV_INPUT_BUFFER_PADDING_SIZE);
+    std::memcpy(m_packetData.data(), bytes, static_cast<size_t>(size));
+    std::memset(m_packetData.data() + size, 0, AV_INPUT_BUFFER_PADDING_SIZE);
+
+    m_packet->data = m_packetData.data();
+    m_packet->size = static_cast<int>(size);
+
+    if (avcodec_send_packet(m_decoder.get(), m_packet.get()) < 0
+        || avcodec_receive_frame(m_decoder.get(), m_decodedFrame.get()) < 0) {
+        return std::nullopt;
+    }
+
+    const auto unrefFrame = qScopeGuard([this]() { av_frame_unref(m_decodedFrame.get()); });
+
+    if (!updateScaler(*m_decodedFrame)) {
+        return std::nullopt;
+    }
+
+    return scale(m_decodedFrame->data, m_decodedFrame->linesize);
+}
+
+std::optional<QVideoFrame> PipeWireFrameConverter::scale(const uint8_t *const planes[],
+                                                         const int strides[])
+
+{
     QVideoFrame frame(m_frameFormat);
     if (!frame.map(QVideoFrame::WriteOnly)) {
         return std::nullopt;
@@ -99,8 +205,8 @@ std::optional<QVideoFrame> PipeWireFrameConverter::convert(const spa_buffer &buf
     const std::array<int, 4> targetStrides = { frame.bytesPerLine(0), frame.bytesPerLine(1),
                                                frame.bytesPerLine(2), 0 };
 
-    const int convertedRows = sws_scale(m_scaler.get(), planes.data(), strides.data(), 0,
-                                        m_size.height(), targetPlanes.data(), targetStrides.data());
+    const int convertedRows = sws_scale(m_scaler.get(), planes, strides, 0, m_size.height(),
+                                        targetPlanes.data(), targetStrides.data());
 
     frame.unmap();
 
@@ -108,14 +214,6 @@ std::optional<QVideoFrame> PipeWireFrameConverter::convert(const spa_buffer &buf
         return std::nullopt;
     }
     return frame;
-}
-
-QString PipeWireFrameConverter::formatName(spa_video_format format)
-{
-    if (const auto *mapping = findMapping(format)) {
-        return QString::fromLatin1(mapping->name);
-    }
-    return QString::number(static_cast<int>(format));
 }
 
 // The chunk only tells the stride of the first plane, including any padding. Widening the image
@@ -136,4 +234,19 @@ std::array<int, 4> PipeWireFrameConverter::sourceStrides(int32_t chunkStride) co
 void PipeWireFrameConverter::SwsContextDeleter::operator()(SwsContext *context) const
 {
     sws_freeContext(context);
+}
+
+void PipeWireFrameConverter::CodecContextDeleter::operator()(AVCodecContext *context) const
+{
+    avcodec_free_context(&context);
+}
+
+void PipeWireFrameConverter::FrameDeleter::operator()(AVFrame *frame) const
+{
+    av_frame_free(&frame);
+}
+
+void PipeWireFrameConverter::PacketDeleter::operator()(AVPacket *packet) const
+{
+    av_packet_free(&packet);
 }

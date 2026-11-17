@@ -29,18 +29,14 @@ bool isCamera(const char *type, const spa_dict *props)
             && std::strcmp(mediaRole, "Camera") == 0;
 }
 
-QString formatToString(const spa_video_info_raw &info)
+QString formatToString(const QString &name, const spa_rectangle &size,
+                       const spa_fraction &framerate)
 {
-    const QString rate = info.framerate.denom > 0
-            ? QString::number(static_cast<double>(info.framerate.num) / info.framerate.denom, 'f',
-                              1)
+    const QString rate = framerate.denom > 0
+            ? QString::number(static_cast<double>(framerate.num) / framerate.denom, 'f', 1)
             : QStringLiteral("variable");
 
-    return QStringLiteral("%1 %2×%3 @ %4 fps")
-            .arg(PipeWireFrameConverter::formatName(info.format))
-            .arg(info.size.width)
-            .arg(info.size.height)
-            .arg(rate);
+    return QStringLiteral("%1 %2x%3 @ %4 fps").arg(name).arg(size.width).arg(size.height).arg(rate);
 }
 
 } // namespace
@@ -255,21 +251,18 @@ void PipeWireCameraSource::onStreamStateChanged(void *data, pw_stream_state old,
 
 void PipeWireCameraSource::onStreamParamChanged(void *data, uint32_t id, const spa_pod *param)
 {
-    spa_video_info_raw info = {};
-    if (!param || id != SPA_PARAM_Format || spa_format_video_raw_parse(param, &info) < 0) {
+    if (!param || id != SPA_PARAM_Format) {
         return;
     }
 
     auto *self = static_cast<PipeWireCameraSource *>(data);
-    if (!self->m_converter.setFormat(info)) {
-        qCWarning(lcPipeWireCameraSource)
-                << "Unsupported format:" << PipeWireFrameConverter::formatName(info.format);
+    const auto description = self->setConverterFormat(param);
+    if (!description) {
         return;
     }
 
-    const QString description = formatToString(info);
-    qCInfo(lcPipeWireCameraSource) << "Negotiated format:" << description;
-    Q_EMIT self->formatChanged(description);
+    qCInfo(lcPipeWireCameraSource) << "Negotiated format:" << *description;
+    Q_EMIT self->formatChanged(*description);
 
     std::array<uint8_t, 256> podBuffer;
     spa_pod_builder builder;
@@ -341,7 +334,17 @@ void PipeWireCameraSource::createStream(const QString &deviceId)
     spa_pod_builder builder;
     spa_pod_builder_init(&builder, podBuffer.data(), static_cast<uint32_t>(podBuffer.size()));
 
+    // First offer: many cameras reach 720p30 only compressed
     spa_pod_frame frame;
+    spa_pod_builder_push_object(&builder, &frame, SPA_TYPE_OBJECT_Format, SPA_PARAM_EnumFormat);
+    spa_pod_builder_add(&builder, SPA_FORMAT_mediaType, SPA_POD_Id(SPA_MEDIA_TYPE_video),
+                        SPA_FORMAT_mediaSubtype, SPA_POD_Id(SPA_MEDIA_SUBTYPE_mjpg),
+                        SPA_FORMAT_VIDEO_size,
+                        SPA_POD_CHOICE_RANGE_Rectangle(&defaultSize, &minSize, &maxSize),
+                        SPA_FORMAT_VIDEO_framerate,
+                        SPA_POD_CHOICE_RANGE_Fraction(&defaultRate, &minRate, &maxRate), 0);
+    const auto *mjpegFormat = static_cast<const spa_pod *>(spa_pod_builder_pop(&builder, &frame));
+
     spa_pod_builder_push_object(&builder, &frame, SPA_TYPE_OBJECT_Format, SPA_PARAM_EnumFormat);
     spa_pod_builder_add(
             &builder, SPA_FORMAT_mediaType, SPA_POD_Id(SPA_MEDIA_TYPE_video),
@@ -352,9 +355,9 @@ void PipeWireCameraSource::createStream(const QString &deviceId)
             SPA_FORMAT_VIDEO_size, SPA_POD_CHOICE_RANGE_Rectangle(&defaultSize, &minSize, &maxSize),
             SPA_FORMAT_VIDEO_framerate,
             SPA_POD_CHOICE_RANGE_Fraction(&defaultRate, &minRate, &maxRate), 0);
-    const auto *format = static_cast<const spa_pod *>(spa_pod_builder_pop(&builder, &frame));
+    const auto *rawFormat = static_cast<const spa_pod *>(spa_pod_builder_pop(&builder, &frame));
 
-    std::array<const spa_pod *, 1> params = { format };
+    std::array<const spa_pod *, 2> params = { mjpegFormat, rawFormat };
 
     // Prevent false positive: the value is not a dedicated member of the enum, but the value is
     // in range and therefore valid.
@@ -387,4 +390,33 @@ void PipeWireCameraSource::setActive(bool active)
     if (m_active.exchange(active) != active) {
         Q_EMIT activeChanged();
     }
+}
+
+std::optional<QString> PipeWireCameraSource::setConverterFormat(const spa_pod *format)
+{
+    uint32_t mediaType = 0;
+    uint32_t mediaSubtype = 0;
+    if (spa_format_parse(format, &mediaType, &mediaSubtype) < 0
+        || mediaType != SPA_MEDIA_TYPE_video) {
+        return std::nullopt;
+    }
+
+    if (mediaSubtype == SPA_MEDIA_SUBTYPE_mjpg) {
+        spa_video_info_mjpg info = {};
+        if (spa_format_video_mjpg_parse(format, &info) < 0 || !m_converter.setMjpegFormat()) {
+            qCWarning(lcPipeWireCameraSource) << "Cannot decode MJPEG";
+            return std::nullopt;
+        }
+        return formatToString(QStringLiteral("MJPEG"), info.size, info.framerate);
+    }
+
+    spa_video_info_raw info = {};
+    if (spa_format_video_raw_parse(format, &info) < 0 || !m_converter.setFormat(info)) {
+        qCWarning(lcPipeWireCameraSource)
+                << "Unsupported format:" << PipeWireFrameConverter::formatName(info.format);
+        return std::nullopt;
+    }
+
+    return formatToString(PipeWireFrameConverter::formatName(info.format), info.size,
+                          info.framerate);
 }

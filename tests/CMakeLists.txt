@@ -216,7 +216,7 @@ target_link_libraries(chatMessageTransformerTest
 if(LINUX)
     find_package(Qt6 REQUIRED COMPONENTS Multimedia)
     pkg_check_modules(LIBSPA REQUIRED libspa-0.2 IMPORTED_TARGET)
-    pkg_check_modules(LIBAV REQUIRED libavutil libswscale IMPORTED_TARGET)
+    pkg_check_modules(LIBAV REQUIRED libavcodec libavutil libswscale IMPORTED_TARGET)
 
     qt_add_executable(pipeWireFrameConverterTest
         PipeWireFrameConverter.test.cpp

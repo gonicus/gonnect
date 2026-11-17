@@ -51,7 +51,7 @@ QString formatToString(const QCameraFormat &format)
         return QString();
     }
 
-    return QStringLiteral("%1 %2×%3 @ %4 fps")
+    return QStringLiteral("%1 %2x%3 @ %4 fps")
             .arg(QVideoFrameFormat::pixelFormatToString(format.pixelFormat()))
             .arg(format.resolution().width())
             .arg(format.resolution().height())
