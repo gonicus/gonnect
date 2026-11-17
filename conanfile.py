@@ -80,6 +80,7 @@ class GOnnectRecipe(ConanFile):
             self.requires("libpulse/system")
             self.requires("xorg/system")
             self.requires("wayland/1.24.0", override=True)
+            self.requires("ffmpeg/9.0.2")
 
         self.requires("openssl/3.6.3", override=True)
         self.requires("qtkeychain/0.18.0")
@@ -98,3 +99,27 @@ class GOnnectRecipe(ConanFile):
 
         if self.settings.os == "Windows":
             self.options["pjproject/*"].with_uuid=False
+
+        if self.settings.os == "Linux":
+            self.options["ffmpeg/*"].disable_everything = True
+            self.options["ffmpeg/*"].avcodec = True
+            self.options["ffmpeg/*"].swscale = True
+            self.options["ffmpeg/*"].enable_decoders = "mjpeg"
+
+            self.options["ffmpeg/*"].avformat = False
+            self.options["ffmpeg/*"].avdevice = False
+            self.options["ffmpeg/*"].avfilter = False
+            self.options["ffmpeg/*"].swresample = False
+            self.options["ffmpeg/*"].with_programs = False
+
+            # External libraries are pulled in regardless of disable_everything,
+            # some of them turn the build into GPL or even nonfree
+            for option in ["with_zlib", "with_bzip2", "with_lzma", "with_libiconv",
+                           "with_freetype", "with_openjpeg", "with_openh264", "with_opus",
+                           "with_vorbis", "with_libx264", "with_libx265", "with_libvpx",
+                           "with_libmp3lame", "with_libfdk_aac", "with_libwebp", "with_ssl",
+                           "with_libsvtav1", "with_libaom", "with_libdav1d", "with_libalsa",
+                           "with_pulse", "with_vaapi", "with_vdpau", "with_xcb", "with_xlib"]:
+                setattr(self.options["ffmpeg/*"], option, False)
+
+
