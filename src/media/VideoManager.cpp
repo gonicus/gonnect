@@ -247,14 +247,6 @@ void VideoManager::removeConsumer(FramePump *consumer)
     }
 }
 
-void VideoManager::setCameraAccessState(CameraAccessState value)
-{
-    if (m_cameraAccessState != value) {
-        m_cameraAccessState = value;
-        Q_EMIT cameraAccessStateChanged();
-    }
-}
-
 void VideoManager::updateDevices()
 {
     QList<VideoDevice> devices = m_cameraSource->devices();
