@@ -3,7 +3,7 @@ set(CMAKE_AUTORCC ON)
 
 include(FindPkgConfig)
 
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Multimedia Qml Quick Test Concurrent)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Multimedia Network Qml Quick Test Concurrent WebSockets)
 
 if(UNIX)
     pkg_check_modules(LIBAV REQUIRED libavcodec libavutil libswscale IMPORTED_TARGET)
@@ -326,6 +326,7 @@ target_link_libraries(jitsiVideoProtocolTest
 
 
 qt_add_executable(videoDecoderTest
+    IvfReader.h
     VideoDecoder.test.cpp
     VideoDecoder.test.h
     ${PROJECT_SOURCE_DIR}/src/media/LibAvPointers.h
@@ -354,6 +355,66 @@ target_link_libraries(videoDecoderTest
         Qt6::Gui
         Qt6::Multimedia
         Qt6::Test
+        ${LIBAV_LIBRARIES}
+)
+
+qt_add_executable(jitsiVideoBridgeTest
+    IvfReader.h
+    JitsiVideoBridge.test.cpp
+    JitsiVideoBridge.test.h
+    ${PROJECT_SOURCE_DIR}/src/conference/ConferenceVideoModel.cpp
+    ${PROJECT_SOURCE_DIR}/src/conference/ConferenceVideoModel.h
+    ${PROJECT_SOURCE_DIR}/src/conference/ConferenceVideoSource.cpp
+    ${PROJECT_SOURCE_DIR}/src/conference/ConferenceVideoSource.h
+    ${PROJECT_SOURCE_DIR}/src/conference/JitsiVideoBridge.cpp
+    ${PROJECT_SOURCE_DIR}/src/conference/JitsiVideoBridge.h
+    ${PROJECT_SOURCE_DIR}/src/conference/JitsiVideoProtocol.cpp
+    ${PROJECT_SOURCE_DIR}/src/conference/JitsiVideoProtocol.h
+    ${PROJECT_SOURCE_DIR}/src/conference/JitsiVideoServer.cpp
+    ${PROJECT_SOURCE_DIR}/src/conference/JitsiVideoServer.h
+    ${PROJECT_SOURCE_DIR}/src/helper/OriginHelper.cpp
+    ${PROJECT_SOURCE_DIR}/src/helper/OriginHelper.h
+    ${PROJECT_SOURCE_DIR}/src/helper/SecretGenerator.cpp
+    ${PROJECT_SOURCE_DIR}/src/helper/SecretGenerator.h
+    ${PROJECT_SOURCE_DIR}/src/media/EncodedFrame.h
+    ${PROJECT_SOURCE_DIR}/src/media/FramePump.cpp
+    ${PROJECT_SOURCE_DIR}/src/media/FramePump.h
+    ${PROJECT_SOURCE_DIR}/src/media/KeyFrameGate.cpp
+    ${PROJECT_SOURCE_DIR}/src/media/KeyFrameGate.h
+    ${PROJECT_SOURCE_DIR}/src/media/LibAvPointers.h
+    ${PROJECT_SOURCE_DIR}/src/media/PlanarVideoBuffer.cpp
+    ${PROJECT_SOURCE_DIR}/src/media/PlanarVideoBuffer.h
+    ${PROJECT_SOURCE_DIR}/src/media/TrackDecoder.cpp
+    ${PROJECT_SOURCE_DIR}/src/media/TrackDecoder.h
+    ${PROJECT_SOURCE_DIR}/src/media/VideoCodec.h
+    ${PROJECT_SOURCE_DIR}/src/media/VideoDecoder.cpp
+    ${PROJECT_SOURCE_DIR}/src/media/VideoDecoder.h
+)
+
+add_test(NAME jitsiVideoBridgeTest COMMAND jitsiVideoBridgeTest)
+
+target_include_directories(jitsiVideoBridgeTest
+    PRIVATE
+        ${PROJECT_SOURCE_DIR}/src/conference
+        ${PROJECT_SOURCE_DIR}/src/helper
+        ${PROJECT_SOURCE_DIR}/src/media
+)
+
+# IVF fixtures are loaded from disk using TEST_DATA_DIR at runtime
+target_compile_definitions(jitsiVideoBridgeTest
+    PRIVATE
+        TEST_DATA_DIR="${CMAKE_CURRENT_SOURCE_DIR}/resources"
+)
+
+target_link_libraries(jitsiVideoBridgeTest
+    PRIVATE
+        Qt6::Core
+        Qt6::Gui
+        Qt6::Multimedia
+        Qt6::Network
+        Qt6::Qml
+        Qt6::Test
+        Qt6::WebSockets
         ${LIBAV_LIBRARIES}
 )
 

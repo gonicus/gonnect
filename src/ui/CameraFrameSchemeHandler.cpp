@@ -1,6 +1,7 @@
 #include "CameraFrameSchemeHandler.h"
 #include "CameraFrameSerializer.h"
 #include "GlobalInfo.h"
+#include "OriginHelper.h"
 #include "VideoManager.h"
 
 #include <QBuffer>
@@ -85,13 +86,7 @@ CameraFrameSchemeHandler::CameraFrameSchemeHandler(QObject *parent)
 
 bool CameraFrameSchemeHandler::isJitsiRequest(const QWebEngineUrlRequestJob *job) const
 {
-    const QUrl jitsiUrl(GlobalInfo::instance().jitsiUrl());
-    const QUrl initiator = job->initiator();
-    const int defaultPort = jitsiUrl.scheme() == QLatin1String("https") ? 443 : 80;
-
-    return !jitsiUrl.host().isEmpty() && initiator.scheme() == jitsiUrl.scheme()
-            && initiator.host() == jitsiUrl.host()
-            && initiator.port(defaultPort) == jitsiUrl.port(defaultPort);
+    return OriginHelper::isSameOrigin(job->initiator(), QUrl(GlobalInfo::instance().jitsiUrl()));
 }
 
 void CameraFrameSchemeHandler::answerPendingJobs(const QVideoFrame &frame)

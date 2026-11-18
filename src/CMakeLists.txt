@@ -13,6 +13,7 @@ find_package(Qt6 REQUIRED COMPONENTS
     Widgets
     WebEngineCore
     WebEngineQuick
+    WebSockets
     Xml)
 
 find_package(logfault CONFIG REQUIRED)
@@ -769,6 +770,10 @@ qt_add_qml_module(gonnect
         conference/IConferenceConnector.h
         conference/JitsiVideoProtocol.h
         conference/JitsiVideoProtocol.cpp
+        conference/JitsiVideoBridge.h
+        conference/JitsiVideoBridge.cpp
+        conference/JitsiVideoServer.h
+        conference/JitsiVideoServer.cpp
 
         contacts/AddressBook.cpp
         contacts/AddressBook.h
@@ -823,6 +828,8 @@ qt_add_qml_module(gonnect
         helper/FileContentHelper.cpp
         helper/GenericFavoriteHelper.h
         helper/GenericFavoriteHelper.cpp
+        helper/OriginHelper.h
+        helper/OriginHelper.cpp
         helper/SecretGenerator.h
         helper/SecretGenerator.cpp
         helper/SipFavoriteHelper.h
@@ -1098,6 +1105,7 @@ target_link_libraries(gonnect
         Qt6::Protobuf
         Qt6::WebEngineCore
         Qt6::WebEngineQuick
+        Qt6::WebSockets
         GOnnectVersion
         ${PLATFORM_LIBRARIES}
         qt6keychain

@@ -1,13 +1,11 @@
 #include "VideoDecoder.test.h"
+#include "IvfReader.h"
 #include "VideoDecoder.h"
 
-#include <QFile>
 #include <QTest>
 #include <QVideoFrame>
-#include <QtEndian>
 
 #include <expected>
-#include <optional>
 
 Q_DECLARE_METATYPE(VideoDecoder::Codec)
 
@@ -25,37 +23,6 @@ constexpr int RedV = 240;
 // Allows small coding losses
 constexpr int Tolerance = 4;
 
-constexpr qsizetype IvfFileHeaderSize = 32;
-constexpr qsizetype IvfFrameHeaderSize = 12;
-
-// Frame payloads of an IVF file, see tests/resources/video/README.md
-std::optional<QList<QByteArray>> readIvfFrames(const QString &path)
-{
-    QFile file(path);
-    if (!file.open(QIODevice::ReadOnly)) {
-        return std::nullopt;
-    }
-
-    const QByteArray content = file.readAll();
-    if (!content.startsWith("DKIF")) {
-        return std::nullopt;
-    }
-
-    QList<QByteArray> frames;
-    qsizetype offset = IvfFileHeaderSize;
-    while (offset + IvfFrameHeaderSize <= content.size()) {
-        const auto frameSize =
-                static_cast<qsizetype>(qFromLittleEndian<quint32>(content.constData() + offset));
-        offset += IvfFrameHeaderSize;
-        if (offset + frameSize > content.size()) {
-            return std::nullopt;
-        }
-        frames.append(content.sliced(offset, frameSize));
-        offset += frameSize;
-    }
-    return frames;
-}
-
 // Value in the middle of a plane of a mapped I420 frame
 int centerValue(const QVideoFrame &frame, int plane)
 {
@@ -65,7 +32,7 @@ int centerValue(const QVideoFrame &frame, int plane)
     return frame.bits(plane)[y * frame.bytesPerLine(plane) + x];
 }
 
-template<typename T>
+template <typename T>
 QString errorOf(const std::expected<T, QString> &result)
 {
     return result.has_value() ? QString() : result.error();
