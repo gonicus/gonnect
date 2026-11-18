@@ -20,13 +20,14 @@ IMHandler::IMHandler(SIPCall *parent) : QObject(parent), m_call(parent)
     ReadOnlyConfdSettings settings;
 
     if (settings.contains("jitsi/url")) {
-
         settings.beginGroup("jitsi");
         m_jitsiBaseURL = settings.value("url", "").toString();
         m_jitsiPreconfig = settings.value("preconfig", false).toBool();
 
         settings.endGroup();
     }
+
+    m_dtmfDebugConfigured = settings.value("generic/dtmfDebug", false).toBool();
 }
 
 bool IMHandler::process(const QString &contentType, const QString &message)
@@ -85,6 +86,33 @@ bool IMHandler::process(const QString &contentType, const QString &message)
 
         m_jistiRequestedMeetingId = meetingId;
         Q_EMIT meetingRequested(m_call->account()->id(), m_call->getId());
+
+        return true;
+    }
+
+    // Call delays
+    else if (path == "callDelay" && dtmfDebugEnabled()) {
+        bool validTimestamp = false;
+        qint64 timestamp = 0;
+        QString digit;
+        QUrlQuery q(callUrl);
+        auto qitems = q.queryItems();
+
+        for (auto &qi : std::as_const(qitems)) {
+            if (qi.first == "timestamp") {
+                timestamp = qi.second.toLongLong(&validTimestamp);
+            }
+            if (qi.first == "digit") {
+                digit = qi.second;
+            }
+        }
+
+        if (!validTimestamp) {
+            qCWarning(lcIMHandler) << "invalid call delay timestamp received";
+            return false;
+        }
+
+        m_call->setCallDelayTx(timestamp, digit);
 
         return true;
     }
@@ -180,6 +208,9 @@ bool IMHandler::sendCapabilities()
         q.addQueryItem("jitsi", "1");
         m_ownCapabilities.push_back("jitsi");
     }
+
+    q.addQueryItem("callDelay", "1");
+    m_ownCapabilities.push_back("callDelay");
 
     QUrl jitsiUrl("gonnect:");
     jitsiUrl.setPath("capabilities");
