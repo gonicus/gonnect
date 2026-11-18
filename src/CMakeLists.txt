@@ -767,6 +767,8 @@ qt_add_qml_module(gonnect
         conference/ConferenceVideoSource.h
         conference/ConferenceVideoSource.cpp
         conference/IConferenceConnector.h
+        conference/JitsiVideoProtocol.h
+        conference/JitsiVideoProtocol.cpp
 
         contacts/AddressBook.cpp
         contacts/AddressBook.h
@@ -842,8 +844,11 @@ qt_add_qml_module(gonnect
         media/CameraPreview.cpp
         media/CameraSource.h
         media/CameraSource.cpp
+        media/EncodedFrame.h
         media/FramePump.h
         media/FramePump.cpp
+        media/KeyFrameGate.h
+        media/KeyFrameGate.cpp
         media/LibAvPointers.h
         media/PlanarVideoBuffer.h
         media/PlanarVideoBuffer.cpp
@@ -851,6 +856,9 @@ qt_add_qml_module(gonnect
         media/QtCameraSource.cpp
         media/Sniffer.h
         media/Sniffer.cpp
+        media/TrackDecoder.h
+        media/TrackDecoder.cpp
+        media/VideoCodec.h
         media/VideoDecoder.h
         media/VideoDecoder.cpp
         media/VideoDevice.h

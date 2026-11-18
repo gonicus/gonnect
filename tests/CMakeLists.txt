@@ -272,6 +272,57 @@ target_link_libraries(conferenceVideoModelTest
         Qt6::Test
 )
 
+qt_add_executable(keyFrameGateTest
+    KeyFrameGate.test.cpp
+    KeyFrameGate.test.h
+    ${PROJECT_SOURCE_DIR}/src/media/EncodedFrame.h
+    ${PROJECT_SOURCE_DIR}/src/media/KeyFrameGate.cpp
+    ${PROJECT_SOURCE_DIR}/src/media/KeyFrameGate.h
+    ${PROJECT_SOURCE_DIR}/src/media/VideoCodec.h
+)
+
+add_test(NAME keyFrameGateTest COMMAND keyFrameGateTest)
+
+target_include_directories(keyFrameGateTest
+    PRIVATE
+        ${PROJECT_SOURCE_DIR}/src/media
+)
+
+target_link_libraries(keyFrameGateTest
+    PRIVATE
+        Qt6::Core
+        Qt6::Test
+)
+
+qt_add_executable(jitsiVideoProtocolTest
+    JitsiVideoProtocol.test.cpp
+    JitsiVideoProtocol.test.h
+    ${PROJECT_SOURCE_DIR}/src/conference/ConferenceVideoSource.cpp
+    ${PROJECT_SOURCE_DIR}/src/conference/ConferenceVideoSource.h
+    ${PROJECT_SOURCE_DIR}/src/conference/JitsiVideoProtocol.cpp
+    ${PROJECT_SOURCE_DIR}/src/conference/JitsiVideoProtocol.h
+    ${PROJECT_SOURCE_DIR}/src/media/EncodedFrame.h
+    ${PROJECT_SOURCE_DIR}/src/media/FramePump.cpp
+    ${PROJECT_SOURCE_DIR}/src/media/FramePump.h
+    ${PROJECT_SOURCE_DIR}/src/media/VideoCodec.h
+)
+
+add_test(NAME jitsiVideoProtocolTest COMMAND jitsiVideoProtocolTest)
+
+target_include_directories(jitsiVideoProtocolTest
+    PRIVATE
+        ${PROJECT_SOURCE_DIR}/src/conference
+        ${PROJECT_SOURCE_DIR}/src/media
+)
+
+target_link_libraries(jitsiVideoProtocolTest
+    PRIVATE
+        Qt6::Core
+        Qt6::Gui
+        Qt6::Multimedia
+        Qt6::Qml
+        Qt6::Test
+)
 
 
 qt_add_executable(videoDecoderTest

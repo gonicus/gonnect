@@ -1,6 +1,7 @@
 #pragma once
 
 #include "LibAvPointers.h"
+#include "VideoCodec.h"
 
 #include <QByteArrayView>
 #include <QList>
@@ -17,7 +18,7 @@ class VideoDecoder
     Q_DISABLE_COPY_MOVE(VideoDecoder)
 
 public:
-    enum class Codec { VP8, VP9, AV1 };
+    using Codec = VideoCodec;
 
     VideoDecoder() = default;
 
