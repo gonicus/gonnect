@@ -3,7 +3,7 @@ set(CMAKE_AUTORCC ON)
 
 include(FindPkgConfig)
 
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Multimedia Quick Test Concurrent)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Multimedia Qml Quick Test Concurrent)
 
 if(UNIX)
     pkg_check_modules(LIBAV REQUIRED libavcodec libavutil libswscale IMPORTED_TARGET)
@@ -241,6 +241,38 @@ target_link_libraries(cameraFrameSerializerTest
         Qt6::Multimedia
         Qt6::Test
 )
+
+qt_add_executable(conferenceVideoModelTest
+    ConferenceVideoModel.test.cpp
+    ConferenceVideoModel.test.h
+    ${PROJECT_SOURCE_DIR}/src/conference/ConferenceVideoModel.cpp
+    ${PROJECT_SOURCE_DIR}/src/conference/ConferenceVideoModel.h
+    ${PROJECT_SOURCE_DIR}/src/conference/ConferenceVideoOutput.cpp
+    ${PROJECT_SOURCE_DIR}/src/conference/ConferenceVideoOutput.h
+    ${PROJECT_SOURCE_DIR}/src/conference/ConferenceVideoSource.cpp
+    ${PROJECT_SOURCE_DIR}/src/conference/ConferenceVideoSource.h
+    ${PROJECT_SOURCE_DIR}/src/media/FramePump.cpp
+    ${PROJECT_SOURCE_DIR}/src/media/FramePump.h
+)
+
+add_test(NAME conferenceVideoModelTest COMMAND conferenceVideoModelTest)
+
+target_include_directories(conferenceVideoModelTest
+    PRIVATE
+        ${PROJECT_SOURCE_DIR}/src/conference
+        ${PROJECT_SOURCE_DIR}/src/media
+)
+
+target_link_libraries(conferenceVideoModelTest
+    PRIVATE
+        Qt6::Core
+        Qt6::Gui
+        Qt6::Multimedia
+        Qt6::Qml
+        Qt6::Test
+)
+
+
 
 qt_add_executable(videoDecoderTest
     VideoDecoder.test.cpp

@@ -760,6 +760,12 @@ qt_add_qml_module(gonnect
         conference/ConferenceLinkedRoomsProxyModel.cpp
         conference/ConferenceUser.h
         conference/ConferenceUser.cpp
+        conference/ConferenceVideoModel.h
+        conference/ConferenceVideoModel.cpp
+        conference/ConferenceVideoOutput.h
+        conference/ConferenceVideoOutput.cpp
+        conference/ConferenceVideoSource.h
+        conference/ConferenceVideoSource.cpp
         conference/IConferenceConnector.h
 
         contacts/AddressBook.cpp

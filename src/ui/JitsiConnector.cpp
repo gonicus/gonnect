@@ -43,6 +43,7 @@ Q_LOGGING_CATEGORY(lcJitsiConnector, "gonnect.app.JitsiConnector")
 JitsiConnector::JitsiConnector(QObject *parent) : IConferenceConnector{ parent }
 {
     m_chatRoom = new ConferenceChatRoom(this);
+    m_videoModel = new ConferenceVideoModel(this);
 
     connect(this, &JitsiConnector::isInConferenceChanged, this, [this]() {
         if (isInConference()) {

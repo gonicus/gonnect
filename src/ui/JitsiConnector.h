@@ -7,6 +7,7 @@
 #include "IConferenceConnector.h"
 #include "JitsiMediaDevice.h"
 #include "ConferenceUser.h"
+#include "ConferenceVideoModel.h"
 #include "MuteSyncGuard.h"
 
 class CallHistoryItem;
@@ -113,6 +114,7 @@ public:
     void grantUserRole(ConferenceUser *user, ConferenceUser::Role newRole) override;
     ConferenceUser *largeVideoUser() const override { return m_largeVideoUser; };
     void setLargeVideoUser(ConferenceUser *user) override;
+    ConferenceVideoModel *videoModel() const override { return m_videoModel; }
     void muteAll() override;
     void setCallHistoryItem(
             QPointer<CallHistoryItem> callHistoryItem = QPointer<CallHistoryItem>()) override;
@@ -200,6 +202,7 @@ private:
     QString m_roomName;
     QString m_displayName;
     QList<ConferenceUser *> m_users;
+    ConferenceVideoModel *m_videoModel = nullptr;
     QPointer<CallHistoryItem> m_callHistoryItem;
     QDateTime m_establishedDateTime;
     QList<Notification *> m_chatNotifications;

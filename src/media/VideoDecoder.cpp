@@ -23,7 +23,7 @@ const char *decoderName(VideoDecoder::Codec codec)
     case VideoDecoder::Codec::VP9:
         return "vp9";
     case VideoDecoder::Codec::AV1:
-        return "libav1d";
+        return "libdav1d";
     }
 
     return nullptr;
