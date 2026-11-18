@@ -29,11 +29,13 @@ if(UNIX)
     pkg_check_modules(LIBUUID REQUIRED uuid IMPORTED_TARGET)
     pkg_check_modules(LIBUSB1 REQUIRED libusb-1.0 IMPORTED_TARGET)
     pkg_check_modules(LIBHIDAPI REQUIRED hidapi-hidraw IMPORTED_TARGET)
+    pkg_check_modules(LIBAV REQUIRED libavcodec libavutil libswscale IMPORTED_TARGET)
     list(APPEND PLATFORM_LIBRARIES
         ${PJSIP_STATIC_LIBRARIES}
         PkgConfig::LIBUUID
         PkgConfig::LIBUSB1
-        PkgConfig::LIBHIDAPI)
+        PkgConfig::LIBHIDAPI
+        PkgConfig::LIBAV)
 
     if(FLATPAK)
         list(APPEND PLATFORM_LIBRARIES
@@ -58,6 +60,7 @@ else()
     find_package(libusb REQUIRED)
     find_package(wintoast REQUIRED)
     find_package(QHotkey REQUIRED)
+    find_package(ffmpeg REQUIRED)
 
     list(APPEND PLATFORM_LIBRARIES
         SnowballStem::libstemmer
@@ -67,7 +70,11 @@ else()
         libusb::libusb
         wintoast::wintoast
         QHotkey
-        runtimeobject)
+        runtimeobject
+        ffmpeg::avcodec
+        ffmpeg::avutil
+        ffmpeg::swscale
+    )
 endif()
 
 add_definitions(-DPJMEDIA_HAS_RTCP_XR=1 -DPJMEDIA_STREAM_ENABLE_XR=1)
@@ -89,14 +96,12 @@ elseif(LINUX)
     pkg_check_modules(LIBNOTIFY REQUIRED libnotify IMPORTED_TARGET)
     pkg_check_modules(LIBPULSE REQUIRED libpulse IMPORTED_TARGET)
     pkg_check_modules(LIBPIPEWIRE REQUIRED libpipewire-0.3 IMPORTED_TARGET)
-    pkg_check_modules(LIBAV REQUIRED libavcodec libavutil libswscale IMPORTED_TARGET)
     pkg_check_modules(XCB REQUIRED xcb IMPORTED_TARGET)
     pkg_check_modules(WAYLAND_CLIENT REQUIRED wayland-client IMPORTED_TARGET)
        
     list(APPEND PLATFORM_LIBRARIES
         PkgConfig::LIBPULSE
         PkgConfig::LIBPIPEWIRE
-        PkgConfig::LIBAV
         PkgConfig::LIBNOTIFY
         PkgConfig::XCB
         PkgConfig::WAYLAND_CLIENT
@@ -833,10 +838,15 @@ qt_add_qml_module(gonnect
         media/CameraSource.cpp
         media/FramePump.h
         media/FramePump.cpp
+        media/LibAvPointers.h
+        media/PlanarVideoBuffer.h
+        media/PlanarVideoBuffer.cpp
         media/QtCameraSource.h
         media/QtCameraSource.cpp
         media/Sniffer.h
         media/Sniffer.cpp
+        media/VideoDecoder.h
+        media/VideoDecoder.cpp
         media/VideoDevice.h
         media/VideoManager.h
         media/VideoManager.cpp
@@ -1038,7 +1048,12 @@ if(LINUX)
         "-Wl,--exclude-libs,libcrypto.a"
         "-Wl,--exclude-libs,libssl.a"
         "-Wl,--exclude-libs,libldap.a"
-        "-Wl,--exclude-libs,liblber.a")
+        "-Wl,--exclude-libs,liblber.a"
+        "-Wl,--exclude-libs,libavcodec.a"
+        "-Wl,--exclude-libs,libavutil.a"
+        "-Wl,--exclude-libs,libswscale.a"
+        "-Wl,--exclude-libs,libdav1d.a"
+    )
 endif()
 
 qt_extract_metatypes(gonnect)

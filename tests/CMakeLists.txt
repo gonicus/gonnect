@@ -5,6 +5,14 @@ include(FindPkgConfig)
 
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Multimedia Quick Test Concurrent)
 
+if(UNIX)
+    pkg_check_modules(LIBAV REQUIRED libavcodec libavutil libswscale IMPORTED_TARGET)
+    set(LIBAV_LIBRARIES PkgConfig::LIBAV)
+else()
+    find_package(ffmpeg REQUIRED)
+    set(LIBAV_LIBRARIES ffmpeg::avcodec ffmpeg::avutil ffmpeg::swscale)
+endif()
+
 add_definitions(-DAPP_TESTS)
 enable_testing(true)
 
@@ -234,9 +242,40 @@ target_link_libraries(cameraFrameSerializerTest
         Qt6::Test
 )
 
+qt_add_executable(videoDecoderTest
+    VideoDecoder.test.cpp
+    VideoDecoder.test.h
+    ${PROJECT_SOURCE_DIR}/src/media/LibAvPointers.h
+    ${PROJECT_SOURCE_DIR}/src/media/PlanarVideoBuffer.cpp
+    ${PROJECT_SOURCE_DIR}/src/media/PlanarVideoBuffer.h
+    ${PROJECT_SOURCE_DIR}/src/media/VideoDecoder.cpp
+    ${PROJECT_SOURCE_DIR}/src/media/VideoDecoder.h
+)
+
+add_test(NAME videoDecoderTest COMMAND videoDecoderTest)
+
+target_include_directories(videoDecoderTest
+    PRIVATE
+        ${PROJECT_SOURCE_DIR}/src/media
+)
+
+# IVF fixtures are loaded from disk using TEST_DATA_DIR at runtime
+target_compile_definitions(videoDecoderTest
+    PRIVATE
+        TEST_DATA_DIR="${CMAKE_CURRENT_SOURCE_DIR}/resources"
+)
+
+target_link_libraries(videoDecoderTest
+    PRIVATE
+        Qt6::Core
+        Qt6::Gui
+        Qt6::Multimedia
+        Qt6::Test
+        ${LIBAV_LIBRARIES}
+)
+
 if(LINUX)
     pkg_check_modules(LIBSPA REQUIRED libspa-0.2 IMPORTED_TARGET)
-    pkg_check_modules(LIBAV REQUIRED libavcodec libavutil libswscale IMPORTED_TARGET)
 
     qt_add_executable(pipeWireFrameConverterTest
         PipeWireFrameConverter.test.cpp
@@ -249,6 +288,7 @@ if(LINUX)
 
     target_include_directories(pipeWireFrameConverterTest
         PRIVATE
+            ${PROJECT_SOURCE_DIR}/src/media
             ${PROJECT_SOURCE_DIR}/src/platform/linux
     )
     target_link_libraries(pipeWireFrameConverterTest
@@ -258,6 +298,6 @@ if(LINUX)
             Qt6::Multimedia
             Qt6::Test
             PkgConfig::LIBSPA
-            PkgConfig::LIBAV
+            ${LIBAV_LIBRARIES}
     )
 endif()

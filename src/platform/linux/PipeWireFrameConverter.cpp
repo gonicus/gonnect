@@ -230,23 +230,3 @@ std::array<int, 4> PipeWireFrameConverter::sourceStrides(int32_t chunkStride) co
 
     return strides;
 }
-
-void PipeWireFrameConverter::SwsContextDeleter::operator()(SwsContext *context) const
-{
-    sws_freeContext(context);
-}
-
-void PipeWireFrameConverter::CodecContextDeleter::operator()(AVCodecContext *context) const
-{
-    avcodec_free_context(&context);
-}
-
-void PipeWireFrameConverter::FrameDeleter::operator()(AVFrame *frame) const
-{
-    av_frame_free(&frame);
-}
-
-void PipeWireFrameConverter::PacketDeleter::operator()(AVPacket *packet) const
-{
-    av_packet_free(&packet);
-}

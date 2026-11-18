@@ -8,6 +8,8 @@
 #include <spa/buffer/buffer.h>
 #include <spa/param/video/raw.h>
 
+#include "LibAvPointers.h"
+
 extern "C" {
 #include <libavutil/pixfmt.h>
 }
@@ -40,23 +42,6 @@ public:
     static QString formatName(spa_video_format format);
 
 private:
-    struct SwsContextDeleter
-    {
-        void operator()(SwsContext *context) const;
-    };
-    struct CodecContextDeleter
-    {
-        void operator()(AVCodecContext *context) const;
-    };
-    struct FrameDeleter
-    {
-        void operator()(AVFrame *frame) const;
-    };
-    struct PacketDeleter
-    {
-        void operator()(AVPacket *packet) const;
-    };
-
     bool createScaler(AVPixelFormat sourceFormat, const QSize &size);
     bool updateScaler(const AVFrame &frame);
     std::optional<QVideoFrame> convertRaw(const uint8_t *bytes, qsizetype size,
@@ -70,8 +55,8 @@ private:
     QSize m_size;
     QVideoFrameFormat m_frameFormat;
     std::unique_ptr<SwsContext, SwsContextDeleter> m_scaler;
-    std::unique_ptr<AVCodecContext, CodecContextDeleter> m_decoder;
-    std::unique_ptr<AVFrame, FrameDeleter> m_decodedFrame;
-    std::unique_ptr<AVPacket, PacketDeleter> m_packet;
+    std::unique_ptr<AVCodecContext, AVCodecContextDeleter> m_decoder;
+    std::unique_ptr<AVFrame, AVFrameDeleter> m_decodedFrame;
+    std::unique_ptr<AVPacket, AVPacketDeleter> m_packet;
     std::vector<uint8_t> m_packetData;
 };

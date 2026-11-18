@@ -1013,7 +1013,7 @@ void JitsiConnector::setUserRole(const QString &id, const QString &roleString)
             user->setRole(role);
 
             qCInfo(lcJitsiConnector).noquote().nospace()
-                    << "Jitsi user " << user->displayName() << " (" << id << ") got new role"
+                    << "Jitsi user " << user->displayName() << " (" << id << ") got new role "
                     << ConferenceUser::userRoleToString(role);
 
             Q_EMIT userRoleChanged(i, user, role);
