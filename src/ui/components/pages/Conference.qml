@@ -390,6 +390,24 @@ Item {
                     onFinishForAll: () => confConn.terminateConference()
                 }
 
+                Flow {
+                    id: nativeVideoStrip
+                    visible: confConn.isNativeVideoEnabled && nativeVideoRepeater.count > 0
+                    height: nativeVideoStrip.visible ? nativeVideoStrip.implicitHeight : 0
+                    spacing: Theme.d
+                    anchors {
+                        top: topBar.bottom
+                        left: nativeVideoStrip.parent.left
+                        right: nativeVideoStrip.parent.right
+                    }
+
+                    Repeater {
+                        id: nativeVideoRepeater
+                        model: confConn.videoModel
+                        delegate: ConferenceVideoTile {}
+                    }
+                }
+
                 WebEngineView {
                     id: jitsiView
                     settings {
@@ -401,7 +419,7 @@ Item {
                         registeredObjects: [ confConn ]
                     }
                     anchors {
-                        top: topBar.bottom
+                        top: nativeVideoStrip.bottom
                         bottom: parent.bottom
                         left: parent.left
                         right: parent.right
@@ -416,6 +434,17 @@ Item {
                             script.worldId = WebEngineScript.MainWorld
                             script.runsOnSubFrames = true
                             jitsiView.userScripts.insert(script)
+
+                            const remoteVideoSource = confConn.remoteVideoScriptInternal()
+                            if (remoteVideoSource !== "") {
+                                const remoteVideoScript = WebEngine.script()
+                                remoteVideoScript.name = "gonnectRemoteVideo"
+                                remoteVideoScript.sourceCode = remoteVideoSource
+                                remoteVideoScript.injectionPoint = WebEngineScript.DocumentCreation
+                                remoteVideoScript.worldId = WebEngineScript.MainWorld
+                                remoteVideoScript.runsOnSubFrames = true
+                                jitsiView.userScripts.insert(remoteVideoScript)
+                            }
                         }
 
                     onJavaScriptConsoleMessage: (level, message, line, source) => {

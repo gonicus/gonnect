@@ -5,6 +5,7 @@
 #include "Application.h"
 #include "CameraFrameSchemeHandler.h"
 #include "GlobalInfo.h"
+#include "JitsiConnector.h"
 #include "PersonCoinProvider.h"
 #include "WebEngineKeyEventFilter.h"
 
@@ -88,10 +89,16 @@ int main(int argc, char *argv[])
         if (GlobalInfo::instance().isWorkaroundActive(GlobalInfo::WorkaroundId::GOW_003)) {
             chromiumFlags.push_back("--disable-renderer-accessibility");
         }
+        if (JitsiConnector::readIsNativeVideoEnabled()) {
+            // Taps encoded remote video for decoding in GOnnect
+            chromiumFlags.push_back("--enable-blink-features=RTCRtpScriptTransform");
+        }
         if (chromiumFlags.size() > 0) {
             qputenv("QTWEBENGINE_CHROMIUM_FLAGS", chromiumFlags.join(" ").toStdString().c_str());
         }
     } else {
+        // Replaces all defaults - requires --enable-blink-features=RTCRtpScriptTransform for native
+        // video
         qputenv("QTWEBENGINE_CHROMIUM_FLAGS", webenginePresetEnv);
     }
 

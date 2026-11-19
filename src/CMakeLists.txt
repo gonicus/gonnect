@@ -529,6 +529,7 @@ qt_add_qml_module(gonnect
         ui/components/CardShadow.qml
         ui/components/ChatSideBar.qml
         ui/components/ConferenceButtonBar.qml
+        ui/components/ConferenceVideoTile.qml
         ui/components/CustomWindowHeader.qml
         ui/components/ActivitiesList.qml
         ui/components/DateEventsList.qml

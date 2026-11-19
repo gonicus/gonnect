@@ -25,7 +25,9 @@
 #include "ErrorBus.h"
 #include "PlatformSession.h"
 #include "CertHelper.h"
+#include "JitsiVideoBridge.h"
 
+#include <QJsonObject>
 #include <QLoggingCategory>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
@@ -95,6 +97,12 @@ JitsiConnector::JitsiConnector(QObject *parent) : IConferenceConnector{ parent }
 JitsiConnector::~JitsiConnector()
 {
     qDeleteAll(m_chatNotifications);
+}
+
+bool JitsiConnector::readIsNativeVideoEnabled()
+{
+    ReadOnlyConfdSettings settings;
+    return settings.value("jitsi/isNativeVideoEnabled", false).toBool();
 }
 
 QString JitsiConnector::ownDisplayName()
@@ -250,6 +258,13 @@ QString JitsiConnector::jitsiJavascriptInternal()
     AppSettings settings;
     const bool persistedTileView = settings.value("jitsi/tileView", false).toBool();
 
+    // Codecs GOnnect can decode
+    const QString nativeVideoConfig = m_isNativeVideoEnabled ? QStringLiteral(R"(
+        "videoQuality.codecPreferenceOrder": ["AV1", "VP9", "VP8"],
+        "videoQuality.disabledCodec": "H264",
+        "p2p.codecPreferenceOrder": ["AV1", "VP9", "VP8"],)")
+                                                             : QString();
+
     return QString(R"""(
 const options = {
     roomName: '%5',
@@ -285,6 +300,7 @@ const options = {
         "screenShareSettings.desktopSystemAudio": "exclude",
         "tileView.disabled": false,
         toolbarButtons: [],
+        %9
     },
     interfaceConfigOverwrite: {
         APP_NAME: "GOnnect",
@@ -539,7 +555,42 @@ api.addListener("transcriptionChunkReceived", data => {
                  defaultName // %6
                  )
             .arg(!m_startWithVideo) // %7
-            .arg(persistedTileView); // %8
+            .arg(persistedTileView) // %8
+            .arg(nativeVideoConfig); // %9
+}
+
+QString JitsiConnector::remoteVideoScriptInternal()
+{
+    if (!m_isNativeVideoEnabled) {
+        return {};
+    }
+
+    // Runs until shutdown -> endpoint and token stay valid for later conferences
+    if (!m_videoBridge) {
+        m_videoBridge =
+                new JitsiVideoBridge(m_videoModel, QUrl(GlobalInfo::instance().jitsiUrl()), this);
+    }
+
+    if (!m_videoBridge->isRunning()) {
+        const auto started = m_videoBridge->start();
+        if (!started) {
+            qCCritical(lcJitsiConnector) << "Cannot start remote video bridge:" << started.error();
+            return {};
+        }
+    }
+
+    QFile script(QStringLiteral(":/webengine/gonnectRemoteVideo.js"));
+    if (!script.open(QIODevice::ReadOnly)) {
+        qCCritical(lcJitsiConnector) << "Cannot read remove video script:" << script.errorString();
+        return {};
+    }
+
+    const QJsonObject config{ { "endpoint", m_videoBridge->endpoint().toString() },
+                              { "token", m_videoBridge->token() } };
+
+    return QString::fromUtf8(script.readAll())
+            .replace(QStringLiteral("__GONNECT_REMOTE_VIDEO_CONFIG__"),
+                     QString::fromUtf8(QJsonDocument(config).toJson(QJsonDocument::Compact)));
 }
 
 void JitsiConnector::toggleMute()

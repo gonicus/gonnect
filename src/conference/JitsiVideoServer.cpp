@@ -16,8 +16,6 @@ Q_LOGGING_CATEGORY(lcJitsiVideoServer, "gonnect.conference.video.server")
 using namespace Qt::Literals::StringLiterals;
 
 namespace {
-// Max arriving frames before the codec arrives on track
-constexpr qsizetype MaxPendingFrames = 60;
 
 // Max frames waiting for decoder
 constexpr int MaxQueuedFrames = 4;
@@ -234,21 +232,16 @@ void JitsiVideoServer::receiveCodecs(Track &track, const QString &message)
     qCInfo(lcJitsiVideoServer) << "Received" << track.codecs.size() << "decodable codecs for"
                                << track.id;
 
-    const QList<QByteArray> pendingFrames = std::exchange(track.pendingFrames, {});
-    for (const QByteArray &frame : pendingFrames) {
-        receiveFrame(track, frame);
+    // Frames before were dropped
+    if (track.gate.isWaitingForKeyFrame() && m_outputs.contains(track.id)) {
+        requestKeyFrame(track);
     }
 }
 
 void JitsiVideoServer::receiveFrame(Track &track, const QByteArray &message)
 {
     if (track.codecs.isEmpty()) {
-        if (track.pendingFrames.size() >= MaxPendingFrames) {
-            qCWarning(lcJitsiVideoServer)
-                    << "No codecs for" << track.id << "- dropping pending frames";
-            track.pendingFrames.clear();
-        }
-        track.pendingFrames.append(message);
+        // Key frame requested once codecs received
         return;
     }
 

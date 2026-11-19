@@ -11,6 +11,7 @@
 #include "MuteSyncGuard.h"
 
 class CallHistoryItem;
+class JitsiVideoBridge;
 class SIPAudioDevice;
 class Notification;
 
@@ -19,9 +20,16 @@ class JitsiConnector : public IConferenceConnector
     Q_OBJECT
     QML_ELEMENT
 
+    Q_PROPERTY(bool isNativeVideoEnabled READ isNativeVideoEnabled CONSTANT FINAL)
+
 public:
     explicit JitsiConnector(QObject *parent = nullptr);
     ~JitsiConnector();
+
+    /// Remove video is decoded by GOnnect instead of Chromium
+    /// Changes require a restart
+    static bool readIsNativeVideoEnabled();
+    bool isNativeVideoEnabled() const { return m_isNativeVideoEnabled; };
 
     QString ownDisplayName() override;
 
@@ -38,6 +46,9 @@ public:
 
     Q_INVOKABLE QString jitsiHtmlInternal();
     Q_INVOKABLE QString jitsiJavascriptInternal();
+
+    /// Empty if native video is disabled
+    Q_INVOKABLE QString remoteVideoScriptInternal();
 
     // Should be called by the JS code once when all initialization is done
     Q_INVOKABLE void apiLoadingFinishedInternal();
@@ -203,6 +214,8 @@ private:
     QString m_displayName;
     QList<ConferenceUser *> m_users;
     ConferenceVideoModel *m_videoModel = nullptr;
+    JitsiVideoBridge *m_videoBridge = nullptr;
+    const bool m_isNativeVideoEnabled = readIsNativeVideoEnabled();
     QPointer<CallHistoryItem> m_callHistoryItem;
     QDateTime m_establishedDateTime;
     QList<Notification *> m_chatNotifications;

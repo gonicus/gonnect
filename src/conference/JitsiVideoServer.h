@@ -46,7 +46,6 @@ private:
         QString id;
         QWebSocket *socket = nullptr;
         JitsiVideoProtocol::CodecMap codecs;
-        QList<QByteArray> pendingFrames;
         KeyFrameGate gate;
         std::unique_ptr<QThread> decoderThread;
 
