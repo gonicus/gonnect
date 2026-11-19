@@ -77,6 +77,7 @@ public:
         VideoQualityAdjustable,
         Whiteboard,
         Transcription,
+        VirtualBackground,
     };
     Q_ENUM(Capability)
 

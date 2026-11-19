@@ -24,6 +24,7 @@
     }
 
     const worker = createWorker()
+    hideJitsiVideos()
     tapPeerConnections()
     raiseReceiverConstraints()
     connectControlWhenStoreAvailable()
@@ -33,12 +34,22 @@
         return `${config.endpoint}/${path}?${query}`
     }
 
+    // Prevent browser from painting videos
+    function hideJitsiVideos() {
+        document.addEventListener('DOMContentLoaded', () => {
+            const style = document.createElement('style')
+            style.textContent = 'video { visibility: hidden !important; }'
+            document.head.appendChild(style)
+        })
+    }
+
     function createWorker() {
         const settings = {
             protocolVersion: 2,
             headerSize: 12,
             keyFrameFlag: 0x01,
-            maxBufferedBytes: 1024 * 1024
+            maxBufferedBytes: 1024 * 1024,
+            maxTrackedFrameIds: 512
         }
 
         const source = `(${runWorker.toString()})(${JSON.stringify(settings)})`
@@ -73,6 +84,15 @@
             const track = { socket, transformer, isWaitingForKeyFrame: false }
             tracks.set(trackId, track)
 
+            const isForChromium = createBaseLayerFilter()
+            let hasReportedError = false
+            const report = error => {
+                if (!hasReportedError) {
+                    hasReportedError = true
+                    console.error('GOnnect remote video: frame handling failed', trackId, error.message)
+                }
+            }
+
             socket.onopen = () => sendCodecs(trackId, track)
             socket.onmessage = message => {
                 if (typeof message.data === 'string'
@@ -84,8 +104,23 @@
             transformer.readable
                 .pipeThrough(new TransformStream({
                     transform(frame, controller) {
-                        send(track, frame)
-                        controller.enqueue(frame)
+                        // Exception ends pipe and video for Chromium
+                        try {
+                            send(track, frame)
+                        } catch (error) {
+                            report(error)
+                        }
+
+                        let isForwarded = true
+                        try {
+                            isForwarded = isForChromium(frame)
+                        } catch (error) {
+                            report(error)
+                        }
+
+                        if (isForwarded) {
+                            controller.enqueue(frame)
+                        }
                     }
                 }))
                 .pipeTo(transformer.writable)
@@ -97,6 +132,35 @@
                         codecsByTrack.delete(trackId)
                     }
                 })
+        }
+
+        // Chromium only gets temporal base layer (Jitsi's video is hidden)
+        function createBaseLayerFilter() {
+            const forwardedFrameIds = new Set()
+
+            return frame => {
+                const { frameId, temporalIndex, dependencies } = frame.getMetadata()
+
+                // All frames needed w/o depencendy descriptor
+                if (frameId === undefined || temporalIndex === undefined) {
+                    return true
+                }
+
+                if (frame.type === 'key') {
+                    forwardedFrameIds.clear()
+                } else if (temporalIndex > 0) {
+                    return false
+                }
+
+                const isDecodable = (dependencies ?? []).every(id => forwardedFrameIds.has(id))
+                if (isDecodable) {
+                    forwardedFrameIds.add(frameId)
+                    if (forwardedFrameIds.size > settings.maxTrackedFrameIds) {
+                        forwardedFrameIds.delete(forwardedFrameIds.values().next().value)
+                    }
+                }
+                return isDecodable
+            }
         }
 
         function send(track, frame) {

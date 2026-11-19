@@ -90,7 +90,7 @@ void SIPManager::initialize()
     if (epConfig.logConfig.level >= 4) {
         QLoggingCategory::setFilterRules(QStringLiteral("gonnect.*=true\n"
                                                         "*.warning=true\n"
-                                                        "*.critical=true"));
+                                                        "*.critical=true\n"));
     } else if (epConfig.logConfig.level >= 2) {
         QLoggingCategory::setFilterRules(QStringLiteral("gonnect.info=true\n"
                                                         "*.warning=true\n"

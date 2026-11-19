@@ -262,7 +262,8 @@ QString JitsiConnector::jitsiJavascriptInternal()
     const QString nativeVideoConfig = m_isNativeVideoEnabled ? QStringLiteral(R"(
         "videoQuality.codecPreferenceOrder": ["AV1", "VP9", "VP8"],
         "videoQuality.disabledCodec": "H264",
-        "p2p.codecPreferenceOrder": ["AV1", "VP9", "VP8"],)")
+        "p2p.codecPreferenceOrder": ["AV1", "VP9", "VP8"],
+        "whiteboard.enabled": false,)")
                                                              : QString();
 
     return QString(R"""(
@@ -1347,14 +1348,25 @@ QUrl JitsiConnector::baseUrl() const
 bool JitsiConnector::hasCapability(const Capability capabilityToCheck) const
 {
     const static QSet<Capability> m_capabilites = {
-        Capability::AudioMute,    Capability::ChatInCall,   Capability::Holdable,
-        Capability::RaiseHand,    Capability::ScreenShare,  Capability::Sharable,
-        Capability::Subtitles,    Capability::MuteAll,      Capability::NoiseSuppression,
-        Capability::UserRoles,    Capability::UserKickable, Capability::RoomPassword,
-        Capability::ShareUrl,     Capability::Textpad,      Capability::TileView,
-        Capability::Whiteboard,   Capability::VideoMute,    Capability::VideoQualityAdjustable,
-        Capability::Transcription
+        Capability::AudioMute,     Capability::ChatInCall,       Capability::Holdable,
+        Capability::RaiseHand,     Capability::ScreenShare,      Capability::Sharable,
+        Capability::Subtitles,     Capability::MuteAll,          Capability::NoiseSuppression,
+        Capability::UserRoles,     Capability::UserKickable,     Capability::RoomPassword,
+        Capability::ShareUrl,      Capability::Textpad,          Capability::TileView,
+        Capability::Whiteboard,    Capability::VideoMute,        Capability::VideoQualityAdjustable,
+        Capability::Transcription, Capability::VirtualBackground
     };
+
+    // Only in Jitsi web ui thus hidden with native video
+    const static QSet<Capability> webUiCapabilities = {
+        Capability::Subtitles,     Capability::Textpad,           Capability::TileView,
+        Capability::Transcription, Capability::VirtualBackground, Capability::Whiteboard
+    };
+
+    if (m_isNativeVideoEnabled && webUiCapabilities.contains(capabilityToCheck)) {
+        return false;
+    }
+
     return m_capabilites.contains(capabilityToCheck);
 }
 
@@ -1546,6 +1558,9 @@ void JitsiConnector::resetConferenceState()
     m_transcriptionMessageLookup.clear();
     m_chatRoom->clear();
 
+    // Leave first so following toggles do not see running conference
+    setIsInConference(false);
+
     // Reset per-conference toggle state so it doesn't leak into the next conference
     setIsSharingScreenInternal(false);
     setVideoMutedInternal(false);
@@ -1556,7 +1571,6 @@ void JitsiConnector::resetConferenceState()
 
     setConferenceName("");
     setDisplayName("");
-    setIsInConference(false);
     Q_EMIT GlobalCallState::instance().callEnded(true);
     GlobalCallState::instance().unholdOtherCall();
 }

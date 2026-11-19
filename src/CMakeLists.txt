@@ -530,6 +530,7 @@ qt_add_qml_module(gonnect
         ui/components/ChatSideBar.qml
         ui/components/ConferenceButtonBar.qml
         ui/components/ConferenceVideoTile.qml
+        ui/components/ConferenceVideoView.qml
         ui/components/CustomWindowHeader.qml
         ui/components/ActivitiesList.qml
         ui/components/DateEventsList.qml
@@ -537,12 +538,13 @@ qt_add_qml_module(gonnect
         ui/components/HistoryList.qml
         ui/components/IndicatorIcon.qml
         ui/components/MainTabBar.qml
+        ui/components/OwnVideoTile.qml
         ui/components/PresenceStatusIndicator.qml
-        ui/components/UsersList.qml
         ui/components/RoomAvatar.qml
         ui/components/RTTDisplay.qml
         ui/components/SettingsPage.qml
         ui/components/TogglerList.qml
+        ui/components/UsersList.qml
         ui/components/VerticalLevelMeter.qml
         ui/components/WindowHeader.qml
         # Dynamic UI

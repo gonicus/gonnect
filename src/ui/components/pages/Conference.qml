@@ -390,26 +390,11 @@ Item {
                     onFinishForAll: () => confConn.terminateConference()
                 }
 
-                Flow {
-                    id: nativeVideoStrip
-                    visible: confConn.isNativeVideoEnabled && nativeVideoRepeater.count > 0
-                    height: nativeVideoStrip.visible ? nativeVideoStrip.implicitHeight : 0
-                    spacing: Theme.d
-                    anchors {
-                        top: topBar.bottom
-                        left: nativeVideoStrip.parent.left
-                        right: nativeVideoStrip.parent.right
-                    }
-
-                    Repeater {
-                        id: nativeVideoRepeater
-                        model: confConn.videoModel
-                        delegate: ConferenceVideoTile {}
-                    }
-                }
-
                 WebEngineView {
                     id: jitsiView
+                    // Web view must be kept for native video, but invisible
+                    opacity: confConn.isNativeVideoEnabled ? 0 : 1
+                    enabled: !confConn.isNativeVideoEnabled
                     settings {
                         localStorageEnabled: true
                         screenCaptureEnabled: true
@@ -419,7 +404,7 @@ Item {
                         registeredObjects: [ confConn ]
                     }
                     anchors {
-                        top: nativeVideoStrip.bottom
+                        top: topBar.bottom
                         bottom: parent.bottom
                         left: parent.left
                         right: parent.right
@@ -525,6 +510,25 @@ Item {
                                 ViewHelper.topDrawer.loader.sourceComponent = undefined
                             }
                         }
+                    }
+                }
+
+                Loader {
+                    id: nativeVideoLoader
+                    active: confConn.isNativeVideoEnabled
+                    anchors {
+                        top: topBar.bottom
+                        bottom: parent.bottom
+                        left: parent.left
+                        right: parent.right
+                        margins: Theme.d
+                    }
+
+                    sourceComponent: ConferenceVideoView {
+                        videoModel: confConn.videoModel
+                        isOwnVideoActive: confConn.isInConference
+                                          && confConn.isVideoAvailable
+                                          && !confConn.isVideoMuted
                     }
                 }
 
