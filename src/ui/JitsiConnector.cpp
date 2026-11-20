@@ -1381,8 +1381,7 @@ QUrl JitsiConnector::baseUrl() const
 
 bool JitsiConnector::hasCapability(const Capability capabilityToCheck) const
 {
-    // Only in Jitsi web ui thus hidden with native video
-    const static QSet<Capability> webUiCapabilities = {
+    const static QSet<Capability> capabilties = {
         Capability::AudioMute,
         Capability::ChatInCall,
         Capability::Holdable,
@@ -1406,11 +1405,17 @@ bool JitsiConnector::hasCapability(const Capability capabilityToCheck) const
         Capability::Whiteboard,
     };
 
+    // Only in Jitsi web ui thus hidden with native video
+    const static QSet<Capability> webUiCapabilities = {
+        Capability::Subtitles,     Capability::Textpad,           Capability::TileView,
+        Capability::Transcription, Capability::VirtualBackground, Capability::Whiteboard,
+    };
+
     if (m_isNativeVideoEnabled && webUiCapabilities.contains(capabilityToCheck)) {
         return false;
     }
 
-    return webUiCapabilities.contains(capabilityToCheck);
+    return capabilties.contains(capabilityToCheck);
 }
 
 void JitsiConnector::toggleWhiteboard()
