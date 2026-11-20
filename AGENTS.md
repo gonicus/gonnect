@@ -124,6 +124,11 @@ cmake --preset conan-relwithdebinfo .
 cmake --build --preset conan-relwithdebinfo
 ```
 
+Performance measurements (e.g. CPU load of camera or video decoding) must use the RelWithDebInfo
+build. For Debug builds, Conan builds FFmpeg with --disable-optimizations --disable-mmx, which
+turns off all SIMD code and makes decoding several times slower.
+
+
 ## Packaging and platforms
 
 GOnnect is served as a Flatpak for Linux and as MSIX for Microsoft Windows. Platform related code lives in `src/platform`. Flatpak
