@@ -1,7 +1,6 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QtMultimedia
 import base
 
 Rectangle {
@@ -14,7 +13,6 @@ Rectangle {
     implicitWidth: Math.round(control.implicitHeight * 16 / 9)
     radius: Theme.d
     color: Theme.backgroundSecondaryColor
-    clip: true
 
     ConferenceVideoOutput {
         source: control.source
@@ -22,10 +20,11 @@ Rectangle {
         displayedHeight: control.isMuted ? 0 : Math.round(videoOutput.height * Screen.devicePixelRatio)
     }
 
-    VideoOutput {
+    RoundedVideoOutput {
         id: videoOutput
+        backgroundColor: control.color
         anchors.fill: parent
+        radius: control.radius
         visible: !control.isMuted
-        fillMode: VideoOutput.PreserveAspectFit
     }
 }

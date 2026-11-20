@@ -2,6 +2,7 @@
 #include "PlanarVideoBuffer.h"
 
 #include <QScopeGuard>
+#include <QThread>
 
 extern "C" {
 #include <libavutil/error.h>
@@ -9,10 +10,14 @@ extern "C" {
 #include <libavutil/pixdesc.h>
 }
 
+#include <algorithm>
 #include <array>
 #include <cstring>
 
 namespace {
+
+// Maximum decoder threads per track
+constexpr int MaxDecoderThreads = 4;
 
 const char *decoderName(VideoDecoder::Codec codec)
 {
@@ -80,12 +85,11 @@ std::expected<void, QString> VideoDecoder::open(Codec codec)
         return std::unexpected(QStringLiteral("Out of memory"));
     }
 
-    // Every frame must leave decoder immediately (real-time video)
+    // Every frame must leave decoder immediately (real-time video) -> threads may only work within
+    // a frame (slices, tiles)
     context->flags |= AV_CODEC_FLAG_LOW_DELAY;
-    context->thread_count = 1;
-    if (codec == Codec::AV1) {
-        av_opt_set_int(context->priv_data, "max_frame_delay", 1, 0);
-    }
+    context->thread_type = FF_THREAD_SLICE;
+    context->thread_count = std::min(MaxDecoderThreads, QThread::idealThreadCount());
 
     const int result = avcodec_open2(context.get(), decoder, nullptr);
     if (result < 0) {

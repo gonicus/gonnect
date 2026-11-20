@@ -79,7 +79,7 @@
             const transformer = event.transformer
             const { trackId, url } = transformer.options
             const socket = new WebSocket(url)
-            const track = { socket, transformer, isWaitingForKeyFrame: false }
+            const track = { socket, transformer, isWaitingForKeyFrame: false, hasReceivedFrame: false }
             tracks.set(trackId, track)
 
             const isForChromium = createBaseLayerFilter()
@@ -93,7 +93,8 @@
 
             socket.onopen = () => sendCodecs(trackId, track)
             socket.onmessage = message => {
-                if (typeof message.data === 'string'
+                // Chromium rejects requests before first frame
+                if (typeof message.data === 'string' && track.hasReceivedFrame
                     && JSON.parse(message.data).type === 'keyFrameRequest') {
                     requestKeyFrame(transformer)
                 }
@@ -102,6 +103,8 @@
             transformer.readable
                 .pipeThrough(new TransformStream({
                     transform(frame, controller) {
+                        track.hasReceivedFrame = true
+
                         // Exception ends pipe and video for Chromium
                         try {
                             send(track, frame)
@@ -348,9 +351,25 @@
             const store = window.APP?.store
             if (store) {
                 clearInterval(timer)
+                checkJitsiState(store.getState())
                 connectControl(store)
             }
         }, storePollInterval)
+    }
+
+    // Early warning if Jitsi changes internals this script relies on
+    function checkJitsiState(state) {
+        const requiredKeys = [
+            'features/base/conference',
+            'features/base/lastn',
+            'features/base/tracks',
+            'features/video-quality',
+        ]
+
+        const missingKeys = requiredKeys.filter(key => !(key in state))
+        if (missingKeys.length > 0) {
+            console.log('GOnnect remote video: Jitsi state lacks', missingKeys.join(', '))
+        }
     }
 
     function connectControl(store) {

@@ -272,7 +272,9 @@ void JitsiVideoServer::receiveFrame(Track &track, const QByteArray &message)
     }
 
     if (track.decoder->queuedFrames() > MaxQueuedFrames) {
-        qCDebug(lcJitsiVideoServer) << "Decoder of" << track.id << "is overloaded";
+        if (!track.gate.isWaitingForKeyFrame()) {
+            qCDebug(lcJitsiVideoServer) << "Decoder of" << track.id << "is overloaded";
+        }
         track.gate.requireKeyFrame();
     }
 

@@ -540,6 +540,7 @@ qt_add_qml_module(gonnect
         ui/components/MainTabBar.qml
         ui/components/OwnVideoTile.qml
         ui/components/PresenceStatusIndicator.qml
+        ui/components/RoundedVideoOutput.qml
         ui/components/RoomAvatar.qml
         ui/components/RTTDisplay.qml
         ui/components/SettingsPage.qml
@@ -859,6 +860,8 @@ qt_add_qml_module(gonnect
         media/FramePump.cpp
         media/KeyFrameGate.h
         media/KeyFrameGate.cpp
+        media/LibAvLogging.h
+        media/LibAvLogging.cpp
         media/LibAvPointers.h
         media/PlanarVideoBuffer.h
         media/PlanarVideoBuffer.cpp

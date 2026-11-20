@@ -1,7 +1,6 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QtMultimedia
 import base
 
 Rectangle {
@@ -11,18 +10,18 @@ Rectangle {
 
     radius: Theme.d
     color: Theme.backgroundSecondaryColor
-    clip: true
 
     CameraPreview {
         videoSink: videoOutput.videoSink
         isActive: control.isActive
     }
 
-    VideoOutput {
+    RoundedVideoOutput {
         id: videoOutput
         anchors.fill: parent
+        radius: control.radius
         visible: control.isActive
-        fillMode: VideoOutput.PreserveAspectFit
+        backgroundColor: control.color
 
         // Show like a mirror
         transform: Scale {

@@ -6,6 +6,7 @@
 #include "CameraFrameSchemeHandler.h"
 #include "GlobalInfo.h"
 #include "JitsiConnector.h"
+#include "LibAvLogging.h"
 #include "PersonCoinProvider.h"
 #include "WebEngineKeyEventFilter.h"
 
@@ -63,6 +64,7 @@ int main(int argc, char *argv[])
                        "%{if-critical}\033[31m%{endif}"
                        "%{if-fatal}\033[31m%{backtrace depth=3}%{endif}\033[0m %{message}");
     setup_unix_signal_handlers();
+    LibAvLogging::install();
 
     CameraFrameSchemeHandler::registerScheme();
     QtWebEngineQuick::initialize();
