@@ -112,6 +112,14 @@ Menu {
 
     HideableMenuItem {
         visible: control.iConferenceConnector.ownRole === ConferenceUser.Role.Moderator
+                 && control.iConferenceConnector.hasCapability(IConferenceConnector.Capability.Lobby)
+        text: control.iConferenceConnector.isLobbyEnabled ? qsTr("Disable lobby") : qsTr("Enable lobby")
+        icon.source: control.iConferenceConnector.isLobbyEnabled ? Icons.securityLow : Icons.securityHigh
+        onClicked: () => control.iConferenceConnector.setLobbyEnabled(!control.iConferenceConnector.isLobbyEnabled)
+    }
+
+    HideableMenuItem {
+        visible: control.iConferenceConnector.ownRole === ConferenceUser.Role.Moderator
                  && control.iConferenceConnector.hasCapability(IConferenceConnector.Capability.MuteAll)
         text: qsTr("Mute everyone")
         icon.source: Icons.microphoneSensitivityMuted

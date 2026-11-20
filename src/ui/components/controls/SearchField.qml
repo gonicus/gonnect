@@ -17,6 +17,24 @@ Item {
         searchInputField.forceActiveFocus(Qt.ShortcutFocusReason)
     }
 
+    ContextMenu.menu: TextEditContextMenu {
+        undoEnabled: searchInputField.canUndo
+        redoEnabled: searchInputField.canRedo
+        cutEnabled: searchInputField.selectedText !== ""
+        copyEnabled: searchInputField.selectedText !== ""
+        pasteEnabled: searchInputField.canPaste
+
+        onUndo: () => searchInputField.undo()
+        onRedo: () => searchInputField.redo()
+        onCut: () => searchInputField.cut()
+        onCopy: () => searchInputField.copy()
+        onPaste: () => {
+                     if (ClipboardHelper.hasText()) {
+                         searchInputField.paste()
+                     }
+                 }
+    }
+
     states: [
         State {
             when: searchInputField.text.trim() === ""

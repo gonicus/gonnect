@@ -417,6 +417,10 @@ new QWebChannel(qt.webChannelTransport, function(channel) {
         api.executeCommand("muteEveryone", "audio")
     })
 
+    jitsiConn.executeSetLobbyEnabledCommand.connect(enabled => {
+        api.executeCommand("toggleLobby", enabled)
+    })
+
     jitsiConn.executeSetVideoQualityCommand.connect(value => {
         api.executeCommand("setVideoQuality", value)
     })
@@ -451,6 +455,12 @@ api.addListener("videoConferenceJoined", data => {
     })
 
     jitsiConn.setVideoQualityInternal(api.getVideoQuality())
+
+    if (typeof api.isLobbyEnabled === "function") {
+        api.isLobbyEnabled().then(enabled => {
+            jitsiConn.setIsLobbyEnabledInternal(!!enabled)
+        })
+    }
 })
 
 api.addListener("videoConferenceLeft", () => {
@@ -521,6 +531,10 @@ api.addListener("raiseHandUpdated", data => {
     if (data.id === myUserId) {
         jitsiConn.setIsHandRaisedInternal(!!data.handRaised)
     }
+})
+
+api.addListener("lobbyModeChanged", data => {
+    jitsiConn.setIsLobbyEnabledInternal(!!data.enabled)
 })
 
 api.addListener("transcribingStatusChanged", data => {
@@ -898,6 +912,14 @@ void JitsiConnector::setIsHandRaisedInternal(bool value)
     }
 }
 
+void JitsiConnector::setIsLobbyEnabledInternal(bool value)
+{
+    if (m_isLobbyEnabled != value) {
+        m_isLobbyEnabled = value;
+        Q_EMIT isLobbyEnabledChanged();
+    }
+}
+
 void JitsiConnector::onPasswordRequired()
 {
     // First password request - check for persisted password
@@ -1086,6 +1108,18 @@ void JitsiConnector::muteAll()
         return;
     }
     Q_EMIT executeMuteAllCommand();
+}
+
+void JitsiConnector::setLobbyEnabled(bool enabled)
+{
+    if (ownRole() != ConferenceUser::Role::Moderator) {
+        qCWarning(lcJitsiConnector) << "Only moderators can change lobby mode";
+        return;
+    }
+
+    if (m_isLobbyEnabled != enabled) {
+        Q_EMIT executeSetLobbyEnabledCommand(enabled);
+    }
 }
 
 void JitsiConnector::setJitsiDevices(const QVariantMap availableDevices)
@@ -1347,20 +1381,17 @@ QUrl JitsiConnector::baseUrl() const
 
 bool JitsiConnector::hasCapability(const Capability capabilityToCheck) const
 {
-    const static QSet<Capability> m_capabilites = {
-        Capability::AudioMute,     Capability::ChatInCall,       Capability::Holdable,
-        Capability::RaiseHand,     Capability::ScreenShare,      Capability::Sharable,
-        Capability::Subtitles,     Capability::MuteAll,          Capability::NoiseSuppression,
-        Capability::UserRoles,     Capability::UserKickable,     Capability::RoomPassword,
-        Capability::ShareUrl,      Capability::Textpad,          Capability::TileView,
-        Capability::Whiteboard,    Capability::VideoMute,        Capability::VideoQualityAdjustable,
-        Capability::Transcription, Capability::VirtualBackground
-    };
-
     // Only in Jitsi web ui thus hidden with native video
     const static QSet<Capability> webUiCapabilities = {
         Capability::Subtitles,     Capability::Textpad,           Capability::TileView,
         Capability::Transcription, Capability::VirtualBackground, Capability::Whiteboard
+        Capability::AudioMute,     Capability::ChatInCall,   Capability::Holdable,
+        Capability::RaiseHand,     Capability::ScreenShare,  Capability::Sharable,
+        Capability::Subtitles,     Capability::MuteAll,      Capability::NoiseSuppression,
+        Capability::UserRoles,     Capability::UserKickable, Capability::RoomPassword,
+        Capability::ShareUrl,      Capability::Textpad,      Capability::TileView,
+        Capability::Whiteboard,    Capability::VideoMute,    Capability::VideoQualityAdjustable,
+        Capability::Transcription, Capability::Lobby,        Capability::VirtualBackground
     };
 
     if (m_isNativeVideoEnabled && webUiCapabilities.contains(capabilityToCheck)) {
@@ -1564,6 +1595,7 @@ void JitsiConnector::resetConferenceState()
     // Reset per-conference toggle state so it doesn't leak into the next conference
     setIsSharingScreenInternal(false);
     setVideoMutedInternal(false);
+    setIsLobbyEnabledInternal(false);
     if (m_isAudioMuted) {
         m_isAudioMuted = false;
         Q_EMIT isAudioMutedChanged();

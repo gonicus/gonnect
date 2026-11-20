@@ -91,6 +91,16 @@ Item {
                     z: 1
 
                     Accessible.role: Accessible.TreeItem
+
+                    ContextMenu.menu: TextEditContextMenu {
+                        undoEnabled: false
+                        redoEnabled: false
+                        cutEnabled: false
+                        copyEnabled: treeItem.selectedText !== ""
+                        pasteEnabled: false
+
+                        onCopy: () => treeItem.copy()
+                    }
                 }
 
                 indentation: 10

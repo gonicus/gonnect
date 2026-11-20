@@ -203,6 +203,14 @@ Item {
                 popup.visibleChanged.disconnect(internal.onEmojiPopupCleanup)
             }
         }
+
+        function pasteFromClipboard() {
+            if (ClipboardHelper.hasImage()) {
+                control.imageFromClipboardReceived()
+            } else if (ClipboardHelper.hasText()) {
+                messageField.paste()
+            }
+        }
     }
 
     // SpellCheckHighlighter {
@@ -336,6 +344,20 @@ Item {
             onCursorRectangleChanged: internal.ensureCursorVisible()
 
             property int lastCursorPosition: 0
+
+            ContextMenu.menu: TextEditContextMenu {
+                undoEnabled: messageField.canUndo
+                redoEnabled: messageField.canRedo
+                cutEnabled: messageField.selectedText !== ""
+                copyEnabled: messageField.selectedText !== ""
+                pasteEnabled: ClipboardHelper.hasImage() || messageField.canPaste
+
+                onUndo: () => messageField.undo()
+                onRedo: () => messageField.redo()
+                onCut: () => messageField.cut()
+                onCopy: () => messageField.copy()
+                onPaste: () => internal.pasteFromClipboard()
+            }
 
             onTextEdited: () => {
                               internal.sendIsTyping()
@@ -474,14 +496,8 @@ Item {
 
                                 } else if (keyEvent.key === Qt.Key_V && (keyEvent.modifiers & Qt.ControlModifier)) {
                                     // Clipboard paste
-
                                     keyEvent.accepted = true
-                                    if (ClipboardHelper.hasImage()) {
-                                        control.imageFromClipboardReceived()
-                                    } else if (ClipboardHelper.hasText()) {
-                                        keyEvent.accepted = true
-                                        messageField.paste()
-                                    }
+                                    internal.pasteFromClipboard()
                                 }
                             }
 
