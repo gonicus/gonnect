@@ -19,7 +19,7 @@ Rectangle {
     ConferenceVideoOutput {
         source: control.source
         videoSink: videoOutput.videoSink
-        displayedHeight: control.isMuted ? 0 : Math.round(videoOutput.height)
+        displayedHeight: control.isMuted ? 0 : Math.round(videoOutput.height * Screen.devicePixelRatio)
     }
 
     VideoOutput {

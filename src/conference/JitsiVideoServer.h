@@ -37,6 +37,9 @@ public:
     /// Frames of track are decoded into output. W/o output they are dropped.
     void setTrackOutput(const QString &trackId, std::shared_ptr<FramePump> output);
 
+    /// Sent to current and later control connection
+    void setReceiverConstraints(const QString &message);
+
 Q_SIGNALS:
     void tracksReceived(const QList<JitsiVideoProtocol::RemoteTrack> &tracks);
 
@@ -68,6 +71,7 @@ private:
     QString m_token;
     QWebSocketServer *m_server = nullptr;
     QPointer<QWebSocket> m_controlSocket;
+    QString m_receiverConstraints;
     std::map<QString, std::unique_ptr<Track>> m_tracks;
     QHash<QString, std::shared_ptr<FramePump>> m_outputs;
 };

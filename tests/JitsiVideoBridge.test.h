@@ -20,6 +20,7 @@ private slots:
     void rejectsForeignOrigin();
     void decodesTrackIntoSource();
     void requestsKeyFrameForInterFrame();
+    void sendsReceiverConstraints();
 
 private:
     std::unique_ptr<ConferenceVideoModel> m_model;

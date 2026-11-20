@@ -8,7 +8,6 @@
     const config = __GONNECT_REMOTE_VIDEO_CONFIG__
 
     const storePollInterval = 500
-    const minReceiverHeight = 720
 
     // Last codecs send to worker per tapped receiver
     const announcedCodecs = new WeakMap()
@@ -26,7 +25,6 @@
     const worker = createWorker()
     hideJitsiVideos()
     tapPeerConnections()
-    raiseReceiverConstraints()
     connectControlWhenStoreAvailable()
 
     function connectionUrl(path, parameters = {}) {
@@ -280,55 +278,68 @@
         }
     }
 
-    // Jitsi requests video in size of own tiles; zero height -> unsubscribe
-    function raiseReceiverConstraints() {
-        const raise = constraint => {
-            if (!(constraint?.maxHeight > 0)) {
-                return constraint
-            }
-            return { ...constraint, maxHeight: Math.max(constraint.maxHeight, minReceiverHeight) }
-        }
+    // GOnnect receiver constraints replace those of Jitsi
+    function createReceiverConstraints(store) {
+        let requested = null
+        let conference = null
+        let setJitsiConstraints = null
 
-        const rewrite = data => {
-            if (typeof data !== 'string' || !data.includes('ReceiverVideoConstraints')) {
-                return data
+        const apply = () => {
+            if (!requested || !setJitsiConstraints) {
+                return
             }
 
-            let message
+            const state = store.getState()
+            const lastN = state['features/base/lastn']?.lastN
+
+            // Video quality
+            const preferredHeight = state['features/video-quality']?.preferredVideoQuality
+            const limit = height => (preferredHeight > 0 ? Math.min(height, preferredHeight) : height)
+            const constraints = Object.fromEntries(Object.entries(requested.constraints)
+                .map(([sourceName, { maxHeight }]) => [sourceName, { maxHeight: limit(maxHeight) }]))
+
             try {
-                message = JSON.parse(data)
-            } catch {
-                return data
-            }
-            if (message.colibriClass !== 'ReceiverVideoConstraints') {
-                return data
-            }
-
-            message.defaultConstraints = raise(message.defaultConstraints)
-            for (const [ sourceName, constraint ] of Object.entries(message.constraints ?? {})) {
-                message.constraints[sourceName] = raise(constraint)
-            }
-            return JSON.stringify(message)
-        }
-
-        // Keep Jitsi working if rewriting fails
-        const rewriteSafely = data => {
-            try {
-                return rewrite(data)
+                setJitsiConstraints({
+                    ...(lastN !== undefined && { lastN }),
+                    defaultConstraints: { maxHeight: 0 },
+                    constraints,
+                    onStageSources: requested.onStageSources,
+                    selectedSources: []
+                })
             } catch (error) {
-                console.error('GOnnect remote video: cannot rewrite receiver constraints', error.message)
-                return data
+                console.error('GOnnect remote video. cannot set receiver constraints', error.message)
             }
         }
 
-        const webSocketSend = WebSocket.prototype.send
-        WebSocket.prototype.send = function (data) {
-            return webSocketSend.call(this, rewriteSafely(data))
+        // Called by Jitsi on every change of layout, lastN oder video quality
+        const takeOver = candidate => {
+            if (!candidate || candidate === conference) {
+                return
+            }
+            conference = candidate
+
+            if (typeof candidate.setReceiverConstraints !== 'function') {
+                console.error('GOnnect remote video: conference without receiver constraints')
+                return
+            }
+
+            setJitsiConstraints = candidate.setReceiverConstraints.bind(candidate)
+            candidate.setReceiverConstraints = jitsiContraints => {
+                if (requested) {
+                    apply()
+                } else {
+                    setJitsiConstraints(jitsiContraints)
+                }
+            }
+            apply()
         }
 
-        const dataChannelSend = RTCDataChannel.prototype.send
-        RTCDataChannel.prototype.send = function (data) {
-            return dataChannelSend.call(this, rewriteSafely(data))
+        return {
+            follow: () => takeOver(store.getState()['features/base/conference']?.conference),
+            receive: message => {
+                requested = message
+                apply()
+            }
         }
     }
 
@@ -344,6 +355,7 @@
 
     function connectControl(store) {
         const socket = new WebSocket(connectionUrl('control'))
+        const receiverConstraints = createReceiverConstraints(store)
         let sentSnapshot = ''
 
         const sendSnapshot = () => {
@@ -362,8 +374,20 @@
         }
 
         socket.onopen = sendSnapshot
+        socket.onmessage = message => {
+            try {
+                const data = JSON.parse(message.data)
+                if (data.type === 'receiverConstraints') {
+                    receiverConstraints.receive(data)
+                }
+            } catch (error) {
+                console.error('GOnnect remote video: invalid control message', error.message)
+            }
+        }
         socket.onclose = () => console.warn('GOnnect remote video: control connection closed')
         store.subscribe(sendSnapshot)
+        store.subscribe(receiverConstraints.follow)
+        receiverConstraints.follow()
     }
 
     function remoteVideoTracks(state) {

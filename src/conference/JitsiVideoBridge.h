@@ -8,6 +8,7 @@
 #include <QPointer>
 #include <QString>
 #include <QThread>
+#include <QTimer>
 #include <QUrl>
 
 #include <expected>
@@ -39,6 +40,10 @@ public:
     /// Required as "token" query item of each connection
     QString token() const { return m_token; }
 
+private Q_SLOTS:
+    void scheduleReceiverConstraints();
+    void sendReceiverConstraints();
+
 private:
     void applyTracks(const QList<JitsiVideoProtocol::RemoteTrack> &tracks);
     void setTrackOutput(const QString &trackId, std::shared_ptr<FramePump> output);
@@ -53,4 +58,7 @@ private:
     QUrl m_endpoint;
     QString m_token;
     QHash<QString, QString> m_sourceNameOfTrack;
+
+    QTimer m_constraintsTimer;
+    QString m_sentConstraints;
 };

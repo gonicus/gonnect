@@ -2,6 +2,8 @@
 #include "IvfReader.h"
 #include "JitsiVideoProtocol.h"
 
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QSignalSpy>
 #include <QTest>
 #include <QVideoFrame>
@@ -140,6 +142,33 @@ void JitsiVideoBridgeTest::requestsKeyFrameForInterFrame()
 
     QTRY_VERIFY(!requests.isEmpty());
     QCOMPARE(requests.first().first().toString(), JitsiVideoProtocol::keyFrameRequestMessage());
+}
+
+void JitsiVideoBridgeTest::sendsReceiverConstraints()
+{
+    QWebSocket control(JitsiOrigin.toString());
+    QSignalSpy messages(&control, &QWebSocket::textMessageReceived);
+    QVERIFY(openAndWait(control, controlUrl(*m_bridge)));
+    control.sendTextMessage(TracksMessage);
+    QTRY_COMPARE(m_model->rowCount(), 1);
+
+    m_model->source(SourceName)->setRequestedHeight(500);
+
+    // Constraints of the tile before may arrive first
+    const auto lastMaxHeight = [&messages]() {
+        if (messages.isEmpty()) {
+            return -1;
+        }
+        const QJsonObject message =
+                QJsonDocument::fromJson(messages.last().first().toString().toUtf8()).object();
+        return message.value("constraints"_L1)
+                .toObject()
+                .value(SourceName)
+                .toObject()
+                .value("maxHeight"_L1)
+                .toInt(-1);
+    };
+    QTRY_COMPARE(lastMaxHeight(), 360);
 }
 
 QTEST_GUILESS_MAIN(JitsiVideoBridgeTest)

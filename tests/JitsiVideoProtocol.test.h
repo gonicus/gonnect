@@ -14,4 +14,7 @@ private slots:
     void rejectsMessageOfOtherType();
     void parsesTracks();
     void createsKeyFrameRequest();
+    void mapsQualityHeight_data();
+    void mapsQualityHeight();
+    void createsReceiverConstraints();
 };

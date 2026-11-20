@@ -5,12 +5,16 @@
 #include <QJsonObject>
 #include <QtEndian>
 
+#include <array>
 #include <optional>
 
 using namespace Qt::Literals::StringLiterals;
 
 namespace {
 constexpr uint MaxPayloadType = 127;
+
+// Layer heights of Jitsi simulcast and SVC encodings
+constexpr std::array QualityHeights = { 180, 360, 720, 1080 };
 
 std::expected<QJsonObject, QString> parseMessage(const QString &message,
                                                  QLatin1StringView expectedType)
@@ -131,4 +135,40 @@ JitsiVideoProtocol::parseTracks(const QString &message)
 QString JitsiVideoProtocol::keyFrameRequestMessage()
 {
     return QStringLiteral(R"({"type":"keyFrameRequest"})");
+}
+
+int JitsiVideoProtocol::qualityHeight(int displayedHeight)
+{
+    if (displayedHeight <= 0) {
+        return 0;
+    }
+
+    int height = QualityHeights.front();
+    for (const int level : QualityHeights) {
+        if (level <= displayedHeight) {
+            height = level;
+        }
+    }
+    return height;
+}
+
+QString JitsiVideoProtocol::receiverConstraintsMessage(const QList<ReceiverConstraint> &constraints)
+{
+    QJsonObject heights;
+    QJsonArray onStageSources;
+
+    for (const auto &constraint : constraints) {
+        heights.insert(constraint.sourceName,
+                       QJsonObject{ { "maxHeight"_L1, constraint.maxHeight } });
+
+        if (constraint.isOnStage) {
+            onStageSources.append(constraint.sourceName);
+        }
+    }
+
+    const QJsonObject message{ { "type"_L1, "receiverConstraints"_L1 },
+                               { "constraints"_L1, heights },
+                               { "onStageSources"_L1, onStageSources } };
+
+    return QString::fromUtf8(QJsonDocument(message).toJson(QJsonDocument::Compact));
 }

@@ -1,6 +1,7 @@
 #include "JitsiVideoProtocol.test.h"
 #include "JitsiVideoProtocol.h"
 
+#include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QTest>
@@ -122,6 +123,46 @@ void JitsiVideoProtocolTest::createsKeyFrameRequest()
             QJsonDocument::fromJson(JitsiVideoProtocol::keyFrameRequestMessage().toUtf8()).object();
 
     QCOMPARE(message.value("type"_L1).toString(), u"keyFrameRequest"_s);
+}
+
+void JitsiVideoProtocolTest::mapsQualityHeight_data()
+{
+    QTest::addColumn<int>("displayedHeight");
+    QTest::addColumn<int>("expectedHeight");
+
+    QTest::newRow("hidden") << 0 << 0;
+    QTest::newRow("tiny") << 50 << 180;
+    QTest::newRow("below standard") << 359 << 180;
+    QTest::newRow("standard") << 360 << 360;
+    QTest::newRow("below high") << 719 << 360;
+    QTest::newRow("high") << 720 << 720;
+    QTest::newRow("beyond full hd") << 1500 << 1080;
+}
+
+void JitsiVideoProtocolTest::mapsQualityHeight()
+{
+    QFETCH(int, displayedHeight);
+    QFETCH(int, expectedHeight);
+
+    QCOMPARE(JitsiVideoProtocol::qualityHeight(displayedHeight), expectedHeight);
+}
+
+void JitsiVideoProtocolTest::createsReceiverConstraints()
+{
+    const QString message = JitsiVideoProtocol::receiverConstraintsMessage(
+            { { .sourceName = u"fd2257db-v0"_s, .maxHeight = 360 },
+              { .sourceName = u"fd2257db-v1"_s,
+                .maxHeight = JitsiVideoProtocol::MaxReceiverHeight,
+                .isOnStage = true } });
+
+    const QJsonObject object = QJsonDocument::fromJson(message.toUtf8()).object();
+    QCOMPARE(object.value("type"_L1).toString(), u"receiverConstraints"_s);
+
+    const QJsonObject constraints = object.value("constraints"_L1).toObject();
+    QCOMPARE(constraints.value("fd2257db-v0"_L1).toObject().value("maxHeight"_L1).toInt(), 360);
+    QCOMPARE(constraints.value("fd2257db-v1"_L1).toObject().value("maxHeight"_L1).toInt(),
+             JitsiVideoProtocol::MaxReceiverHeight);
+    QCOMPARE(object.value("onStageSources"_L1).toArray(), QJsonArray{ u"fd2257db-v1"_s });
 }
 
 QTEST_GUILESS_MAIN(JitsiVideoProtocolTest)

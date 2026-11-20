@@ -30,6 +30,7 @@ public:
     QVideoSink *videoSink() const { return m_videoSink; }
     void setVideoSink(QVideoSink *sink);
 
+    /// Device pixels; 0 if invisible
     int displayedHeight() const { return m_displayedHeight; }
     void setDisplayedHeight(int height);
 

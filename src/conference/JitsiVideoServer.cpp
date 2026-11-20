@@ -73,6 +73,14 @@ void JitsiVideoServer::setTrackOutput(const QString &trackId, std::shared_ptr<Fr
     }
 }
 
+void JitsiVideoServer::setReceiverConstraints(const QString &message)
+{
+    m_receiverConstraints = message;
+    if (m_controlSocket) {
+        m_controlSocket->sendTextMessage(message);
+    }
+}
+
 void JitsiVideoServer::authenticateOrigin(QWebSocketCorsAuthenticator *authenticator) const
 {
     const bool isAllowed =
@@ -142,6 +150,11 @@ void JitsiVideoServer::acceptControl(QWebSocket *socket)
         // Cannot assign track w/o control connection
         Q_EMIT tracksReceived({});
     });
+
+    // Reloaded frame must not fall back to Jitsi default constraints
+    if (!m_receiverConstraints.isEmpty()) {
+        socket->sendTextMessage(m_receiverConstraints);
+    }
 }
 
 void JitsiVideoServer::acceptTrack(QWebSocket *socket, const QString &trackId)

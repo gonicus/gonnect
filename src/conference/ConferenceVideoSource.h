@@ -37,7 +37,7 @@ public:
     bool isMuted() const { return m_isMuted; }
     void setIsMuted(bool value);
 
-    /// Height of displayed video; 0 if not visible
+    /// Height of displayed video in device pixels; 0 if not visible
     int requestedHeight() const { return m_requestedHeight; }
     void setRequestedHeight(int height);
 
