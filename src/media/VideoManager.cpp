@@ -57,7 +57,7 @@ VideoManager::VideoManager(QObject *parent) : QObject{ parent }
 
     connect(this, &VideoManager::selectedDeviceIdChanged, this, [this]() {
         if (!m_consumers.isEmpty()) {
-            m_cameraSource->start(m_selectedDeviceId);
+            startCamera();
         }
     });
 
@@ -73,12 +73,13 @@ void VideoManager::setCameraSource(std::unique_ptr<CameraSource> source)
             [this]() { m_debounceUpdateTimer.start(); });
     connect(m_cameraSource.get(), &CameraSource::errorOccurred, this, [this](QString message) {
         qCWarning(lcVideoManager) << "Camera error:" << message;
+        setCameraError(message);
         Q_EMIT cameraErrorOccurred(message);
     });
 
     updateFrameHandler();
     if (!m_consumers.isEmpty()) {
-        m_cameraSource->start(m_selectedDeviceId);
+        startCamera();
     }
 }
 
@@ -90,6 +91,26 @@ void VideoManager::updateFrameHandler()
             consumer->push(frame);
         }
     });
+}
+
+void VideoManager::startCamera()
+{
+    setCameraError({});
+    m_cameraSource->start(m_selectedDeviceId);
+}
+
+void VideoManager::stopCamera()
+{
+    m_cameraSource->stop();
+    setCameraError({});
+}
+
+void VideoManager::setCameraError(const QString &message)
+{
+    if (m_cameraError != message) {
+        m_cameraError = message;
+        Q_EMIT cameraErrorChanged();
+    }
 }
 
 void VideoManager::acquireCameras()
@@ -229,7 +250,7 @@ void VideoManager::addConsumer(FramePump *consumer)
     updateFrameHandler();
 
     if (m_consumers.size() == 1) {
-        m_cameraSource->start(m_selectedDeviceId);
+        startCamera();
     }
 }
 
@@ -247,7 +268,7 @@ void VideoManager::removeConsumer(FramePump *consumer)
     updateFrameHandler();
 
     if (m_consumers.isEmpty()) {
-        m_cameraSource->stop();
+        stopCamera();
     }
 }
 

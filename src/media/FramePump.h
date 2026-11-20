@@ -20,6 +20,10 @@ public:
     /// Callable from any thread
     void push(QVideoFrame frame);
 
+    /// Drop pending frames and empty sink
+    /// Must be called from sink's thread
+    void clear();
+
     quint64 droppedFrames() const;
 
 private:

@@ -29,6 +29,18 @@ void FramePump::push(QVideoFrame frame)
     QMetaObject::invokeMethod(this, &FramePump::deliver, Qt::QueuedConnection);
 }
 
+void FramePump::clear()
+{
+    {
+        QMutexLocker locker(&m_mutex);
+        m_pending = QVideoFrame();
+    }
+
+    if (m_sink) {
+        m_sink->setVideoFrame(QVideoFrame());
+    }
+}
+
 quint64 FramePump::droppedFrames() const
 {
     QMutexLocker locker(&m_mutex);

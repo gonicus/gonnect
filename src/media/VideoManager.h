@@ -27,6 +27,7 @@ class VideoManager : public QObject
                        cameraAccessStateChanged FINAL)
     Q_PROPERTY(bool isCameraAccessDenied READ isCameraAccessDenied NOTIFY cameraAccessStateChanged
                        FINAL)
+    Q_PROPERTY(QString cameraError READ cameraError NOTIFY cameraErrorChanged FINAL)
 
 public:
     enum class CameraAccessState {
@@ -51,6 +52,9 @@ public:
     VideoManager::CameraAccessState cameraAccessState() const { return m_cameraAccessState; }
     bool isCameraAccessDenied() const;
 
+    /// Last error of running camera or empty
+    QString cameraError() const { return m_cameraError; }
+
     // Access not denied and ≥ 1 camera existent
     bool isCameraAvailable() const;
 
@@ -70,6 +74,9 @@ private:
     explicit VideoManager(QObject *parent = nullptr);
     void setCameraSource(std::unique_ptr<CameraSource> source);
     void updateFrameHandler();
+    void startCamera();
+    void stopCamera();
+    void setCameraError(const QString &message);
     bool isDeviceAvailable(const QString &deviceId) const;
     VideoDevice deviceById(const QString &deviceId) const;
     void setCameraAccessState(CameraAccessState value);
@@ -89,12 +96,14 @@ private:
     unsigned m_currentProfile = 0;
 
     CameraAccessState m_cameraAccessState = CameraAccessState::Unknown;
+    QString m_cameraError;
 
 Q_SIGNALS:
     void devicesChanged();
     void selectedDeviceIdChanged();
     void cameraAccessStateChanged();
     void cameraErrorOccurred(QString message);
+    void cameraErrorChanged();
 };
 
 class VideoManagerWrapper

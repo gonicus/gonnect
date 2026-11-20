@@ -28,6 +28,7 @@ void CameraPreview::setIsActive(bool value)
             VideoManager::instance().addConsumer(&m_framePump);
         } else {
             VideoManager::instance().removeConsumer(&m_framePump);
+            m_framePump.clear();
         }
 
         Q_EMIT isActiveChanged();

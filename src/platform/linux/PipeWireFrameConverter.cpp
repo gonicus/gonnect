@@ -85,6 +85,11 @@ void PipeWireFrameConverter::reset()
     m_packetData.clear();
 }
 
+bool PipeWireFrameConverter::isMjpegSupported()
+{
+    return avcodec_find_decoder(AV_CODEC_ID_MJPEG) != nullptr;
+}
+
 bool PipeWireFrameConverter::isValid() const
 {
     return m_scaler != nullptr || m_decoder != nullptr;

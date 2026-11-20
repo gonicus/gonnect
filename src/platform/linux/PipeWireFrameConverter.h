@@ -33,6 +33,8 @@ public:
     bool setMjpegFormat();
     void reset();
 
+    static bool isMjpegSupported();
+
     bool isValid() const;
 
     // Missing, corrupted or short buffer -> return nothing

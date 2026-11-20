@@ -10,6 +10,7 @@
 #include <cerrno>
 #include <cstring>
 #include <unistd.h>
+#include <vector>
 
 Q_LOGGING_CATEGORY(lcPipeWireCameraSource, "gonnect.media.camera.pipewire")
 
@@ -357,7 +358,13 @@ void PipeWireCameraSource::createStream(const QString &deviceId)
             SPA_POD_CHOICE_RANGE_Fraction(&defaultRate, &minRate, &maxRate), 0);
     const auto *rawFormat = static_cast<const spa_pod *>(spa_pod_builder_pop(&builder, &frame));
 
-    std::array<const spa_pod *, 2> params = { mjpegFormat, rawFormat };
+    std::vector<const spa_pod *> params;
+    if (PipeWireFrameConverter::isMjpegSupported()) {
+        params.push_back(mjpegFormat);
+    } else {
+        qCWarning(lcPipeWireCameraSource) << "No MJPEG decoder - offering raw formats only";
+    }
+    params.push_back(rawFormat);
 
     // Prevent false positive: the value is not a dedicated member of the enum, but the value is
     // in range and therefore valid.

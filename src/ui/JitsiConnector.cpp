@@ -26,6 +26,7 @@
 #include "PlatformSession.h"
 #include "CertHelper.h"
 #include "JitsiVideoBridge.h"
+#include "VideoDecoder.h"
 
 #include <QJsonObject>
 #include <QLoggingCategory>
@@ -33,6 +34,23 @@
 #include <QNetworkReply>
 #include <QRegularExpression>
 #include <QtConcurrent>
+#include <QJsonArray>
+#include <QJsonDocument>
+
+namespace {
+
+// Codecs GOnnect can decode; in order of preference
+QStringList decodableVideoCodecs()
+{
+    QStringList codecs;
+    for (const auto codec : { VideoCodec::AV1, VideoCodec::VP9, VideoCodec::VP8 }) {
+        if (VideoDecoder::isSupported(codec)) {
+            codecs.append(VideoDecoder::codecName(codec));
+        }
+    }
+    return codecs;
+}
+} // namespace
 
 Q_LOGGING_CATEGORY(lcJitsiConnector, "gonnect.app.JitsiConnector")
 
@@ -102,7 +120,16 @@ JitsiConnector::~JitsiConnector()
 bool JitsiConnector::readIsNativeVideoEnabled()
 {
     ReadOnlyConfdSettings settings;
-    return settings.value("jitsi/isNativeVideoEnabled", false).toBool();
+    if (!settings.value("jitsi/isNativeVideoEnabled", false).toBool()) {
+        return false;
+    }
+
+    // Jitsi can send videos that GOnnect cannot show
+    if (decodableVideoCodecs().isEmpty()) {
+        qCWarning(lcJitsiConnector) << "Native video disabled - no video decoder available";
+        return false;
+    }
+    return true;
 }
 
 QString JitsiConnector::ownDisplayName()
@@ -259,11 +286,15 @@ QString JitsiConnector::jitsiJavascriptInternal()
     const bool persistedTileView = settings.value("jitsi/tileView", false).toBool();
 
     // Codecs GOnnect can decode
+    const auto codecs =
+            QString::fromUtf8(QJsonDocument(QJsonArray::fromStringList(decodableVideoCodecs()))
+                                      .toJson(QJsonDocument::Compact));
     const QString nativeVideoConfig = m_isNativeVideoEnabled ? QStringLiteral(R"(
-        "videoQuality.codecPreferenceOrder": ["AV1", "VP9", "VP8"],
+        "videoQuality.codecPreferenceOrder": %1,
         "videoQuality.disabledCodec": "H264",
-        "p2p.codecPreferenceOrder": ["AV1", "VP9", "VP8"],
+        "p2p.codecPreferenceOrder": %1,
         "whiteboard.enabled": false,)")
+                                                                       .arg(codecs)
                                                              : QString();
 
     return QString(R"""(
