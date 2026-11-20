@@ -15,7 +15,6 @@
 #include "VideoManager.h"
 #include "SIPAudioDevice.h"
 #include "GlobalMuteState.h"
-#include "FuzzyCompare.h"
 #include "NotificationManager.h"
 #include "GlobalInfo.h"
 #include "ConferenceUser.h"
@@ -26,12 +25,32 @@
 #include "ErrorBus.h"
 #include "PlatformSession.h"
 #include "CertHelper.h"
+#include "JitsiVideoBridge.h"
+#include "VideoDecoder.h"
 
+#include <QJsonObject>
 #include <QLoggingCategory>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QRegularExpression>
 #include <QtConcurrent>
+#include <QJsonArray>
+#include <QJsonDocument>
+
+namespace {
+
+// Codecs GOnnect can decode; in order of preference
+QStringList decodableVideoCodecs()
+{
+    QStringList codecs;
+    for (const auto codec : { VideoCodec::AV1, VideoCodec::VP9, VideoCodec::VP8 }) {
+        if (VideoDecoder::isSupported(codec)) {
+            codecs.append(VideoDecoder::codecName(codec));
+        }
+    }
+    return codecs;
+}
+} // namespace
 
 Q_LOGGING_CATEGORY(lcJitsiConnector, "gonnect.app.JitsiConnector")
 
@@ -44,6 +63,7 @@ Q_LOGGING_CATEGORY(lcJitsiConnector, "gonnect.app.JitsiConnector")
 JitsiConnector::JitsiConnector(QObject *parent) : IConferenceConnector{ parent }
 {
     m_chatRoom = new ConferenceChatRoom(this);
+    m_videoModel = new ConferenceVideoModel(this);
 
     connect(this, &JitsiConnector::isInConferenceChanged, this, [this]() {
         if (isInConference()) {
@@ -69,12 +89,10 @@ JitsiConnector::JitsiConnector(QObject *parent) : IConferenceConnector{ parent }
             &JitsiConnector::transferAudioManagerDevicesToJitsi);
 
     auto &videoManager = VideoManager::instance();
-    connect(&videoManager, &VideoManager::selectedDeviceIdChanged, this,
-            &JitsiConnector::transferVideoManagerDeviceToJitsi);
-    connect(&videoManager, &VideoManager::cameraAccessStateChanged, this, [this]() {
-        Q_EMIT isVideoAvailableChanged();
-        updateVideoCallState();
-    });
+    connect(&videoManager, &VideoManager::cameraAccessStateChanged, this,
+            &JitsiConnector::updateVideoAvailability);
+    connect(&videoManager, &VideoManager::devicesChanged, this,
+            &JitsiConnector::updateVideoAvailability);
 
     auto headsetProxy = USBDevices::instance().getHeadsetDeviceProxy();
     connect(headsetProxy, &IHeadsetDevice::hookSwitch, this,
@@ -97,6 +115,21 @@ JitsiConnector::JitsiConnector(QObject *parent) : IConferenceConnector{ parent }
 JitsiConnector::~JitsiConnector()
 {
     qDeleteAll(m_chatNotifications);
+}
+
+bool JitsiConnector::readIsNativeVideoEnabled()
+{
+    ReadOnlyConfdSettings settings;
+    if (!settings.value("jitsi/isNativeVideoEnabled", false).toBool()) {
+        return false;
+    }
+
+    // Jitsi can send videos that GOnnect cannot show
+    if (decodableVideoCodecs().isEmpty()) {
+        qCWarning(lcJitsiConnector) << "Native video disabled - no video decoder available";
+        return false;
+    }
+    return true;
 }
 
 QString JitsiConnector::ownDisplayName()
@@ -252,6 +285,18 @@ QString JitsiConnector::jitsiJavascriptInternal()
     AppSettings settings;
     const bool persistedTileView = settings.value("jitsi/tileView", false).toBool();
 
+    // Codecs GOnnect can decode
+    const auto codecs =
+            QString::fromUtf8(QJsonDocument(QJsonArray::fromStringList(decodableVideoCodecs()))
+                                      .toJson(QJsonDocument::Compact));
+    const QString nativeVideoConfig = m_isNativeVideoEnabled ? QStringLiteral(R"(
+        "videoQuality.codecPreferenceOrder": %1,
+        "videoQuality.disabledCodec": "H264",
+        "p2p.codecPreferenceOrder": %1,
+        "whiteboard.enabled": false,)")
+                                                                       .arg(codecs)
+                                                             : QString();
+
     return QString(R"""(
 const options = {
     roomName: '%5',
@@ -287,6 +332,7 @@ const options = {
         "screenShareSettings.desktopSystemAudio": "exclude",
         "tileView.disabled": false,
         toolbarButtons: [],
+        %9
     },
     interfaceConfigOverwrite: {
         APP_NAME: "GOnnect",
@@ -380,14 +426,6 @@ new QWebChannel(qt.webChannelTransport, function(channel) {
 
     jitsiConn.executeSetAudioOutputDeviceCommand.connect((deviceId) => {
         api.setAudioOutputDevice(undefined, deviceId)
-    })
-
-    jitsiConn.executeSetVideoInputDeviceCommand.connect((deviceId) => {
-        api.getCurrentDevices().then(devices => {
-            if (devices?.videoInput?.deviceId !== deviceId) {
-                api.setVideoInputDevice(undefined, deviceId)
-            }
-        })
     })
 
     jitsiConn.executeToggleVirtualBackgroundDialogCommand.connect(() => {
@@ -563,7 +601,42 @@ api.addListener("transcriptionChunkReceived", data => {
                  defaultName // %6
                  )
             .arg(!m_startWithVideo) // %7
-            .arg(persistedTileView); // %8
+            .arg(persistedTileView) // %8
+            .arg(nativeVideoConfig); // %9
+}
+
+QString JitsiConnector::remoteVideoScriptInternal()
+{
+    if (!m_isNativeVideoEnabled) {
+        return {};
+    }
+
+    // Runs until shutdown -> endpoint and token stay valid for later conferences
+    if (!m_videoBridge) {
+        m_videoBridge =
+                new JitsiVideoBridge(m_videoModel, QUrl(GlobalInfo::instance().jitsiUrl()), this);
+    }
+
+    if (!m_videoBridge->isRunning()) {
+        const auto started = m_videoBridge->start();
+        if (!started) {
+            qCCritical(lcJitsiConnector) << "Cannot start remote video bridge:" << started.error();
+            return {};
+        }
+    }
+
+    QFile script(QStringLiteral(":/webengine/gonnectRemoteVideo.js"));
+    if (!script.open(QIODevice::ReadOnly)) {
+        qCCritical(lcJitsiConnector) << "Cannot read remove video script:" << script.errorString();
+        return {};
+    }
+
+    const QJsonObject config{ { "endpoint", m_videoBridge->endpoint().toString() },
+                              { "token", m_videoBridge->token() } };
+
+    return QString::fromUtf8(script.readAll())
+            .replace(QStringLiteral("__GONNECT_REMOTE_VIDEO_CONFIG__"),
+                     QString::fromUtf8(QJsonDocument(config).toJson(QJsonDocument::Compact)));
 }
 
 void JitsiConnector::toggleMute()
@@ -1046,7 +1119,7 @@ void JitsiConnector::setUserRole(const QString &id, const QString &roleString)
             user->setRole(role);
 
             qCInfo(lcJitsiConnector).noquote().nospace()
-                    << "Jitsi user " << user->displayName() << " (" << id << ") got new role"
+                    << "Jitsi user " << user->displayName() << " (" << id << ") got new role "
                     << ConferenceUser::userRoleToString(role);
 
             Q_EMIT userRoleChanged(i, user, role);
@@ -1088,9 +1161,6 @@ void JitsiConnector::setJitsiDevices(const QVariantMap availableDevices)
     qDeleteAll(m_audioOutputDevices);
     m_audioOutputDevices.clear();
 
-    qDeleteAll(m_videoInputDevices);
-    m_videoInputDevices.clear();
-
     const auto audioInputMap = availableDevices.value("audioInput", {}).toList();
     for (const auto &mapEntry : audioInputMap) {
         if (auto deviceObj = createJitsiMediaDevice(mapEntry.toMap())) {
@@ -1105,23 +1175,11 @@ void JitsiConnector::setJitsiDevices(const QVariantMap availableDevices)
         }
     }
 
-    const auto videoInputMap = availableDevices.value("videoInput", {}).toList();
-    for (const auto &mapEntry : videoInputMap) {
-        if (auto deviceObj = createJitsiMediaDevice(mapEntry.toMap())) {
-            m_videoInputDevices.append(deviceObj);
-        }
-    }
-
-    qCInfo(lcJitsiConnector) << "Found"
-                             << (m_audioInputDevices.size() + m_audioOutputDevices.size()
-                                 + m_videoInputDevices.size())
-                             << "Jitsi devices:" << m_audioInputDevices.size()
-                             << "audio input devices," << m_audioOutputDevices.size()
-                             << "audio output devices and" << m_videoInputDevices.size()
-                             << "video input devices";
+    // Video input is always the GOnnect camera (gonnectCamera.js), selected via VideoManager
+    qCInfo(lcJitsiConnector) << "Found" << m_audioInputDevices.size() << "audio input and"
+                             << m_audioOutputDevices.size() << "audio output devices in Jitsi";
 
     transferAudioManagerDevicesToJitsi();
-    transferVideoManagerDeviceToJitsi();
 }
 
 void JitsiConnector::addKnockingParticipant(QString id, QString name)
@@ -1256,17 +1314,6 @@ void JitsiConnector::selectAudioOutputDevice(const QString &deviceId)
     Q_EMIT executeSetAudioOutputDeviceCommand(deviceId);
 }
 
-void JitsiConnector::selectVideoInputDevice(const QString &deviceId)
-{
-    auto device = findDevice(m_videoInputDevices, deviceId);
-    if (!device) {
-        qCCritical(lcJitsiConnector) << "Unkown device for id" << deviceId;
-        return;
-    }
-
-    Q_EMIT executeSetVideoInputDeviceCommand(deviceId);
-}
-
 void JitsiConnector::toggleHoldImpl()
 {
     setOnHold(!m_isOnHold);
@@ -1328,34 +1375,10 @@ void JitsiConnector::transferAudioManagerDevicesToJitsi()
     }
 }
 
-void JitsiConnector::transferVideoManagerDeviceToJitsi()
+void JitsiConnector::updateVideoAvailability()
 {
-    const auto videoDevice = VideoManager::instance().selectedDevice();
-
-    if (videoDevice.isNull()) {
-        selectVideoInputDevice("");
-        return;
-    }
-
-    // Find correct Jitsi device id for QCameraDevice
-    const auto deviceName = videoDevice.description;
-    JitsiMediaDevice *bestMatchingDevice = nullptr;
-    qreal maxD = 0.0;
-
-    for (auto jitsiDevice : std::as_const(m_videoInputDevices)) {
-        const qreal d = FuzzyCompare::jaroWinklerDistance(jitsiDevice->label(), deviceName);
-        if (d > maxD) {
-            maxD = d;
-            bestMatchingDevice = jitsiDevice;
-        }
-    }
-
-    if (bestMatchingDevice) {
-        selectVideoInputDevice(bestMatchingDevice->deviceId());
-    } else {
-        qCInfo(lcJitsiConnector) << "No labeled jitsi video input matches" << deviceName
-                                 << "- retrying once camera is started";
-    }
+    Q_EMIT isVideoAvailableChanged();
+    updateVideoCallState();
 }
 
 void JitsiConnector::setConferenceName(const QString &name)
@@ -1389,16 +1412,41 @@ QUrl JitsiConnector::baseUrl() const
 
 bool JitsiConnector::hasCapability(const Capability capabilityToCheck) const
 {
-    const static QSet<Capability> m_capabilites = {
-        Capability::AudioMute,     Capability::ChatInCall,   Capability::Holdable,
-        Capability::RaiseHand,     Capability::ScreenShare,  Capability::Sharable,
-        Capability::Subtitles,     Capability::MuteAll,      Capability::NoiseSuppression,
-        Capability::UserRoles,     Capability::UserKickable, Capability::RoomPassword,
-        Capability::ShareUrl,      Capability::Textpad,      Capability::TileView,
-        Capability::Whiteboard,    Capability::VideoMute,    Capability::VideoQualityAdjustable,
-        Capability::Transcription, Capability::Lobby
+    const static QSet<Capability> capabilties = {
+        Capability::AudioMute,
+        Capability::ChatInCall,
+        Capability::Holdable,
+        Capability::Lobby,
+        Capability::MuteAll,
+        Capability::NoiseSuppression,
+        Capability::RaiseHand,
+        Capability::RoomPassword,
+        Capability::ScreenShare,
+        Capability::Sharable,
+        Capability::ShareUrl,
+        Capability::Subtitles,
+        Capability::Textpad,
+        Capability::TileView,
+        Capability::Transcription,
+        Capability::UserKickable,
+        Capability::UserRoles,
+        Capability::VideoMute,
+        Capability::VideoQualityAdjustable,
+        Capability::VirtualBackground,
+        Capability::Whiteboard,
     };
-    return m_capabilites.contains(capabilityToCheck);
+
+    // Only in Jitsi web ui thus hidden with native video
+    const static QSet<Capability> webUiCapabilities = {
+        Capability::Subtitles,     Capability::Textpad,           Capability::TileView,
+        Capability::Transcription, Capability::VirtualBackground, Capability::Whiteboard,
+    };
+
+    if (m_isNativeVideoEnabled && webUiCapabilities.contains(capabilityToCheck)) {
+        return false;
+    }
+
+    return capabilties.contains(capabilityToCheck);
 }
 
 void JitsiConnector::toggleWhiteboard()
@@ -1589,6 +1637,9 @@ void JitsiConnector::resetConferenceState()
     m_transcriptionMessageLookup.clear();
     m_chatRoom->clear();
 
+    // Leave first so following toggles do not see running conference
+    setIsInConference(false);
+
     // Reset per-conference toggle state so it doesn't leak into the next conference
     setIsSharingScreenInternal(false);
     setVideoMutedInternal(false);
@@ -1600,7 +1651,6 @@ void JitsiConnector::resetConferenceState()
 
     setConferenceName("");
     setDisplayName("");
-    setIsInConference(false);
     Q_EMIT GlobalCallState::instance().callEnded(true);
     GlobalCallState::instance().unholdOtherCall();
 }
@@ -1662,7 +1712,7 @@ void JitsiConnector::setAudioMuted(bool value)
 
 bool JitsiConnector::isVideoAvailable() const
 {
-    return m_isVideoAvailable && !VideoManager::instance().isCameraAccessDenied();
+    return m_isVideoAvailable && VideoManager::instance().isCameraAvailable();
 }
 
 void JitsiConnector::setVideoMuted(bool shallMute)

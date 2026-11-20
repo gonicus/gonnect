@@ -3,6 +3,7 @@
 #include "ICallState.h"
 #include "IChatRoom.h"
 #include "ConferenceUser.h"
+#include "ConferenceVideoModel.h"
 #include "CallHistoryItem.h"
 
 #include <QPointer>
@@ -52,6 +53,7 @@ class IConferenceConnector : public ICallState
     Q_PROPERTY(uint numberOfUsers READ numberOfUsers NOTIFY numberOfUsersChanged FINAL)
     Q_PROPERTY(
             ConferenceUser *largeVideoUser READ largeVideoUser NOTIFY largeVideoUserChanged FINAL)
+    Q_PROPERTY(ConferenceVideoModel *videoModel READ videoModel CONSTANT FINAL)
 
 public:
     IConferenceConnector(QObject *parent = nullptr) : ICallState{ parent } { }
@@ -76,6 +78,7 @@ public:
         VideoQualityAdjustable,
         Whiteboard,
         Transcription,
+        VirtualBackground,
         Lobby
     };
     Q_ENUM(Capability)
@@ -177,6 +180,8 @@ public:
     virtual void grantUserRole(ConferenceUser *user, ConferenceUser::Role newRole) = 0;
     virtual ConferenceUser *largeVideoUser() const = 0;
     virtual void setLargeVideoUser(ConferenceUser *user) = 0;
+
+    virtual ConferenceVideoModel *videoModel() const = 0;
 
     Q_INVOKABLE virtual void muteAll() = 0;
 

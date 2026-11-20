@@ -3,8 +3,10 @@
 #include <QtWebEngineQuick>
 #include <QtProtobuf>
 #include "Application.h"
-#include "AppSettings.h"
+#include "CameraFrameSchemeHandler.h"
 #include "GlobalInfo.h"
+#include "JitsiConnector.h"
+#include "LibAvLogging.h"
 #include "PersonCoinProvider.h"
 #include "WebEngineKeyEventFilter.h"
 
@@ -62,7 +64,9 @@ int main(int argc, char *argv[])
                        "%{if-critical}\033[31m%{endif}"
                        "%{if-fatal}\033[31m%{backtrace depth=3}%{endif}\033[0m %{message}");
     setup_unix_signal_handlers();
+    LibAvLogging::install();
 
+    CameraFrameSchemeHandler::registerScheme();
     QtWebEngineQuick::initialize();
 
 #ifdef Q_OS_LINUX
@@ -87,27 +91,16 @@ int main(int argc, char *argv[])
         if (GlobalInfo::instance().isWorkaroundActive(GlobalInfo::WorkaroundId::GOW_003)) {
             chromiumFlags.push_back("--disable-renderer-accessibility");
         }
-
-#ifdef Q_OS_LINUX
-
-        // Workaround: when PipeWire camera access is not permitted, WebEngine hangs forever because
-        // enumerateDevices() never receives a response or timeout. Disabling WebRtcPipeWireCamera
-        // is the only known way to work around that. That information is persisted in settings
-        // because it must be known here - before the portal can be asked.
-
-        const bool isCameraAccessDenied =
-                AppSettings().value("video/cameraAccessDenied", false).toBool();
-
-        if (!isCameraAccessDenied
-            && !GlobalInfo::instance().isWorkaroundActive(GlobalInfo::WorkaroundId::GOW_004)) {
-            chromiumFlags.push_back("--enable-features=WebRtcPipeWireCamera");
+        if (JitsiConnector::readIsNativeVideoEnabled()) {
+            // Taps encoded remote video for decoding in GOnnect
+            chromiumFlags.push_back("--enable-blink-features=RTCRtpScriptTransform");
         }
-#endif
-
         if (chromiumFlags.size() > 0) {
             qputenv("QTWEBENGINE_CHROMIUM_FLAGS", chromiumFlags.join(" ").toStdString().c_str());
         }
     } else {
+        // Replaces all defaults - requires --enable-blink-features=RTCRtpScriptTransform for native
+        // video
         qputenv("QTWEBENGINE_CHROMIUM_FLAGS", webenginePresetEnv);
     }
 

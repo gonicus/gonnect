@@ -123,9 +123,6 @@ Item {
                 if ([ VideoManager.CameraAccessState.Unknown, VideoManager.CameraAccessState.Pending ].includes(VideoManager.cameraAccessState)) {
                     return waitingForCameraAccessComponent
                 }
-                if (VideoManager.cameraAccessState === VideoManager.CameraAccessState.DeniedRestartRequired) {
-                    return cameraDeniedRestartRequiredComponent
-                }
 
                 return jitsiViewComponent
             }
@@ -307,48 +304,6 @@ Item {
     }
 
     Component {
-        id: cameraDeniedRestartRequiredComponent
-
-        Item {
-            id: cameraDeniedItem
-
-            Accessible.id: "conference.cameraDenied"
-            Accessible.role: Accessible.Pane
-            Accessible.name: cameraDeniedMessage.text
-
-            Column {
-                id: cameraDeniedCol
-                anchors.centerIn: parent
-                spacing: Theme.d * 3
-
-                Label {
-                    id: cameraDeniedMessage
-                    width: Math.min(cameraDeniedItem.width - 2 * Theme.d, Theme.d * 100)
-                    wrapMode: Label.WordWrap
-                    horizontalAlignment: Label.AlignHCenter
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    text: qsTr("Camera access has been denied. You can still join conferences without a camera, but due to technical intricacies, GOnnect must be restarted once.")
-
-                    Accessible.ignored: true
-                }
-
-                Button {
-                    id: restartButton
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    text: qsTr("Restart GOnnect")
-                    highlighted: true
-
-                    onClicked: () => SM.restart()
-
-                    Accessible.id: "conference.cameraDenied.restart"
-                    Accessible.role: Accessible.Button
-                    Accessible.name: restartButton.text
-                }
-            }
-        }
-    }
-
-    Component {
         id: jitsiViewComponent
 
         Item {
@@ -437,6 +392,9 @@ Item {
 
                 WebEngineView {
                     id: jitsiView
+                    // Web view must be kept for native video, but invisible
+                    opacity: confConn.isNativeVideoEnabled ? 0 : 1
+                    enabled: !confConn.isNativeVideoEnabled
                     settings {
                         localStorageEnabled: true
                         screenCaptureEnabled: true
@@ -451,6 +409,28 @@ Item {
                         left: parent.left
                         right: parent.right
                     }
+
+                    Component.onCompleted:
+                        () => {
+                            const script = WebEngine.script()
+                            script.name = "gonnectCamera"
+                            script.sourceUrl = "qrc:/webengine/gonnectCamera.js"
+                            script.injectionPoint = WebEngineScript.DocumentCreation
+                            script.worldId = WebEngineScript.MainWorld
+                            script.runsOnSubFrames = true
+                            jitsiView.userScripts.insert(script)
+
+                            const remoteVideoSource = confConn.remoteVideoScriptInternal()
+                            if (remoteVideoSource !== "") {
+                                const remoteVideoScript = WebEngine.script()
+                                remoteVideoScript.name = "gonnectRemoteVideo"
+                                remoteVideoScript.sourceCode = remoteVideoSource
+                                remoteVideoScript.injectionPoint = WebEngineScript.DocumentCreation
+                                remoteVideoScript.worldId = WebEngineScript.MainWorld
+                                remoteVideoScript.runsOnSubFrames = true
+                                jitsiView.userScripts.insert(remoteVideoScript)
+                            }
+                        }
 
                     onJavaScriptConsoleMessage: (level, message, line, source) => {
                         // Prevent writing JWT to log
@@ -470,8 +450,9 @@ Item {
                         const isCameraRequest = permission.permissionType === WebEnginePermission.PermissionType.MediaVideoCapture
                                              || permission.permissionType === WebEnginePermission.PermissionType.MediaAudioVideoCapture
 
-                        if (isCameraRequest && VideoManager.isCameraAccessDenied) {
-                            console.warn(category, "Denying camera permission request in WebEngine because it is denied by VideoManager")
+                        if (isCameraRequest) {
+                            // Camera frames received from GOnnect - browser must never open camera
+                            console.warn(category, "Denying camera permission request in WebEngine")
                             permission.deny()
                         } else {
                             permission.grant()
@@ -529,6 +510,25 @@ Item {
                                 ViewHelper.topDrawer.loader.sourceComponent = undefined
                             }
                         }
+                    }
+                }
+
+                Loader {
+                    id: nativeVideoLoader
+                    active: confConn.isNativeVideoEnabled
+                    anchors {
+                        top: topBar.bottom
+                        bottom: parent.bottom
+                        left: parent.left
+                        right: parent.right
+                        margins: Theme.d
+                    }
+
+                    sourceComponent: ConferenceVideoView {
+                        videoModel: confConn.videoModel
+                        isOwnVideoActive: confConn.isInConference
+                                          && confConn.isVideoAvailable
+                                          && !confConn.isVideoMuted
                     }
                 }
 

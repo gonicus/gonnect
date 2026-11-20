@@ -13,6 +13,7 @@ find_package(Qt6 REQUIRED COMPONENTS
     Widgets
     WebEngineCore
     WebEngineQuick
+    WebSockets
     Xml)
 
 find_package(logfault CONFIG REQUIRED)
@@ -20,7 +21,7 @@ find_package(logfault CONFIG REQUIRED)
 find_package(cmark REQUIRED)
 find_package(KF6SyntaxHighlighting REQUIRED)
 find_package(ICU REQUIRED COMPONENTS uc i18n data)
-find_package(QCoro6 REQUIRED COMPONENTS Core Network)
+find_package(QCoro6 REQUIRED COMPONENTS Core Network DBus)
 
 if(UNIX)
     include(FindPkgConfig)
@@ -29,11 +30,13 @@ if(UNIX)
     pkg_check_modules(LIBUUID REQUIRED uuid IMPORTED_TARGET)
     pkg_check_modules(LIBUSB1 REQUIRED libusb-1.0 IMPORTED_TARGET)
     pkg_check_modules(LIBHIDAPI REQUIRED hidapi-hidraw IMPORTED_TARGET)
+    pkg_check_modules(LIBAV REQUIRED libavcodec libavutil libswscale IMPORTED_TARGET)
     list(APPEND PLATFORM_LIBRARIES
         ${PJSIP_STATIC_LIBRARIES}
         PkgConfig::LIBUUID
         PkgConfig::LIBUSB1
-        PkgConfig::LIBHIDAPI)
+        PkgConfig::LIBHIDAPI
+        PkgConfig::LIBAV)
 
     if(FLATPAK)
         list(APPEND PLATFORM_LIBRARIES
@@ -58,6 +61,7 @@ else()
     find_package(libusb REQUIRED)
     find_package(wintoast REQUIRED)
     find_package(QHotkey REQUIRED)
+    find_package(ffmpeg REQUIRED)
 
     list(APPEND PLATFORM_LIBRARIES
         SnowballStem::libstemmer
@@ -67,7 +71,11 @@ else()
         libusb::libusb
         wintoast::wintoast
         QHotkey
-        runtimeobject)
+        runtimeobject
+        ffmpeg::avcodec
+        ffmpeg::avutil
+        ffmpeg::swscale
+    )
 endif()
 
 add_definitions(-DPJMEDIA_HAS_RTCP_XR=1 -DPJMEDIA_STREAM_ENABLE_XR=1)
@@ -254,8 +262,11 @@ if(FLATPAK)
         platform/linux/LinuxDesktopSearchProvider.cpp
         platform/linux/LinuxPlatformSession.h
         platform/linux/LinuxPlatformSession.cpp
-        platform/linux/PipeWireCameraDevices.h
-        platform/linux/PipeWireCameraDevices.cpp)
+        platform/linux/PipeWireCameraSource.h
+        platform/linux/PipeWireCameraSource.cpp
+        platform/linux/PipeWireFrameConverter.h
+        platform/linux/PipeWireFrameConverter.cpp
+    )
 
 elseif(LINUX)
     set(PLATFORM_SOURCES
@@ -286,7 +297,12 @@ elseif(LINUX)
         platform/linux/LinuxDesktopSearchProvider.h
         platform/linux/LinuxDesktopSearchProvider.cpp
         platform/linux/LinuxPlatformSession.h
-        platform/linux/LinuxPlatformSession.cpp)
+        platform/linux/LinuxPlatformSession.cpp
+        platform/linux/PipeWireCameraSource.h
+        platform/linux/PipeWireCameraSource.cpp
+        platform/linux/PipeWireFrameConverter.h
+        platform/linux/PipeWireFrameConverter.cpp
+    )
 
 elseif(APPLE)
     set(PLATFORM_SOURCES
@@ -514,6 +530,8 @@ qt_add_qml_module(gonnect
         ui/components/CardShadow.qml
         ui/components/ChatSideBar.qml
         ui/components/ConferenceButtonBar.qml
+        ui/components/ConferenceVideoTile.qml
+        ui/components/ConferenceVideoView.qml
         ui/components/CustomWindowHeader.qml
         ui/components/ActivitiesList.qml
         ui/components/DateEventsList.qml
@@ -521,12 +539,14 @@ qt_add_qml_module(gonnect
         ui/components/HistoryList.qml
         ui/components/IndicatorIcon.qml
         ui/components/MainTabBar.qml
+        ui/components/OwnVideoTile.qml
         ui/components/PresenceStatusIndicator.qml
-        ui/components/UsersList.qml
+        ui/components/RoundedVideoOutput.qml
         ui/components/RoomAvatar.qml
         ui/components/RTTDisplay.qml
         ui/components/SettingsPage.qml
         ui/components/TogglerList.qml
+        ui/components/UsersList.qml
         ui/components/VerticalLevelMeter.qml
         ui/components/WindowHeader.qml
         # Dynamic UI
@@ -746,7 +766,19 @@ qt_add_qml_module(gonnect
         conference/ConferenceLinkedRoomsProxyModel.cpp
         conference/ConferenceUser.h
         conference/ConferenceUser.cpp
+        conference/ConferenceVideoModel.h
+        conference/ConferenceVideoModel.cpp
+        conference/ConferenceVideoOutput.h
+        conference/ConferenceVideoOutput.cpp
+        conference/ConferenceVideoSource.h
+        conference/ConferenceVideoSource.cpp
         conference/IConferenceConnector.h
+        conference/JitsiVideoProtocol.h
+        conference/JitsiVideoProtocol.cpp
+        conference/JitsiVideoBridge.h
+        conference/JitsiVideoBridge.cpp
+        conference/JitsiVideoServer.h
+        conference/JitsiVideoServer.cpp
 
         contacts/AddressBook.cpp
         contacts/AddressBook.h
@@ -801,6 +833,8 @@ qt_add_qml_module(gonnect
         helper/FileContentHelper.cpp
         helper/GenericFavoriteHelper.h
         helper/GenericFavoriteHelper.cpp
+        helper/OriginHelper.h
+        helper/OriginHelper.cpp
         helper/SecretGenerator.h
         helper/SecretGenerator.cpp
         helper/SipFavoriteHelper.h
@@ -818,8 +852,29 @@ qt_add_qml_module(gonnect
         media/AudioPort.cpp
         media/AudioProcessor.h
         media/AudioProcessor.cpp
+        media/CameraPreview.h
+        media/CameraPreview.cpp
+        media/CameraSource.h
+        media/CameraSource.cpp
+        media/EncodedFrame.h
+        media/FramePump.h
+        media/FramePump.cpp
+        media/KeyFrameGate.h
+        media/KeyFrameGate.cpp
+        media/LibAvLogging.h
+        media/LibAvLogging.cpp
+        media/LibAvPointers.h
+        media/PlanarVideoBuffer.h
+        media/PlanarVideoBuffer.cpp
+        media/QtCameraSource.h
+        media/QtCameraSource.cpp
         media/Sniffer.h
         media/Sniffer.cpp
+        media/TrackDecoder.h
+        media/TrackDecoder.cpp
+        media/VideoCodec.h
+        media/VideoDecoder.h
+        media/VideoDecoder.cpp
         media/VideoDevice.h
         media/VideoManager.h
         media/VideoManager.cpp
@@ -876,6 +931,10 @@ qt_add_qml_module(gonnect
         ui/CallRoutingHelper.h
         ui/CallRoutingHelper.cpp
         ui/CallRoutingHopInfo.h
+        ui/CameraFrameSerializer.h
+        ui/CameraFrameSerializer.cpp
+        ui/CameraFrameSchemeHandler.h
+        ui/CameraFrameSchemeHandler.cpp
         ui/ClipboardHelper.h
         ui/ClipboardHelper.cpp
         ui/DateEventsModel.h
@@ -999,7 +1058,12 @@ qt_add_qml_module(gonnect
         webdav/WebDavSyncResult.h
 )
 
-set_source_files_properties(webdav/WebDavClient.cpp PROPERTIES COMPILE_OPTIONS "$<$<CXX_COMPILER_ID:GNU>:-Wno-subobject-linkage>")
+# Prevent false GCC errors with QCoro
+set_source_files_properties(
+    webdav/WebDavClient.cpp
+    dbus/portal/CameraPortal.cpp
+    media/VideoManager.cpp
+    PROPERTIES COMPILE_OPTIONS "$<$<CXX_COMPILER_ID:GNU>:-Wno-subobject-linkage>")
 
 qt_add_protobuf(gonnect
     PROTO_FILES
@@ -1012,7 +1076,12 @@ if(LINUX)
         "-Wl,--exclude-libs,libcrypto.a"
         "-Wl,--exclude-libs,libssl.a"
         "-Wl,--exclude-libs,libldap.a"
-        "-Wl,--exclude-libs,liblber.a")
+        "-Wl,--exclude-libs,liblber.a"
+        "-Wl,--exclude-libs,libavcodec.a"
+        "-Wl,--exclude-libs,libavutil.a"
+        "-Wl,--exclude-libs,libswscale.a"
+        "-Wl,--exclude-libs,libdav1d.a"
+    )
 endif()
 
 qt_extract_metatypes(gonnect)
@@ -1043,6 +1112,7 @@ target_link_libraries(gonnect
         Qt6::Protobuf
         Qt6::WebEngineCore
         Qt6::WebEngineQuick
+        Qt6::WebSockets
         GOnnectVersion
         ${PLATFORM_LIBRARIES}
         qt6keychain
@@ -1055,6 +1125,7 @@ target_link_libraries(gonnect
         ICU::data
         QCoro6::Core
         QCoro6::Network
+        QCoro6::DBus
         ${AKONADI_CONTACT_FACTORY}
         ${AKONADI_CALENDAR_FACTORY}
         ${CARDDAV_CONTACT_FACTORY}

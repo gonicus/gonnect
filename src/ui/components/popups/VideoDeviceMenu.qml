@@ -8,6 +8,7 @@ Menu {
     id: control
 
     property string selectedDeviceId
+    property bool isVirtualBackgroundAvailable: true
 
     signal deviceSelected(string deviceId)
     signal virtualBackgroundButtonClicked
@@ -49,10 +50,13 @@ Menu {
         }
     }
 
-    MenuSeparator {}
+    HideableMenuSeparator {
+        visible: virtualBackground.visible
+    }
 
-    MenuItem {
+    HideableMenuItem {
         id: virtualBackground
+        visible: control.isVirtualBackgroundAvailable
         text: qsTr("Virtual background")
         onTriggered: () => control.virtualBackgroundButtonClicked()
     }

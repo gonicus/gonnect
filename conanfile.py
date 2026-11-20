@@ -67,6 +67,7 @@ class GOnnectRecipe(ConanFile):
         self.requires("cmark/0.31.2")
         self.requires("ksyntaxhighlighting/6.31.0")
         self.requires("icu/78.2")
+        self.requires("ffmpeg/9.0.2")
 
         if self.settings.os != "Windows":
             self.requires("libuuid/1.0.3")
@@ -98,3 +99,31 @@ class GOnnectRecipe(ConanFile):
 
         if self.settings.os == "Windows":
             self.options["pjproject/*"].with_uuid=False
+
+        # ffmpeg
+        self.options["ffmpeg/*"].disable_everything = True
+        self.options["ffmpeg/*"].avcodec = True
+        self.options["ffmpeg/*"].swscale = True
+        self.options["ffmpeg/*"].enable_decoders = "mjpeg,vp8,vp9,libdav1d"
+
+        self.options["ffmpeg/*"].avformat = False
+        self.options["ffmpeg/*"].avdevice = False
+        self.options["ffmpeg/*"].avfilter = False
+        self.options["ffmpeg/*"].swresample = False
+        self.options["ffmpeg/*"].with_programs = False
+
+        # External libraries are pulled in regardless of disable_everything,
+        # some of them turn the build into GPL or even nonfree
+        for option in ["with_zlib", "with_bzip2", "with_lzma", "with_libiconv",
+                       "with_freetype", "with_openjpeg", "with_openh264", "with_opus",
+                       "with_vorbis", "with_libx264", "with_libx265", "with_libvpx",
+                       "with_libmp3lame", "with_libfdk_aac", "with_libwebp", "with_ssl",
+                       "with_libsvtav1", "with_libaom"]:
+            setattr(self.options["ffmpeg/*"], option, False)
+
+        if self.settings.os == "Linux":
+            for option in ["with_libalsa", "with_pulse", "with_vaapi", "with_vdpau",
+                           "with_xcb", "with_xlib"]:
+                setattr(self.options["ffmpeg/*"], option, False)
+
+

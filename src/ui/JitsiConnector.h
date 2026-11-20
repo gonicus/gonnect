@@ -7,9 +7,11 @@
 #include "IConferenceConnector.h"
 #include "JitsiMediaDevice.h"
 #include "ConferenceUser.h"
+#include "ConferenceVideoModel.h"
 #include "MuteSyncGuard.h"
 
 class CallHistoryItem;
+class JitsiVideoBridge;
 class SIPAudioDevice;
 class Notification;
 
@@ -18,9 +20,16 @@ class JitsiConnector : public IConferenceConnector
     Q_OBJECT
     QML_ELEMENT
 
+    Q_PROPERTY(bool isNativeVideoEnabled READ isNativeVideoEnabled CONSTANT FINAL)
+
 public:
     explicit JitsiConnector(QObject *parent = nullptr);
     ~JitsiConnector();
+
+    /// Remove video is decoded by GOnnect instead of Chromium
+    /// Changes require a restart
+    static bool readIsNativeVideoEnabled();
+    bool isNativeVideoEnabled() const { return m_isNativeVideoEnabled; };
 
     QString ownDisplayName() override;
 
@@ -37,6 +46,9 @@ public:
 
     Q_INVOKABLE QString jitsiHtmlInternal();
     Q_INVOKABLE QString jitsiJavascriptInternal();
+
+    /// Empty if native video is disabled
+    Q_INVOKABLE QString remoteVideoScriptInternal();
 
     // Should be called by the JS code once when all initialization is done
     Q_INVOKABLE void apiLoadingFinishedInternal();
@@ -114,6 +126,7 @@ public:
     void grantUserRole(ConferenceUser *user, ConferenceUser::Role newRole) override;
     ConferenceUser *largeVideoUser() const override { return m_largeVideoUser; };
     void setLargeVideoUser(ConferenceUser *user) override;
+    ConferenceVideoModel *videoModel() const override { return m_videoModel; }
     void muteAll() override;
     bool isLobbyEnabled() const override { return m_isLobbyEnabled; }
     void setLobbyEnabled(bool enabled) override;
@@ -136,7 +149,7 @@ protected:
 private Q_SLOTS:
     void onHeadsetHookSwitchChanged();
     void transferAudioManagerDevicesToJitsi();
-    void transferVideoManagerDeviceToJitsi();
+    void updateVideoAvailability();
 
 private:
     // Toggles the Jitsi-internal mute. For globally setting the mute state, use GlobalMuteState
@@ -158,7 +171,6 @@ private:
     void setIsPasswordRequired(bool value);
     void selectAudioInputDevice(const QString &deviceId);
     void selectAudioOutputDevice(const QString &deviceId);
-    void selectVideoInputDevice(const QString &deviceId);
     void updateVideoCallState();
     JitsiMediaDevice *createJitsiMediaDevice(const QVariantMap &deviceMap);
     JitsiMediaDevice *findDevice(const QList<JitsiMediaDevice *> &deviceList,
@@ -205,6 +217,9 @@ private:
     QString m_roomName;
     QString m_displayName;
     QList<ConferenceUser *> m_users;
+    ConferenceVideoModel *m_videoModel = nullptr;
+    JitsiVideoBridge *m_videoBridge = nullptr;
+    const bool m_isNativeVideoEnabled = readIsNativeVideoEnabled();
     QPointer<CallHistoryItem> m_callHistoryItem;
     QDateTime m_establishedDateTime;
     QList<Notification *> m_chatNotifications;
@@ -216,7 +231,6 @@ private:
 
     QList<JitsiMediaDevice *> m_audioInputDevices;
     QList<JitsiMediaDevice *> m_audioOutputDevices;
-    QList<JitsiMediaDevice *> m_videoInputDevices;
 
 Q_SIGNALS:
     // Internal API
@@ -237,7 +251,6 @@ Q_SIGNALS:
     void executeAnswerKnockingParticipant(QString id, bool approved);
     void executeSetAudioInputDeviceCommand(QString devicId);
     void executeSetAudioOutputDeviceCommand(QString devicId);
-    void executeSetVideoInputDeviceCommand(QString devicId);
     void executeSetNoiseSupressionCommand(bool value);
     void executeSetLargeVideoUser(QString id);
     void executeKickUserCommand(QString id);

@@ -3,6 +3,7 @@
 #include <QDBusPendingReply>
 #include <QDBusUnixFileDescriptor>
 #include <QLoggingCategory>
+#include <QCoroDBus>
 
 #include "CameraPortal.h"
 
@@ -46,11 +47,11 @@ void CameraPortal::propertiesChanged(const QString &interfaceName, const QVarian
     }
 }
 
-void CameraPortal::AccessCamera(PortalResponse callback)
+QCoro::Task<AbstractPortal::Response> CameraPortal::AccessCamera()
 {
     if (!isValid()) {
-        callback(ResponseCode::ERROR, { { "error", tr("Camera portal is not available") } });
-        return;
+        co_return Response{ ResponseCode::ERROR,
+                            { { "error", tr("Camera portal is not available") } } };
     }
 
     QDBusMessage message = QDBusMessage::createMethodCall(FREEDESKTOP_DBUS_PORTAL_SERVICE,
@@ -60,36 +61,34 @@ void CameraPortal::AccessCamera(PortalResponse callback)
     const QString token = generateHandleToken();
     message << QVariantMap{ { "handle_token", QVariant(token) } };
 
-    portalCall(token, message, [this, callback](uint code, const QVariantMap &response) {
-        const bool granted = code == ResponseCode::SUCCESS;
+    const Response response = co_await portalCallAsync(token, message);
+    switch (response.code) {
+    case ResponseCode::SUCCESS:
+        qCInfo(lcCameraPortal) << "Camera access granted";
+        break;
+    case ResponseCode::CANCELED:
+        qCInfo(lcCameraPortal) << "Camera access was denied by the user";
+        break;
+    default:
+        qCWarning(lcCameraPortal) << "Camera access request failed:"
+                                  << response.results.value("error").toString();
+        break;
+    }
 
-        switch (code) {
-        case ResponseCode::SUCCESS:
-            qCInfo(lcCameraPortal) << "camera access granted";
-            break;
-        case ResponseCode::CANCELED:
-            qCInfo(lcCameraPortal) << "camera access was denied by the user";
-            break;
-        default:
-            qCWarning(lcCameraPortal)
-                    << "camera access request failed:" << response.value("error").toString();
-            break;
-        }
+    const bool granted = response.code == ResponseCode::SUCCESS;
+    if (granted != m_hasAccess) {
+        m_hasAccess = granted;
+        Q_EMIT hasAccessChanged();
+    }
 
-        if (granted != m_hasAccess) {
-            m_hasAccess = granted;
-            Q_EMIT hasAccessChanged();
-        }
-
-        callback(code, response);
-    });
+    co_return response;
 }
 
-void CameraPortal::OpenPipeWireRemote(std::function<void(int, const QString &)> callback)
+QCoro::Task<int> CameraPortal::OpenPipeWireRemote()
 {
     if (!isValid()) {
-        callback(-1, tr("Camera portal is not available"));
-        return;
+        qCWarning(lcCameraPortal) << "Camera portal is not available";
+        co_return -1;
     }
 
     QDBusMessage message = QDBusMessage::createMethodCall(
@@ -98,34 +97,24 @@ void CameraPortal::OpenPipeWireRemote(std::function<void(int, const QString &)> 
 
     message << QVariantMap{};
 
-    auto watcher =
-            new QDBusPendingCallWatcher(QDBusConnection::sessionBus().asyncCall(message), this);
+    QDBusPendingReply<QDBusUnixFileDescriptor> reply =
+            QDBusConnection::sessionBus().asyncCall(message);
+    co_await reply;
 
-    connect(watcher, &QDBusPendingCallWatcher::finished, this,
-            [callback](QDBusPendingCallWatcher *watcher) {
-                watcher->deleteLater();
+    if (reply.isError()) {
+        qCWarning(lcCameraPortal) << "OpenPipeWireRemote failed:" << reply.error().message();
+        co_return -1;
+    }
 
-                QDBusPendingReply<QDBusUnixFileDescriptor> reply = *watcher;
+    // QDBusUnixFileDescriptor owns its descriptor and closes it once the
+    // reply goes out of scope. Duplicate it.
+    const int fd = ::dup(reply.value().fileDescriptor());
 
-                if (reply.isError()) {
-                    qCWarning(lcCameraPortal)
-                            << "OpenPipeWireRemote failed:" << reply.error().message();
-                    callback(-1, reply.error().message());
-                    return;
-                }
+    if (fd < 0) {
+        qCWarning(lcCameraPortal) << "Could not duplicate PipeWire fd:" << std::strerror(errno);
+        co_return -1;
+    }
 
-                // QDBusUnixFileDescriptor owns its descriptor and closes it once the
-                // reply goes out of scope. Duplicate it.
-                const int fd = ::dup(reply.value().fileDescriptor());
-
-                if (fd < 0) {
-                    const QString error = QString::fromLocal8Bit(std::strerror(errno));
-                    qCWarning(lcCameraPortal) << "could not duplicate PipeWire fd:" << error;
-                    callback(-1, error);
-                    return;
-                }
-
-                qCDebug(lcCameraPortal) << "opened PipeWire remote on fd" << fd;
-                callback(fd, {});
-            });
+    qCDebug(lcCameraPortal) << "Opened PipeWire remote on fd" << fd;
+    co_return fd;
 }
