@@ -1383,22 +1383,34 @@ bool JitsiConnector::hasCapability(const Capability capabilityToCheck) const
 {
     // Only in Jitsi web ui thus hidden with native video
     const static QSet<Capability> webUiCapabilities = {
-        Capability::Subtitles,     Capability::Textpad,           Capability::TileView,
-        Capability::Transcription, Capability::VirtualBackground, Capability::Whiteboard
-        Capability::AudioMute,     Capability::ChatInCall,   Capability::Holdable,
-        Capability::RaiseHand,     Capability::ScreenShare,  Capability::Sharable,
-        Capability::Subtitles,     Capability::MuteAll,      Capability::NoiseSuppression,
-        Capability::UserRoles,     Capability::UserKickable, Capability::RoomPassword,
-        Capability::ShareUrl,      Capability::Textpad,      Capability::TileView,
-        Capability::Whiteboard,    Capability::VideoMute,    Capability::VideoQualityAdjustable,
-        Capability::Transcription, Capability::Lobby,        Capability::VirtualBackground
+        Capability::AudioMute,
+        Capability::ChatInCall,
+        Capability::Holdable,
+        Capability::Lobby,
+        Capability::MuteAll,
+        Capability::NoiseSuppression,
+        Capability::RaiseHand,
+        Capability::RoomPassword,
+        Capability::ScreenShare,
+        Capability::Sharable,
+        Capability::ShareUrl,
+        Capability::Subtitles,
+        Capability::Textpad,
+        Capability::TileView,
+        Capability::Transcription,
+        Capability::UserKickable,
+        Capability::UserRoles,
+        Capability::VideoMute,
+        Capability::VideoQualityAdjustable,
+        Capability::VirtualBackground,
+        Capability::Whiteboard,
     };
 
     if (m_isNativeVideoEnabled && webUiCapabilities.contains(capabilityToCheck)) {
         return false;
     }
 
-    return m_capabilites.contains(capabilityToCheck);
+    return webUiCapabilities.contains(capabilityToCheck);
 }
 
 void JitsiConnector::toggleWhiteboard()
