@@ -51,6 +51,6 @@ void LibAvLogging::install()
     static std::once_flag isInstalled;
     std::call_once(isInstalled, []() {
         av_log_set_callback(logMessage);
-        qCDebug(lcLibAv) << LIBAVCODEC_IDENT << "configured width" << avcodec_configuration();
+        qCDebug(lcLibAv) << LIBAVCODEC_IDENT << "configured with" << avcodec_configuration();
     });
 }

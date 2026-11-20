@@ -28,6 +28,25 @@ bool isSameDeviceList(const QList<VideoDevice> &left, const QList<VideoDevice> &
         return a.id == b.id && a.description == b.description && a.isDefault == b.isDefault;
     });
 }
+
+// Two different cameras can have same name - use this to seperate them in menus
+void numberDuplicateDescriptions(QList<VideoDevice> &devices)
+{
+    QHash<QString, int> counts;
+    for (const auto &device : std::as_const(devices)) {
+        ++counts[device.description];
+    }
+
+    QHash<QString, int> numbers;
+    for (auto &device : devices) {
+        const QString description = device.description;
+        if (counts.value(description) > 1) {
+            device.description =
+                    QStringLiteral("%1 (%2)").arg(description).arg(++numbers[description]);
+        }
+    }
+}
+
 } // namespace
 
 VideoManager::VideoManager(QObject *parent) : QObject{ parent }
@@ -275,6 +294,7 @@ void VideoManager::removeConsumer(FramePump *consumer)
 void VideoManager::updateDevices()
 {
     QList<VideoDevice> devices = m_cameraSource->devices();
+    numberDuplicateDescriptions(devices);
 
     if (isSameDeviceList(devices, m_devices)) {
         return;
