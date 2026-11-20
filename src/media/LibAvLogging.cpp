@@ -4,6 +4,7 @@
 #include <QString>
 
 extern "C" {
+#include <libavcodec/avcodec.h>
 #include <libavutil/log.h>
 }
 
@@ -48,5 +49,8 @@ void logMessage(void *context, int level, const char *format, va_list arguments)
 void LibAvLogging::install()
 {
     static std::once_flag isInstalled;
-    std::call_once(isInstalled, []() { av_log_set_callback(logMessage); });
+    std::call_once(isInstalled, []() {
+        av_log_set_callback(logMessage);
+        qCDebug(lcLibAv) << LIBAVCODEC_IDENT << "configured width" << avcodec_configuration();
+    });
 }
