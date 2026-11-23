@@ -19,7 +19,7 @@
 #  include "linux/PipeWireCameraSource.h"
 #endif
 
-Q_LOGGING_CATEGORY(lcVideoManager, "gonnect.sip.video")
+Q_LOGGING_CATEGORY(lcVideoManager, "gonnect.media.video")
 
 namespace {
 
@@ -67,16 +67,18 @@ VideoManager::VideoManager(QObject *parent) : QObject{ parent }
     setCameraSource(std::make_unique<QtCameraSource>());
 
     connect(this, &VideoManager::selectedDeviceIdChanged, this, [this]() {
-        qCInfo(lcVideoManager) << "Video device selected:" << m_selectedDeviceId
-                               << "saving as profile" << m_currentProfile;
+        const auto key = QString("video%1/camera").arg(m_currentProfile);
+        const auto device = deviceById(m_selectedDeviceId);
 
-        // Save selected device to settings
-        auto device = deviceById(m_selectedDeviceId);
+        // Default device is fallback (requires no profile entry)
         if (device.isNull() || device.isDefault) {
-            m_settings->remove(QString("video%1/camera").arg(m_currentProfile));
+            qCInfo(lcVideoManager) << "Video device selected:" << m_selectedDeviceId
+                                   << "(default - no profile entry)";
+            m_settings->remove(key);
         } else {
-            m_settings->setValue(QString("video%1/camera").arg(m_currentProfile),
-                                 m_selectedDeviceId);
+            qCInfo(lcVideoManager) << "Video device selected:" << m_selectedDeviceId
+                                   << "saving as profile" << m_currentProfile;
+            m_settings->setValue(key, m_selectedDeviceId);
         }
     });
 
