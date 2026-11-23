@@ -111,7 +111,7 @@ QCoro::Task<> CalDAVEventFeeder::run()
         if (result == WebDavSyncResult::OtherError) {
             if (retriesLeft-- <= 0) {
                 ErrorBus::instance().addError(
-                        tr("CalDAV source %1 repeatedly failed - retries exhausted")
+                        tr("CalDAV source %1 repeatedly failed to sync - giving up")
                                 .arg(m_config.source));
                 m_isRunning = false;
                 co_return;
