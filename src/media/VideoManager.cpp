@@ -7,6 +7,7 @@
 #include <QRegularExpression>
 
 #include <algorithm>
+#include <chrono>
 
 #include <QCoroSignal>
 
@@ -21,6 +22,8 @@
 Q_LOGGING_CATEGORY(lcVideoManager, "gonnect.sip.video")
 
 namespace {
+
+constexpr auto StallTimeout = std::chrono::seconds(10);
 
 bool isSameDeviceList(const QList<VideoDevice> &left, const QList<VideoDevice> &right)
 {
@@ -58,6 +61,9 @@ VideoManager::VideoManager(QObject *parent) : QObject{ parent }
     m_debounceUpdateTimer.setInterval(500);
     m_debounceUpdateTimer.callOnTimeout(this, &VideoManager::updateDevices);
 
+    m_stallTimer.setInterval(StallTimeout);
+    m_stallTimer.callOnTimeout(this, &VideoManager::checkForStall);
+
     setCameraSource(std::make_unique<QtCameraSource>());
 
     connect(this, &VideoManager::selectedDeviceIdChanged, this, [this]() {
@@ -90,11 +96,8 @@ void VideoManager::setCameraSource(std::unique_ptr<CameraSource> source)
     m_cameraSource = std::move(source);
     connect(m_cameraSource.get(), &CameraSource::devicesChanged, this,
             [this]() { m_debounceUpdateTimer.start(); });
-    connect(m_cameraSource.get(), &CameraSource::errorOccurred, this, [this](QString message) {
-        qCWarning(lcVideoManager) << "Camera error:" << message;
-        setCameraError(message);
-        Q_EMIT cameraErrorOccurred(message);
-    });
+    connect(m_cameraSource.get(), &CameraSource::errorOccurred, this,
+            &VideoManager::reportCameraError);
 
     updateFrameHandler();
     if (!m_consumers.isEmpty()) {
@@ -105,7 +108,9 @@ void VideoManager::setCameraSource(std::unique_ptr<CameraSource> source)
 void VideoManager::updateFrameHandler()
 {
     // Must copy consumer list because running on camera's thread
-    m_cameraSource->setFrameHandler([consumers = m_consumers](const QVideoFrame &frame) {
+    m_cameraSource->setFrameHandler([this, consumers = m_consumers](const QVideoFrame &frame) {
+        m_hasReceivedFrame.store(true, std::memory_order_relaxed);
+
         for (auto *consumer : consumers) {
             consumer->push(frame);
         }
@@ -115,13 +120,35 @@ void VideoManager::updateFrameHandler()
 void VideoManager::startCamera()
 {
     setCameraError({});
+    m_hasReceivedFrame = false;
+    m_stallTimer.start();
     m_cameraSource->start(m_selectedDeviceId);
 }
 
 void VideoManager::stopCamera()
 {
+    m_stallTimer.stop();
     m_cameraSource->stop();
     setCameraError({});
+}
+
+void VideoManager::checkForStall()
+{
+    // Camera can hang without reporting error
+    if (m_hasReceivedFrame.exchange(false)) {
+        return;
+    }
+
+    reportCameraError(tr("Camera does not deliver any images"));
+}
+
+void VideoManager::reportCameraError(const QString &message)
+{
+    m_stallTimer.stop();
+
+    qCWarning(lcVideoManager) << "Camera error:" << message;
+    setCameraError(message);
+    Q_EMIT cameraErrorOccurred(message);
 }
 
 void VideoManager::setCameraError(const QString &message)

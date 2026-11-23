@@ -9,6 +9,7 @@
 #include "VideoDevice.h"
 #include "CameraSource.h"
 
+#include <atomic>
 #include <memory>
 
 #include <QCoroCore>
@@ -69,6 +70,7 @@ public Q_SLOTS:
 
 private Q_SLOTS:
     void updateProfile();
+    void checkForStall();
 
 private:
     explicit VideoManager(QObject *parent = nullptr);
@@ -76,6 +78,7 @@ private:
     void updateFrameHandler();
     void startCamera();
     void stopCamera();
+    void reportCameraError(const QString &message);
     void setCameraError(const QString &message);
     bool isDeviceAvailable(const QString &deviceId) const;
     VideoDevice deviceById(const QString &deviceId) const;
@@ -86,6 +89,9 @@ private:
 #endif
 
     QTimer m_debounceUpdateTimer;
+    QTimer m_stallTimer;
+    // Camera thread
+    std::atomic<bool> m_hasReceivedFrame = false;
     std::unique_ptr<CameraSource> m_cameraSource;
     QList<FramePump *> m_consumers;
 
