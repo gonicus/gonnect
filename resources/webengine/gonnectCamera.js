@@ -9,6 +9,7 @@
     const frameUrl = 'gonnect-camera:frame'
     const frameFormats = [ 'I420', 'RGBX' ]
     const headerSize = 12
+    const defaultSize = { width: 1280, height: 720 }
 
     const mediaDevices = navigator.mediaDevices
     if (!mediaDevices) {
@@ -37,18 +38,29 @@
         const stream = constraints.audio 
                        ? await getUserMedia({ audio: constraints.audio })
                        : new MediaStream()
-        stream.addTrack(createCameraTrack())
+        stream.addTrack(createCameraTrack(constraints.video))
         return stream
     }
 
-    function createCameraTrack() {
+    function createCameraTrack(videoConstraints) {
         const track = new MediaStreamTrackGenerator({ kind: 'video' })
         const abortController = new AbortController()
-        const settings = { deviceId, groupId: deviceId, width: 0, height: 0 }
+
+        let trackConstraints = typeof videoConstraints === 'object' ? { ...videoConstraints } : {}
+
+        const settings = { 
+            deviceId, 
+            groupId: deviceId, 
+            width: requestedSize(trackConstraints.width) || defaultSize.width, 
+            height: requestedSize(trackConstraints.height) || defaultSize.height 
+        }
 
         Object.defineProperty(track, 'label', { value: label })
         track.getSettings = () => ({ ...settings })
-        track.applyConstraints = async () => {}
+        track.getConstraints = () => ({ ...trackConstraints })
+        track.applyConstraints = async (constraints = {}) => {
+            trackConstraints = { ...constraints }
+        }
 
         const stop = track.stop.bind(track)
         track.stop = () => {
@@ -85,6 +97,13 @@
         }
 
         writer.close().catch(() => {})
+    }
+
+    function requestedSize(constraint) {
+        if (typeof constraint === 'number') {
+            return constraint
+        }
+        return constraint?.exact ?? constraint?.ideal ?? constraint?.max ?? 0
     }
 
     function toVideoFrame(buffer) {
