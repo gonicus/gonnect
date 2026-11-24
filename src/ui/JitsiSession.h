@@ -19,6 +19,8 @@ private:
     void receiveEvent(const QString &message);
     void handle(const JitsiSessionProtocol::Joined &joined);
     void handle(const JitsiSessionProtocol::RoleChanged &roleChanged);
+    void handle(const JitsiSessionProtocol::UserJoined &userJoined);
+    void handle(const JitsiSessionProtocol::UserLeft &userLeft);
     void handle(const JitsiSessionProtocol::AudioMuted &audioMuted);
     void handle(const JitsiSessionProtocol::VideoMuted &videoMuted);
     void handle(const JitsiSessionProtocol::Devices &devices);

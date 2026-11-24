@@ -58,6 +58,30 @@ void JitsiSessionProtocolTest::parsesRoleChanged()
     QCOMPARE(roleChanged->role, Role::Moderator);
 }
 
+void JitsiSessionProtocolTest::parsesUserJoined()
+{
+    const auto event = JitsiSessionProtocol::parseEvent(
+            uR"({"type":"userJoined","participantId":"abcd1234","displayName":"Alice","role":"participant"})"_s);
+
+    QVERIFY2(event.has_value(), errorText(event).constData());
+    const auto *userJoined = std::get_if<JitsiSessionProtocol::UserJoined>(&*event);
+    QVERIFY(userJoined);
+    QCOMPARE(userJoined->participantId, u"abcd1234"_s);
+    QCOMPARE(userJoined->displayName, u"Alice"_s);
+    QCOMPARE(userJoined->role, Role::User);
+}
+
+void JitsiSessionProtocolTest::parsesUserLeft()
+{
+    const auto event = JitsiSessionProtocol::parseEvent(
+            uR"({"type":"userLeft","participantId":"abcd1234"})"_s);
+
+    QVERIFY2(event.has_value(), errorText(event).constData());
+    const auto *userLeft = std::get_if<JitsiSessionProtocol::UserLeft>(&*event);
+    QVERIFY(userLeft);
+    QCOMPARE(userLeft->participantId, u"abcd1234"_s);
+}
+
 void JitsiSessionProtocolTest::parsesAudioMuted()
 {
     const auto event =
@@ -118,6 +142,8 @@ void JitsiSessionProtocolTest::rejectsInvalidEvent_data()
     QTest::newRow("unknown type") << uR"({"type":"dance"})"_s;
     QTest::newRow("joined without id") << uR"({"type":"joined","role":"moderator"})"_s;
     QTest::newRow("role change without id") << uR"({"type":"roleChanged","role":"moderator"})"_s;
+    QTest::newRow("user join without id") << uR"({"type":"userJoined","displayName":"Alice"})"_s;
+    QTest::newRow("user leave without id") << uR"({"type":"userLeft"})"_s;
     QTest::newRow("audio mute without state") << uR"({"type":"audioMuted"})"_s;
 }
 void JitsiSessionProtocolTest::rejectsInvalidEvent()
@@ -163,6 +189,24 @@ void JitsiSessionProtocolTest::createsVideoCommand()
 
     QCOMPARE(object.value("type"_L1).toString(), u"setVideoMuted"_s);
     QCOMPARE(object.value("isMuted"_L1).toBool(), false);
+}
+
+void JitsiSessionProtocolTest::createsModerationCommands()
+{
+    const auto toObject = [](const QString &message) {
+        return QJsonDocument::fromJson(message.toUtf8()).object();
+    };
+
+    const QJsonObject kick = toObject(JitsiSessionProtocol::kickParticipantCommand(u"abcd"_s));
+    QCOMPARE(kick.value("type"_L1).toString(), u"kickParticipant"_s);
+    QCOMPARE(kick.value("participantId"_L1).toString(), u"abcd"_s);
+
+    const QJsonObject grant = toObject(JitsiSessionProtocol::grantModeratorCommand(u"abcd"_s));
+    QCOMPARE(grant.value("type"_L1).toString(), u"grantModerator"_s);
+    QCOMPARE(grant.value("participantId"_L1).toString(), u"abcd"_s);
+
+    const QJsonObject muteAll = toObject(JitsiSessionProtocol::muteAllCommand());
+    QCOMPARE(muteAll.value("type"_L1).toString(), u"muteAll"_s);
 }
 
 QTEST_GUILESS_MAIN(JitsiSessionProtocolTest)

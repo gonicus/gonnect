@@ -31,6 +31,9 @@
     })
     control.on('setAudioInputDevice', message => setAudioInputDevice(message.deviceId))
     control.on('setAudioOutputDevice', message => setAudioOutputDevice(message.deviceId))
+    control.on('kickParticipant', message => conference?.kickParticipant(message.participantId))
+    control.on('grantModerator', message => conference?.grantOwner(message.participantId))
+    control.on('muteAll', muteAll)
     control.on('receiverConstraints', message => {
         requestedReceiverConstraints = message
         applyReceiverConstraints()
@@ -93,6 +96,30 @@
             })
         })
 
+        conference.on(events.USER_JOINED, (participantId, participant) => {
+            if (participant.isHidden()) {
+                // Transcriber, recorder, etc.
+                return
+            }
+
+            control.send({
+                type: 'userJoined',
+                participantId,
+                displayName: participant.getDisplayName() ?? '',
+                role: participant.getRole()
+            })
+        })
+
+        conference.on(events.USER_LEFT, participantId => {
+            control.send({
+                type: 'userLeft',
+                participantId
+            })
+            reportTracks()
+        })
+
+        conference.on(events.KICKED, () => fail('conference.kicked'))
+
         conference.on(events.CONFERENCE_FAILED, error => fail(`conference.${error}`))
         conference.on(events.TRACK_ADDED, track => {
             playRemoteAudio(track)
@@ -105,7 +132,6 @@
         })
         conference.on(events.TRACK_MUTE_CHANGED, reportTracks)
         conference.on(events.PARTICIPANT_SOURCE_UPDATED, reportTracks)
-        conference.on(events.USER_LEFT, reportTracks)
 
         conference.setDisplayName(settings.displayName)
 
@@ -177,6 +203,12 @@
             sentTracks = snapshot
             control.send(message)
         }
+    }
+
+    function muteAll() {
+        conference?.getParticipants()
+            .filter(participant => !participant.isHidden())
+            .forEach(participant => conference.muteParticipant(participant.getId(), 'audio'))
     }
 
     async function createAudioTrack(deviceId, isMuted) {

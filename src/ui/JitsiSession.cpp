@@ -54,6 +54,16 @@ JitsiSession::JitsiSession(JitsiConnector *connector, JitsiVideoBridge *bridge, 
             [this](const QString &deviceId) {
                 send(JitsiSessionProtocol::setAudioOutputDeviceCommand(deviceId));
             });
+    connect(m_connector, &JitsiConnector::executeKickUserCommand, this,
+            [this](const QString &participantId) {
+                sendIfJoined(JitsiSessionProtocol::kickParticipantCommand(participantId));
+            });
+    connect(m_connector, &JitsiConnector::executeGrantModeratorCommand, this,
+            [this](const QString &participantId) {
+                sendIfJoined(JitsiSessionProtocol::grantModeratorCommand(participantId));
+            });
+    connect(m_connector, &JitsiConnector::executeMuteAllCommand, this,
+            [this]() { sendIfJoined(JitsiSessionProtocol::muteAllCommand()); });
 }
 
 void JitsiSession::receiveEvent(const QString &message)
@@ -85,6 +95,17 @@ void JitsiSession::handle(const JitsiSessionProtocol::Joined &joined)
 void JitsiSession::handle(const JitsiSessionProtocol::RoleChanged &roleChanged)
 {
     m_connector->setUserRole(roleChanged.participantId, roleChanged.role);
+}
+
+void JitsiSession::handle(const JitsiSessionProtocol::UserJoined &userJoined)
+{
+    m_connector->addUser(userJoined.participantId, userJoined.displayName);
+    m_connector->setUserRole(userJoined.participantId, userJoined.role);
+}
+
+void JitsiSession::handle(const JitsiSessionProtocol::UserLeft &userLeft)
+{
+    m_connector->removeUser(userLeft.participantId);
 }
 
 void JitsiSession::handle(const JitsiSessionProtocol::AudioMuted &audioMuted)

@@ -38,6 +38,7 @@ Item {
 
             readonly property bool isModerator: delg.role === ConferenceUser.Role.Moderator
             readonly property bool isMe: delg.id === control.conferenceConnector?.ownId ?? false
+            readonly property bool canBecomeModerator: !delg.isMe && control.conferenceConnector?.ownRole === ConferenceUser.Role.Moderator
 
             Accessible.role: Accessible.ListItem
             Accessible.name: delg.displayName
@@ -123,10 +124,7 @@ Item {
                 acceptedButtons: Qt.LeftButton | Qt.RightButton
                 onTapped: (_, mouseButton) => {
                     if (mouseButton === Qt.RightButton) {
-                        // The functions features in the context menu are not working right now (jitsi meet issues), so hide
-                        // the menu completely until fixed.
-
-                        if (!delg.isMe && delg.isModerator) {
+                        if (delg.canBecomeModerator) {
                             userContextMenuComponent.createObject(delg).popup()
                         }
                     } else {

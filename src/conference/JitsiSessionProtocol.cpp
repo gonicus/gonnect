@@ -75,6 +75,24 @@ JitsiSessionProtocol::parseEvent(const QString &message)
                             .role = roleFromString(object.value("role"_L1).toString()) };
     }
 
+    if (type == "userJoined"_L1) {
+        const auto participantId = object.value("participantId"_L1).toString();
+        if (participantId.isEmpty()) {
+            return std::unexpected(u"User joined without participant id"_s);
+        }
+        return UserJoined{ .participantId = participantId,
+                           .displayName = object.value("displayName"_L1).toString(),
+                           .role = roleFromString(object.value("role"_L1).toString()) };
+    }
+
+    if (type == "userLeft"_L1) {
+        const auto participantId = object.value("participantId"_L1).toString();
+        if (participantId.isEmpty()) {
+            return std::unexpected(u"User left without participant id"_s);
+        }
+        return UserLeft{ .participantId = participantId };
+    }
+
     if (type == "audioMuted"_L1) {
         const auto isMuted = object.value("isMuted"_L1);
         if (!isMuted.isBool()) {
@@ -127,4 +145,19 @@ QString JitsiSessionProtocol::setAudioInputDeviceCommand(const QString &deviceId
 QString JitsiSessionProtocol::setAudioOutputDeviceCommand(const QString &deviceId)
 {
     return commandMessage("setAudioOutputDevice"_L1, { { "deviceId"_L1, deviceId } });
+}
+
+QString JitsiSessionProtocol::kickParticipantCommand(const QString &participantId)
+{
+    return commandMessage("kickParticipant"_L1, { { "participantId"_L1, participantId } });
+}
+
+QString JitsiSessionProtocol::grantModeratorCommand(const QString &participantId)
+{
+    return commandMessage("grantModerator"_L1, { { "participantId"_L1, participantId } });
+}
+
+QString JitsiSessionProtocol::muteAllCommand()
+{
+    return commandMessage("muteAll"_L1);
 }
