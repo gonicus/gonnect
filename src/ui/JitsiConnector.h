@@ -12,6 +12,7 @@
 
 class CallHistoryItem;
 class JitsiVideoBridge;
+class JitsiSession;
 class SIPAudioDevice;
 class Notification;
 
@@ -21,6 +22,7 @@ class JitsiConnector : public IConferenceConnector
     QML_ELEMENT
 
     Q_PROPERTY(bool isNativeVideoEnabled READ isNativeVideoEnabled CONSTANT FINAL)
+    Q_PROPERTY(bool isLibJitsiMeetEnabled READ isLibJitsiMeetEnabled CONSTANT FINAL)
 
 public:
     explicit JitsiConnector(QObject *parent = nullptr);
@@ -30,6 +32,7 @@ public:
     /// Changes require a restart
     static bool readIsNativeVideoEnabled();
     bool isNativeVideoEnabled() const { return m_isNativeVideoEnabled; };
+    bool isLibJitsiMeetEnabled() const { return m_isLibJitsiMeetEnabled; }
 
     QString ownDisplayName() override;
 
@@ -49,6 +52,7 @@ public:
 
     /// Empty if native video is disabled
     Q_INVOKABLE QString remoteVideoScriptInternal();
+    Q_INVOKABLE QString sessionHtmlInternal();
 
     // Should be called by the JS code once when all initialization is done
     Q_INVOKABLE void apiLoadingFinishedInternal();
@@ -66,6 +70,7 @@ public:
     Q_INVOKABLE void addUser(const QString &id, const QString &displayName);
     Q_INVOKABLE void removeUser(const QString &id);
     Q_INVOKABLE void setUserRole(const QString &id, const QString &roleString);
+    void setUserRole(const QString &id, ConferenceUser::Role role);
     Q_INVOKABLE void setLargeVideoUserById(const QString &id);
 
     bool isTranscriptionActive() const override { return m_isTranscriptionActive; }
@@ -152,6 +157,9 @@ private Q_SLOTS:
     void updateVideoAvailability();
 
 private:
+    static bool readIsLibJitsiMeetEnabled();
+    bool ensureVideoBridge();
+
     // Toggles the Jitsi-internal mute. For globally setting the mute state, use GlobalMuteState
     // instead.
     void toggleMute();
@@ -219,7 +227,9 @@ private:
     QList<ConferenceUser *> m_users;
     ConferenceVideoModel *m_videoModel = nullptr;
     JitsiVideoBridge *m_videoBridge = nullptr;
+    JitsiSession *m_session = nullptr;
     const bool m_isNativeVideoEnabled = readIsNativeVideoEnabled();
+    const bool m_isLibJitsiMeetEnabled = m_isNativeVideoEnabled && readIsLibJitsiMeetEnabled();
     QPointer<CallHistoryItem> m_callHistoryItem;
     QDateTime m_establishedDateTime;
     QList<Notification *> m_chatNotifications;

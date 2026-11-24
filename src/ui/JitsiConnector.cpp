@@ -26,6 +26,7 @@
 #include "PlatformSession.h"
 #include "CertHelper.h"
 #include "JitsiVideoBridge.h"
+#include "JitsiSession.h"
 #include "VideoDecoder.h"
 
 #include <QJsonObject>
@@ -611,18 +612,8 @@ QString JitsiConnector::remoteVideoScriptInternal()
         return {};
     }
 
-    // Runs until shutdown -> endpoint and token stay valid for later conferences
-    if (!m_videoBridge) {
-        m_videoBridge =
-                new JitsiVideoBridge(m_videoModel, QUrl(GlobalInfo::instance().jitsiUrl()), this);
-    }
-
-    if (!m_videoBridge->isRunning()) {
-        const auto started = m_videoBridge->start();
-        if (!started) {
-            qCCritical(lcJitsiConnector) << "Cannot start remote video bridge:" << started.error();
-            return {};
-        }
+    if (!ensureVideoBridge()) {
+        return {};
     }
 
     QFile script(QStringLiteral(":/webengine/gonnectRemoteVideo.js"));
@@ -631,12 +622,67 @@ QString JitsiConnector::remoteVideoScriptInternal()
         return {};
     }
 
-    const QJsonObject config{ { "endpoint", m_videoBridge->endpoint().toString() },
-                              { "token", m_videoBridge->token() } };
+    const QJsonObject config{
+        { "endpoint", m_videoBridge->endpoint().toString() },
+        { "token", m_videoBridge->token() },
+        { "isSessionPage", m_isLibJitsiMeetEnabled },
+    };
 
     return QString::fromUtf8(script.readAll())
             .replace(QStringLiteral("__GONNECT_REMOTE_VIDEO_CONFIG__"),
                      QString::fromUtf8(QJsonDocument(config).toJson(QJsonDocument::Compact)));
+}
+
+QString JitsiConnector::sessionHtmlInternal()
+{
+    if (!m_isLibJitsiMeetEnabled || !ensureVideoBridge()) {
+        return {};
+    }
+
+    if (!m_session) {
+        m_session = new JitsiSession(this, m_videoBridge, this);
+    }
+
+    QFile script(QStringLiteral(":/webengine/gonnectJitsiSession.js"));
+    if (!script.open(QIODevice::ReadOnly)) {
+        qCCritical(lcJitsiConnector) << "Cannot read session script:" << script.errorString();
+        return {};
+    }
+
+    auto &authManager = AuthManager::instance();
+    const QString jwt = authManager.isJitsiAuthRequired()
+            ? QString::fromUtf8(authManager.jitsiTokenForRoom(m_roomName))
+            : QString();
+
+    const QJsonObject config{
+        { "endpoint", m_videoBridge->endpoint().toString() },
+        { "token", m_videoBridge->token() },
+        { "roomName", m_roomName },
+        { "jwt", jwt },
+        { "displayName", ownDisplayName() },
+        { "isAudioMuted", m_isOnHold || GlobalMuteState::instance().isMuted() },
+        { "videoCodecs", QJsonArray::fromStringList(decodableVideoCodecs()) },
+    };
+
+    const auto configJson = QString::fromUtf8(QJsonDocument(config).toJson(QJsonDocument::Compact))
+                                    // Encoding: prevent "<" from ending script
+                                    .replace(QLatin1Char('<'), QStringLiteral("\\u003c"));
+
+    const auto source = QString::fromUtf8(script.readAll())
+                                .replace(QStringLiteral("__GONNECT_SESSION_CONFIG__"), configJson);
+
+    return QStringLiteral(R"(<!DOCTYPE html>
+<html>
+<head>
+    <script src="%1/config.js"></script>
+    <script src="%1/libs/lib-jitsi-meet.min.js"></script>
+    <script>%2</script>
+</head>
+</html>
+)")
+            .arg(GlobalInfo::instance().jitsiUrl(), // %1
+                 source // %2
+            );
 }
 
 void JitsiConnector::toggleMute()
@@ -1103,6 +1149,11 @@ void JitsiConnector::setUserRole(const QString &id, const QString &roleString)
         role = Role::User;
     }
 
+    setUserRole(id, role);
+}
+
+void JitsiConnector::setUserRole(const QString &id, ConferenceUser::Role role)
+{
     if (id == m_jitsiId) {
         if (m_ownRole != role) {
             qCInfo(lcJitsiConnector)
@@ -1379,6 +1430,31 @@ void JitsiConnector::updateVideoAvailability()
 {
     Q_EMIT isVideoAvailableChanged();
     updateVideoCallState();
+}
+
+bool JitsiConnector::readIsLibJitsiMeetEnabled()
+{
+    ReadOnlyConfdSettings settings;
+    return settings.value("jitsi/isLibJitsiMeetEnabled", false).toBool();
+}
+
+bool JitsiConnector::ensureVideoBridge()
+{
+
+    // Runs until shutdown -> endpoint and token stay valid for later conferences
+    if (!m_videoBridge) {
+        m_videoBridge =
+                new JitsiVideoBridge(m_videoModel, QUrl(GlobalInfo::instance().jitsiUrl()), this);
+    }
+
+    if (!m_videoBridge->isRunning()) {
+        const auto started = m_videoBridge->start();
+        if (!started) {
+            qCCritical(lcJitsiConnector) << "Cannot start remote video bridge:" << started.error();
+            return false;
+        }
+    }
+    return true;
 }
 
 void JitsiConnector::setConferenceName(const QString &name)

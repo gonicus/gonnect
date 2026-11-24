@@ -1,0 +1,388 @@
+// Run conference with lib-jitsi-meet
+// See src/conference/JitsiSessionProtocol.h
+
+(() => {
+    'use strict'
+
+    const settings = __GONNECT_SESSION_CONFIG__
+    const roomName = settings.roomName.toLowerCase()
+    const control = createControl()
+
+    const cameraDeviceId = 'gonnect-camera'  // As in gonnectCamera.js
+
+    let connection = null
+    let conference = null
+    let audioTrack = null
+    let videoTrack = null
+    let requestedReceiverConstraints = null
+    let sentTracks = ''
+    let isLeaving = false
+
+    // Serializes camera changes (track creation is asynchronous)
+    let videoChange = Promise.resolve()
+
+    // Remote audio track -> element playing it
+    const remoteAudioElements = new Map()
+
+    control.on('leave', leave)
+    control.on('setAudioMuted', message => setAudioMuted(message.isMuted))
+    control.on('setVideoMuted', message => {
+        videoChange = videoChange.then(() => setVideoMuted(message.isMuted))
+    })
+    control.on('setAudioInputDevice', message => setAudioInputDevice(message.deviceId))
+    control.on('setAudioOutputDevice', message => setAudioOutputDevice(message.deviceId))
+    control.on('receiverConstraints', message => {
+        requestedReceiverConstraints = message
+        applyReceiverConstraints()
+    })
+
+    if (typeof JitsiMeetJS === 'undefined' || typeof config === 'undefined') {
+        fail('libraryNotLoaded')
+        return
+    }
+
+    connect()
+
+    function connect() {
+        JitsiMeetJS.setLogLevel(JitsiMeetJS.logLevels.WARN)
+        JitsiMeetJS.init({ ...config })
+
+        connection = new JitsiMeetJS.JitsiConnection(null, 
+                                                     settings.jwt || null,
+                                                     { ...config, serviceUrl: serviceUrl() })
+
+        const events = JitsiMeetJS.events.connection
+        connection.addEventListener(events.CONNECTION_ESTABLISHED, joinConference)
+        connection.addEventListener(events.CONNECTION_FAILED, error => fail(`connection.${error}`))
+        connection.addEventListener(events.CONNECTION_DISCONNECTED, () => {
+            if (!isLeaving) {
+                fail('connection.disconnected')
+            }
+        })
+
+        connection.connect({ name: roomName })
+    }
+
+    function serviceUrl() {
+        const url = config.websocket || config.bosh
+        const scheme = config.websocket ? 'wss:' : 'https:'
+        const absoluteUrl = url.startsWith('//') ? `${scheme}${url}` : url
+        const separator = absoluteUrl.includes('?') ? '&' : '?'
+        return `${absoluteUrl}${separator}room=${encodeURIComponent(roomName)}`
+    }
+
+    async function joinConference() {
+        conference = connection.initJitsiConference(roomName, conferenceOptions())
+        applyReceiverConstraints()
+
+        const events = JitsiMeetJS.events.conference
+        conference.on(events.CONFERENCE_JOINED, () => {
+            control.send({
+                type: 'joined',
+                participantId: conference.myUserId(),
+                role: conference.getRole()
+            })
+            reportAudioMuted()
+        })
+
+        conference.on(events.USER_ROLE_CHANGED, (participantId, role) => {
+            control.send({
+                type: 'roleChanged',
+                participantId,
+                role
+            })
+        })
+
+        conference.on(events.CONFERENCE_FAILED, error => fail(`conference.${error}`))
+        conference.on(events.TRACK_ADDED, track => {
+            playRemoteAudio(track)
+            watchRemoteVideo(track)
+            reportTracks()
+        })
+        conference.on(events.TRACK_REMOVED, track => {
+            stopRemoteAudio(track)
+            reportTracks()
+        })
+        conference.on(events.TRACK_MUTE_CHANGED, reportTracks)
+        conference.on(events.PARTICIPANT_SOURCE_UPDATED, reportTracks)
+        conference.on(events.USER_LEFT, reportTracks)
+
+        conference.setDisplayName(settings.displayName)
+
+        audioTrack = await createAudioTrack(undefined, settings.isAudioMuted)
+        if (audioTrack) {
+            await conference.addTrack(audioTrack)
+        }
+
+        conference.join()
+
+        reportDevices()
+        JitsiMeetJS.mediaDevices.addEventListener(
+            JitsiMeetJS.events.mediaDevices.DEVICE_LIST_CHANGED, reportDevices)
+    }
+
+    function conferenceOptions() {
+        const codecPreferenceOrder = settings.videoCodecs
+        return {
+            ...config,
+            videoQuality: { ...config.videoQuality, codecPreferenceOrder },
+            p2p: { ...config.p2p, codecPreferenceOrder }
+        }
+    }
+
+    function applyReceiverConstraints() {
+        if (!conference || !requestedReceiverConstraints) {
+            return 
+        }
+
+        const { constraints, onStageSources } = requestedReceiverConstraints
+        conference.setReceiverConstraints({
+            lastN: config.channelLastN ?? -1,
+            defaultConstraints: { maxHeight: 0 },
+            constraints,
+            onStageSources,
+            selectedSources: []
+        })
+    }
+
+    function watchRemoteVideo(track) {
+        if (track.isLocal() || !track.isVideoTrack()) {
+            return
+        }
+
+        const events = JitsiMeetJS.events.track
+        track.addEventListener(events.TRACK_VIDEOTYPE_CHANGED, reportTracks)
+        track.addEventListener(events.TRACK_OWNER_SET, reportTracks)
+    }
+
+    function reportTracks() {
+        if (!conference) {
+            return
+        }
+
+        const tracks = conference.getParticipants()
+            .flatMap(participant => participant.getTracksByMediaType('video'))
+            .filter(track => track.getSourceName())
+            .map(track => ({
+                trackId: track.getTrack().id,
+                sourceName: track.getSourceName(),
+                participantId: track.getParticipantId(),
+                videoType: track.getVideoType(),
+                isMuted: track.isMuted()
+            }))
+
+        const message = { type: 'tracks', tracks }
+        const snapshot = JSON.stringify(message)
+        if (snapshot !== sentTracks) {
+            sentTracks = snapshot
+            control.send(message)
+        }
+    }
+
+    async function createAudioTrack(deviceId, isMuted) {
+        try {
+            const [ track ] = await JitsiMeetJS.createLocalTracks({ devices: [ 'audio' ],
+                                                                    micDeviceId: deviceId })
+            if (isMuted) {
+                await track.mute()
+            }
+
+            track.addEventListener(JitsiMeetJS.events.track.TRACK_MUTE_CHANGED, () => {
+                if (track === audioTrack) {
+                    reportAudioMuted()
+                }
+            })
+            return track
+        } catch (error) {
+            console.error('GOnnect session microphone not available:', error?.message ?? error)
+            return null
+        }
+    }
+
+    function reportAudioMuted() {
+        if (audioTrack) {
+            control.send({
+                type: 'audioMuted',
+                isMuted: audioTrack.isMuted()
+            })
+        }
+    }
+
+    async function setAudioMuted(isMuted) {
+        if (!audioTrack) {
+            return
+        }
+
+        // GOnnect waits for confirmation (even if nothing changed)
+        if (audioTrack.isMuted() === isMuted) {
+            reportAudioMuted()
+            return
+        }
+
+        try {
+            if (isMuted) {
+                await audioTrack.mute()
+            } else {
+                await audioTrack.unmute()
+            }
+        } catch (error) {
+            console.error('GOnnect session cannot change microphone mute', error?.message ?? error)
+            reportAudioMuted()
+        }
+    }
+
+    async function setAudioInputDevice(deviceId) {
+        if (!conference || audioTrack?.getDeviceId() === deviceId) {
+            return
+        }
+
+        const isMuted = audioTrack?.isMuted() ?? settings.isAudioMuted
+        const track = await createAudioTrack(deviceId, isMuted)
+        if (!track) {
+            return
+        }
+
+        const previousTrack = audioTrack
+        audioTrack = track
+        await conference.replaceTrack(previousTrack, track)
+        await previousTrack?.dispose()
+    }
+
+    async function setVideoMuted(isMuted) {
+        try {
+            if (!videoTrack && !isMuted) {
+                const track = await createVideoTrack()
+                try {
+                    await conference.addTrack(track)
+                    videoTrack = track
+                } catch (error) {
+                    await track.dispose()
+                    throw error
+                }
+            } else if (videoTrack && videoTrack.isMuted() !== isMuted) {
+                await (isMuted ? videoTrack.mute() : videoTrack.unmute())
+            }
+        } catch (error) {
+            console.error('GOnnect session cannot change camera:', error?.message ?? error)
+        }
+
+        reportVideoMuted()
+    }
+
+    async function createVideoTrack() {
+        const [ track ] = await JitsiMeetJS.createLocalTracks({
+            devices: [ 'video' ],
+            cameraDeviceId,
+            resolution: config.resolution ?? 720
+        })
+
+        track.addEventListener(JitsiMeetJS.events.track.TRACK_MUTE_CHANGED, () => {
+            if (track === videoTrack) {
+                reportVideoMuted()
+            }
+        })
+        return track
+    }
+
+    function reportVideoMuted() {
+        control.send({
+            type: 'videoMuted',
+            isMuted: !videoTrack || videoTrack.isMuted()
+        })
+    }
+
+    function setAudioOutputDevice(deviceId) {
+        JitsiMeetJS.mediaDevices.setAudioOutputDevice(deviceId).catch(error => {
+            console.error('GOnnect session cannot set audio output', error?.message ?? error)
+        })
+    }
+
+    function reportDevices() {
+        JitsiMeetJS.mediaDevices.enumerateDevices(devices => {
+            const toDevice = device => ({
+                deviceId: device.deviceId,
+                groupId: device.groupId,
+                label: device.label
+            })
+
+            control.send({
+                type: 'devices',
+                audioInputs: devices.filter(device => device.kind === 'audioinput').map(toDevice),
+                audioOutputs: devices.filter(device => device.kind === 'audiooutput').map(toDevice)
+            })
+        })
+    }
+
+    function playRemoteAudio(track) {
+        if (track.isLocal() || track.getType() !== 'audio') {
+            return
+        }
+
+        const element = document.createElement('audio')
+        element.autoplay = true
+        document.body.appendChild(element)
+        track.attach(element)
+        remoteAudioElements.set(track, element)
+    }
+
+    function stopRemoteAudio(track) {
+        const element = remoteAudioElements.get(track)
+        if (!element) {
+            return
+        }
+
+        track.detach(element)
+        element.remove()
+        remoteAudioElements.delete(track)
+    }
+
+    async function leave() {
+        isLeaving = true
+
+        try {
+            await conference?.leave()
+        } catch (error) {
+            console.warn('GOnnect session: leaving failed', error?.message ?? error)
+        }
+        await audioTrack?.dispose()
+        await videoTrack?.dispose()
+        connection?.disconnect()
+    }
+
+    function fail(reason) {
+        console.error('GOnnect session failed:', reason)
+        control.send({ type: 'failed', reason })
+    }
+
+    function createControl() {
+        const query = new URLSearchParams({ token: settings.token })
+        const socket = new WebSocket(`${settings.endpoint}/control?${query}`)
+        const pendingMessages = []
+        const handlers = {}
+
+        socket.onopen = () => pendingMessages.splice(0).forEach(message => socket.send(message))
+        socket.onmessage = event => {
+            try {
+                const message = JSON.parse(event.data)
+                handlers[message.type]?.(message)
+            } catch (error) {
+                console.error('GOnnect session invalid control message:', error.message)
+            }
+        }
+        socket.onclose = () => console.warn('GOnnect session control connection closed')
+
+        return {
+            send: message => {
+                const text = JSON.stringify(message)
+                if (socket.readyState === WebSocket.OPEN) {
+                    socket.send(text)
+                } else {
+                    pendingMessages.push(text)
+                }
+            },
+            on: (type, handler) => {
+                handlers[type] = handler
+            }
+        }
+    }
+})()

@@ -773,6 +773,8 @@ qt_add_qml_module(gonnect
         conference/ConferenceVideoSource.h
         conference/ConferenceVideoSource.cpp
         conference/IConferenceConnector.h
+        conference/JitsiSessionProtocol.h
+        conference/JitsiSessionProtocol.cpp
         conference/JitsiVideoProtocol.h
         conference/JitsiVideoProtocol.cpp
         conference/JitsiVideoBridge.h
@@ -975,6 +977,8 @@ qt_add_qml_module(gonnect
         ui/JitsiConnector.cpp
         ui/JitsiMediaDevice.h
         ui/JitsiMediaDevice.cpp
+        ui/JitsiSession.h
+        ui/JitsiSession.cpp
         ui/MostCalledModel.h
         ui/MostCalledModel.cpp
         ui/NumberStatsModel.h

@@ -172,3 +172,8 @@ QString JitsiVideoProtocol::receiverConstraintsMessage(const QList<ReceiverConst
 
     return QString::fromUtf8(QJsonDocument(message).toJson(QJsonDocument::Compact));
 }
+
+QString JitsiVideoProtocol::messageType(const QString &message)
+{
+    return QJsonDocument::fromJson(message.toUtf8()).object().value("type"_L1).toString();
+}

@@ -40,6 +40,12 @@ public:
     /// Required as "token" query item of each connection
     QString token() const { return m_token; }
 
+    /// Is dropped if no control connection
+    void sendControlMessage(const QString &message);
+
+Q_SIGNALS:
+    void controlMessageReceived(const QString &message);
+
 private Q_SLOTS:
     void scheduleReceiverConstraints();
     void sendReceiverConstraints();

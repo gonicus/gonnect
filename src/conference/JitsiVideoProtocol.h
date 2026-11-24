@@ -66,6 +66,9 @@ std::expected<CodecMap, QString> parseCodecs(const QString &message);
 
 std::expected<QList<RemoteTrack>, QString> parseTracks(const QString &message);
 
+/// Value of "type" as in json message or empty if invalid
+QString messageType(const QString &message);
+
 QString keyFrameRequestMessage();
 
 /// Largest standard layer height not above display height

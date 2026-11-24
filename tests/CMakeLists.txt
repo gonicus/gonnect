@@ -294,6 +294,29 @@ target_link_libraries(keyFrameGateTest
         Qt6::Test
 )
 
+qt_add_executable(jitsiSessionProtocolTest
+    JitsiSessionProtocol.test.cpp
+    JitsiSessionProtocol.test.h
+    ${PROJECT_SOURCE_DIR}/src/conference/ConferenceUser.cpp
+    ${PROJECT_SOURCE_DIR}/src/conference/ConferenceUser.h
+    ${PROJECT_SOURCE_DIR}/src/conference/JitsiSessionProtocol.cpp
+    ${PROJECT_SOURCE_DIR}/src/conference/JitsiSessionProtocol.h
+)
+
+add_test(NAME jitsiSessionProtocolTest COMMAND jitsiSessionProtocolTest)
+
+target_include_directories(jitsiSessionProtocolTest
+    PRIVATE
+        ${PROJECT_SOURCE_DIR}/src/conference
+)
+
+target_link_libraries(jitsiSessionProtocolTest
+    PRIVATE
+        Qt6::Core
+        Qt6::Qml
+        Qt6::Test
+)
+
 qt_add_executable(jitsiVideoProtocolTest
     JitsiVideoProtocol.test.cpp
     JitsiVideoProtocol.test.h

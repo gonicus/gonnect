@@ -40,8 +40,12 @@ public:
     /// Sent to current and later control connection
     void setReceiverConstraints(const QString &message);
 
+    /// Is dropped when no control connection
+    void sendControlMessage(const QString &message);
+
 Q_SIGNALS:
     void tracksReceived(const QList<JitsiVideoProtocol::RemoteTrack> &tracks);
+    void controlMessageReceived(const QString &message);
 
 private:
     struct Track

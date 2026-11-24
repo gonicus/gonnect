@@ -52,6 +52,8 @@ std::expected<void, QString> JitsiVideoBridge::start()
 
     connect(&m_networkThread, &QThread::finished, m_server, &QObject::deleteLater);
     connect(m_server, &JitsiVideoServer::tracksReceived, this, &JitsiVideoBridge::applyTracks);
+    connect(m_server, &JitsiVideoServer::controlMessageReceived, this,
+            &JitsiVideoBridge::controlMessageReceived);
     m_networkThread.start();
 
     std::expected<quint16, QString> port;
@@ -90,6 +92,17 @@ void JitsiVideoBridge::stop()
     }
 
     qCInfo(lcJitsiVideoBridge) << "Stopped";
+}
+
+void JitsiVideoBridge::sendControlMessage(const QString &message)
+{
+    if (!m_server) {
+        return;
+    }
+
+    QMetaObject::invokeMethod(
+            m_server, [server = m_server, message]() { server->sendControlMessage(message); },
+            Qt::QueuedConnection);
 }
 
 void JitsiVideoBridge::applyTracks(const QList<JitsiVideoProtocol::RemoteTrack> &tracks)

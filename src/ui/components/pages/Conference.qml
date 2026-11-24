@@ -398,6 +398,7 @@ Item {
                     settings {
                         localStorageEnabled: true
                         screenCaptureEnabled: true
+                        playbackRequiresUserGesture: false  // lib-jitis-meet page: remote audio starts automatically
                     }
                     profile: CertificateProfile.profile
                     webChannel: WebChannel {
@@ -469,7 +470,9 @@ Item {
 
                     onLoadingChanged: (info) => {
                         if (info.status === WebEngineView.LoadSucceededStatus) {
-                            jitsiView.runJavaScript(confConn.jitsiJavascriptInternal())
+                            if (!confConn.isLibJitsiMeetEnabled) {
+                                jitsiView.runJavaScript(confConn.jitsiJavascriptInternal())
+                            }
                         } else if (info.status === WebEngineView.LoadFailedStatus) {
                             console.error(category, `failed to load HTML: ${info.errorString} (domain: ${info.errorDomain}, code: ${info.errorCode})`)
                         }
@@ -477,7 +480,10 @@ Item {
 
                     function loadJitsiSite() {
                         if (CertHelper.clientCertsInitialized) {
-                            jitsiView.loadHtml(confConn.jitsiHtmlInternal(), GlobalInfo.jitsiUrl())
+                            const html = confConn.isLibJitsiMeetEnabled
+                                         ? confConn.sessionHtmlInternal()
+                                         : confConn.jitsiHtmlInternal()
+                            jitsiView.loadHtml(html, GlobalInfo.jitsiUrl())
                         }
                     }
 

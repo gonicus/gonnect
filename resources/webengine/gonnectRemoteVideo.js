@@ -12,8 +12,8 @@
     // Last codecs send to worker per tapped receiver
     const announcedCodecs = new WeakMap()
 
-    // Meeting must run in iframe
-    if (window === window.top) {
+    // Jitsi app runs meeting in iframe, GOnnect session page in top frame
+    if (!config.isSessionPage && window === window.top) {
         return
     }
 
@@ -23,9 +23,12 @@
     }
 
     const worker = createWorker()
-    hideJitsiVideos()
     tapPeerConnections()
-    connectControlWhenStoreAvailable()
+
+    if (!config.isSessionPage) {
+        hideJitsiVideos()
+        connectControlWhenStoreAvailable()
+    }
 
     function connectionUrl(path, parameters = {}) {
         const query = new URLSearchParams({ token: config.token, ...parameters })
@@ -232,7 +235,7 @@
                   try {
                     tapTrack(event.receiver, event.track)
                   } catch (error) {
-                    console.error('GOnnect remote video: cannot tap track', event.track.id, error.mesage)
+                    console.error('GOnnect remote video: cannot tap track', event.track.id, error.message)
                   }
                 })
             }

@@ -81,6 +81,15 @@ void JitsiVideoServer::setReceiverConstraints(const QString &message)
     }
 }
 
+void JitsiVideoServer::sendControlMessage(const QString &message)
+{
+    if (!m_controlSocket) {
+        qCWarning(lcJitsiVideoServer) << "Dropping control message - no control connection";
+        return;
+    }
+    m_controlSocket->sendTextMessage(message);
+}
+
 void JitsiVideoServer::authenticateOrigin(QWebSocketCorsAuthenticator *authenticator) const
 {
     const bool isAllowed =
@@ -135,6 +144,11 @@ void JitsiVideoServer::acceptControl(QWebSocket *socket)
     qCInfo(lcJitsiVideoServer) << "Control connection established";
 
     connect(socket, &QWebSocket::textMessageReceived, this, [this](const QString &message) {
+        if (JitsiVideoProtocol::messageType(message) != "tracks"_L1) {
+            Q_EMIT controlMessageReceived(message);
+            return;
+        }
+
         const auto tracks = JitsiVideoProtocol::parseTracks(message);
         if (!tracks) {
             qCWarning(lcJitsiVideoServer) << "Invalid control message:" << tracks.error();
