@@ -82,6 +82,67 @@ void JitsiSessionProtocolTest::parsesUserLeft()
     QCOMPARE(userLeft->participantId, u"abcd1234"_s);
 }
 
+void JitsiSessionProtocolTest::parsesDisplayNameChanged()
+{
+    const auto event = JitsiSessionProtocol::parseEvent(
+            uR"({"type":"displayNameChanged","participantId":"abcd1234","displayName":"Bob"})"_s);
+
+    QVERIFY2(event.has_value(), errorText(event).constData());
+    const auto *changed = std::get_if<JitsiSessionProtocol::DisplayNameChanged>(&*event);
+    QVERIFY(changed);
+    QCOMPARE(changed->participantId, u"abcd1234"_s);
+    QCOMPARE(changed->displayName, u"Bob"_s);
+}
+
+void JitsiSessionProtocolTest::parsesParticipantMuted()
+{
+    const auto event = JitsiSessionProtocol::parseEvent(
+            uR"({"type":"participantMuted","participantId":"abcd1234","isAudioMuted":true,"isVideoMuted":false})"_s);
+
+    QVERIFY2(event.has_value(), errorText(event).constData());
+    const auto *muted = std::get_if<JitsiSessionProtocol::ParticipantMuted>(&*event);
+    QVERIFY(muted);
+    QCOMPARE(muted->participantId, u"abcd1234"_s);
+    QVERIFY(muted->isAudioMuted);
+    QVERIFY(!muted->isVideoMuted);
+}
+
+void JitsiSessionProtocolTest::parsesHandRaised_data()
+{
+    QTest::addColumn<qint64>("timestamp");
+    QTest::addColumn<QDateTime>("dateTime");
+
+    QTest::newRow("raised") << Q_INT64_C(1795969348296)
+                            << QDateTime::fromMSecsSinceEpoch(1795969348296);
+    QTest::newRow("lowered") << Q_INT64_C(0) << QDateTime();
+}
+
+void JitsiSessionProtocolTest::parsesHandRaised()
+{
+    QFETCH(qint64, timestamp);
+    QFETCH(QDateTime, dateTime);
+
+    const auto event = JitsiSessionProtocol::parseEvent(
+            uR"({"type":"handRaised","participantId":"abcd1234","timestamp":%1})"_s.arg(timestamp));
+
+    QVERIFY2(event.has_value(), errorText(event).constData());
+    const auto *handRaised = std::get_if<JitsiSessionProtocol::HandRaised>(&*event);
+    QVERIFY(handRaised);
+    QCOMPARE(handRaised->participantId, u"abcd1234"_s);
+    QCOMPARE(handRaised->dateTime, dateTime);
+}
+
+void JitsiSessionProtocolTest::parsesDominantSpeaker()
+{
+    const auto event = JitsiSessionProtocol::parseEvent(
+            uR"({"type":"dominantSpeaker","participantId":"abcd1234"})"_s);
+
+    QVERIFY2(event.has_value(), errorText(event).constData());
+    const auto *speaker = std::get_if<JitsiSessionProtocol::DominantSpeaker>(&*event);
+    QVERIFY(speaker);
+    QCOMPARE(speaker->participantId, u"abcd1234"_s);
+}
+
 void JitsiSessionProtocolTest::parsesAudioMuted()
 {
     const auto event =
@@ -144,6 +205,12 @@ void JitsiSessionProtocolTest::rejectsInvalidEvent_data()
     QTest::newRow("role change without id") << uR"({"type":"roleChanged","role":"moderator"})"_s;
     QTest::newRow("user join without id") << uR"({"type":"userJoined","displayName":"Alice"})"_s;
     QTest::newRow("user leave without id") << uR"({"type":"userLeft"})"_s;
+    QTest::newRow("name change without id")
+            << uR"({"type":"displayNameChanged","displayName":"Bob"})"_s;
+    QTest::newRow("participant mute incomplete")
+            << uR"({"type":"participantMuted","participantId":"abcd","isAudioMuted":true})"_s;
+    QTest::newRow("hand without timestamp") << uR"({"type":"handRaised","participantId":"abcd"})"_s;
+    QTest::newRow("speaker without id") << uR"({"type":"dominantSpeaker"})"_s;
     QTest::newRow("audio mute without state") << uR"({"type":"audioMuted"})"_s;
 }
 void JitsiSessionProtocolTest::rejectsInvalidEvent()
@@ -207,6 +274,16 @@ void JitsiSessionProtocolTest::createsModerationCommands()
 
     const QJsonObject muteAll = toObject(JitsiSessionProtocol::muteAllCommand());
     QCOMPARE(muteAll.value("type"_L1).toString(), u"muteAll"_s);
+}
+
+void JitsiSessionProtocolTest::createsHandCommand()
+{
+    const QJsonObject object =
+            QJsonDocument::fromJson(JitsiSessionProtocol::setHandRaisedCommand(true).toUtf8())
+                    .object();
+
+    QCOMPARE(object.value("type"_L1).toString(), u"setHandRaised"_s);
+    QCOMPARE(object.value("isRaised"_L1).toBool(), true);
 }
 
 QTEST_GUILESS_MAIN(JitsiSessionProtocolTest)

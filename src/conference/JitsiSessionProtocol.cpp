@@ -93,6 +93,62 @@ JitsiSessionProtocol::parseEvent(const QString &message)
         return UserLeft{ .participantId = participantId };
     }
 
+    if (type == "displayNameChanged"_L1) {
+        const auto participantId = object.value("participantId"_L1).toString();
+        if (participantId.isEmpty()) {
+            return std::unexpected(u"Display name change without participant id"_s);
+        }
+        return DisplayNameChanged{ .participantId = participantId,
+                                   .displayName = object.value("displayName"_L1).toString() };
+    }
+
+    if (type == "participantMuted"_L1) {
+        const auto participantId = object.value("participantId"_L1).toString();
+        if (participantId.isEmpty()) {
+            return std::unexpected(u"Participant muted without participant id"_s);
+        }
+
+        const auto isAudioMuted = object.value("isAudioMuted"_L1);
+        if (!isAudioMuted.isBool()) {
+            return std::unexpected(u"Participant muted without isAudioMuted flag"_s);
+        }
+
+        const auto isVideoMuted = object.value("isVideoMuted"_L1);
+        if (!isVideoMuted.isBool()) {
+            return std::unexpected(u"Participant muted without isVideoMuted flag"_s);
+        }
+
+        return ParticipantMuted{ .participantId = participantId,
+                                 .isAudioMuted = isAudioMuted.toBool(),
+                                 .isVideoMuted = isVideoMuted.toBool() };
+    }
+
+    if (type == "handRaised"_L1) {
+        const auto participantId = object.value("participantId"_L1).toString();
+        if (participantId.isEmpty()) {
+            return std::unexpected(u"Hand raised without participant id"_s);
+        }
+
+        const auto timestamp = object.value("timestamp"_L1);
+        if (!timestamp.isDouble()) {
+            return std::unexpected(u"Hand raised with invalid timestamp"_s);
+        }
+
+        const qint64 msecs = timestamp.toInteger();
+        return HandRaised{ .participantId = participantId,
+                           .dateTime = msecs > 0 ? QDateTime::fromMSecsSinceEpoch(msecs)
+                                                 : QDateTime() };
+    }
+
+    if (type == "dominantSpeaker"_L1) {
+        const auto participantId = object.value("participantId"_L1).toString();
+        if (participantId.isEmpty()) {
+            return std::unexpected(u"Dominant speaker without participant id"_s);
+        }
+
+        return DominantSpeaker{ .participantId = participantId };
+    }
+
     if (type == "audioMuted"_L1) {
         const auto isMuted = object.value("isMuted"_L1);
         if (!isMuted.isBool()) {
@@ -160,4 +216,9 @@ QString JitsiSessionProtocol::grantModeratorCommand(const QString &participantId
 QString JitsiSessionProtocol::muteAllCommand()
 {
     return commandMessage("muteAll"_L1);
+}
+
+QString JitsiSessionProtocol::setHandRaisedCommand(bool isRaised)
+{
+    return commandMessage("setHandRaised"_L1, { { "isRaised"_L1, isRaised } });
 }

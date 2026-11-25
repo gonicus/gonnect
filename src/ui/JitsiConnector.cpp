@@ -38,6 +38,8 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 
+#include <algorithm>
+
 namespace {
 
 // Codecs GOnnect can decode; in order of preference
@@ -1183,6 +1185,39 @@ void JitsiConnector::setUserRole(const QString &id, ConferenceUser::Role role)
             << "but could not be found in user list - ignoring";
 }
 
+void JitsiConnector::setUserDisplayName(const QString &id, const QString &displayName)
+{
+    updateUser(id, [&displayName](ConferenceUser &user) { user.setDisplayName(displayName); });
+}
+
+void JitsiConnector::setUserAudioMuted(const QString &id, bool isMuted)
+{
+    updateUser(id, [isMuted](ConferenceUser &user) { user.setAudioMuted(isMuted); });
+}
+
+void JitsiConnector::setUserVideoMuted(const QString &id, bool isMuted)
+{
+    updateUser(id, [isMuted](ConferenceUser &user) { user.setVideoMuted(isMuted); });
+}
+
+void JitsiConnector::setUserHandRaisedDateTime(const QString &id, const QDateTime &dateTime)
+{
+    updateUser(id, [&dateTime](ConferenceUser &user) { user.setHandRaisedDateTime(dateTime); });
+}
+
+void JitsiConnector::setDominantSpeakerById(const QString &id)
+{
+    for (qsizetype i = 0; i < m_users.size(); ++i) {
+        const auto user = m_users.at(i);
+        const bool isDominantSpeaker = user->id() == id;
+
+        if (user->isDominantSpeaker() != isDominantSpeaker) {
+            user->setDominantSpeaker(isDominantSpeaker);
+            Q_EMIT userChanged(i, user);
+        }
+    }
+}
+
 void JitsiConnector::muteAll()
 {
     if (ownRole() != ConferenceUser::Role::Moderator) {
@@ -1884,6 +1919,19 @@ void JitsiConnector::setLargeVideoUser(ConferenceUser *user)
 QUrl JitsiConnector::conferenceUrl() const
 {
     return QUrl(QString("%1/%2").arg(GlobalInfo::instance().jitsiUrl(), conferenceName()));
+}
+
+template <typename Update>
+void JitsiConnector::updateUser(const QString &id, Update update)
+{
+    const auto it = std::ranges::find(m_users, id, &ConferenceUser::id);
+    if (it == m_users.end()) {
+        qCWarning(lcJitsiConnector) << "Ignoring update of unknown user" << id;
+        return;
+    }
+
+    update(**it);
+    Q_EMIT userChanged(std::distance(m_users.begin(), it), *it);
 }
 
 #undef GONNECT_ASSERT

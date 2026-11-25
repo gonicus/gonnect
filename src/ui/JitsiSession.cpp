@@ -64,6 +64,9 @@ JitsiSession::JitsiSession(JitsiConnector *connector, JitsiVideoBridge *bridge, 
             });
     connect(m_connector, &JitsiConnector::executeMuteAllCommand, this,
             [this]() { sendIfJoined(JitsiSessionProtocol::muteAllCommand()); });
+    connect(m_connector, &JitsiConnector::executeToggleRaiseHandCommand, this, [this]() {
+        sendIfJoined(JitsiSessionProtocol::setHandRaisedCommand(!m_connector->isHandRaised()));
+    });
 }
 
 void JitsiSession::receiveEvent(const QString &message)
@@ -108,14 +111,49 @@ void JitsiSession::handle(const JitsiSessionProtocol::UserLeft &userLeft)
     m_connector->removeUser(userLeft.participantId);
 }
 
+void JitsiSession::handle(const JitsiSessionProtocol::DisplayNameChanged &displayNameChanged)
+{
+    m_connector->setUserDisplayName(displayNameChanged.participantId,
+                                    displayNameChanged.displayName);
+}
+
+void JitsiSession::handle(const JitsiSessionProtocol::ParticipantMuted &participantMuted)
+{
+    qCDebug(lcJitsiSession) << "Participant" << participantMuted.participantId
+                            << "audio muted:" << participantMuted.isAudioMuted
+                            << "video muted:" << participantMuted.isVideoMuted;
+
+    m_connector->setUserAudioMuted(participantMuted.participantId, participantMuted.isAudioMuted);
+    m_connector->setUserVideoMuted(participantMuted.participantId, participantMuted.isVideoMuted);
+}
+
+void JitsiSession::handle(const JitsiSessionProtocol::HandRaised &handRaised)
+{
+    qCDebug(lcJitsiSession) << "Participant" << handRaised.participantId << "hand raised at"
+                            << handRaised.dateTime;
+
+    m_connector->setUserHandRaisedDateTime(handRaised.participantId, handRaised.dateTime);
+    if (handRaised.participantId == m_connector->ownId()) {
+        m_connector->setIsHandRaisedInternal(handRaised.dateTime.isValid());
+    }
+}
+
+void JitsiSession::handle(const JitsiSessionProtocol::DominantSpeaker &dominantSpeaker)
+{
+    qCDebug(lcJitsiSession) << "Dominant speaker:" << dominantSpeaker.participantId;
+    m_connector->setDominantSpeakerById(dominantSpeaker.participantId);
+}
+
 void JitsiSession::handle(const JitsiSessionProtocol::AudioMuted &audioMuted)
 {
     m_connector->setAudioMuted(audioMuted.isMuted);
+    m_connector->setUserAudioMuted(m_connector->ownId(), audioMuted.isMuted);
 }
 
 void JitsiSession::handle(const JitsiSessionProtocol::VideoMuted &videoMuted)
 {
     m_connector->setVideoMutedInternal(videoMuted.isMuted);
+    m_connector->setUserVideoMuted(m_connector->ownId(), videoMuted.isMuted);
 }
 
 void JitsiSession::handle(const JitsiSessionProtocol::Devices &devices)

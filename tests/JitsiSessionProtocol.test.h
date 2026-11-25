@@ -12,6 +12,11 @@ private slots:
     void parsesRoleChanged();
     void parsesUserJoined();
     void parsesUserLeft();
+    void parsesDisplayNameChanged();
+    void parsesParticipantMuted();
+    void parsesHandRaised_data();
+    void parsesHandRaised();
+    void parsesDominantSpeaker();
     void parsesAudioMuted();
     void parsesVideoMuted();
     void parsesDevices();
@@ -24,4 +29,5 @@ private slots:
     void createsAudioCommand();
     void createsVideoCommand();
     void createsModerationCommands();
+    void createsHandCommand();
 };

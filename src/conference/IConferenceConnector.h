@@ -222,6 +222,7 @@ Q_SIGNALS:
     void userAdded(qsizetype index, ConferenceUser *user);
     void userRemoved(qsizetype index, ConferenceUser *user);
     void userRoleChanged(qsizetype index, ConferenceUser *user, ConferenceUser::Role newRole);
+    void userChanged(qsizetype index, ConferenceUser *user);
     void usersCleared();
     void numberOfUsersChanged();
     void largeVideoUserChanged();

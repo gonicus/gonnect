@@ -14,7 +14,15 @@ class UsersModel : public QAbstractListModel
                        conferenceConnectorChanged FINAL)
 
 public:
-    enum class Roles { Id = Qt::UserRole + 1, DisplayName, Role };
+    enum class Roles {
+        Id = Qt::UserRole + 1,
+        DisplayName,
+        Role,
+        IsAudioMuted,
+        IsVideoMuted,
+        IsHandRaised,
+        IsDominantSpeaker,
+    };
 
     explicit UsersModel(QObject *parent = nullptr);
 

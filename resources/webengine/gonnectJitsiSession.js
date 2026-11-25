@@ -34,6 +34,7 @@
     control.on('kickParticipant', message => conference?.kickParticipant(message.participantId))
     control.on('grantModerator', message => conference?.grantOwner(message.participantId))
     control.on('muteAll', muteAll)
+    control.on('setHandRaised', message => setHandRaised(message.isRaised))
     control.on('receiverConstraints', message => {
         requestedReceiverConstraints = message
         applyReceiverConstraints()
@@ -118,19 +119,53 @@
             reportTracks()
         })
 
+        conference.on(events.DISPLAY_NAME_CHANGED, (participantId, displayName) => {
+            control.send({
+                type: 'displayNameChanged',
+                participantId,
+                displayName
+            })
+        })
+
+        conference.on(events.PARTICIPANT_PROPERTY_CHANGED, (participant, name, oldValue, value) => {
+            if (name === 'raisedHand') {
+                reportHandRaised(participant.getId(), handRaisedTimestamp(value))
+            }
+        })
+
+        // When moderator wants to lower hand of someone else, an endpoint message is sent to that
+        // peer who then sends the hand raise update
+        conference.on(events.ENDPOINT_MESSAGE_RECEIVED, (participant, data) => {
+            if (data?.name === 'lower-hand-message'
+                && participant.isModerator()
+                && !config.raisedHands?.disableLowerHandByModerator) {
+
+                setHandRaised(false)
+            }
+        })
+
+        conference.on(events.DOMINANT_SPEAKER_CHANGED, participantId => {
+            control.send({ type: 'dominantSpeaker', participantId })
+        })
+
         conference.on(events.KICKED, () => fail('conference.kicked'))
 
         conference.on(events.CONFERENCE_FAILED, error => fail(`conference.${error}`))
         conference.on(events.TRACK_ADDED, track => {
             playRemoteAudio(track)
             watchRemoteVideo(track)
+            reportParticipantMuted(track)
             reportTracks()
         })
         conference.on(events.TRACK_REMOVED, track => {
             stopRemoteAudio(track)
+            reportParticipantMuted(track)
             reportTracks()
         })
-        conference.on(events.TRACK_MUTE_CHANGED, reportTracks)
+        conference.on(events.TRACK_MUTE_CHANGED, track => {
+            reportParticipantMuted(track)
+            reportTracks()
+        })
         conference.on(events.PARTICIPANT_SOURCE_UPDATED, reportTracks)
 
         conference.setDisplayName(settings.displayName)
@@ -209,6 +244,53 @@
         conference?.getParticipants()
             .filter(participant => !participant.isHidden())
             .forEach(participant => conference.muteParticipant(participant.getId(), 'audio'))
+    }
+
+    // Count participant without track as muted
+    function reportParticipantMuted(track) {
+        if (track.isLocal()) {
+            return
+        }
+
+        const participant = conference.getParticipantById(track.getParticipantId())
+        if (!participant || participant.isHidden()) {
+            return
+        }
+
+        const cameraTracks = participant.getTracksByMediaType('video')
+            .filter(cameraTrack => cameraTrack.getVideoType() === 'camera')
+
+        control.send({
+            type: 'participantMuted',
+            participantId: participant.getId(),
+            isAudioMuted: participant.isAudioMuted(),
+            isVideoMuted: cameraTracks.every(cameraTrack => cameraTrack.isMuted())
+        })
+    }
+
+    // Timestamp is ms since epoch or 0 if hand lowered (true|false from older clients)
+    function handRaisedTimestamp(value) {
+        if (value === 'true') {
+            return Date.now()
+        }
+
+        const timestamp = parseInt(value, 10)
+        return Number.isNaN(timestamp) ? 0 : timestamp
+    }
+
+    // Local participant has no property event
+    function setHandRaised(isRaised) {
+        if (!conference) {
+            return
+        }
+
+        const timestamp = isRaised ? Date.now() : 0
+        conference.setLocalParticipantProperty('raisedHand', timestamp)
+        reportHandRaised(conference.myUserId(), timestamp)
+    }
+
+    function reportHandRaised(participantId, timestamp) {
+        control.send({ type: 'handRaised', participantId, timestamp })
     }
 
     async function createAudioTrack(deviceId, isMuted) {

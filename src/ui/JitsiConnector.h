@@ -71,6 +71,11 @@ public:
     Q_INVOKABLE void removeUser(const QString &id);
     Q_INVOKABLE void setUserRole(const QString &id, const QString &roleString);
     void setUserRole(const QString &id, ConferenceUser::Role role);
+    void setUserDisplayName(const QString &id, const QString &displayName);
+    void setUserAudioMuted(const QString &id, bool isMuted);
+    void setUserVideoMuted(const QString &id, bool isMuted);
+    void setUserHandRaisedDateTime(const QString &id, const QDateTime &dateTime);
+    void setDominantSpeakerById(const QString &id);
     Q_INVOKABLE void setLargeVideoUserById(const QString &id);
 
     bool isTranscriptionActive() const override { return m_isTranscriptionActive; }
@@ -159,6 +164,9 @@ private Q_SLOTS:
 private:
     static bool readIsLibJitsiMeetEnabled();
     bool ensureVideoBridge();
+
+    template <typename Update>
+    void updateUser(const QString &id, Update update);
 
     // Toggles the Jitsi-internal mute. For globally setting the mute state, use GlobalMuteState
     // instead.
