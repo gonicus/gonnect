@@ -14,6 +14,7 @@
 #include "SystemTrayMenu.h"
 #include "SIPCallManager.h"
 #include "SIPCall.h"
+#include "SIPAccountManager.h"
 #include "GlobalCallState.h"
 #include "DateEventManager.h"
 #include "DateEvent.h"
@@ -524,4 +525,24 @@ QString ViewHelper::leadingEmoji(const QString &str) const
                                        + QStringLiteral(")"));
     auto m = re.match(str);
     return m.hasMatch() ? m.captured(1) : QString();
+}
+
+void ViewHelper::ciscoToggleHuntGroupLogin(const QString &accountId) const
+{
+    bool found = false;
+
+    const auto accounts = SIPAccountManager::instance().accounts();
+    for (auto account : accounts) {
+        if (!account->isCiscoDevice() || (!accountId.isEmpty() && account->id() != accountId)) {
+            continue;
+        }
+
+        found = true;
+        account->ciscoToggleHuntGroupLogin();
+    }
+
+    if (!found) {
+        qCWarning(lcViewHelper) << "no Cisco account found for hunt group login"
+                                << (accountId.isEmpty() ? "(any)" : accountId);
+    }
 }
