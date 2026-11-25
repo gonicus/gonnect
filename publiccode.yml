@@ -9,8 +9,8 @@ name: GOnnect
 url: "https://github.com/gonicus/gonnect"
 
 # Keep in sync with the latest stable release (CHANGELOG.md).
-softwareVersion: "2.4.1"
-releaseDate: "2026-07-31"
+softwareVersion: "2.5.0"
+releaseDate: "2026-11-25"
 
 logo: gonnect-logo-horizontal.svg
 
