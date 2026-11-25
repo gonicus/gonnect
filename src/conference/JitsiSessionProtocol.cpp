@@ -45,6 +45,171 @@ QList<JitsiSessionProtocol::MediaDevice> parseMediaDevices(const QJsonArray &ent
 
 } // namespace
 
+namespace JitsiSessionProtocol {
+namespace {
+
+// Reads fields of an event. On failure, it does not abort but delivers default values, remembering
+// the first invalid field name in invalidField().
+class EventFields
+{
+public:
+    explicit EventFields(const QJsonObject &object) : m_object{ object } { }
+
+    QString requiredString(QLatin1StringView key)
+    {
+        const auto value = m_object.value(key).toString();
+        if (value.isEmpty()) {
+            reject(key);
+        }
+        return value;
+    }
+
+    QString optionalString(QLatin1StringView key) const { return m_object.value(key).toString(); }
+
+    bool requiredBool(QLatin1StringView key)
+    {
+        const auto value = m_object.value(key);
+        if (!value.isBool()) {
+            reject(key);
+        }
+        return value.toBool();
+    }
+
+    qint64 requiredInteger(QLatin1StringView key)
+    {
+        const auto value = m_object.value(key);
+        if (!value.isDouble()) {
+            reject(key);
+        }
+        return value.toInteger();
+    }
+
+    QJsonArray optionalArray(QLatin1StringView key) const { return m_object.value(key).toArray(); }
+
+    /// Empty if all required fields are valid
+    const QString &invalidField() const { return m_invalidField; }
+
+private:
+    void reject(QLatin1StringView key)
+    {
+        if (m_invalidField.isEmpty()) {
+            m_invalidField = key;
+        }
+    }
+
+    const QJsonObject &m_object;
+    QString m_invalidField;
+};
+
+Event parseJoined(EventFields &fields)
+{
+    return Joined{ .participantId = fields.requiredString("participantId"_L1),
+                   .role = roleFromString(fields.optionalString("role"_L1)) };
+}
+
+Event parseRoleChanged(EventFields &fields)
+{
+    return RoleChanged{ .participantId = fields.requiredString("participantId"_L1),
+                        .role = roleFromString(fields.optionalString("role"_L1)) };
+}
+
+Event parseUserJoined(EventFields &fields)
+{
+    return UserJoined{ .participantId = fields.requiredString("participantId"_L1),
+                       .displayName = fields.optionalString("displayName"_L1),
+                       .role = roleFromString(fields.optionalString("role"_L1)) };
+}
+
+Event parseUserLeft(EventFields &fields)
+{
+    return UserLeft{ .participantId = fields.requiredString("participantId"_L1) };
+}
+
+Event parseDisplayNameChanged(EventFields &fields)
+{
+    return DisplayNameChanged{ .participantId = fields.requiredString("participantId"_L1),
+                               .displayName = fields.optionalString("displayName"_L1) };
+}
+
+Event parseParticipantMuted(EventFields &fields)
+{
+    return ParticipantMuted{ .participantId = fields.requiredString("participantId"_L1),
+                             .isAudioMuted = fields.requiredBool("isAudioMuted"_L1),
+                             .isVideoMuted = fields.requiredBool("isVideoMuted"_L1) };
+}
+
+Event parseHandRaised(EventFields &fields)
+{
+    const QString participantId = fields.requiredString("participantId"_L1);
+    const qint64 msecs = fields.requiredInteger("timestamp"_L1);
+
+    // Epoch itself would be a valid date time
+    return HandRaised{ .participantId = participantId,
+                       .dateTime =
+                               msecs > 0 ? QDateTime::fromMSecsSinceEpoch(msecs) : QDateTime() };
+}
+
+Event parseDominantSpeaker(EventFields &fields)
+{
+    return DominantSpeaker{ .participantId = fields.requiredString("participantId"_L1) };
+}
+
+Event parseMessageReceived(EventFields &fields)
+{
+    return MessageReceived{ .participantId = fields.requiredString("participantId"_L1),
+                            .displayName = fields.optionalString("displayName"_L1),
+                            .text = fields.requiredString("text"_L1),
+                            .dateTime = QDateTime::fromMSecsSinceEpoch(
+                                    fields.requiredInteger("timestamp"_L1)),
+                            .isFromHistory = fields.requiredBool("isFromHistory"_L1) };
+}
+
+Event parseAudioMuted(EventFields &fields)
+{
+    return AudioMuted{ .isMuted = fields.requiredBool("isMuted"_L1) };
+}
+
+Event parseVideoMuted(EventFields &fields)
+{
+    return VideoMuted{ .isMuted = fields.requiredBool("isMuted"_L1) };
+}
+
+Event parseDevices(EventFields &fields)
+{
+    return Devices{ .audioInputs = parseMediaDevices(fields.optionalArray("audioInputs"_L1)),
+                    .audioOutputs = parseMediaDevices(fields.optionalArray("audioOutputs"_L1)) };
+}
+
+Event parseFailed(EventFields &fields)
+{
+    return Failed{ .reason = fields.optionalString("reason"_L1) };
+}
+
+struct EventParser
+{
+    QLatin1StringView type;
+    Event (*parse)(EventFields &fields);
+};
+
+constexpr EventParser eventParsers[] = {
+    { "joined"_L1, parseJoined },
+    { "roleChanged"_L1, parseRoleChanged },
+    { "userJoined"_L1, parseUserJoined },
+    { "userLeft"_L1, parseUserLeft },
+    { "displayNameChanged"_L1, parseDisplayNameChanged },
+    { "participantMuted"_L1, parseParticipantMuted },
+    { "handRaised"_L1, parseHandRaised },
+    { "dominantSpeaker"_L1, parseDominantSpeaker },
+    { "messageReceived"_L1, parseMessageReceived },
+    { "audioMuted"_L1, parseAudioMuted },
+    { "videoMuted"_L1, parseVideoMuted },
+    { "devices"_L1, parseDevices },
+    { "failed"_L1, parseFailed },
+};
+
+} // namespace
+} // namespace JitsiSessionProtocol
+
 std::expected<JitsiSessionProtocol::Event, QString>
 JitsiSessionProtocol::parseEvent(const QString &message)
 {
@@ -57,150 +222,18 @@ JitsiSessionProtocol::parseEvent(const QString &message)
     const auto object = document.object();
     const QString type = object.value("type"_L1).toString();
 
-    if (type == "joined"_L1) {
-        const QString participantId = object.value("participantId"_L1).toString();
-        if (participantId.isEmpty()) {
-            return std::unexpected(u"Joined without participant id"_s);
+    for (const auto &eventParser : eventParsers) {
+        if (type == eventParser.type) {
+            EventFields fields(object);
+            const Event event = eventParser.parse(fields);
+
+            if (!fields.invalidField().isEmpty()) {
+                return std::unexpected(
+                        QStringLiteral("Event '%1' has missing or invalid field '%2'")
+                                .arg(type, fields.invalidField()));
+            }
+            return event;
         }
-        return Joined{ .participantId = participantId,
-                       .role = roleFromString(object.value("role"_L1).toString()) };
-    }
-
-    if (type == "roleChanged"_L1) {
-        const auto participantId = object.value("participantId"_L1).toString();
-        if (participantId.isEmpty()) {
-            return std::unexpected(u"Role change without participant id"_s);
-        }
-        return RoleChanged{ .participantId = participantId,
-                            .role = roleFromString(object.value("role"_L1).toString()) };
-    }
-
-    if (type == "userJoined"_L1) {
-        const auto participantId = object.value("participantId"_L1).toString();
-        if (participantId.isEmpty()) {
-            return std::unexpected(u"User joined without participant id"_s);
-        }
-        return UserJoined{ .participantId = participantId,
-                           .displayName = object.value("displayName"_L1).toString(),
-                           .role = roleFromString(object.value("role"_L1).toString()) };
-    }
-
-    if (type == "userLeft"_L1) {
-        const auto participantId = object.value("participantId"_L1).toString();
-        if (participantId.isEmpty()) {
-            return std::unexpected(u"User left without participant id"_s);
-        }
-        return UserLeft{ .participantId = participantId };
-    }
-
-    if (type == "displayNameChanged"_L1) {
-        const auto participantId = object.value("participantId"_L1).toString();
-        if (participantId.isEmpty()) {
-            return std::unexpected(u"Display name change without participant id"_s);
-        }
-        return DisplayNameChanged{ .participantId = participantId,
-                                   .displayName = object.value("displayName"_L1).toString() };
-    }
-
-    if (type == "participantMuted"_L1) {
-        const auto participantId = object.value("participantId"_L1).toString();
-        if (participantId.isEmpty()) {
-            return std::unexpected(u"Participant muted without participant id"_s);
-        }
-
-        const auto isAudioMuted = object.value("isAudioMuted"_L1);
-        if (!isAudioMuted.isBool()) {
-            return std::unexpected(u"Participant muted without isAudioMuted flag"_s);
-        }
-
-        const auto isVideoMuted = object.value("isVideoMuted"_L1);
-        if (!isVideoMuted.isBool()) {
-            return std::unexpected(u"Participant muted without isVideoMuted flag"_s);
-        }
-
-        return ParticipantMuted{ .participantId = participantId,
-                                 .isAudioMuted = isAudioMuted.toBool(),
-                                 .isVideoMuted = isVideoMuted.toBool() };
-    }
-
-    if (type == "handRaised"_L1) {
-        const auto participantId = object.value("participantId"_L1).toString();
-        if (participantId.isEmpty()) {
-            return std::unexpected(u"Hand raised without participant id"_s);
-        }
-
-        const auto timestamp = object.value("timestamp"_L1);
-        if (!timestamp.isDouble()) {
-            return std::unexpected(u"Hand raised with invalid timestamp"_s);
-        }
-
-        const qint64 msecs = timestamp.toInteger();
-        return HandRaised{ .participantId = participantId,
-                           .dateTime = msecs > 0 ? QDateTime::fromMSecsSinceEpoch(msecs)
-                                                 : QDateTime() };
-    }
-
-    if (type == "dominantSpeaker"_L1) {
-        const auto participantId = object.value("participantId"_L1).toString();
-        if (participantId.isEmpty()) {
-            return std::unexpected(u"Dominant speaker without participant id"_s);
-        }
-
-        return DominantSpeaker{ .participantId = participantId };
-    }
-
-    if (type == "messageReceived"_L1) {
-        const auto participantId = object.value("participantId"_L1).toString();
-        if (participantId.isEmpty()) {
-            return std::unexpected(u"Message without participant id"_s);
-        }
-
-        const auto text = object.value("text"_L1).toString();
-        if (text.isEmpty()) {
-            return std::unexpected(u"Message without text"_s);
-        }
-
-        const auto timestamp = object.value("timestamp"_L1);
-        if (!timestamp.isDouble()) {
-            return std::unexpected(u"Message with invalid timestamp"_s);
-        }
-
-        const auto isFromHistory = object.value("isFromHistory"_L1);
-        if (!isFromHistory.isBool()) {
-            return std::unexpected(u"Message without isFromHistory flag"_s);
-        }
-
-        return MessageReceived{ .participantId = participantId,
-                                .displayName = object.value("displayName"_L1).toString(),
-                                .text = text,
-                                .dateTime = QDateTime::fromMSecsSinceEpoch(timestamp.toInteger()),
-                                .isFromHistory = isFromHistory.toBool() };
-    }
-
-    if (type == "audioMuted"_L1) {
-        const auto isMuted = object.value("isMuted"_L1);
-        if (!isMuted.isBool()) {
-            return std::unexpected(u"Audio mute state without isMuted"_s);
-        }
-        return AudioMuted{ .isMuted = isMuted.toBool() };
-    }
-
-    if (type == "videoMuted"_L1) {
-        const auto isMuted = object.value("isMuted"_L1);
-        if (!isMuted.isBool()) {
-            return std::unexpected(u"Video mute state without isMuted"_s);
-        }
-        return VideoMuted{ .isMuted = isMuted.toBool() };
-    }
-
-    if (type == "devices"_L1) {
-        return Devices{ .audioInputs = parseMediaDevices(object.value("audioInputs"_L1).toArray()),
-                        .audioOutputs =
-                                parseMediaDevices(object.value("audioOutputs"_L1).toArray()) };
-    }
-
-    if (type == "failed"_L1) {
-        return Failed{ .reason = object.value("reason"_L1).toString() };
     }
 
     return std::unexpected(QStringLiteral("Unknown event type '%1'").arg(type));

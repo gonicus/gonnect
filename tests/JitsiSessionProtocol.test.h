@@ -26,6 +26,7 @@ private slots:
 
     void rejectsInvalidEvent_data();
     void rejectsInvalidEvent();
+    void namesInvalidField();
 
     void createsLeaveCommand();
     void createsAudioCommand();

@@ -255,6 +255,15 @@ void JitsiSessionProtocolTest::rejectsInvalidEvent()
     QVERIFY(!JitsiSessionProtocol::parseEvent(message).has_value());
 }
 
+void JitsiSessionProtocolTest::namesInvalidField()
+{
+    const auto event = JitsiSessionProtocol::parseEvent(
+            uR"({"type":"participantMuted","participantId":"abcd","isAudioMuted":true})"_s);
+
+    QVERIFY(!event.has_value());
+    QVERIFY2(event.error().contains("'isVideoMuted'"_L1), event.error().toUtf8().constData());
+}
+
 void JitsiSessionProtocolTest::createsLeaveCommand()
 {
     const QJsonObject object =
