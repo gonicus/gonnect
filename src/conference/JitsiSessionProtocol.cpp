@@ -149,6 +149,34 @@ JitsiSessionProtocol::parseEvent(const QString &message)
         return DominantSpeaker{ .participantId = participantId };
     }
 
+    if (type == "messageReceived"_L1) {
+        const auto participantId = object.value("participantId"_L1).toString();
+        if (participantId.isEmpty()) {
+            return std::unexpected(u"Message without participant id"_s);
+        }
+
+        const auto text = object.value("text"_L1).toString();
+        if (text.isEmpty()) {
+            return std::unexpected(u"Message without text"_s);
+        }
+
+        const auto timestamp = object.value("timestamp"_L1);
+        if (!timestamp.isDouble()) {
+            return std::unexpected(u"Message with invalid timestamp"_s);
+        }
+
+        const auto isFromHistory = object.value("isFromHistory"_L1);
+        if (!isFromHistory.isBool()) {
+            return std::unexpected(u"Message without isFromHistory flag"_s);
+        }
+
+        return MessageReceived{ .participantId = participantId,
+                                .displayName = object.value("displayName"_L1).toString(),
+                                .text = text,
+                                .dateTime = QDateTime::fromMSecsSinceEpoch(timestamp.toInteger()),
+                                .isFromHistory = isFromHistory.toBool() };
+    }
+
     if (type == "audioMuted"_L1) {
         const auto isMuted = object.value("isMuted"_L1);
         if (!isMuted.isBool()) {
@@ -221,4 +249,10 @@ QString JitsiSessionProtocol::muteAllCommand()
 QString JitsiSessionProtocol::setHandRaisedCommand(bool isRaised)
 {
     return commandMessage("setHandRaised"_L1, { { "isRaised"_L1, isRaised } });
+}
+
+QString JitsiSessionProtocol::sendMessageCommand(const QString &text)
+{
+
+    return commandMessage("sendMessage"_L1, { { "text"_L1, text } });
 }

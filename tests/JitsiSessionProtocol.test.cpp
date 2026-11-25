@@ -143,6 +143,33 @@ void JitsiSessionProtocolTest::parsesDominantSpeaker()
     QCOMPARE(speaker->participantId, u"abcd1234"_s);
 }
 
+void JitsiSessionProtocolTest::parseMessageReceived_data()
+{
+    QTest::addColumn<bool>("isFromHistory");
+
+    QTest::newRow("live") << false;
+    QTest::newRow("history") << true;
+}
+
+void JitsiSessionProtocolTest::parseMessageReceived()
+{
+    QFETCH(bool, isFromHistory);
+
+    const auto event = JitsiSessionProtocol::parseEvent(
+            uR"({"type":"messageReceived","participantId":"abcd1234","displayName":"Alice",)"
+            uR"("text":"Grüße 👋","timestamp":1795969348296,"isFromHistory":%1})"_s.arg(
+                    isFromHistory ? "true"_L1 : "false"_L1));
+
+    QVERIFY2(event.has_value(), errorText(event).constData());
+    const auto *message = std::get_if<JitsiSessionProtocol::MessageReceived>(&*event);
+    QVERIFY(message);
+    QCOMPARE(message->participantId, u"abcd1234"_s);
+    QCOMPARE(message->displayName, u"Alice"_s);
+    QCOMPARE(message->text, u"Grüße 👋"_s);
+    QCOMPARE(message->dateTime, QDateTime::fromMSecsSinceEpoch(1795969348296));
+    QCOMPARE(message->isFromHistory, isFromHistory);
+}
+
 void JitsiSessionProtocolTest::parsesAudioMuted()
 {
     const auto event =
@@ -211,7 +238,15 @@ void JitsiSessionProtocolTest::rejectsInvalidEvent_data()
             << uR"({"type":"participantMuted","participantId":"abcd","isAudioMuted":true})"_s;
     QTest::newRow("hand without timestamp") << uR"({"type":"handRaised","participantId":"abcd"})"_s;
     QTest::newRow("speaker without id") << uR"({"type":"dominantSpeaker"})"_s;
+    QTest::newRow("message without id")
+            << uR"({"type":"messageReceived","text":"Hi","timestamp":1,"isFromHistory":false})"_s;
+    QTest::newRow("message without text")
+            << uR"({"type":"messageReceived","participantId":"abcd","timestamp":1,"isFromHistory":false})"_s;
+    QTest::newRow("message without timestamp")
+            << uR"({"type":"messageReceived","participantId":"abcd","text":"Hi","isFromHistory":false})"_s;
     QTest::newRow("audio mute without state") << uR"({"type":"audioMuted"})"_s;
+    QTest::newRow("message without history flag")
+            << uR"({"type":"messageReceived","participantId":"abcd","text":"Hi","timestamp":1})"_s;
 }
 void JitsiSessionProtocolTest::rejectsInvalidEvent()
 {
@@ -284,6 +319,17 @@ void JitsiSessionProtocolTest::createsHandCommand()
 
     QCOMPARE(object.value("type"_L1).toString(), u"setHandRaised"_s);
     QCOMPARE(object.value("isRaised"_L1).toBool(), true);
+}
+
+void JitsiSessionProtocolTest::createsMessageCommand()
+{
+    const QJsonObject object =
+            QJsonDocument::fromJson(
+                    JitsiSessionProtocol::sendMessageCommand(u"Grüße 👋"_s).toUtf8())
+                    .object();
+
+    QCOMPARE(object.value("type"_L1).toString(), u"sendMessage"_s);
+    QCOMPARE(object.value("text"_L1).toString(), u"Grüße 👋"_s);
 }
 
 QTEST_GUILESS_MAIN(JitsiSessionProtocolTest)

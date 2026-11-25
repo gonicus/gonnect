@@ -43,7 +43,7 @@ public:
     Q_INVOKABLE void addError(QString type, QString name, QString message = "",
                               bool isFatal = false, QVariantMap details = QVariantMap());
     Q_INVOKABLE void addIncomingMessage(QString fromId, QString nickName, QString message,
-                                        QDateTime stamp, bool isPrivateMessage);
+                                        QDateTime stamp, bool isPrivateMessage, bool isFromHistory);
     Q_INVOKABLE void setJitsiDevices(const QVariantMap availableDevices);
     Q_INVOKABLE void addKnockingParticipant(QString id, QString name);
 

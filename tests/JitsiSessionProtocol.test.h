@@ -17,6 +17,8 @@ private slots:
     void parsesHandRaised_data();
     void parsesHandRaised();
     void parsesDominantSpeaker();
+    void parseMessageReceived_data();
+    void parseMessageReceived();
     void parsesAudioMuted();
     void parsesVideoMuted();
     void parsesDevices();
@@ -30,4 +32,5 @@ private slots:
     void createsVideoCommand();
     void createsModerationCommands();
     void createsHandCommand();
+    void createsMessageCommand();
 };

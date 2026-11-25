@@ -25,6 +25,7 @@ private:
     void handle(const JitsiSessionProtocol::ParticipantMuted &participantMuted);
     void handle(const JitsiSessionProtocol::HandRaised &handRaised);
     void handle(const JitsiSessionProtocol::DominantSpeaker &dominantSpeaker);
+    void handle(const JitsiSessionProtocol::MessageReceived &message);
     void handle(const JitsiSessionProtocol::AudioMuted &audioMuted);
     void handle(const JitsiSessionProtocol::VideoMuted &videoMuted);
     void handle(const JitsiSessionProtocol::Devices &devices);

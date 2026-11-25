@@ -83,6 +83,14 @@ struct DominantSpeaker
 {
     QString participantId;
 };
+struct MessageReceived
+{
+    QString participantId;
+    QString displayName;
+    QString text;
+    QDateTime dateTime;
+    bool isFromHistory = false;
+};
 struct AudioMuted
 {
     bool isMuted = false;
@@ -104,8 +112,8 @@ struct Devices
 };
 
 using Event = std::variant<Joined, RoleChanged, UserJoined, UserLeft, DisplayNameChanged,
-                           ParticipantMuted, HandRaised, DominantSpeaker, AudioMuted, VideoMuted,
-                           Devices, Failed>;
+                           ParticipantMuted, HandRaised, DominantSpeaker, MessageReceived,
+                           AudioMuted, VideoMuted, Devices, Failed>;
 
 std::expected<Event, QString> parseEvent(const QString &message);
 
@@ -119,5 +127,6 @@ QString kickParticipantCommand(const QString &participantId);
 QString grantModeratorCommand(const QString &participantId);
 QString muteAllCommand();
 QString setHandRaisedCommand(bool isRaised);
+QString sendMessageCommand(const QString &text);
 
 } // namespace JitsiSessionProtocol

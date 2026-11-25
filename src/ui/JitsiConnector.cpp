@@ -206,11 +206,12 @@ void JitsiConnector::addError(QString type, QString name, QString message, bool 
 }
 
 void JitsiConnector::addIncomingMessage(QString fromId, QString nickName, QString message,
-                                        QDateTime stamp, bool isPrivateMessage)
+                                        QDateTime stamp, bool isPrivateMessage, bool isFromHistory)
 {
     qCInfo(lcJitsiConnector) << "Received chat message"
                              << "from" << fromId << nickName << "at" << stamp
-                             << "as private message:" << isPrivateMessage << ":" << message;
+                             << "as private message:" << isPrivateMessage
+                             << "is from history:" << isFromHistory << ":" << message;
 
     ChatMessage::Flags flags = ChatMessage::Flag::Unknown;
     if (isPrivateMessage) {
@@ -223,6 +224,11 @@ void JitsiConnector::addIncomingMessage(QString fromId, QString nickName, QStrin
     auto msgObj = new ChatMessage("", fromId, nickName, new ChatMessageContentText(message), stamp,
                                   m_chatRoom, flags);
     m_chatRoom->addMessage(msgObj);
+
+    // No notifications for all the messages that existed before entering the conference
+    if (isFromHistory) {
+        return;
+    }
 
     // System notification
     AppSettings settings;

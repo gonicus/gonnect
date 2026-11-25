@@ -1,4 +1,5 @@
 #include "JitsiSession.h"
+#include "ConferenceChatRoom.h"
 #include "ErrorBus.h"
 #include "GlobalMuteState.h"
 #include "JitsiConnector.h"
@@ -67,6 +68,13 @@ JitsiSession::JitsiSession(JitsiConnector *connector, JitsiVideoBridge *bridge, 
     connect(m_connector, &JitsiConnector::executeToggleRaiseHandCommand, this, [this]() {
         sendIfJoined(JitsiSessionProtocol::setHandRaisedCommand(!m_connector->isHandRaised()));
     });
+
+    if (const auto *chatRoom = qobject_cast<const ConferenceChatRoom *>(m_connector->chatRoom())) {
+        connect(chatRoom, &ConferenceChatRoom::sendMessageRequested, this,
+                [this](const QString &text) {
+                    sendIfJoined(JitsiSessionProtocol::sendMessageCommand(text));
+                });
+    }
 }
 
 void JitsiSession::receiveEvent(const QString &message)
@@ -142,6 +150,12 @@ void JitsiSession::handle(const JitsiSessionProtocol::DominantSpeaker &dominantS
 {
     qCDebug(lcJitsiSession) << "Dominant speaker:" << dominantSpeaker.participantId;
     m_connector->setDominantSpeakerById(dominantSpeaker.participantId);
+}
+
+void JitsiSession::handle(const JitsiSessionProtocol::MessageReceived &message)
+{
+    m_connector->addIncomingMessage(message.participantId, message.displayName, message.text,
+                                    message.dateTime, false, message.isFromHistory);
 }
 
 void JitsiSession::handle(const JitsiSessionProtocol::AudioMuted &audioMuted)

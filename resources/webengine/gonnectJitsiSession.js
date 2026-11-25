@@ -3,6 +3,11 @@
 
 (() => {
     'use strict'
+    
+    // Also show errors in async functions
+    window.addEventListener('unhandledrejection', event => {
+        console.error('GOnnect session unhandled error:', event.reason?.stack ?? event.reason)
+    })
 
     const settings = __GONNECT_SESSION_CONFIG__
     const roomName = settings.roomName.toLowerCase()
@@ -35,6 +40,7 @@
     control.on('grantModerator', message => conference?.grantOwner(message.participantId))
     control.on('muteAll', muteAll)
     control.on('setHandRaised', message => setHandRaised(message.isRaised))
+    control.on('sendMessage', message => conference?.sendTextMessage(message.text))
     control.on('receiverConstraints', message => {
         requestedReceiverConstraints = message
         applyReceiverConstraints()
@@ -56,7 +62,14 @@
                                                      { ...config, serviceUrl: serviceUrl() })
 
         const events = JitsiMeetJS.events.connection
-        connection.addEventListener(events.CONNECTION_ESTABLISHED, joinConference)
+        connection.addEventListener(events.CONNECTION_ESTABLISHED, () => {
+            joinConference().catch(error => {
+                joinConference().catch(error => {
+                    console.error('GOnnect session join error:', error?.stack ?? error)
+                    fail('conference.setupFailed')
+                })
+            })
+        })
         connection.addEventListener(events.CONNECTION_FAILED, error => fail(`connection.${error}`))
         connection.addEventListener(events.CONNECTION_DISCONNECTED, () => {
             if (!isLeaving) {
@@ -146,6 +159,27 @@
 
         conference.on(events.DOMINANT_SPEAKER_CHANGED, participantId => {
             control.send({ type: 'dominantSpeaker', participantId })
+        })
+
+        conference.on(events.MESSAGE_RECEIVED, (participantId, text, stamp, displayName) => {
+            // Own messages are also received but already shown by GOnnect
+            if (participantId === conference.myUserId()) {
+                return
+            }
+
+            control.send({
+                type: 'messageReceived',
+                participantId: participantId || displayName,
+                displayName: conference.getParticipantById(participantId)?.getDisplayName() ?? displayName ?? '',
+                text,
+                timestamp: messageTimestamp(stamp),
+                isFromHistory: Boolean(stamp)
+            })
+        })
+
+        // TODO: support private messages
+        conference.on(events.PRIVATE_MESSAGE_RECEIVED, participantId => {
+            console.info('GOnnect session ignores private message from', participantId)
         })
 
         conference.on(events.KICKED, () => fail('conference.kicked'))
@@ -276,6 +310,11 @@
 
         const timestamp = parseInt(value, 10)
         return Number.isNaN(timestamp) ? 0 : timestamp
+    }
+
+    function messageTimestamp(stamp) {
+        const timestamp = stamp ? new Date(stamp).getTime() : NaN
+        return Number.isNaN(timestamp) ? Date.now() : timestamp
     }
 
     // Local participant has no property event
