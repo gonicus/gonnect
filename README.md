@@ -15,6 +15,10 @@
 ---
 [![GOnnect workflow](https://github.com/gonicus/gonnect/actions/workflows/gonnect.yml/badge.svg)](https://github.com/gonicus/gonnect/actions/workflows/gonnect.yml) [![Flathub Version](https://img.shields.io/flathub/v/de.gonicus.gonnect)](https://flathub.org/apps/de.gonicus.gonnect) [![Translations](https://hosted.weblate.org/widget/gonnect/svg-badge.svg)](https://hosted.weblate.org/engage/gonnect/)
 
+> **Note:** Development of _GOnnect_ takes place on [GitHub](https://github.com/gonicus/gonnect).
+> Copies of this repository on other platforms are mirrors and show the same README.
+> Please open issues and pull requests on GitHub.
+
 # Overview
 
 _GOnnect_ is a simple, easy to use UC client that brings telephony (SIP),
@@ -47,10 +51,13 @@ Here's a short feature list:
  * **Jitsi Meet Integration: Upgrade call to Videoconference**
    * Admit or reject waiting participants (knock), tile view, screen sharing
    * Join conferences straight from your calendar
+   * Live transcription (if enabled on the Jitsi Meet server)
  * Pluggable **chat support** via [GOuda](https://github.com/gonicus/gouda-proto)
    * [Matrix chat](https://github.com/gonicus/gouda-matrix) as a Flatpak plugin
    * Direct chat next to a call, call button in the chat
    * Reactions, replies, editing, pinned messages, attachments via drag & drop
+   * Threads and search in chat history
+   * Chat rooms linked to video conferences
    * Device verification
  * **Presence**: SIP buddy and chat presence combined, own status and status text
  * Dashboard with widgets (appointments, favorites, history, chat, activities, web view)
@@ -142,16 +149,6 @@ udevadm trigger
 | Logitech     | Litra Beam LX      |
 | Logitech     | Litra Glow         |
 
-# Installing _GOnnect_
-
-_GOnnect_ is distributed via Flathub only. To install it, either visit the
-[Flathub page](https://flathub.org/apps/de.gonicus.gonnect), search for _GOnnect_ in _GNOME-Software_
-or KDE's _discover_.
-
-After you have installed _GOnnect_, either adjust the provided
-`docs/modules/ROOT/examples/sample.conf` and place it in `~/.var/app/de.gonicus.gonnect/config/gonnect/99-user.conf`,
-or head over to [the documentation](https://docs.gonicus.de/gonnect).
-
 # Non-goals
 
 Like every other software, _GOnnect_ cannot be an all-purpose silver bullet. Here are some
@@ -163,8 +160,7 @@ obsolete or rarely used. _GOnnect_ strives to be simple and therefore allows onl
 common and important options. This will exclude some exotic ones.
 * **PIM/contact management**: This should be done via dedicated PIM services as opposed to
 implementing the nth place to store contacts.
-* **Speech-to-text transcription and audio recording**: Apart from some technical insufficiencies
-this bears some critical questions about data privacy.
+
 * **Conferences with more than three participants**: Ad-hoc conferences are implemented such
 that the initializing participant will be a router for the audio streams of the others. In
 our experience, having more than three endpoints will produce bad sound quality, delays and
@@ -192,15 +188,54 @@ Plugins can be listed via:
 flatpak search de.gonicus.gonnect.plugin
 ```
 
-Install them as desired with their flatpak ID (i.e. `flatpak install de.gonicus.gonnect.plugin.Matrix//3`
-for matrix chat support) and restart GOnnect. For plugin configuration, refer to the
-plugin documentation. On Windows, a chat backend can only be used by pointing
-`generic/headlessClientPath` to it.
+Install them as desired with their flatpak ID and restart GOnnect.
 
 ## Windows
 
-Download the NSIS installer from the github [releases](https://github.com/gonicus/gonnect/releases)
-and run the installer.
+Download the signed MSIX package (`GOnnect-<version>.msix`) from the GitHub
+[releases](https://github.com/gonicus/gonnect/releases) and open it to install
+_GOnnect_ with the Windows App Installer.
+
+## Configuration
+
+After you have installed _GOnnect_, either adjust the provided
+[`sample.conf`](docs/modules/ROOT/examples/sample.conf) and place it in
+`~/.var/app/de.gonicus.gonnect/config/gonnect/99-user.conf` (Flatpak),
+or head over to [the documentation](https://docs.gonicus.de/gonnect).
+
+## Matrix chat
+
+Chat support is provided by the separate backend [gouda-matrix](https://github.com/gonicus/gouda-matrix),
+which talks to _GOnnect_ via the [GOuda](https://github.com/gonicus/gouda-proto) interface.
+On Linux it is available as a Flatpak plugin:
+
+```
+flatpak install flathub de.gonicus.gonnect.plugin.Matrix//3
+```
+
+Restart _GOnnect_ afterwards. The plugin branch (`3`) has to match the plugin version
+of your _GOnnect_ release.
+
+Add a `[chat0]` section to your configuration (further accounts: `[chat1]`, …):
+
+```ini
+[chat0]
+## Name shown in GOnnect
+displayName=Matrix
+## URL of your Matrix homeserver
+backendUrl=https://matrix.example.org
+## Your Matrix user ID, mind the additional @ due to the QSettings behavior.
+userId=@@jdoe:example.org
+## "Credentials" (password) or "SSO"
+loginFlow=Credentials
+## Only for loginFlow=SSO: ID of the identity provider to use (optional)
+#identityProviderId=
+## Verify the server certificate (default: true)
+#verifyServer=true
+```
+
+With `loginFlow=Credentials`, _GOnnect_ asks for the password on first start and
+stores it in the system keyring.
 
 # Translations
 

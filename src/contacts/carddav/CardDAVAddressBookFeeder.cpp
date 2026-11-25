@@ -133,7 +133,7 @@ QCoro::Task<> CardDAVAddressBookFeeder::run()
         if (result == WebDavSyncResult::OtherError) {
             if (retriesLeft-- <= 0) {
                 ErrorBus::instance().addError(
-                        tr("CardDAV source %1 repeatedly failed - retries exhausted").arg(m_group));
+                        tr("CardDAV source %1 repeatedly failed to sync - giving up").arg(m_group));
                 co_return;
             }
 
@@ -929,7 +929,7 @@ Contact::ContactSourceInfo CardDAVAddressBookFeeder::sourceInfoFor(const QString
     if (m_collectionNames.size() < 2 || collectionName.isEmpty()) {
         return { m_priority, m_displayName, m_group };
     }
-    return { m_priority, QString("%1-%2").arg(m_displayName, collectionName), m_group };
+    return { m_priority, QString("%1 - %2").arg(m_displayName, collectionName), m_group };
 }
 
 void CardDAVAddressBookFeeder::flushCache()

@@ -189,6 +189,7 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
         qCWarning(lcSIPCall) << "onCallState: call info unavailable, treating as disconnected:"
                              << QString::fromStdString(err.info(false));
         m_statsTimer.stop();
+        m_isDisconnected = true;
         m_account->removeCall(this);
         m_isEstablished = false;
         m_earlyCallState = false;
@@ -311,6 +312,7 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
 
     case PJSIP_INV_STATE_DISCONNECTED:
         m_statsTimer.stop();
+        m_isDisconnected = true;
 
         if (!m_isEstablished && m_incoming) {
             Q_EMIT missed();
@@ -655,6 +657,11 @@ bool SIPCall::unhold()
 
 void SIPCall::accept()
 {
+    if (isDisconnected()) {
+        qCWarning(lcSIPCall) << "Cannot accept disconnected call";
+        return;
+    }
+
     if (isEstablished()) {
         qCCritical(lcSIPCall) << "Cannot accept call that is already established";
         return;
@@ -670,17 +677,27 @@ void SIPCall::accept()
         return;
     }
 
-    m_hasAccepted = true;
-
     pj::CallOpParam prm(true);
     prm.opt.textCount = m_account && m_account->isRTTEnabled() ? 1 : 0;
 
     prm.statusCode = PJSIP_SC_OK;
-    answer(prm);
+
+    try {
+        answer(prm);
+    } catch (const pj::Error &err) {
+        qCWarning(lcSIPCall) << "Failed to reject call:" << err.info();
+    }
+
+    m_hasAccepted = true;
 }
 
 void SIPCall::reject()
 {
+    if (isDisconnected()) {
+        qCWarning(lcSIPCall) << "Cannot reject disconnected call";
+        return;
+    }
+
     if (isEstablished()) {
         qCCritical(lcSIPCall) << "Cannot reject call that is already established";
         return;
@@ -696,10 +713,16 @@ void SIPCall::reject()
         return;
     }
 
-    m_hasRejected = true;
     pj::CallOpParam prm;
     prm.statusCode = PJSIP_SC_DECLINE;
-    answer(prm);
+
+    try {
+        answer(prm);
+    } catch (const pj::Error &err) {
+        qCWarning(lcSIPCall) << "failed to reject call:" << err.info();
+    }
+
+    m_hasRejected = true;
 }
 
 void SIPCall::toggleHoldImpl()

@@ -71,6 +71,10 @@ JitsiConnector::JitsiConnector(QObject *parent) : IConferenceConnector{ parent }
     auto &videoManager = VideoManager::instance();
     connect(&videoManager, &VideoManager::selectedDeviceIdChanged, this,
             &JitsiConnector::transferVideoManagerDeviceToJitsi);
+    connect(&videoManager, &VideoManager::cameraAccessStateChanged, this, [this]() {
+        Q_EMIT isVideoAvailableChanged();
+        updateVideoCallState();
+    });
 
     auto headsetProxy = USBDevices::instance().getHeadsetDeviceProxy();
     connect(headsetProxy, &IHeadsetDevice::hookSwitch, this,
@@ -295,6 +299,7 @@ const options = {
     }
 }
 
+let myUserId = ""
 let jitsiUrl = "%1"
 
 if (jitsiUrl.startsWith("https://")) {
@@ -405,6 +410,10 @@ new QWebChannel(qt.webChannelTransport, function(channel) {
         api.executeCommand("muteEveryone", "audio")
     })
 
+    jitsiConn.executeSetLobbyEnabledCommand.connect(enabled => {
+        api.executeCommand("toggleLobby", enabled)
+    })
+
     jitsiConn.executeSetVideoQualityCommand.connect(value => {
         api.executeCommand("setVideoQuality", value)
     })
@@ -423,7 +432,8 @@ new QWebChannel(qt.webChannelTransport, function(channel) {
 })
 
 api.addListener("videoConferenceJoined", data => {
-    jitsiConn.setJitsiId(api._myUserID)
+    myUserId = data.id
+    jitsiConn.setJitsiId(myUserId)
 
     api.executeCommand("setTileView", %8)
 
@@ -438,6 +448,12 @@ api.addListener("videoConferenceJoined", data => {
     })
 
     jitsiConn.setVideoQualityInternal(api.getVideoQuality())
+
+    if (typeof api.isLobbyEnabled === "function") {
+        api.isLobbyEnabled().then(enabled => {
+            jitsiConn.setIsLobbyEnabledInternal(!!enabled)
+        })
+    }
 })
 
 api.addListener("videoConferenceLeft", () => {
@@ -450,6 +466,13 @@ api.addListener("audioMuteStatusChanged", data => {
 
 api.addListener("videoAvailabilityChanged", data => {
     jitsiConn.setVideoAvailableInternal(data.available)
+
+    // Camera labels known after access grant
+    if (!data.muted) {
+        api.getAvailableDevices().then(availableDevices => {
+            jitsiConn.setJitsiDevices(availableDevices)
+        })
+    }
 })
 
 api.addListener("videoMuteStatusChanged", data => {
@@ -498,9 +521,13 @@ api.addListener("knockingParticipant", data => {
 })
 
 api.addListener("raiseHandUpdated", data => {
-    if (data.id === api.getMyUserId()) {
+    if (data.id === myUserId) {
         jitsiConn.setIsHandRaisedInternal(!!data.handRaised)
     }
+})
+
+api.addListener("lobbyModeChanged", data => {
+    jitsiConn.setIsLobbyEnabledInternal(!!data.enabled)
 })
 
 api.addListener("transcribingStatusChanged", data => {
@@ -705,6 +732,7 @@ void JitsiConnector::setIsInConference(bool value)
 
         if (value) {
             addCallState(ICallState::State::CallActive | ICallState::State::AudioActive);
+            updateVideoCallState();
             auto &globalMute = GlobalMuteState::instance();
 
             if (m_isAudioMuted != globalMute.isMuted()) {
@@ -764,7 +792,7 @@ void JitsiConnector::setRoomPassword(QString value)
 
 void JitsiConnector::updateVideoCallState()
 {
-    if (m_isVideoAvailable && !m_isVideoMuted) {
+    if (m_isInConference && isVideoAvailable() && !m_isVideoMuted) {
         addCallState(ICallState::State::VideoActive);
     } else {
         removeCallState(ICallState::State::VideoActive);
@@ -839,6 +867,14 @@ void JitsiConnector::setIsHandRaisedInternal(bool value)
     if (m_isHandRaised != value) {
         m_isHandRaised = value;
         Q_EMIT isHandRaisedChanged();
+    }
+}
+
+void JitsiConnector::setIsLobbyEnabledInternal(bool value)
+{
+    if (m_isLobbyEnabled != value) {
+        m_isLobbyEnabled = value;
+        Q_EMIT isLobbyEnabledChanged();
     }
 }
 
@@ -1030,6 +1066,18 @@ void JitsiConnector::muteAll()
         return;
     }
     Q_EMIT executeMuteAllCommand();
+}
+
+void JitsiConnector::setLobbyEnabled(bool enabled)
+{
+    if (ownRole() != ConferenceUser::Role::Moderator) {
+        qCWarning(lcJitsiConnector) << "Only moderators can change lobby mode";
+        return;
+    }
+
+    if (m_isLobbyEnabled != enabled) {
+        Q_EMIT executeSetLobbyEnabledCommand(enabled);
+    }
 }
 
 void JitsiConnector::setJitsiDevices(const QVariantMap availableDevices)
@@ -1304,6 +1352,9 @@ void JitsiConnector::transferVideoManagerDeviceToJitsi()
 
     if (bestMatchingDevice) {
         selectVideoInputDevice(bestMatchingDevice->deviceId());
+    } else {
+        qCInfo(lcJitsiConnector) << "No labeled jitsi video input matches" << deviceName
+                                 << "- retrying once camera is started";
     }
 }
 
@@ -1339,13 +1390,13 @@ QUrl JitsiConnector::baseUrl() const
 bool JitsiConnector::hasCapability(const Capability capabilityToCheck) const
 {
     const static QSet<Capability> m_capabilites = {
-        Capability::AudioMute,    Capability::ChatInCall,   Capability::Holdable,
-        Capability::RaiseHand,    Capability::ScreenShare,  Capability::Sharable,
-        Capability::Subtitles,    Capability::MuteAll,      Capability::NoiseSuppression,
-        Capability::UserRoles,    Capability::UserKickable, Capability::RoomPassword,
-        Capability::ShareUrl,     Capability::Textpad,      Capability::TileView,
-        Capability::Whiteboard,   Capability::VideoMute,    Capability::VideoQualityAdjustable,
-        Capability::Transcription
+        Capability::AudioMute,     Capability::ChatInCall,   Capability::Holdable,
+        Capability::RaiseHand,     Capability::ScreenShare,  Capability::Sharable,
+        Capability::Subtitles,     Capability::MuteAll,      Capability::NoiseSuppression,
+        Capability::UserRoles,     Capability::UserKickable, Capability::RoomPassword,
+        Capability::ShareUrl,      Capability::Textpad,      Capability::TileView,
+        Capability::Whiteboard,    Capability::VideoMute,    Capability::VideoQualityAdjustable,
+        Capability::Transcription, Capability::Lobby
     };
     return m_capabilites.contains(capabilityToCheck);
 }
@@ -1541,6 +1592,7 @@ void JitsiConnector::resetConferenceState()
     // Reset per-conference toggle state so it doesn't leak into the next conference
     setIsSharingScreenInternal(false);
     setVideoMutedInternal(false);
+    setIsLobbyEnabledInternal(false);
     if (m_isAudioMuted) {
         m_isAudioMuted = false;
         Q_EMIT isAudioMutedChanged();
@@ -1606,6 +1658,11 @@ void JitsiConnector::setAudioMuted(bool value)
     }
 
     m_didExecuteAudioMuteToggle = false;
+}
+
+bool JitsiConnector::isVideoAvailable() const
+{
+    return m_isVideoAvailable && !VideoManager::instance().isCameraAccessDenied();
 }
 
 void JitsiConnector::setVideoMuted(bool shallMute)

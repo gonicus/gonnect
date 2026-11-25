@@ -24,13 +24,13 @@ runs:
         cache: true
 
     - name: Setup ccache
-      uses: hendrikmuhs/ccache-action@5ebbd400eff9e74630f759d94ddd7b6c26299639 # v1
+      uses: hendrikmuhs/ccache-action@e91f31892a1d1b8c44424b1a94c0b7f52d337168 # v1
       with:
         key: windows-msvc
         max-size: 2G
 
     - name: Install Conan
-      uses: conan-io/setup-conan@5db0275587014d13a5ca698db681ce4782a6e052 # v1
+      uses: conan-io/setup-conan@2c7f599b76d52302b8e122bf890878e696d4577b # v1
       with:
         version: 2.34.0
         cache_packages: true

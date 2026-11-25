@@ -1,4 +1,4 @@
 sources:
-  "0.17.0":
-    url: "https://github.com/frankosterfeld/qtkeychain/archive/refs/tags/0.17.0.zip"
-    sha256: "a00e6980272d5b57b12523f243ffd37b7285ece61a7ad87f449daed4d9717106"
+  "0.18.0":
+    url: "https://github.com/frankosterfeld/qtkeychain/archive/refs/tags/0.18.0.zip"
+    sha256: "483cc947f7120f6d707c19760e1eb24fbb858707742cfeef330a2bd1ddd6b718"

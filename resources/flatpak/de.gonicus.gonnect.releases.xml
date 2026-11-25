@@ -1,5 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <releases>
+  <release version="2.5.0" date="2026-11-25">
+    <description>
+      <p>Changes:</p>
+      <ul>
+        <li>new chat based on Matrix: direct and group chats, threads, pinned messages, search, read markers and notification settings</li>
+        <li>chat integrated with calls and conferences: chat in the call screen, chat as a widget, chat rooms attached to Jitsi Meet conferences</li>
+        <li>Jitsi Meet: knock to join and live transcription</li>
+        <li>own presence state in the system tray menu</li>
+        <li>grouped favorites and a filter for favorites widgets</li>
+        <li>notification sound, DTMF input in the search box and removable history entries</li>
+        <li>configurable LDAP attribute mapping and unified avatars from LDAP and chat</li>
+        <li>accessibility improvements</li>
+        <li>support for Blinkstick busylights</li>
+        <li>new template for 1&amp;1</li>
+        <li>many bug fixes and improvements, especially for network changes and stability</li>
+      </ul>
+    </description>
+  </release>
   <release version="2.4.1" date="2026-07-31"/>
   <release version="2.4.0" date="2026-07-07"/>
   <release version="2.3.2" date="2026-07-01"/>

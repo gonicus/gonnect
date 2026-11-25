@@ -4,7 +4,7 @@
 <context>
     <name>CallSideBar</name>
     <message numerus="yes">
-        <location filename="../src/ui/components/CallSideBar.qml" line="296"/>
+        <location filename="../src/ui/components/CallSideBar.qml" line="297"/>
         <source>Person(s)</source>
         <translation>
             <numerusform>Person</numerusform>
@@ -98,6 +98,17 @@
 %3</numerusform>
             <numerusform>%n of %2 have read this message:
 %3</numerusform>
+        </translation>
+    </message>
+</context>
+<context>
+    <name>SearchResultPopup</name>
+    <message numerus="yes">
+        <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="711"/>
+        <source>%n more contact(s) found</source>
+        <translation>
+            <numerusform>%n more contact found</numerusform>
+            <numerusform>%n more contacts found</numerusform>
         </translation>
     </message>
 </context>

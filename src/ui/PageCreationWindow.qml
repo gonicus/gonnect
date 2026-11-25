@@ -12,17 +12,20 @@ BaseWindow {
     id: control
     objectName: "pageCreationWindow"
     title: control.newPage ? qsTr("Create new dashboard page") : qsTr("Edit dashboard page")
-    width: 600
-    height: 340
+    width: control.fixedWidth
+    height: control.fixedHeight
     visible: true
     resizable: false
     showMinimizeButton: false
     showMaximizeButton: false
 
-    minimumWidth: control.width
-    minimumHeight: control.height
-    maximumWidth: control.width
-    maximumHeight: control.height
+    minimumWidth: control.fixedWidth
+    minimumHeight: control.fixedHeight
+    maximumWidth: control.fixedWidth
+    maximumHeight: control.fixedHeight
+
+    readonly property int fixedWidth: 600
+    readonly property int fixedHeight: 340
 
     required property string pageId
 

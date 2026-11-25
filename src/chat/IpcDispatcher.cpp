@@ -2285,6 +2285,11 @@ void IpcDispatcher::makeNotificationNewMessage(ChatMessage *messageObj)
         return;
     }
 
+    // Only show notification for status messages affecting own user
+    if (messageObj->isStateUpdate() && messageObj->affectedUserId() != ownUserId()) {
+        return;
+    }
+
     // Check if not active and in foreground anyway
     auto &selectionState = SelectionState::instance();
     if (selectionState.isMainWindowActive()
@@ -2324,7 +2329,7 @@ void IpcDispatcher::makeNotificationNewMessage(ChatMessage *messageObj)
 
     if (const auto stateContent =
                 qobject_cast<ChatMessageContentUserStateChange *>(messageObj->content())) {
-        QString otherName("Someone");
+        QString otherName = tr("Someone");
         if (const auto user = m_users.value(stateContent->affectedUserId(), nullptr)) {
             otherName = user->computedName();
         }
@@ -2372,9 +2377,8 @@ void IpcDispatcher::makeNotificationNewMessage(ChatMessage *messageObj)
             title = tr("[%1] Message from %2").arg(chatRoom->name(), senderName);
         }
         message = textContent->simpleText();
-    } else if (qobject_cast<ChatMessageContentRemoved *>(messageObj->content())) {
-        // No notification if message has been removed
-        qt_noop();
+    } else {
+        return;
     }
 
     auto notification =
@@ -3182,16 +3186,18 @@ void IpcDispatcher::toggleReaction(const QString &roomId, const QString &message
     const auto *message = room->chatMessageById(messageId);
     GONNECT_ASSERT(message, "Unable to find message for id " + messageId)
 
-    const auto ownId = ownUserId();
-    const auto &reactions = message->reactions();
-    for (const auto *reactionObj : reactions) {
-        if (reactionObj->reaction() == reaction && reactionObj->isUser(ownId)) {
-            retractReaction(roomId, messageId, reaction);
-            return;
-        }
+    const auto *existingReaction = message->reactionObject(reaction);
+    const auto ownVariants =
+            existingReaction ? existingReaction->variantsOfUser(ownUserId()) : QSet<QString>{};
+
+    if (ownVariants.isEmpty()) {
+        addReaction(roomId, messageId, reaction);
+        return;
     }
 
-    addReaction(roomId, messageId, reaction);
+    for (const auto &variant : ownVariants) {
+        retractReaction(roomId, messageId, variant);
+    }
 }
 
 QString IpcDispatcher::uploadFile(const QString &filePath)

@@ -482,6 +482,7 @@ qt_add_qml_module(gonnect
         ui/components/popups/Popup.qml
         ui/components/popups/PopupBackgroundOverlay.qml
         ui/components/popups/SearchResultPopup.qml
+        ui/components/popups/TextEditContextMenu.qml
         ui/components/popups/UrlCopyDialog.qml
         ui/components/popups/UserSelect.qml
         ui/components/popups/VideoDeviceMenu.qml

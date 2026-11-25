@@ -258,7 +258,8 @@ Item {
 
             BarButton {
                 id: cameraMuteButton
-                visible: control.iConferenceConnector.hasCapability(IConferenceConnector.Capability.VideoMute) && control.isVideoAvailable
+                visible: control.iConferenceConnector.hasCapability(IConferenceConnector.Capability.VideoMute)
+                         && control.isVideoAvailable
                 enabled: !control.isOnHold
                 toggled: !control.isVideoMuted
                 toggleColorMode: BarButton.ToggleColorMode.Warn
@@ -267,6 +268,19 @@ Item {
                 onClicked: () => control.setVideoMuted(!control.isVideoMuted)
 
                 Accessible.name: control.isVideoMuted ? qsTr("Enable camera") : qsTr("Disable camera")
+            }
+
+            BarButton {
+                id: cameraDeniedPseudoButton
+                visible: control.iConferenceConnector.hasCapability(IConferenceConnector.Capability.VideoMute)
+                         && VideoManager.isCameraAccessDenied
+                text: qsTr("Camera")
+                iconPath: Icons.cameraOff
+                iconColor: Theme.secondaryInactiveTextColor
+                showIndicatorBadge: true
+                tooltipText: qsTr("Camera access denied. Allow it via system settings.")
+
+                Accessible.name: qsTr("Camera not available")
             }
 
             BarButton {

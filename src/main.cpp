@@ -3,6 +3,7 @@
 #include <QtWebEngineQuick>
 #include <QtProtobuf>
 #include "Application.h"
+#include "AppSettings.h"
 #include "GlobalInfo.h"
 #include "PersonCoinProvider.h"
 #include "WebEngineKeyEventFilter.h"
@@ -88,7 +89,17 @@ int main(int argc, char *argv[])
         }
 
 #ifdef Q_OS_LINUX
-        if (!GlobalInfo::instance().isWorkaroundActive(GlobalInfo::WorkaroundId::GOW_004)) {
+
+        // Workaround: when PipeWire camera access is not permitted, WebEngine hangs forever because
+        // enumerateDevices() never receives a response or timeout. Disabling WebRtcPipeWireCamera
+        // is the only known way to work around that. That information is persisted in settings
+        // because it must be known here - before the portal can be asked.
+
+        const bool isCameraAccessDenied =
+                AppSettings().value("video/cameraAccessDenied", false).toBool();
+
+        if (!isCameraAccessDenied
+            && !GlobalInfo::instance().isWorkaroundActive(GlobalInfo::WorkaroundId::GOW_004)) {
             chromiumFlags.push_back("--enable-features=WebRtcPipeWireCamera");
         }
 #endif
