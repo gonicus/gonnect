@@ -40,6 +40,7 @@ private:
     void handle(const JitsiSessionProtocol::LobbyUserLeft &lobbyUserLeft);
     void handle(const JitsiSessionProtocol::Failed &failed);
 
+    void applyVideoQuality();
     void send(const QString &command);
     void sendIfJoined(const QString &command);
 

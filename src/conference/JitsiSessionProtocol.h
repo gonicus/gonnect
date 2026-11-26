@@ -156,5 +156,8 @@ QString joinWithPasswordCommand(const QString &password);
 QString setRoomPasswordCommand(const QString &password);
 QString setLobbyEnabledCommand(bool isEnabled);
 QString answerLobbyUserCommand(const QString &participantId, bool isApproved);
+QString setVideoQualityCommand(uint maxHeight);
+QString endConferenceCommand();
+QString setOnHoldCommand(bool isOnHold);
 
 } // namespace JitsiSessionProtocol

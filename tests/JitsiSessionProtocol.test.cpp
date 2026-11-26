@@ -429,4 +429,28 @@ void JitsiSessionProtocolTest::createsLobbyCommands()
     QCOMPARE(answer.value("isApproved"_L1).toBool(), false);
 }
 
+void JitsiSessionProtocolTest::createsVideoQualityCommand()
+{
+    const QJsonObject object =
+            QJsonDocument::fromJson(JitsiSessionProtocol::setVideoQualityCommand(360).toUtf8())
+                    .object();
+    QCOMPARE(object.value("type"_L1).toString(), u"setVideoQuality"_s);
+    QCOMPARE(object.value("maxHeight"_L1).toInt(), 360);
+}
+
+void JitsiSessionProtocolTest::createsEndConferenceCommand()
+{
+    const QJsonObject object =
+            QJsonDocument::fromJson(JitsiSessionProtocol::endConferenceCommand().toUtf8()).object();
+    QCOMPARE(object.value("type"_L1).toString(), u"endConference"_s);
+}
+
+void JitsiSessionProtocolTest::createsOnHoldCommand()
+{
+    const QJsonObject object =
+            QJsonDocument::fromJson(JitsiSessionProtocol::setOnHoldCommand(true).toUtf8()).object();
+    QCOMPARE(object.value("type"_L1).toString(), u"setOnHold"_s);
+    QCOMPARE(object.value("isOnHold"_L1).toBool(), true);
+}
+
 QTEST_GUILESS_MAIN(JitsiSessionProtocolTest)

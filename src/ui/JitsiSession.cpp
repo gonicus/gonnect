@@ -43,42 +43,65 @@ JitsiSession::JitsiSession(JitsiConnector *connector, JitsiVideoBridge *bridge, 
         m_isJoined = false;
         send(JitsiSessionProtocol::leaveCommand());
     });
+
+    connect(m_connector, &JitsiConnector::executeEndConferenceCommand, this, [this]() {
+        sendIfJoined(JitsiSessionProtocol::endConferenceCommand());
+        m_isJoined = false;
+    });
+
+    connect(m_connector, &JitsiConnector::videoQualityChanged, this,
+            &JitsiSession::applyVideoQuality);
+
+    connect(m_connector, &JitsiConnector::isOnHoldChanged, this, [this]() {
+        sendIfJoined(JitsiSessionProtocol::setOnHoldCommand(m_connector->isOnHold()));
+    });
+
     connect(m_connector, &JitsiConnector::executeSetLobbyEnabledCommand, this,
             [this](bool isEnabled) {
                 sendIfJoined(JitsiSessionProtocol::setLobbyEnabledCommand(isEnabled));
             });
+
     connect(m_connector, &JitsiConnector::executeAnswerKnockingParticipant, this,
             [this](const QString &participantId, bool isApproved) {
                 sendIfJoined(
                         JitsiSessionProtocol::answerLobbyUserCommand(participantId, isApproved));
             });
+
     connect(m_connector, &JitsiConnector::executeToggleAudioCommand, this, [this]() {
         sendIfJoined(JitsiSessionProtocol::setAudioMutedCommand(!m_connector->isAudioMuted()));
     });
+
     connect(m_connector, &JitsiConnector::executeToggleVideoCommand, this, [this]() {
         sendIfJoined(JitsiSessionProtocol::setVideoMutedCommand(m_connector->isVideoMuted()));
     });
+
     connect(m_connector, &JitsiConnector::executeSetAudioInputDeviceCommand, this,
             [this](const QString &deviceId) {
                 send(JitsiSessionProtocol::setAudioInputDeviceCommand(deviceId));
             });
+
     connect(m_connector, &JitsiConnector::executeSetAudioOutputDeviceCommand, this,
             [this](const QString &deviceId) {
                 send(JitsiSessionProtocol::setAudioOutputDeviceCommand(deviceId));
             });
+
     connect(m_connector, &JitsiConnector::executeKickUserCommand, this,
             [this](const QString &participantId) {
                 sendIfJoined(JitsiSessionProtocol::kickParticipantCommand(participantId));
             });
+
     connect(m_connector, &JitsiConnector::executeGrantModeratorCommand, this,
             [this](const QString &participantId) {
                 sendIfJoined(JitsiSessionProtocol::grantModeratorCommand(participantId));
             });
+
     connect(m_connector, &JitsiConnector::executeMuteAllCommand, this,
             [this]() { sendIfJoined(JitsiSessionProtocol::muteAllCommand()); });
+
     connect(m_connector, &JitsiConnector::executeToggleRaiseHandCommand, this, [this]() {
         sendIfJoined(JitsiSessionProtocol::setHandRaisedCommand(!m_connector->isHandRaised()));
     });
+
     connect(m_connector, &JitsiConnector::executePasswordCommand, this,
             [this](const QString &password) {
                 if (m_isJoined) {
@@ -131,6 +154,9 @@ void JitsiSession::handle(const JitsiSessionProtocol::Joined &joined)
     m_connector->setVideoAvailableInternal(true);
     m_connector->setIsWaitingInLobbyInternal(false);
     m_isJoined = true;
+
+    applyVideoQuality();
+    send(JitsiSessionProtocol::setOnHoldCommand(m_connector->isOnHold()));
 
     const bool isAudioMuted = m_connector->isOnHold() || GlobalMuteState::instance().isMuted();
     send(JitsiSessionProtocol::setAudioMutedCommand(isAudioMuted));
@@ -261,7 +287,7 @@ void JitsiSession::handle(const JitsiSessionProtocol::Failed &failed)
     // Dispatch failure as notification or "real" error
     const QString message = endedMessage(failed.reason);
     if (message.isEmpty()) {
-        ErrorBus::instance().error(tr("Conference fail: %1").arg(failed.reason));
+        ErrorBus::instance().error(tr("Conference failed: %1").arg(failed.reason));
     } else {
         const auto title = tr("[%1] Conference ended").arg(m_connector->conferenceName());
         auto *notification =
@@ -271,6 +297,19 @@ void JitsiSession::handle(const JitsiSessionProtocol::Failed &failed)
     }
 
     m_connector->leaveConference();
+}
+
+void JitsiSession::applyVideoQuality()
+{
+    const auto quality = m_connector->videoQuality();
+
+    // AudioOnly -> no video; do not turn on automatically
+    if (quality == IConferenceConnector::VideoQuality::AudioOnly && !m_connector->isVideoMuted()) {
+        m_connector->setVideoMuted(true);
+    }
+
+    sendIfJoined(
+            JitsiSessionProtocol::setVideoQualityCommand(JitsiConnector::maxVideoHeight(quality)));
 }
 
 void JitsiSession::send(const QString &command)

@@ -1070,29 +1070,7 @@ void JitsiConnector::setVideoQuality(VideoQuality quality)
             Q_EMIT executeSetAudioOnlyCommand(false);
         }
 
-        uint numVal = 0;
-
-        switch (quality) {
-
-        case IConferenceConnector::VideoQuality::AudioOnly:
-            numVal = 0;
-            break;
-        case IConferenceConnector::VideoQuality::Minimum:
-        case IConferenceConnector::VideoQuality::Low:
-            numVal = 180;
-            break;
-        case IConferenceConnector::VideoQuality::Average:
-            numVal = 360;
-            break;
-        case IConferenceConnector::VideoQuality::High:
-            numVal = 720;
-            break;
-        case IConferenceConnector::VideoQuality::Maximum:
-            numVal = 2160;
-            break;
-        }
-
-        Q_EMIT executeSetVideoQualityCommand(numVal);
+        Q_EMIT executeSetVideoQualityCommand(maxVideoHeight(quality));
     }
 
     if (m_videoQuality != quality) {
@@ -1508,6 +1486,25 @@ bool JitsiConnector::readIsLibJitsiMeetEnabled()
 {
     ReadOnlyConfdSettings settings;
     return settings.value("jitsi/isLibJitsiMeetEnabled", false).toBool();
+}
+
+uint JitsiConnector::maxVideoHeight(VideoQuality quality)
+{
+    switch (quality) {
+
+    case IConferenceConnector::VideoQuality::AudioOnly:
+        return 0;
+    case IConferenceConnector::VideoQuality::Minimum:
+    case IConferenceConnector::VideoQuality::Low:
+        return 180;
+    case IConferenceConnector::VideoQuality::Average:
+        return 360;
+    case IConferenceConnector::VideoQuality::High:
+        return 720;
+    case IConferenceConnector::VideoQuality::Maximum:
+        return 2160;
+    }
+    return 0;
 }
 
 bool JitsiConnector::ensureVideoBridge()

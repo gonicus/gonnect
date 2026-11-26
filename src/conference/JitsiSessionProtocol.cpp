@@ -246,30 +246,6 @@ constexpr EventParser eventParsers[] = {
 
 } // namespace
 
-QString joinWithPasswordCommand(const QString &password)
-{
-    return commandMessage("joinWithPassword"_L1, { { "password"_L1, password } });
-}
-
-QString setRoomPasswordCommand(const QString &password)
-{
-    return commandMessage("setRoomPassword"_L1, { { "password"_L1, password } });
-}
-
-QString setLobbyEnabledCommand(bool isEnabled)
-{
-    return commandMessage("setLobbyEnabled"_L1, { { "isEnabled"_L1, isEnabled } });
-}
-
-QString answerLobbyUserCommand(const QString &participantId, bool isApproved)
-{
-
-    return commandMessage(
-            "answerLobbyUser"_L1,
-            { { "participantId"_L1, participantId }, { "isApproved"_L1, isApproved } });
-}
-
-// namespace
 } // namespace JitsiSessionProtocol
 
 std::expected<JitsiSessionProtocol::Event, QString>
@@ -350,4 +326,43 @@ QString JitsiSessionProtocol::sendMessageCommand(const QString &text)
 {
 
     return commandMessage("sendMessage"_L1, { { "text"_L1, text } });
+}
+
+QString JitsiSessionProtocol::joinWithPasswordCommand(const QString &password)
+{
+    return commandMessage("joinWithPassword"_L1, { { "password"_L1, password } });
+}
+
+QString JitsiSessionProtocol::setRoomPasswordCommand(const QString &password)
+{
+    return commandMessage("setRoomPassword"_L1, { { "password"_L1, password } });
+}
+
+QString JitsiSessionProtocol::setLobbyEnabledCommand(bool isEnabled)
+{
+    return commandMessage("setLobbyEnabled"_L1, { { "isEnabled"_L1, isEnabled } });
+}
+
+QString JitsiSessionProtocol::answerLobbyUserCommand(const QString &participantId, bool isApproved)
+{
+
+    return commandMessage(
+            "answerLobbyUser"_L1,
+            { { "participantId"_L1, participantId }, { "isApproved"_L1, isApproved } });
+}
+
+QString JitsiSessionProtocol::setVideoQualityCommand(uint maxHeight)
+{
+    return commandMessage("setVideoQuality"_L1,
+                          { { "maxHeight"_L1, static_cast<qint64>(maxHeight) } });
+}
+
+QString JitsiSessionProtocol::endConferenceCommand()
+{
+    return commandMessage("endConference"_L1);
+}
+
+QString JitsiSessionProtocol::setOnHoldCommand(bool isOnHold)
+{
+    return commandMessage("setOnHold"_L1, { { "isOnHold"_L1, isOnHold } });
 }

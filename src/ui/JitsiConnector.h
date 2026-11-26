@@ -158,6 +158,9 @@ public:
     void showVirtualBackgroundDialog() override;
     virtual void answerKnockingParticipant(const QString &id, bool approved) override;
 
+    /// Maximum video height for a quality. 0 means "audio only"
+    static uint maxVideoHeight(VideoQuality quality);
+
 protected:
     void toggleHoldImpl() override;
 

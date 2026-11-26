@@ -20,6 +20,8 @@
     let audioTrack = null
     let videoTrack = null
     let requestedReceiverConstraints = null
+    let maxVideoHeight = null  // Not selected by GOnnect yet
+    let isOnHold = false
     let sentTracks = ''
     let isLeaving = false
 
@@ -49,6 +51,9 @@
         requestedReceiverConstraints = message
         applyReceiverConstraints()
     })
+    control.on('setVideoQuality', message => setVideoQuality(message.maxHeight))
+    control.on('endConference', endConference)
+    control.on('setOnHold', message => setOnHold(message.isOnHold))
 
     if (typeof JitsiMeetJS === 'undefined' || typeof config === 'undefined') {
         fail('libraryNotLoaded')
@@ -68,10 +73,8 @@
         const events = JitsiMeetJS.events.connection
         connection.addEventListener(events.CONNECTION_ESTABLISHED, () => {
             joinConference().catch(error => {
-                joinConference().catch(error => {
-                    console.error('GOnnect session join error:', error?.stack ?? error)
-                    fail('conference.setupFailed')
-                })
+                console.error('GOnnect session join error:', error?.stack ?? error)
+                fail('conference.setupFailed')
             })
         })
         connection.addEventListener(events.CONNECTION_FAILED, error => fail(`connection.${error}`))
@@ -268,13 +271,48 @@
         }
 
         const { constraints, onStageSources } = requestedReceiverConstraints
+        const isAudioOnly = maxVideoHeight === 0
         conference.setReceiverConstraints({
-            lastN: config.channelLastN ?? -1,
+            lastN: isAudioOnly ? 0 : (config.channelLastN ?? -1),
             defaultConstraints: { maxHeight: 0 },
-            constraints,
-            onStageSources,
+            constraints: cappedConstraints(constraints),
+            onStageSources: isAudioOnly ? [] : onStageSources,
             selectedSources: []
         })
+    }
+
+    // Quality chosen in GOnnect limits tile requests
+    function cappedConstraints(constraints) {
+        if (!maxVideoHeight) {
+            return constraints
+        }
+
+        return Object.fromEntries(Object.entries(constraints)
+            .map(([ sourceName, constraint ]) =>
+                [ sourceName, { ...constraint,
+                                maxHeight: Math.min(constraint.maxHeight, maxVideoHeight) }]
+        ))
+    }
+
+    function setVideoQuality(maxHeight) {
+        maxVideoHeight = maxHeight
+        applyReceiverConstraints()
+
+        if (conference && maxHeight > 0) {
+            conference.setSenderVideoConstraint(maxHeight).catch(error =>
+                console.error('GOnnet session cannot limit sent video:', error?.message ?? error))
+        }
+    }
+
+    async function endConference() {
+        try {
+            if (conference?.isModerator()) {
+                conference?.end()
+            }
+        } catch (error) {
+            console.error('GOnnect session cannot end conference:', error?.message ?? error)
+        }
+        await leave()
     }
 
     function watchRemoteVideo(track) {
@@ -557,6 +595,7 @@
 
         const element = document.createElement('audio')
         element.autoplay = true
+        element.muted = isOnHold
         document.body.appendChild(element)
         track.attach(element)
         remoteAudioElements.set(track, element)
@@ -571,6 +610,13 @@
         track.detach(element)
         element.remove()
         remoteAudioElements.delete(track)
+    }
+
+    function setOnHold(isHeld) {
+        isOnHold = isHeld
+        remoteAudioElements.forEach(element => {
+            element.muted = isHeld
+        })
     }
 
     async function leave() {

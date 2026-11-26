@@ -39,4 +39,7 @@ private slots:
     void createsMessageCommand();
     void createsPasswordCommands();
     void createsLobbyCommands();
+    void createsVideoQualityCommand();
+    void createsEndConferenceCommand();
+    void createsOnHoldCommand();
 };
