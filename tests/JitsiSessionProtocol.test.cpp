@@ -230,6 +230,35 @@ void JitsiSessionProtocolTest::parsesRoomLockChanged()
     QVERIFY(roomLockChanged->isLocked);
 }
 
+void JitsiSessionProtocolTest::parsesLobbyEvents()
+{
+    const auto waiting = JitsiSessionProtocol::parseEvent(uR"({"type":"lobbyWaiting"})"_s);
+    QVERIFY2(waiting.has_value(), errorText(waiting).constData());
+    QVERIFY(std::holds_alternative<JitsiSessionProtocol::LobbyWaiting>(*waiting));
+
+    const auto changed =
+            JitsiSessionProtocol::parseEvent(uR"({"type":"lobbyChanged","isEnabled":true})"_s);
+    QVERIFY2(changed.has_value(), errorText(changed).constData());
+    const auto *lobbyChanged = std::get_if<JitsiSessionProtocol::LobbyChanged>(&*changed);
+    QVERIFY(lobbyChanged);
+    QVERIFY(lobbyChanged->isEnabled);
+
+    const auto joined = JitsiSessionProtocol::parseEvent(
+            uR"({"type":"lobbyUserJoined","participantId":"lobby1","displayName":"Carol"})"_s);
+    QVERIFY2(joined.has_value(), errorText(joined).constData());
+    const auto *userJoined = std::get_if<JitsiSessionProtocol::LobbyUserJoined>(&*joined);
+    QVERIFY(userJoined);
+    QCOMPARE(userJoined->participantId, u"lobby1"_s);
+    QCOMPARE(userJoined->displayName, u"Carol"_s);
+
+    const auto left = JitsiSessionProtocol::parseEvent(
+            uR"({"type":"lobbyUserLeft","participantId":"lobby1"})"_s);
+    QVERIFY2(left.has_value(), errorText(left).constData());
+    const auto *userLeft = std::get_if<JitsiSessionProtocol::LobbyUserLeft>(&*left);
+    QVERIFY(userLeft);
+    QCOMPARE(userLeft->participantId, u"lobby1"_s);
+}
+
 void JitsiSessionProtocolTest::parsesFailed()
 {
     const auto event = JitsiSessionProtocol::parseEvent(
@@ -267,6 +296,10 @@ void JitsiSessionProtocolTest::rejectsInvalidEvent_data()
     QTest::newRow("message without history flag")
             << uR"({"type":"messageReceived","participantId":"abcd","text":"Hi","timestamp":1})"_s;
     QTest::newRow("room lock without state") << uR"({"type":"roomLockChanged"})"_s;
+    QTest::newRow("lobby change without state") << uR"({"type":"lobbyChanged"})"_s;
+    QTest::newRow("lobby join without id")
+            << uR"({"type":"lobbyUserJoined","displayName":"Carol"})"_s;
+    QTest::newRow("lobby leave without id") << uR"({"type":"lobbyUserLeft"})"_s;
 }
 void JitsiSessionProtocolTest::rejectsInvalidEvent()
 {
@@ -376,6 +409,24 @@ void JitsiSessionProtocolTest::createsPasswordCommands()
     QCOMPARE(unlock.value("type"_L1).toString(), u"setRoomPassword"_s);
     QVERIFY(unlock.contains("password"_L1));
     QCOMPARE(unlock.value("password"_L1).toString(), QString());
+}
+
+void JitsiSessionProtocolTest::createsLobbyCommands()
+{
+    const QJsonObject enable =
+            QJsonDocument::fromJson(JitsiSessionProtocol::setLobbyEnabledCommand(true).toUtf8())
+                    .object();
+    QCOMPARE(enable.value("type"_L1).toString(), u"setLobbyEnabled"_s);
+    QCOMPARE(enable.value("isEnabled"_L1).toBool(), true);
+
+    const QJsonObject answer =
+            QJsonDocument::fromJson(
+                    JitsiSessionProtocol::answerLobbyUserCommand(u"lobby1"_s, false).toUtf8())
+                    .object();
+    QCOMPARE(answer.value("type"_L1).toString(), u"answerLobbyUser"_s);
+    QCOMPARE(answer.value("participantId"_L1).toString(), u"lobby1"_s);
+    QVERIFY(answer.contains("isApproved"_L1));
+    QCOMPARE(answer.value("isApproved"_L1).toBool(), false);
 }
 
 QTEST_GUILESS_MAIN(JitsiSessionProtocolTest)

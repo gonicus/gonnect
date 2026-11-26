@@ -51,6 +51,22 @@ struct RoomLockChanged
 {
     bool isLocked = false;
 };
+struct LobbyWaiting
+{
+};
+struct LobbyChanged
+{
+    bool isEnabled = false;
+};
+struct LobbyUserJoined
+{
+    QString participantId;
+    QString displayName;
+};
+struct LobbyUserLeft
+{
+    QString participantId;
+};
 struct Failed
 {
     QString reason;
@@ -118,10 +134,10 @@ struct Devices
     QList<MediaDevice> audioOutputs;
 };
 
-using Event =
-        std::variant<Joined, RoleChanged, UserJoined, UserLeft, DisplayNameChanged,
-                     ParticipantMuted, HandRaised, DominantSpeaker, MessageReceived, AudioMuted,
-                     VideoMuted, Devices, PasswordRequired, RoomLockChanged, Failed>;
+using Event = std::variant<Joined, RoleChanged, UserJoined, UserLeft, DisplayNameChanged,
+                           ParticipantMuted, HandRaised, DominantSpeaker, MessageReceived,
+                           AudioMuted, VideoMuted, Devices, PasswordRequired, RoomLockChanged,
+                           LobbyWaiting, LobbyChanged, LobbyUserJoined, LobbyUserLeft, Failed>;
 
 std::expected<Event, QString> parseEvent(const QString &message);
 
@@ -138,5 +154,7 @@ QString setHandRaisedCommand(bool isRaised);
 QString sendMessageCommand(const QString &text);
 QString joinWithPasswordCommand(const QString &password);
 QString setRoomPasswordCommand(const QString &password);
+QString setLobbyEnabledCommand(bool isEnabled);
+QString answerLobbyUserCommand(const QString &participantId, bool isApproved);
 
 } // namespace JitsiSessionProtocol

@@ -65,6 +65,8 @@ public:
     Q_INVOKABLE void setIsHandRaisedInternal(bool value);
     Q_INVOKABLE void setIsLobbyEnabledInternal(bool value);
     void setIsRoomLockedInternal(bool value);
+    void setIsWaitingInLobbyInternal(bool value);
+    void removeKnockingParticipant(const QString &id);
 
     Q_INVOKABLE void onPasswordRequired();
 
@@ -142,6 +144,7 @@ public:
     void muteAll() override;
     bool isLobbyEnabled() const override { return m_isLobbyEnabled; }
     void setLobbyEnabled(bool enabled) override;
+    bool isWaitingInLobby() const override { return m_isWaitingInLobby; }
     void setCallHistoryItem(
             QPointer<CallHistoryItem> callHistoryItem = QPointer<CallHistoryItem>()) override;
     QString displayName() const override { return m_displayName; }
@@ -232,6 +235,7 @@ private:
     VideoQuality m_videoQuality = VideoQuality::Average;
     bool m_isTranscriptionActive = false;
     bool m_isLobbyEnabled = false;
+    bool m_isWaitingInLobby = false;
 
     QString m_roomName;
     QString m_displayName;

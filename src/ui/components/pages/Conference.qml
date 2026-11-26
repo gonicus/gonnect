@@ -538,6 +538,33 @@ Item {
                     }
                 }
 
+                // TODO: correct design
+                Column {
+                    id: lobbyWaitingHint
+                    visible: confConn.isWaitingInLobby
+                    spacing: Theme.d * 2
+                    anchors.centerIn: nativeVideoLoader
+
+                    Accessible.id: "conference.lobby.waiting"
+                    Accessible.role: Accessible.Grouping
+                    Accessible.name: lobbyWaitingLabel.text
+
+                    Label {
+                        id: lobbyWaitingLabel
+                        text: qsTr("Waiting for a moderator to let you in...")
+                        anchors.horizontalCenter: parent.horizontalCenter
+                    }
+
+                    Button {
+                        id: lobbyCancelButton
+                        text: qsTr("Cancel")
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        onClicked: () => confConn.leaveConference()
+
+                        Accessible.id: "conference.lobby.cancel"
+                    }
+                }
+
                 Component {
                     id: passwordItemComponent
 

@@ -46,6 +46,7 @@ class IConferenceConnector : public ICallState
     Q_PROPERTY(bool isTranscriptionActive READ isTranscriptionActive NOTIFY
                        isTranscriptionActiveChanged FINAL)
     Q_PROPERTY(bool isLobbyEnabled READ isLobbyEnabled NOTIFY isLobbyEnabledChanged FINAL)
+    Q_PROPERTY(bool isWaitingInLobby READ isWaitingInLobby NOTIFY isWaitingInLobbyChanged FINAL)
 
     Q_PROPERTY(IConferenceConnector::VideoQuality videoQuality READ videoQuality NOTIFY
                        videoQualityChanged FINAL)
@@ -192,6 +193,9 @@ public:
     virtual bool isLobbyEnabled() const = 0;
     Q_INVOKABLE virtual void setLobbyEnabled(bool enabled) = 0;
 
+    /// This client is waiting for moderator to have entrance granted
+    virtual bool isWaitingInLobby() const = 0;
+
     Q_INVOKABLE virtual void showVirtualBackgroundDialog() = 0;
 
     Q_INVOKABLE virtual void answerKnockingParticipant(const QString &id, bool approved) = 0;
@@ -205,6 +209,7 @@ Q_SIGNALS:
     void hasTranscriptionChanged();
     void isTranscriptionActiveChanged();
     void isLobbyEnabledChanged();
+    void isWaitingInLobbyChanged();
     void isPasswordRequiredChanged();
     void isRoomLockedChanged();
     void roomPasswordChanged();

@@ -43,6 +43,8 @@
     control.on('sendMessage', message => conference?.sendTextMessage(message.text))
     control.on('joinWithPassword', message => conference?.join(message.password))
     control.on('setRoomPassword', message => setRoomPassword(message.password))
+    control.on('setLobbyEnabled', message => setLobbyEnabled(message.isEnabled))
+    control.on('answerLobbyUser', message => answerLobbyUser(message.participantId, message.isApproved))
     control.on('receiverConstraints', message => {
         requestedReceiverConstraints = message
         applyReceiverConstraints()
@@ -191,10 +193,31 @@
             control.send({ type: 'roomLockChanged', isLocked })
         })
 
+        // Reported right after joining room with lobby
+        conference.on(events.MEMBERS_ONLY_CHANGED, isEnabled => {
+            control.send({ type: 'lobbyChanged', isEnabled })
+        })
+
+        // Only moderators see lobby
+        conference.on(events.LOBBY_USER_JOINED, (participantId, displayName) => {
+            control.send({ type: 'lobbyUserJoined', participantId, displayName: displayName ?? '' })
+        })
+        conference.on(events.LOBBY_USER_LEFT, participantId => {
+            control.send({ type: 'lobbyUserLeft', participantId })
+        })
+
         conference.on(events.CONFERENCE_FAILED, error => {
+            const errors = JitsiMeetJS.errors.conference
+
             // Ask again on wrong password
-            if (error === JitsiMeetJS.errors.conference.PASSWORD_REQUIRED) {
+            if (error === errors.PASSWORD_REQUIRED) {
                 control.send({ type: 'passwordRequired' })
+                return
+            }
+
+            // Once a moderator lets this client in, the library joins on its own
+            if (error === errors.MEMBERS_ONLY_ERROR) {
+                joinLobby()
                 return
             }
             fail(error)
@@ -340,6 +363,42 @@
         change.catch(error => {
             console.error('GOnnect session cannot set room password:', error)
         })
+    }
+
+    async function joinLobby() {
+        try {
+            await conference.joinLobby(settings.displayName, '')
+            control.send({ type: 'lobbyWaiting' })
+        } catch (error) {
+            console.error('GOnnect session cannot join lobby:', error)
+            fail('conference.lobbyFailed')
+        }
+    }
+
+    function setLobbyEnabled(isEnabled) {
+        if (!conference) {
+            return
+        }
+
+        if (isEnabled) {
+            conference.enableLobby().catch(error => {
+                console.error('GOnnect session cannot enable lobby:', error)
+            })
+        } else {
+            conference.disableLobby()
+        }
+    }
+
+    function answerLobbyUser(participantId, isApproved) {
+        if (!conference) {
+            return
+        }
+
+        if (isApproved) {
+            conference.lobbyApproveAccess(participantId)
+        } else {
+            conference.lobbyDenyAccess(participantId)
+        }
     }
 
     // Local participant has no property event

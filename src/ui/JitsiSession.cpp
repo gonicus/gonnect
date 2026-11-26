@@ -4,6 +4,8 @@
 #include "GlobalMuteState.h"
 #include "JitsiConnector.h"
 #include "JitsiVideoBridge.h"
+#include "Notification.h"
+#include "NotificationManager.h"
 
 #include <QLoggingCategory>
 #include <QVariantMap>
@@ -41,6 +43,15 @@ JitsiSession::JitsiSession(JitsiConnector *connector, JitsiVideoBridge *bridge, 
         m_isJoined = false;
         send(JitsiSessionProtocol::leaveCommand());
     });
+    connect(m_connector, &JitsiConnector::executeSetLobbyEnabledCommand, this,
+            [this](bool isEnabled) {
+                sendIfJoined(JitsiSessionProtocol::setLobbyEnabledCommand(isEnabled));
+            });
+    connect(m_connector, &JitsiConnector::executeAnswerKnockingParticipant, this,
+            [this](const QString &participantId, bool isApproved) {
+                sendIfJoined(
+                        JitsiSessionProtocol::answerLobbyUserCommand(participantId, isApproved));
+            });
     connect(m_connector, &JitsiConnector::executeToggleAudioCommand, this, [this]() {
         sendIfJoined(JitsiSessionProtocol::setAudioMutedCommand(!m_connector->isAudioMuted()));
     });
@@ -85,6 +96,20 @@ JitsiSession::JitsiSession(JitsiConnector *connector, JitsiVideoBridge *bridge, 
     }
 }
 
+QString JitsiSession::endedMessage(const QString &reason) const
+{
+    if (reason == "conference.destroyed"_L1) {
+        return tr("A moderator ended the conference for all participants.");
+    }
+    if (reason == "conference.connectionError.accessDenied"_L1) {
+        return tr("A moderator did not let you in.");
+    }
+    if (reason == "conference.kicked"_L1) {
+        return tr("A moderator removed you from the conference.");
+    }
+    return {};
+}
+
 void JitsiSession::receiveEvent(const QString &message)
 {
     const auto event = JitsiSessionProtocol::parseEvent(message);
@@ -104,6 +129,7 @@ void JitsiSession::handle(const JitsiSessionProtocol::Joined &joined)
     m_connector->setJitsiId(joined.participantId);
     m_connector->setUserRole(joined.participantId, joined.role);
     m_connector->setVideoAvailableInternal(true);
+    m_connector->setIsWaitingInLobbyInternal(false);
     m_isJoined = true;
 
     const bool isAudioMuted = m_connector->isOnHold() || GlobalMuteState::instance().isMuted();
@@ -198,6 +224,31 @@ void JitsiSession::handle(const JitsiSessionProtocol::RoomLockChanged &roomLockC
     m_connector->setIsRoomLockedInternal(roomLockChanged.isLocked);
 }
 
+void JitsiSession::handle(const JitsiSessionProtocol::LobbyWaiting &)
+{
+    qCInfo(lcJitsiSession) << "Waiting in lobby";
+    m_connector->setIsWaitingInLobbyInternal(true);
+}
+
+void JitsiSession::handle(const JitsiSessionProtocol::LobbyChanged &lobbyChanged)
+{
+    qCInfo(lcJitsiSession) << "Lobby enabled:" << lobbyChanged.isEnabled;
+    m_connector->setIsLobbyEnabledInternal(lobbyChanged.isEnabled);
+}
+
+void JitsiSession::handle(const JitsiSessionProtocol::LobbyUserJoined &lobbyUserJoined)
+{
+    qCInfo(lcJitsiSession) << "Participant" << lobbyUserJoined.participantId
+                           << "knocks (= is in lobby)";
+    m_connector->addKnockingParticipant(lobbyUserJoined.participantId, lobbyUserJoined.displayName);
+}
+
+void JitsiSession::handle(const JitsiSessionProtocol::LobbyUserLeft &lobbyUserLeft)
+{
+    qCInfo(lcJitsiSession) << "Participant" << lobbyUserLeft.participantId << "left the lobby";
+    m_connector->removeKnockingParticipant(lobbyUserLeft.participantId);
+}
+
 void JitsiSession::handle(const JitsiSessionProtocol::Failed &failed)
 {
     qCWarning(lcJitsiSession) << "Conference failed:" << failed.reason;
@@ -207,7 +258,18 @@ void JitsiSession::handle(const JitsiSessionProtocol::Failed &failed)
         return;
     }
 
-    ErrorBus::instance().error(tr("Conference failed: %1").arg(failed.reason));
+    // Dispatch failure as notification or "real" error
+    const QString message = endedMessage(failed.reason);
+    if (message.isEmpty()) {
+        ErrorBus::instance().error(tr("Conference fail: %1").arg(failed.reason));
+    } else {
+        const auto title = tr("[%1] Conference ended").arg(m_connector->conferenceName());
+        auto *notification =
+                new Notification(title, message, Notification::Priority::normal, false, this);
+        notification->setIcon(":/icons/gonnect.svg");
+        NotificationManager::instance().add(notification);
+    }
+
     m_connector->leaveConference();
 }
 

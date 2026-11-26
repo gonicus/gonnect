@@ -1021,6 +1021,21 @@ void JitsiConnector::setIsRoomLockedInternal(bool value)
     }
 }
 
+void JitsiConnector::setIsWaitingInLobbyInternal(bool value)
+{
+    if (m_isWaitingInLobby != value) {
+        m_isWaitingInLobby = value;
+        Q_EMIT isWaitingInLobbyChanged();
+    }
+}
+
+void JitsiConnector::removeKnockingParticipant(const QString &id)
+{
+    if (m_knockedIds.remove(id)) {
+        Q_EMIT knockAnswered(id);
+    }
+}
+
 void JitsiConnector::onPasswordRequired()
 {
     // First password request - check for persisted password
@@ -1790,6 +1805,7 @@ void JitsiConnector::resetConferenceState()
     setIsLobbyEnabledInternal(false);
     setIsPasswordRequired(false);
     setIsRoomLockedInternal(false);
+    setIsWaitingInLobbyInternal(false);
     if (m_isAudioMuted) {
         m_isAudioMuted = false;
         Q_EMIT isAudioMutedChanged();

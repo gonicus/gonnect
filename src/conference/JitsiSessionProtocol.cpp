@@ -190,6 +190,27 @@ Event parseRoomLockChanged(EventFields &fields)
     return RoomLockChanged{ .isLocked = fields.requiredBool("isLocked"_L1) };
 }
 
+Event parseLobbyWaiting(EventFields &)
+{
+    return LobbyWaiting{};
+}
+
+Event parseLobbyChanged(EventFields &fields)
+{
+    return LobbyChanged{ .isEnabled = fields.requiredBool("isEnabled"_L1) };
+}
+
+Event parseLobbyUserJoined(EventFields &fields)
+{
+    return LobbyUserJoined{ .participantId = fields.requiredString("participantId"_L1),
+                            .displayName = fields.optionalString("displayName"_L1) };
+}
+
+Event parseLobbyUserLeft(EventFields &fields)
+{
+    return LobbyUserLeft{ .participantId = fields.requiredString("participantId"_L1) };
+}
+
 Event parseFailed(EventFields &fields)
 {
     return Failed{ .reason = fields.optionalString("reason"_L1) };
@@ -216,6 +237,10 @@ constexpr EventParser eventParsers[] = {
     { "devices"_L1, parseDevices },
     { "passwordRequired"_L1, parsePasswordRequired },
     { "roomLockChanged"_L1, parseRoomLockChanged },
+    { "lobbyWaiting"_L1, parseLobbyWaiting },
+    { "lobbyChanged"_L1, parseLobbyChanged },
+    { "lobbyUserJoined"_L1, parseLobbyUserJoined },
+    { "lobbyUserLeft"_L1, parseLobbyUserLeft },
     { "failed"_L1, parseFailed },
 };
 
@@ -229,6 +254,19 @@ QString joinWithPasswordCommand(const QString &password)
 QString setRoomPasswordCommand(const QString &password)
 {
     return commandMessage("setRoomPassword"_L1, { { "password"_L1, password } });
+}
+
+QString setLobbyEnabledCommand(bool isEnabled)
+{
+    return commandMessage("setLobbyEnabled"_L1, { { "isEnabled"_L1, isEnabled } });
+}
+
+QString answerLobbyUserCommand(const QString &participantId, bool isApproved)
+{
+
+    return commandMessage(
+            "answerLobbyUser"_L1,
+            { { "participantId"_L1, participantId }, { "isApproved"_L1, isApproved } });
 }
 
 // namespace
