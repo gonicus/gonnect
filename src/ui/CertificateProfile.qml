@@ -47,6 +47,7 @@ QtObject {
                 }
                 profile.offTheRecord = false
                 profile.httpCacheType = WebEngineProfile.MemoryHttpCache
+                profile.persistentPermissionsPolicy = WebEngineProfile.PersistentPermissionsPolicy.AskEveryTime
 
                 const systemLocale = Qt.locale().name.replace("_", "-")
                 const mainLang = systemLocale.split("-")[0]

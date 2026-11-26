@@ -43,6 +43,7 @@ class IConferenceConnector : public ICallState
     Q_PROPERTY(bool hasTranscription READ hasTranscription NOTIFY hasTranscriptionChanged FINAL)
     Q_PROPERTY(bool isTranscriptionActive READ isTranscriptionActive NOTIFY
                        isTranscriptionActiveChanged FINAL)
+    Q_PROPERTY(bool isLobbyEnabled READ isLobbyEnabled NOTIFY isLobbyEnabledChanged FINAL)
 
     Q_PROPERTY(IConferenceConnector::VideoQuality videoQuality READ videoQuality NOTIFY
                        videoQualityChanged FINAL)
@@ -75,6 +76,7 @@ public:
         VideoQualityAdjustable,
         Whiteboard,
         Transcription,
+        Lobby
     };
     Q_ENUM(Capability)
 
@@ -177,6 +179,10 @@ public:
     virtual void setLargeVideoUser(ConferenceUser *user) = 0;
 
     Q_INVOKABLE virtual void muteAll() = 0;
+
+    virtual bool isLobbyEnabled() const = 0;
+    Q_INVOKABLE virtual void setLobbyEnabled(bool enabled) = 0;
+
     Q_INVOKABLE virtual void showVirtualBackgroundDialog() = 0;
 
     Q_INVOKABLE virtual void answerKnockingParticipant(const QString &id, bool approved) = 0;
@@ -189,6 +195,7 @@ Q_SIGNALS:
     void hasDialInChanged();
     void hasTranscriptionChanged();
     void isTranscriptionActiveChanged();
+    void isLobbyEnabledChanged();
     void isPasswordRequiredChanged();
     void roomPasswordChanged();
     void displayNameChanged();

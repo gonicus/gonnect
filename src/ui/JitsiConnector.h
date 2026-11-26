@@ -47,6 +47,7 @@ public:
     Q_INVOKABLE void setIsSharingScreenInternal(bool value);
     Q_INVOKABLE void setIsTileViewInternal(bool value);
     Q_INVOKABLE void setIsHandRaisedInternal(bool value);
+    Q_INVOKABLE void setIsLobbyEnabledInternal(bool value);
 
     Q_INVOKABLE void onPasswordRequired();
 
@@ -89,7 +90,7 @@ public:
     void setOnHold(bool shallHold) override;
     void setAudioMuted(bool shallMute) override;
     bool isAudioMuted() const override { return m_isAudioMuted; }
-    bool isVideoAvailable() const override { return m_isVideoAvailable; };
+    bool isVideoAvailable() const override;
     bool isVideoMuted() const override { return m_isVideoMuted; }
     void setVideoMuted(bool shallMute) override;
     void setHandRaised(bool handRaised) override;
@@ -114,6 +115,8 @@ public:
     ConferenceUser *largeVideoUser() const override { return m_largeVideoUser; };
     void setLargeVideoUser(ConferenceUser *user) override;
     void muteAll() override;
+    bool isLobbyEnabled() const override { return m_isLobbyEnabled; }
+    void setLobbyEnabled(bool enabled) override;
     void setCallHistoryItem(
             QPointer<CallHistoryItem> callHistoryItem = QPointer<CallHistoryItem>()) override;
     QString displayName() const override { return m_displayName; }
@@ -197,6 +200,7 @@ private:
     QString m_roomPassword;
     VideoQuality m_videoQuality = VideoQuality::Average;
     bool m_isTranscriptionActive = false;
+    bool m_isLobbyEnabled = false;
 
     QString m_roomName;
     QString m_displayName;
@@ -239,6 +243,7 @@ Q_SIGNALS:
     void executeKickUserCommand(QString id);
     void executeGrantModeratorCommand(QString id);
     void executeMuteAllCommand();
+    void executeSetLobbyEnabledCommand(bool enabled);
     void executeSetVideoQualityCommand(uint videoQuality);
     void executeSetAudioOnlyCommand(bool isAudioOnly);
 };

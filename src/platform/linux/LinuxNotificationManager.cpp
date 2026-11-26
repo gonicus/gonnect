@@ -107,9 +107,11 @@ QString LinuxNotificationManager::add(Notification *notification)
         notify_notification_add_action(
                 internalNotification, "default", "default",
                 [](NotifyNotification *notification, char *, gpointer user_data) {
+                    g_object_ref(notification);
                     Notification *en = (Notification *)user_data;
                     Q_EMIT en->actionInvoked(en->defaultAction(), en->defaultActionParameters());
                     notify_notification_close(notification, NULL);
+                    g_object_unref(notification);
                 },
                 (gpointer)notification, NULL);
     }
@@ -127,9 +129,11 @@ QString LinuxNotificationManager::add(Notification *notification)
         notify_notification_add_action(
                 internalNotification, action.toStdString().c_str(), label.toStdString().c_str(),
                 [](NotifyNotification *notification, char *action, gpointer user_data) {
+                    g_object_ref(notification);
                     Notification *en = (Notification *)user_data;
                     Q_EMIT en->actionInvoked(action, {});
                     notify_notification_close(notification, NULL);
+                    g_object_unref(notification);
                 },
                 (gpointer)notification, NULL);
     }

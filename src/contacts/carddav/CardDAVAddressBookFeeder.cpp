@@ -133,7 +133,7 @@ QCoro::Task<> CardDAVAddressBookFeeder::run()
         if (result == WebDavSyncResult::OtherError) {
             if (retriesLeft-- <= 0) {
                 ErrorBus::instance().addError(
-                        tr("CardDAV source %1 repeatedly failed - retries exhausted").arg(m_group));
+                        tr("CardDAV source %1 repeatedly failed to sync - giving up").arg(m_group));
                 co_return;
             }
 
