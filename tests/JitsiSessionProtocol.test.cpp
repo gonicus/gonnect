@@ -259,6 +259,17 @@ void JitsiSessionProtocolTest::parsesLobbyEvents()
     QCOMPARE(userLeft->participantId, u"lobby1"_s);
 }
 
+void JitsiSessionProtocolTest::parsesScreenSharing()
+{
+    const auto event =
+            JitsiSessionProtocol::parseEvent(uR"({"type":"screenSharing","isSharing":true})"_s);
+
+    QVERIFY2(event.has_value(), errorText(event).constData());
+    const auto *screenSharing = std::get_if<JitsiSessionProtocol::ScreenSharing>(&*event);
+    QVERIFY(screenSharing);
+    QVERIFY(screenSharing->isSharing);
+}
+
 void JitsiSessionProtocolTest::parsesFailed()
 {
     const auto event = JitsiSessionProtocol::parseEvent(
@@ -300,6 +311,7 @@ void JitsiSessionProtocolTest::rejectsInvalidEvent_data()
     QTest::newRow("lobby join without id")
             << uR"({"type":"lobbyUserJoined","displayName":"Carol"})"_s;
     QTest::newRow("lobby leave without id") << uR"({"type":"lobbyUserLeft"})"_s;
+    QTest::newRow("screen sharing without state") << uR"({"type":"screenSharing"})"_s;
 }
 void JitsiSessionProtocolTest::rejectsInvalidEvent()
 {
@@ -451,6 +463,15 @@ void JitsiSessionProtocolTest::createsOnHoldCommand()
             QJsonDocument::fromJson(JitsiSessionProtocol::setOnHoldCommand(true).toUtf8()).object();
     QCOMPARE(object.value("type"_L1).toString(), u"setOnHold"_s);
     QCOMPARE(object.value("isOnHold"_L1).toBool(), true);
+}
+
+void JitsiSessionProtocolTest::createsScreenSharingCommand()
+{
+    const QJsonObject object =
+            QJsonDocument::fromJson(JitsiSessionProtocol::setScreenSharingCommand(true).toUtf8())
+                    .object();
+    QCOMPARE(object.value("type"_L1).toString(), u"setScreenSharing"_s);
+    QCOMPARE(object.value("isSharing"_L1).toBool(), true);
 }
 
 QTEST_GUILESS_MAIN(JitsiSessionProtocolTest)

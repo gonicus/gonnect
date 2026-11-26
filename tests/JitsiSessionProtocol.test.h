@@ -25,6 +25,7 @@ private slots:
     void parsesPasswordRequired();
     void parsesRoomLockChanged();
     void parsesLobbyEvents();
+    void parsesScreenSharing();
     void parsesFailed();
 
     void rejectsInvalidEvent_data();
@@ -42,4 +43,5 @@ private slots:
     void createsVideoQualityCommand();
     void createsEndConferenceCommand();
     void createsOnHoldCommand();
+    void createsScreenSharingCommand();
 };

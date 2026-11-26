@@ -67,6 +67,10 @@ struct LobbyUserLeft
 {
     QString participantId;
 };
+struct ScreenSharing
+{
+    bool isSharing = false;
+};
 struct Failed
 {
     QString reason;
@@ -134,10 +138,30 @@ struct Devices
     QList<MediaDevice> audioOutputs;
 };
 
-using Event = std::variant<Joined, RoleChanged, UserJoined, UserLeft, DisplayNameChanged,
-                           ParticipantMuted, HandRaised, DominantSpeaker, MessageReceived,
-                           AudioMuted, VideoMuted, Devices, PasswordRequired, RoomLockChanged,
-                           LobbyWaiting, LobbyChanged, LobbyUserJoined, LobbyUserLeft, Failed>;
+// clang-format off
+using Event = std::variant<
+    AudioMuted,
+    Devices,
+    DisplayNameChanged,
+    DominantSpeaker,
+    Failed,
+    HandRaised,
+    Joined,
+    LobbyChanged,
+    LobbyUserJoined,
+    LobbyUserLeft,
+    LobbyWaiting,
+    MessageReceived,
+    ParticipantMuted,
+    PasswordRequired,
+    RoleChanged,
+    RoomLockChanged,
+    ScreenSharing,
+    UserJoined,
+    UserLeft,
+    VideoMuted
+>;
+// clang-format on
 
 std::expected<Event, QString> parseEvent(const QString &message);
 
@@ -159,5 +183,6 @@ QString answerLobbyUserCommand(const QString &participantId, bool isApproved);
 QString setVideoQualityCommand(uint maxHeight);
 QString endConferenceCommand();
 QString setOnHoldCommand(bool isOnHold);
+QString setScreenSharingCommand(bool isSharing);
 
 } // namespace JitsiSessionProtocol

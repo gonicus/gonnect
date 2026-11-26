@@ -211,6 +211,11 @@ Event parseLobbyUserLeft(EventFields &fields)
     return LobbyUserLeft{ .participantId = fields.requiredString("participantId"_L1) };
 }
 
+Event parseScreenSharing(EventFields &fields)
+{
+    return ScreenSharing{ .isSharing = fields.requiredBool("isSharing"_L1) };
+}
+
 Event parseFailed(EventFields &fields)
 {
     return Failed{ .reason = fields.optionalString("reason"_L1) };
@@ -223,25 +228,26 @@ struct EventParser
 };
 
 constexpr EventParser eventParsers[] = {
-    { "joined"_L1, parseJoined },
-    { "roleChanged"_L1, parseRoleChanged },
-    { "userJoined"_L1, parseUserJoined },
-    { "userLeft"_L1, parseUserLeft },
-    { "displayNameChanged"_L1, parseDisplayNameChanged },
-    { "participantMuted"_L1, parseParticipantMuted },
-    { "handRaised"_L1, parseHandRaised },
-    { "dominantSpeaker"_L1, parseDominantSpeaker },
-    { "messageReceived"_L1, parseMessageReceived },
     { "audioMuted"_L1, parseAudioMuted },
-    { "videoMuted"_L1, parseVideoMuted },
     { "devices"_L1, parseDevices },
-    { "passwordRequired"_L1, parsePasswordRequired },
-    { "roomLockChanged"_L1, parseRoomLockChanged },
-    { "lobbyWaiting"_L1, parseLobbyWaiting },
+    { "displayNameChanged"_L1, parseDisplayNameChanged },
+    { "dominantSpeaker"_L1, parseDominantSpeaker },
+    { "failed"_L1, parseFailed },
+    { "handRaised"_L1, parseHandRaised },
+    { "joined"_L1, parseJoined },
     { "lobbyChanged"_L1, parseLobbyChanged },
     { "lobbyUserJoined"_L1, parseLobbyUserJoined },
     { "lobbyUserLeft"_L1, parseLobbyUserLeft },
-    { "failed"_L1, parseFailed },
+    { "lobbyWaiting"_L1, parseLobbyWaiting },
+    { "messageReceived"_L1, parseMessageReceived },
+    { "participantMuted"_L1, parseParticipantMuted },
+    { "passwordRequired"_L1, parsePasswordRequired },
+    { "roleChanged"_L1, parseRoleChanged },
+    { "roomLockChanged"_L1, parseRoomLockChanged },
+    { "screenSharing"_L1, parseScreenSharing },
+    { "userJoined"_L1, parseUserJoined },
+    { "userLeft"_L1, parseUserLeft },
+    { "videoMuted"_L1, parseVideoMuted },
 };
 
 } // namespace
@@ -365,4 +371,9 @@ QString JitsiSessionProtocol::endConferenceCommand()
 QString JitsiSessionProtocol::setOnHoldCommand(bool isOnHold)
 {
     return commandMessage("setOnHold"_L1, { { "isOnHold"_L1, isOnHold } });
+}
+
+QString JitsiSessionProtocol::setScreenSharingCommand(bool isSharing)
+{
+    return commandMessage("setScreenSharing"_L1, { { "isSharing"_L1, isSharing } });
 }

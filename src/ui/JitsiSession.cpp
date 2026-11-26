@@ -56,6 +56,11 @@ JitsiSession::JitsiSession(JitsiConnector *connector, JitsiVideoBridge *bridge, 
         sendIfJoined(JitsiSessionProtocol::setOnHoldCommand(m_connector->isOnHold()));
     });
 
+    connect(m_connector, &JitsiConnector::executeToggleShareScreenCommand, this, [this]() {
+        sendIfJoined(
+                JitsiSessionProtocol::setScreenSharingCommand(!m_connector->isSharingScreen()));
+    });
+
     connect(m_connector, &JitsiConnector::executeSetLobbyEnabledCommand, this,
             [this](bool isEnabled) {
                 sendIfJoined(JitsiSessionProtocol::setLobbyEnabledCommand(isEnabled));
@@ -248,6 +253,12 @@ void JitsiSession::handle(const JitsiSessionProtocol::RoomLockChanged &roomLockC
 {
     qCInfo(lcJitsiSession) << "Room locked:" << roomLockChanged.isLocked;
     m_connector->setIsRoomLockedInternal(roomLockChanged.isLocked);
+}
+
+void JitsiSession::handle(const JitsiSessionProtocol::ScreenSharing &screenSharing)
+{
+    qCInfo(lcJitsiSession) << "Sharing screen:" << screenSharing.isSharing;
+    m_connector->setIsSharingScreenInternal(screenSharing.isSharing);
 }
 
 void JitsiSession::handle(const JitsiSessionProtocol::LobbyWaiting &)

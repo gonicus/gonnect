@@ -19,6 +19,7 @@
     let conference = null
     let audioTrack = null
     let videoTrack = null
+    let desktopTrack = null
     let requestedReceiverConstraints = null
     let maxVideoHeight = null  // Not selected by GOnnect yet
     let isOnHold = false
@@ -27,6 +28,7 @@
 
     // Serializes camera changes (track creation is asynchronous)
     let videoChange = Promise.resolve()
+    let screenSharingChange = Promise.resolve()
 
     // Remote audio track -> element playing it
     const remoteAudioElements = new Map()
@@ -54,6 +56,7 @@
     control.on('setVideoQuality', message => setVideoQuality(message.maxHeight))
     control.on('endConference', endConference)
     control.on('setOnHold', message => setOnHold(message.isOnHold))
+    control.on('setScreenSharing', message => changeScreenSharing(message.isSharing))
 
     if (typeof JitsiMeetJS === 'undefined' || typeof config === 'undefined') {
         fail('libraryNotLoaded')
@@ -619,6 +622,56 @@
         })
     }
 
+    function changeScreenSharing(isSharing) {
+        screenSharingChange = screenSharingChange.then(() => setScreenSharing(isSharing))
+    }
+
+    async function setScreenSharing(isSharing) {
+        try {
+            if (isSharing && !desktopTrack) {
+                const track = await createDesktopTrack()
+                try {
+                    await conference.addTrack(track)
+                    desktopTrack = track
+                } catch (error) {
+                    await track.dispose()
+                    throw error
+                }
+            } else if (!isSharing && desktopTrack) {
+                const track = desktopTrack
+                desktopTrack = null
+                await conference.removeTrack(track)
+                await track.dispose()
+            }
+        } catch (error) {
+            // Can also happen if user cancels screen picker
+            console.error('GOnnect session cannot change screen sharing:', error?.message ?? error)
+        }
+
+        control.send({ type: 'screenSharing', isSharing: Boolean(desktopTrack) })
+    }
+
+    async function createDesktopTrack() {
+        const tracks = await JitsiMeetJS.createLocalTracks({ devices: [ 'desktop' ] })
+
+        const track = tracks.find(candidate => candidate.getType() === 'video')
+        await Promise.all(tracks.filter(candidate => candidate !== track)
+                                .map(candidate => candidate.dispose()))
+
+        if (!track) {
+            throw new Error('No desktop video track')
+        }
+
+        // Sharing stopped outside of GOnnect, such as desktop environment
+        track.addEventListener(JitsiMeetJS.events.track.LOCAL_TRACK_STOPPED, () => {
+            if (track === desktopTrack) {
+                changeScreenSharing(false)
+            }
+        })
+
+        return track
+    }
+
     async function leave() {
         isLeaving = true
 
@@ -629,6 +682,7 @@
         }
         await audioTrack?.dispose()
         await videoTrack?.dispose()
+        await desktopTrack?.dispose()
         connection?.disconnect()
     }
 
