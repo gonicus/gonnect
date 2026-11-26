@@ -689,7 +689,7 @@ Item {
                             states: [
                                 State {
                                     name: "PASSWORD_SET_BY_ME"
-                                    when: confConn.isPasswordRequired && confConn.roomPassword !== ""
+                                    when: confConn.isRoomLocked && confConn.roomPassword !== ""
 
                                     PropertyChanges {
                                         passwordField.visible: false
@@ -703,7 +703,7 @@ Item {
                                 },
                                 State {
                                     name: "PASSWORD_SET_BY_SOMEONE_ELSE"
-                                    when: confConn.isPasswordRequired && confConn.roomPassword === ""
+                                    when: confConn.isRoomLocked && confConn.roomPassword === ""
 
                                     PropertyChanges {
                                         passwordField.visible: false

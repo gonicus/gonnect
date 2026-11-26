@@ -41,6 +41,8 @@
     control.on('muteAll', muteAll)
     control.on('setHandRaised', message => setHandRaised(message.isRaised))
     control.on('sendMessage', message => conference?.sendTextMessage(message.text))
+    control.on('joinWithPassword', message => conference?.join(message.password))
+    control.on('setRoomPassword', message => setRoomPassword(message.password))
     control.on('receiverConstraints', message => {
         requestedReceiverConstraints = message
         applyReceiverConstraints()
@@ -184,7 +186,19 @@
 
         conference.on(events.KICKED, () => fail('conference.kicked'))
 
-        conference.on(events.CONFERENCE_FAILED, error => fail(`conference.${error}`))
+        // Can be reported right after joining a locked room
+        conference.on(events.LOCK_STATE_CHANGED, isLocked => {
+            control.send({ type: 'roomLockChanged', isLocked })
+        })
+
+        conference.on(events.CONFERENCE_FAILED, error => {
+            // Ask again on wrong password
+            if (error === JitsiMeetJS.errors.conference.PASSWORD_REQUIRED) {
+                control.send({ type: 'passwordRequired' })
+                return
+            }
+            fail(error)
+        })
         conference.on(events.TRACK_ADDED, track => {
             playRemoteAudio(track)
             watchRemoteVideo(track)
@@ -315,6 +329,17 @@
     function messageTimestamp(stamp) {
         const timestamp = stamp ? new Date(stamp).getTime() : NaN
         return Number.isNaN(timestamp) ? Date.now() : timestamp
+    }
+
+    function setRoomPassword(password) {
+        if (!conference) {
+            return
+        }
+
+        const change = password ? conference.lock(password) : conference.unlock()
+        change.catch(error => {
+            console.error('GOnnect session cannot set room password:', error)
+        })
     }
 
     // Local participant has no property event

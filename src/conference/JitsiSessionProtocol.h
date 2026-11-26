@@ -44,6 +44,13 @@ struct Joined
     QString participantId;
     ConferenceUser::Role role = ConferenceUser::Role::None;
 };
+struct PasswordRequired
+{
+};
+struct RoomLockChanged
+{
+    bool isLocked = false;
+};
 struct Failed
 {
     QString reason;
@@ -111,9 +118,10 @@ struct Devices
     QList<MediaDevice> audioOutputs;
 };
 
-using Event = std::variant<Joined, RoleChanged, UserJoined, UserLeft, DisplayNameChanged,
-                           ParticipantMuted, HandRaised, DominantSpeaker, MessageReceived,
-                           AudioMuted, VideoMuted, Devices, Failed>;
+using Event =
+        std::variant<Joined, RoleChanged, UserJoined, UserLeft, DisplayNameChanged,
+                     ParticipantMuted, HandRaised, DominantSpeaker, MessageReceived, AudioMuted,
+                     VideoMuted, Devices, PasswordRequired, RoomLockChanged, Failed>;
 
 std::expected<Event, QString> parseEvent(const QString &message);
 
@@ -128,5 +136,7 @@ QString grantModeratorCommand(const QString &participantId);
 QString muteAllCommand();
 QString setHandRaisedCommand(bool isRaised);
 QString sendMessageCommand(const QString &text);
+QString joinWithPasswordCommand(const QString &password);
+QString setRoomPasswordCommand(const QString &password);
 
 } // namespace JitsiSessionProtocol

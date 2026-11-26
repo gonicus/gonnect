@@ -180,6 +180,16 @@ Event parseDevices(EventFields &fields)
                     .audioOutputs = parseMediaDevices(fields.optionalArray("audioOutputs"_L1)) };
 }
 
+Event parsePasswordRequired(EventFields &)
+{
+    return PasswordRequired{};
+}
+
+Event parseRoomLockChanged(EventFields &fields)
+{
+    return RoomLockChanged{ .isLocked = fields.requiredBool("isLocked"_L1) };
+}
+
 Event parseFailed(EventFields &fields)
 {
     return Failed{ .reason = fields.optionalString("reason"_L1) };
@@ -204,10 +214,24 @@ constexpr EventParser eventParsers[] = {
     { "audioMuted"_L1, parseAudioMuted },
     { "videoMuted"_L1, parseVideoMuted },
     { "devices"_L1, parseDevices },
+    { "passwordRequired"_L1, parsePasswordRequired },
+    { "roomLockChanged"_L1, parseRoomLockChanged },
     { "failed"_L1, parseFailed },
 };
 
 } // namespace
+
+QString joinWithPasswordCommand(const QString &password)
+{
+    return commandMessage("joinWithPassword"_L1, { { "password"_L1, password } });
+}
+
+QString setRoomPasswordCommand(const QString &password)
+{
+    return commandMessage("setRoomPassword"_L1, { { "password"_L1, password } });
+}
+
+// namespace
 } // namespace JitsiSessionProtocol
 
 std::expected<JitsiSessionProtocol::Event, QString>

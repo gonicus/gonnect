@@ -29,6 +29,8 @@ private:
     void handle(const JitsiSessionProtocol::AudioMuted &audioMuted);
     void handle(const JitsiSessionProtocol::VideoMuted &videoMuted);
     void handle(const JitsiSessionProtocol::Devices &devices);
+    void handle(const JitsiSessionProtocol::PasswordRequired &passwordRequired);
+    void handle(const JitsiSessionProtocol::RoomLockChanged &roomLockChanged);
     void handle(const JitsiSessionProtocol::Failed &failed);
 
     void send(const QString &command);

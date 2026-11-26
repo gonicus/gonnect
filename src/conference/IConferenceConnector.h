@@ -21,6 +21,7 @@ class IConferenceConnector : public ICallState
     Q_PROPERTY(bool isInConference READ isInConference NOTIFY isInConferenceChanged FINAL)
     Q_PROPERTY(
             bool isPasswordRequired READ isPasswordRequired NOTIFY isPasswordRequiredChanged FINAL)
+    Q_PROPERTY(bool isRoomLocked READ isRoomLocked NOTIFY isRoomLockedChanged FINAL)
     Q_PROPERTY(QString roomPassword READ roomPassword NOTIFY roomPasswordChanged FINAL)
     Q_PROPERTY(QString displayName READ displayName NOTIFY displayNameChanged FINAL)
     Q_PROPERTY(QString conferenceName READ conferenceName NOTIFY conferenceNameChanged FINAL)
@@ -98,7 +99,10 @@ public:
 
     virtual bool isInitialized() = 0;
     virtual bool isInConference() const = 0;
+    /// User must enter password
     virtual bool isPasswordRequired() const = 0;
+    /// Room is protected by password (does not mean user must enter one)
+    virtual bool isRoomLocked() const = 0;
     virtual QString roomPassword() const = 0;
     Q_INVOKABLE virtual void setRoomPassword(QString password) = 0;
     Q_INVOKABLE virtual void joinConference(const QString &conferenceId, const QString &displayName,
@@ -202,6 +206,7 @@ Q_SIGNALS:
     void isTranscriptionActiveChanged();
     void isLobbyEnabledChanged();
     void isPasswordRequiredChanged();
+    void isRoomLockedChanged();
     void roomPasswordChanged();
     void displayNameChanged();
     void conferenceNameChanged();

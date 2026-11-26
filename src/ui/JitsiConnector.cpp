@@ -909,7 +909,7 @@ void JitsiConnector::setRoomPassword(QString value)
                         Q_EMIT roomPasswordChanged();
                     }
 
-                    setIsPasswordRequired(!value.isEmpty());
+                    setIsRoomLockedInternal(!value.isEmpty());
                 } else {
                     ErrorBus::instance().error(
                             tr("Failed to persist room password: %1").arg(message));
@@ -1002,6 +1002,22 @@ void JitsiConnector::setIsLobbyEnabledInternal(bool value)
     if (m_isLobbyEnabled != value) {
         m_isLobbyEnabled = value;
         Q_EMIT isLobbyEnabledChanged();
+    }
+}
+
+void JitsiConnector::setIsRoomLockedInternal(bool value)
+{
+    if (m_isRoomLocked == value) {
+        return;
+    }
+
+    m_isRoomLocked = value;
+    Q_EMIT isRoomLockedChanged();
+
+    // Ignore old remembered password
+    if (!value && !m_roomPassword.isEmpty()) {
+        m_roomPassword.clear();
+        Q_EMIT roomPasswordChanged();
     }
 }
 
@@ -1712,30 +1728,41 @@ void JitsiConnector::joinConference(const QString &conferenceId, const QString &
 
 void JitsiConnector::enterPassword(const QString &password, bool rememberPassword)
 {
-    if (rememberPassword) {
-        QString authGroup = "jitsiRoomPasswords/" + m_roomName;
-
-        Credentials::instance().set(
-                authGroup, password,
-                [this, password, authGroup](QKeychain::Error error, const QString &,
-                                            const QString &message) {
-                    if (error == QKeychain::NoError) {
-                        Q_EMIT executePasswordCommand(password);
-
-                        if (m_roomPassword != password) {
-                            m_roomPassword = password;
-                            Q_EMIT roomPasswordChanged();
-                        }
-
-                        setIsPasswordRequired(false);
-
-                        Q_EMIT executePasswordCommand(password);
-                    } else {
-                        ErrorBus::instance().error(
-                                tr("Failed to persist room password: %1").arg(message));
-                    }
-                });
+    if (m_roomPassword != password) {
+        m_roomPassword = password;
+        Q_EMIT roomPasswordChanged();
     }
+
+    setIsPasswordRequired(false);
+    setIsRoomLockedInternal(true);
+    Q_EMIT executePasswordCommand(password);
+
+    if (!rememberPassword) {
+        return;
+    }
+
+    QString authGroup = "jitsiRoomPasswords/" + m_roomName;
+
+    Credentials::instance().set(
+            authGroup, password,
+            [this, password, authGroup](QKeychain::Error error, const QString &,
+                                        const QString &message) {
+                if (error == QKeychain::NoError) {
+                    Q_EMIT executePasswordCommand(password);
+
+                    if (m_roomPassword != password) {
+                        m_roomPassword = password;
+                        Q_EMIT roomPasswordChanged();
+                    }
+
+                    setIsPasswordRequired(false);
+
+                    Q_EMIT executePasswordCommand(password);
+                } else {
+                    ErrorBus::instance().error(
+                            tr("Failed to persist room password: %1").arg(message));
+                }
+            });
 }
 
 void JitsiConnector::resetConferenceState()
@@ -1761,6 +1788,8 @@ void JitsiConnector::resetConferenceState()
     setIsSharingScreenInternal(false);
     setVideoMutedInternal(false);
     setIsLobbyEnabledInternal(false);
+    setIsPasswordRequired(false);
+    setIsRoomLockedInternal(false);
     if (m_isAudioMuted) {
         m_isAudioMuted = false;
         Q_EMIT isAudioMutedChanged();

@@ -68,6 +68,14 @@ JitsiSession::JitsiSession(JitsiConnector *connector, JitsiVideoBridge *bridge, 
     connect(m_connector, &JitsiConnector::executeToggleRaiseHandCommand, this, [this]() {
         sendIfJoined(JitsiSessionProtocol::setHandRaisedCommand(!m_connector->isHandRaised()));
     });
+    connect(m_connector, &JitsiConnector::executePasswordCommand, this,
+            [this](const QString &password) {
+                if (m_isJoined) {
+                    send(JitsiSessionProtocol::setRoomPasswordCommand(password));
+                } else {
+                    send(JitsiSessionProtocol::joinWithPasswordCommand(password));
+                }
+            });
 
     if (const auto *chatRoom = qobject_cast<const ConferenceChatRoom *>(m_connector->chatRoom())) {
         connect(chatRoom, &ConferenceChatRoom::sendMessageRequested, this,
@@ -176,6 +184,18 @@ void JitsiSession::handle(const JitsiSessionProtocol::Devices &devices)
             { u"audioInput"_s, toVariantList(devices.audioInputs, u"audioinput"_s) },
             { u"audioOutput"_s, toVariantList(devices.audioOutputs, u"audiooutput"_s) },
     });
+}
+
+void JitsiSession::handle(const JitsiSessionProtocol::PasswordRequired &)
+{
+    qCInfo(lcJitsiSession) << "Conference requires a password";
+    m_connector->onPasswordRequired();
+}
+
+void JitsiSession::handle(const JitsiSessionProtocol::RoomLockChanged &roomLockChanged)
+{
+    qCInfo(lcJitsiSession) << "Room locked:" << roomLockChanged.isLocked;
+    m_connector->setIsRoomLockedInternal(roomLockChanged.isLocked);
 }
 
 void JitsiSession::handle(const JitsiSessionProtocol::Failed &failed)

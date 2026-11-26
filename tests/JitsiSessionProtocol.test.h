@@ -22,6 +22,8 @@ private slots:
     void parsesAudioMuted();
     void parsesVideoMuted();
     void parsesDevices();
+    void parsesPasswordRequired();
+    void parsesRoomLockChanged();
     void parsesFailed();
 
     void rejectsInvalidEvent_data();
@@ -34,4 +36,5 @@ private slots:
     void createsModerationCommands();
     void createsHandCommand();
     void createsMessageCommand();
+    void createsPasswordCommands();
 };

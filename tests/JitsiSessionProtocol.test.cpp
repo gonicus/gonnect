@@ -211,6 +211,25 @@ void JitsiSessionProtocolTest::parsesDevices()
     QCOMPARE(devices->audioOutputs.first().groupId, u"g3"_s);
 }
 
+void JitsiSessionProtocolTest::parsesPasswordRequired()
+{
+    const auto event = JitsiSessionProtocol::parseEvent(uR"({"type":"passwordRequired"})"_s);
+
+    QVERIFY2(event.has_value(), errorText(event).constData());
+    QVERIFY(std::holds_alternative<JitsiSessionProtocol::PasswordRequired>(*event));
+}
+
+void JitsiSessionProtocolTest::parsesRoomLockChanged()
+{
+    const auto event =
+            JitsiSessionProtocol::parseEvent(uR"({"type":"roomLockChanged","isLocked":true})"_s);
+
+    QVERIFY2(event.has_value(), errorText(event).constData());
+    const auto *roomLockChanged = std::get_if<JitsiSessionProtocol::RoomLockChanged>(&*event);
+    QVERIFY(roomLockChanged);
+    QVERIFY(roomLockChanged->isLocked);
+}
+
 void JitsiSessionProtocolTest::parsesFailed()
 {
     const auto event = JitsiSessionProtocol::parseEvent(
@@ -247,6 +266,7 @@ void JitsiSessionProtocolTest::rejectsInvalidEvent_data()
     QTest::newRow("audio mute without state") << uR"({"type":"audioMuted"})"_s;
     QTest::newRow("message without history flag")
             << uR"({"type":"messageReceived","participantId":"abcd","text":"Hi","timestamp":1})"_s;
+    QTest::newRow("room lock without state") << uR"({"type":"roomLockChanged"})"_s;
 }
 void JitsiSessionProtocolTest::rejectsInvalidEvent()
 {
@@ -339,6 +359,23 @@ void JitsiSessionProtocolTest::createsMessageCommand()
 
     QCOMPARE(object.value("type"_L1).toString(), u"sendMessage"_s);
     QCOMPARE(object.value("text"_L1).toString(), u"Grüße 👋"_s);
+}
+
+void JitsiSessionProtocolTest::createsPasswordCommands()
+{
+    const QJsonObject join =
+            QJsonDocument::fromJson(
+                    JitsiSessionProtocol::joinWithPasswordCommand(u"geheim"_s).toUtf8())
+                    .object();
+    QCOMPARE(join.value("type"_L1).toString(), u"joinWithPassword"_s);
+    QCOMPARE(join.value("password"_L1).toString(), u"geheim"_s);
+
+    const QJsonObject unlock =
+            QJsonDocument::fromJson(JitsiSessionProtocol::setRoomPasswordCommand({}).toUtf8())
+                    .object();
+    QCOMPARE(unlock.value("type"_L1).toString(), u"setRoomPassword"_s);
+    QVERIFY(unlock.contains("password"_L1));
+    QCOMPARE(unlock.value("password"_L1).toString(), QString());
 }
 
 QTEST_GUILESS_MAIN(JitsiSessionProtocolTest)

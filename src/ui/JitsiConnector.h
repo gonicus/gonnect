@@ -64,6 +64,7 @@ public:
     Q_INVOKABLE void setIsTileViewInternal(bool value);
     Q_INVOKABLE void setIsHandRaisedInternal(bool value);
     Q_INVOKABLE void setIsLobbyEnabledInternal(bool value);
+    void setIsRoomLockedInternal(bool value);
 
     Q_INVOKABLE void onPasswordRequired();
 
@@ -99,6 +100,7 @@ public:
     bool hasTextpad() const override { return m_hasTextpad; }
     bool hasTranscription() const override { return m_hasTranscription; }
     bool isPasswordRequired() const override { return m_isPasswordRequired; }
+    bool isRoomLocked() const override { return m_isRoomLocked; }
     QString roomPassword() const override { return m_roomPassword; }
     void setRoomPassword(QString value) override;
     void joinConference(const QString &conferenceId, const QString &displayName,
@@ -218,6 +220,7 @@ private:
     bool m_isSubtitles = false;
     bool m_passwordAlreadyRequested = false;
     bool m_isPasswordRequired = false;
+    bool m_isRoomLocked = false;
     bool m_isApiLoadingFinished = false;
     bool m_isToggleScreenSharePending = false;
     bool m_hasWhiteboard = false;
