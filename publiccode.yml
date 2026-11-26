@@ -131,9 +131,9 @@ legal:
 maintenance:
   type: internal
   contacts:
-    - name: "Aaron Schirmacher"
-      phone: "+492932916165"
-      email: "schirmacher@gonicus.de"
+    - name: "Stefan Grote"
+      phone: "+4929329160"
+      email: "info@gonicus.de"
       affiliation: GONICUS GmbH
 
 localisation:
