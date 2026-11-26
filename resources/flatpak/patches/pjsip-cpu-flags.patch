@@ -1,0 +1,12 @@
+diff -Naur a/third_party/build/os-auto.mak.in b/third_party/build/os-auto.mak.in
+--- a/third_party/build/os-auto.mak.in	2026-11-25 06:37:44.000000000 +0100
++++ b/third_party/build/os-auto.mak.in	2026-11-26 15:16:31.204977313 +0100
+@@ -147,7 +147,7 @@
+ 	modules/audio_processing/aec3/matched_filter_avx2.o \
+ 	modules/audio_processing/aec3/vector_math_avx2.o \
+ 	modules/audio_processing/agc2/rnn_vad/rnn_vector_math_avx2.o
+-    WEBRTC_AEC3_OTHER_CFLAGS += -mfma
++    WEBRTC_AEC3_OTHER_CFLAGS += $$(if $$(findstring _avx2,$$@),-mavx2 -mfma)
+ else ifneq ($(findstring neon,@ac_webrtc_aec3_instset@),)
+     export WEBRTC_AEC3_SRC = \
+ 	common_audio/resampler/sinc_resampler_neon.o \
