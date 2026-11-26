@@ -6,3 +6,4 @@ patches:
   '2.18':
     - patch_file: patches/03-pjsip-mwi-crash.patch
     - patch_file: patches/04-pjsua-ice-media-ioqueue.patch
+    - patch_file: patches/05-cpu-flags.patch

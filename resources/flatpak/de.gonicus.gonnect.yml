@@ -141,21 +141,19 @@ modules:
     sources:
       - type: git
         url: https://github.com/pjsip/pjproject.git
-        tag: '2.17'
-        commit: 5a457451fa2712ba18e12b01738e8ff3af2b26fd
+        tag: '2.18'
+        commit: bd4a7189d83d94237b6f42f3b8274664dbe6ff94
         x-checker-data:
           type: git
           tag-pattern: ^([0-9]+\.[0-9]+(?:\.[0-9]+)?)$
       - type: patch
         path: patches/pjproject-site-config.patch
       - type: patch
-        path: patches/pjsip-pres-crash.patch
-      - type: patch
         path: patches/pjsip-mwi-crash.patch
       - type: patch
         path: patches/pjsip-ice-media-ioqueue.patch
       - type: patch
-        path: patches/pjsip-a7fa90f45.patch
+        path: patches/pjsip-cpu-flags.patch
 
   - name: openldap
     config-opts:
