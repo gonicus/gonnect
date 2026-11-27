@@ -845,6 +845,11 @@ SIPCall *SIPAccount::getCallById(const int callId)
     return nullptr;
 }
 
+QString SIPAccount::ownNumber() const
+{
+    return PhoneNumberUtil::numberFromSipUrl(QString::fromStdString(m_accountConfig.idUri));
+}
+
 void SIPAccount::hangup(const int callId)
 {
     SIPCall *foundCall = getCallById(callId);
