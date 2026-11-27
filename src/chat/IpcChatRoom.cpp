@@ -433,7 +433,7 @@ void IpcChatRoom::updateMessageEventId(const QString &oldEventId, const QString 
             for (const auto &childEventId : value) {
                 if (auto *childMessage = m_mainMessageContainer.messageById(childEventId)) {
                     if (childMessage->threadId() == oldEventId) {
-                        childMessage->setEventId(newEventId);
+                        childMessage->setThreadId(newEventId);
                         Q_EMIT chatMessageThreadIdChanged(indexOfMessage(childMessage),
                                                           childMessage);
                     }
