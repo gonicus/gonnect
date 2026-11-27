@@ -233,7 +233,7 @@ void Application::initLogging()
     bool replaceMessageHandler = false;
 
     AppSettings settings;
-    m_isDebugRun = settings.value("generic/nextDebugRun", false).toBool();
+    m_isDebugRun = isFirstInstance() && settings.value("generic/nextDebugRun", false).toBool();
 #ifndef Q_OS_LINUX
     replaceMessageHandler = true;
 #else
