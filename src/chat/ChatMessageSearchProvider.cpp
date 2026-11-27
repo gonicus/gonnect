@@ -9,9 +9,36 @@
 #include "ChatConnectorManager.h"
 #include "ChatMessage.h"
 
+#include <optional>
+
 Q_LOGGING_CATEGORY(lcChatMessageSearchProvider, "gonnect.chat.message.search.provider")
 
 using namespace std::chrono_literals;
+
+namespace {
+
+bool isIndexable(const ChatMessage &message)
+{
+    return !(message.flags() & (ChatMessage::Flag::Pending | ChatMessage::Flag::Failed));
+}
+
+std::optional<ChatMessageSearchIndexer::Message> toIndexerMessage(const QString &roomUid,
+                                                                  const ChatMessage &message)
+{
+    if (!isIndexable(message)) {
+        return std::nullopt;
+    }
+
+    const auto *textContent = qobject_cast<ChatMessageContentText *>(message.content());
+    if (!textContent) {
+        return std::nullopt;
+    }
+
+    return ChatMessageSearchIndexer::Message{ message.eventId(), roomUid, textContent->simpleText(),
+                                              message.timestamp().toMSecsSinceEpoch() };
+}
+
+} // namespace
 
 ChatMessageSearchProvider::ChatMessageSearchProvider(QObject *parent) : QObject{ parent }
 {
@@ -70,7 +97,7 @@ void ChatMessageSearchProvider::indexRoomMessages(IChatRoom &room) const
     messages.reserve(chatMessages.size());
 
     for (auto &chatMessage : chatMessages) {
-        if (chatMessage && chatMessage->content()) {
+        if (chatMessage && chatMessage->content() && isIndexable(*chatMessage)) {
             if (const auto textContent =
                         qobject_cast<ChatMessageContentText *>(chatMessage->content())) {
                 messages.append({ chatMessage->eventId(), room.id(), textContent->rawText(),
@@ -249,13 +276,11 @@ void ChatMessageSearchProvider::loadChatRoom(const QString &providerUid, IChatRo
     // Connect to chat room changes as long as the associated context lives
     connect(room, &IChatRoom::chatMessageAdded, context,
             [this, roomUid](qsizetype, ChatMessage *chatMessage) {
-                if (isRoomIndexingEnabled(roomUid) && chatMessage && chatMessage->content()) {
-                    if (const auto textContent =
-                                qobject_cast<ChatMessageContentText *>(chatMessage->content())) {
-                        m_indexer->addMessage({ chatMessage->eventId(), roomUid,
-                                                textContent->simpleText(),
-                                                chatMessage->timestamp().toMSecsSinceEpoch() });
-                    }
+                if (!isRoomIndexingEnabled(roomUid) || !chatMessage) {
+                    return;
+                }
+                if (const auto indexerMessage = toIndexerMessage(roomUid, *chatMessage)) {
+                    m_indexer->addMessage(*indexerMessage);
                 }
             });
     connect(room, &IChatRoom::chatMessageRemoved, context,
@@ -264,15 +289,25 @@ void ChatMessageSearchProvider::loadChatRoom(const QString &providerUid, IChatRo
                     m_indexer->removeMessage(chatMessage->eventId());
                 }
             });
+    connect(room, &IChatRoom::chatMessageFlagsChanged, context,
+            [this, roomUid](qsizetype, ChatMessage *chatMessage, ChatMessage::Flags previousFlags) {
+                const bool wasPending = previousFlags & ChatMessage::Flag::Pending;
+                if (!wasPending || !isRoomIndexingEnabled(roomUid) || !chatMessage) {
+                    return;
+                }
+
+                // Message has now final event id
+                if (const auto indexerMessage = toIndexerMessage(roomUid, *chatMessage)) {
+                    m_indexer->addMessage(*indexerMessage);
+                }
+            });
     connect(room, &IChatRoom::chatMessageContentChanged, context,
             [this, roomUid](qsizetype, ChatMessage *chatMessage) {
-                if (isRoomIndexingEnabled(roomUid) && chatMessage && chatMessage->content()) {
-                    if (const auto textContent =
-                                qobject_cast<ChatMessageContentText *>(chatMessage->content())) {
-                        m_indexer->updateMessage({ chatMessage->eventId(), roomUid,
-                                                   textContent->simpleText(),
-                                                   chatMessage->timestamp().toMSecsSinceEpoch() });
-                    }
+                if (!isRoomIndexingEnabled(roomUid) || !chatMessage) {
+                    return;
+                }
+                if (const auto indexerMessage = toIndexerMessage(roomUid, *chatMessage)) {
+                    m_indexer->updateMessage(*indexerMessage);
                 }
             });
     connect(room, &IChatRoom::chatMessageOutOfSequenceReceived, context,

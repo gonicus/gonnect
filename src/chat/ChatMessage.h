@@ -44,6 +44,10 @@ public:
     Q_DECLARE_FLAGS(Flags, Flag)
     Q_FLAG(Flags)
 
+    // Temporary event ids: ids for optimistic messages no yet confirmed by chat provider
+    static QString createTemporaryEventId();
+    static bool isTemporaryEventId(const QString &eventId);
+
     explicit ChatMessage(const QString &eventId, const QString &fromId, const QString &nickName,
                          QObject *content, const QDateTime &timestamp, IChatRoom *chatRoom,
                          Flags flags, const QString &threadId = QString());

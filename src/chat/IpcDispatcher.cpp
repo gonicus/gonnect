@@ -422,7 +422,7 @@ void IpcDispatcher::sendMessage(const QString &roomId, const QString &text,
 
     // Create optimistic (pending) message for immediate display
     const auto tag = req->tag();
-    const auto tempEventId = QUuid::createUuid().toString(QUuid::WithoutBraces);
+    const auto tempEventId = ChatMessage::createTemporaryEventId();
 
     using Flag = ChatMessage::Flag;
 

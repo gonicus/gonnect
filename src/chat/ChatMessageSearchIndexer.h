@@ -87,6 +87,9 @@ private:
     bool openDB(const QByteArray &secret);
     State checkDB();
     bool initDB();
+    bool migrateDB();
+    int schemaVersion();
+    bool removeTemporaryMessageIds();
 
     bool exec(const QString &statement);
 
