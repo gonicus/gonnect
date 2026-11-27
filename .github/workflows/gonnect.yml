@@ -164,18 +164,16 @@ jobs:
           exclude-regex: '^src/platform/windows/EventLog.h$' # generated file
 
   webengine-lint:
-    webengine-lint:
-      runs-on: ubuntu-26.04
-      name: "JavaScript Lint"
-      needs: changes
-      if: ${{ inputs.run_format || needs.changes.outputs.webengine == 'true' }}
-      steps:
-        - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-        - name: Run ESLint on web engine scripts
-          run: |
-            npm install --no-save --no-package-lock --no-audit --no-fund eslint@9.39.5 globals@15.15.0
-            npx --no-install eslint resources/webengine
-  
+    runs-on: ubuntu-26.04
+    name: "JavaScript Lint"
+    needs: changes
+    if: ${{ inputs.run_format || needs.changes.outputs.webengine == 'true' }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Run ESLint on web engine scripts
+        run: |
+          npm install --no-save --no-package-lock --no-audit --no-fund eslint@9.39.5 globals@15.15.0
+          npx --no-install eslint resources/webengine
 
 
   clang:
