@@ -107,37 +107,12 @@ QVariant ChatModel::data(const QModelIndex &index, int role) const
         return rawData(relatedMessage, normalizedRole);
     }
 
-    const auto item = m_chatRoom->chatMessages().at(index.row());
+    const auto messages = m_chatRoom->chatMessages();
+    const auto item = q_check_ptr(messages.at(index.row()));
 
-    if (role == static_cast<int>(Roles::IsSameUserAsPrevious)) {
-        if (index.row() > 0) {
-            if (const auto prev = m_chatRoom->chatMessages().at(index.row() - 1)) {
-                return prev->fromId() == item->fromId();
-            }
-        }
-        return false;
-    }
-
-    if (role == static_cast<int>(Roles::IsSameMinuteAsPrevious)) {
-        if (index.row() > 0) {
-            if (const auto prev = m_chatRoom->chatMessages().at(index.row() - 1)) {
-                const auto prevDateTime = prev->timestamp();
-                const auto itemDateTime = item->timestamp();
-                return prevDateTime.date() == itemDateTime.date()
-                        && prevDateTime.time().hour() == itemDateTime.time().hour()
-                        && prevDateTime.time().minute() == itemDateTime.time().minute();
-            }
-        }
-        return false;
-    }
-
-    if (role == static_cast<int>(Roles::IsSameDayAsPrevious)) {
-        if (index.row() > 0) {
-            if (const auto prev = m_chatRoom->chatMessages().at(index.row() - 1)) {
-                return prev->timestamp().date() == item->timestamp().date();
-            }
-        }
-        return false;
+    if (nextItemContentRoles().contains(role)) {
+        const auto prev = messages.value(index.row() - 1, nullptr);
+        return compareMessagesByRole(prev, item, static_cast<Roles>(role));
     }
 
     return rawData(item, role);
@@ -507,6 +482,33 @@ QList<int> ChatModel::nextItemContentRoles()
         static_cast<int>(Roles::IsSameUserAsPrevious),
     };
     return roles;
+}
+
+bool ChatModel::compareMessagesByRole(const ChatMessage *a, const ChatMessage *b, Roles role)
+{
+    if (!a || !b) {
+        return false;
+    }
+
+    switch (role) {
+
+    case Roles::IsSameUserAsPrevious:
+        return a->fromId() == b->fromId();
+
+    case Roles::IsSameDayAsPrevious:
+        return a->timestamp().date() == b->timestamp().date();
+
+    case Roles::IsSameMinuteAsPrevious: {
+        const auto aTime = a->timestamp();
+        const auto bTime = b->timestamp();
+
+        return aTime.date() == bTime.date() && aTime.time().hour() == bTime.time().hour()
+                && aTime.time().minute() == bTime.time().minute();
+    }
+
+    default:
+        return false;
+    }
 }
 
 QList<int> ChatModel::relatedContentRoles(const ChatMessage &messageObject) const
