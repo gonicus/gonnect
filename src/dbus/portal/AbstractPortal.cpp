@@ -2,7 +2,10 @@
 #include <QDBusPendingCall>
 #include <QDBusPendingCallWatcher>
 #include <QDBusPendingReply>
+#include <QPointer>
 #include <QRandomGenerator>
+#include <QCoroSignal>
+
 #if QT_VERSION >= QT_VERSION_CHECK(6, 9, 0)
 #  include <private/qdesktopunixservices_p.h>
 #else
@@ -10,6 +13,9 @@
 #endif
 #include <private/qguiapplication_p.h>
 #include <qpa/qplatformintegration.h>
+
+#include <optional>
+
 #include "AbstractPortal.h"
 #include "Application.h"
 
@@ -69,10 +75,22 @@ QString AbstractPortal::portalCall(const QString &handle, const QDBusMessage &me
 
     auto watcher = new QDBusPendingCallWatcher(pendingCall, this);
     connect(watcher, &QDBusPendingCallWatcher::finished, this,
-            [preCalculatedReplyPath, tracker, callback, handle](QDBusPendingCallWatcher *watcher) {
+            [preCalculatedReplyPath, tracker = QPointer(tracker), callback,
+             handle](QDBusPendingCallWatcher *watcher) {
                 watcher->deleteLater();
+                if (!tracker) {
+                    return;
+                }
+
                 QDBusPendingReply<QDBusObjectPath> reply = *watcher;
                 if (reply.isError()) {
+                    // No response will follow -> tracker must not outlive caller
+                    QDBusConnection::sessionBus().disconnect(
+                            "org.freedesktop.portal.Desktop", preCalculatedReplyPath,
+                            "org.freedesktop.portal.Request", "Response", tracker,
+                            SLOT(responseReceived(uint, QVariantMap)));
+                    tracker->deleteLater();
+
                     callback(ResponseCode::ERROR,
                              { { "error",
                                  tr("DBus call failed: %1")
@@ -96,6 +114,25 @@ QString AbstractPortal::portalCall(const QString &handle, const QDBusMessage &me
             });
 
     return preCalculatedReplyPath;
+}
+
+QCoro::Task<AbstractPortal::Response> AbstractPortal::portalCallAsync(const QString &handle,
+                                                                      const QDBusMessage &message)
+{
+    std::optional<Response> result;
+    PortalResponseWaiter waiter;
+
+    portalCall(handle, message, [&result, &waiter](uint code, const QVariantMap &results) {
+        result = Response{ static_cast<ResponseCode>(code), results };
+        Q_EMIT waiter.received();
+    });
+
+    // Errors are synchronous
+    if (!result) {
+        co_await qCoro(&waiter, &PortalResponseWaiter::received);
+    }
+
+    co_return *result;
 }
 
 QString AbstractPortal::generateHandleToken() const

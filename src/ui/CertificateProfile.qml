@@ -54,6 +54,7 @@ QtObject {
                 profile.httpAcceptLanguage = `${systemLocale},${mainLang};q=0.9,en;q=0.8`
 
                 CertHelper.addClientCerts(profile)
+                CameraFrameSchemeHandler.install(profile)
 
                 internal.profile = profile
             }

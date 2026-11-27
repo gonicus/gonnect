@@ -123,9 +123,6 @@ Item {
                 if ([ VideoManager.CameraAccessState.Unknown, VideoManager.CameraAccessState.Pending ].includes(VideoManager.cameraAccessState)) {
                     return waitingForCameraAccessComponent
                 }
-                if (VideoManager.cameraAccessState === VideoManager.CameraAccessState.DeniedRestartRequired) {
-                    return cameraDeniedRestartRequiredComponent
-                }
 
                 return jitsiViewComponent
             }
@@ -307,48 +304,6 @@ Item {
     }
 
     Component {
-        id: cameraDeniedRestartRequiredComponent
-
-        Item {
-            id: cameraDeniedItem
-
-            Accessible.id: "conference.cameraDenied"
-            Accessible.role: Accessible.Pane
-            Accessible.name: cameraDeniedMessage.text
-
-            Column {
-                id: cameraDeniedCol
-                anchors.centerIn: parent
-                spacing: Theme.d * 3
-
-                Label {
-                    id: cameraDeniedMessage
-                    width: Math.min(cameraDeniedItem.width - 2 * Theme.d, Theme.d * 100)
-                    wrapMode: Label.WordWrap
-                    horizontalAlignment: Label.AlignHCenter
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    text: qsTr("Camera access has been denied. You can still join conferences without a camera, but due to technical intricacies, GOnnect must be restarted once.")
-
-                    Accessible.ignored: true
-                }
-
-                Button {
-                    id: restartButton
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    text: qsTr("Restart GOnnect")
-                    highlighted: true
-
-                    onClicked: () => SM.restart()
-
-                    Accessible.id: "conference.cameraDenied.restart"
-                    Accessible.role: Accessible.Button
-                    Accessible.name: restartButton.text
-                }
-            }
-        }
-    }
-
-    Component {
         id: jitsiViewComponent
 
         Item {
@@ -437,9 +392,13 @@ Item {
 
                 WebEngineView {
                     id: jitsiView
+                    // Web view must be kept for native video, but invisible
+                    opacity: confConn.isNativeVideoEnabled ? 0 : 1
+                    enabled: !confConn.isNativeVideoEnabled
                     settings {
                         localStorageEnabled: true
                         screenCaptureEnabled: true
+                        playbackRequiresUserGesture: false  // lib-jitis-meet page: remote audio starts automatically
                     }
                     profile: CertificateProfile.profile
                     webChannel: WebChannel {
@@ -451,6 +410,28 @@ Item {
                         left: parent.left
                         right: parent.right
                     }
+
+                    Component.onCompleted:
+                        () => {
+                            const script = WebEngine.script()
+                            script.name = "gonnectCamera"
+                            script.sourceUrl = "qrc:/webengine/gonnectCamera.js"
+                            script.injectionPoint = WebEngineScript.DocumentCreation
+                            script.worldId = WebEngineScript.MainWorld
+                            script.runsOnSubFrames = true
+                            jitsiView.userScripts.insert(script)
+
+                            const remoteVideoSource = confConn.remoteVideoScriptInternal()
+                            if (remoteVideoSource !== "") {
+                                const remoteVideoScript = WebEngine.script()
+                                remoteVideoScript.name = "gonnectRemoteVideo"
+                                remoteVideoScript.sourceCode = remoteVideoSource
+                                remoteVideoScript.injectionPoint = WebEngineScript.DocumentCreation
+                                remoteVideoScript.worldId = WebEngineScript.MainWorld
+                                remoteVideoScript.runsOnSubFrames = true
+                                jitsiView.userScripts.insert(remoteVideoScript)
+                            }
+                        }
 
                     onJavaScriptConsoleMessage: (level, message, line, source) => {
                         // Prevent writing JWT to log
@@ -470,8 +451,9 @@ Item {
                         const isCameraRequest = permission.permissionType === WebEnginePermission.PermissionType.MediaVideoCapture
                                              || permission.permissionType === WebEnginePermission.PermissionType.MediaAudioVideoCapture
 
-                        if (isCameraRequest && VideoManager.isCameraAccessDenied) {
-                            console.warn(category, "Denying camera permission request in WebEngine because it is denied by VideoManager")
+                        if (isCameraRequest) {
+                            // Camera frames received from GOnnect - browser must never open camera
+                            console.warn(category, "Denying camera permission request in WebEngine")
                             permission.deny()
                         } else {
                             permission.grant()
@@ -488,7 +470,9 @@ Item {
 
                     onLoadingChanged: (info) => {
                         if (info.status === WebEngineView.LoadSucceededStatus) {
-                            jitsiView.runJavaScript(confConn.jitsiJavascriptInternal())
+                            if (!confConn.isLibJitsiMeetEnabled) {
+                                jitsiView.runJavaScript(confConn.jitsiJavascriptInternal())
+                            }
                         } else if (info.status === WebEngineView.LoadFailedStatus) {
                             console.error(category, `failed to load HTML: ${info.errorString} (domain: ${info.errorDomain}, code: ${info.errorCode})`)
                         }
@@ -496,7 +480,10 @@ Item {
 
                     function loadJitsiSite() {
                         if (CertHelper.clientCertsInitialized) {
-                            jitsiView.loadHtml(confConn.jitsiHtmlInternal(), GlobalInfo.jitsiUrl())
+                            const html = confConn.isLibJitsiMeetEnabled
+                                         ? confConn.sessionHtmlInternal()
+                                         : confConn.jitsiHtmlInternal()
+                            jitsiView.loadHtml(html, GlobalInfo.jitsiUrl())
                         }
                     }
 
@@ -530,6 +517,68 @@ Item {
                             }
                         }
                     }
+                }
+
+                Loader {
+                    id: nativeVideoLoader
+                    active: confConn.isNativeVideoEnabled
+                    anchors {
+                        top: topBar.bottom
+                        bottom: parent.bottom
+                        left: parent.left
+                        right: parent.right
+                        margins: Theme.d
+                    }
+
+                    sourceComponent: ConferenceVideoView {
+                        videoModel: confConn.videoModel
+                        isOwnVideoActive: confConn.isInConference
+                                          && confConn.isVideoAvailable
+                                          && !confConn.isVideoMuted
+                    }
+                }
+
+                // TODO: correct design
+                Column {
+                    id: lobbyWaitingHint
+                    visible: confConn.isWaitingInLobby
+                    spacing: Theme.d * 2
+                    anchors.centerIn: nativeVideoLoader
+
+                    Accessible.id: "conference.lobby.waiting"
+                    Accessible.role: Accessible.Grouping
+                    Accessible.name: lobbyWaitingLabel.text
+
+                    Label {
+                        id: lobbyWaitingLabel
+                        text: qsTr("Waiting for a moderator to let you in...")
+                        anchors.horizontalCenter: parent.horizontalCenter
+                    }
+
+                    Button {
+                        id: lobbyCancelButton
+                        text: qsTr("Cancel")
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        onClicked: () => confConn.leaveConference()
+
+                        Accessible.id: "conference.lobby.cancel"
+                    }
+                }
+
+                // TODO: correct design
+                Label {
+                    id: connectionInterruptedHint
+                    visible: confConn.isConnectinInterrupted && !confConn.isWaitingInLobby
+                    text: qsTr("Connection interrupted, trying to restore...")
+                    anchors {
+                        top: nativeVideoLoader.top
+                        horizontalCenter: nativeVideoLoader.horizontalCenter
+                        topMargin: Theme.d * 2
+                    }
+
+                    Accessible.id: "conference.connection.interrupted"
+                    Accessible.role: Accessible.StaticText
+                    Accessible.name: connectionInterruptedHint.text
                 }
 
                 Component {
@@ -683,7 +732,7 @@ Item {
                             states: [
                                 State {
                                     name: "PASSWORD_SET_BY_ME"
-                                    when: confConn.isPasswordRequired && confConn.roomPassword !== ""
+                                    when: confConn.isRoomLocked && confConn.roomPassword !== ""
 
                                     PropertyChanges {
                                         passwordField.visible: false
@@ -697,7 +746,7 @@ Item {
                                 },
                                 State {
                                     name: "PASSWORD_SET_BY_SOMEONE_ELSE"
-                                    when: confConn.isPasswordRequired && confConn.roomPassword === ""
+                                    when: confConn.isRoomLocked && confConn.roomPassword === ""
 
                                     PropertyChanges {
                                         passwordField.visible: false

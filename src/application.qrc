@@ -25,4 +25,9 @@
         <file alias="plural-nouns.txt">../resources/roomnames/plural-nouns.txt</file>
         <file alias="verbs.txt">../resources/roomnames/verbs.txt</file>
     </qresource>
+    <qresource prefix="/webengine">
+        <file alias="gonnectCamera.js">../resources/webengine/gonnectCamera.js</file>
+        <file alias="gonnectJitsiSession.js">../resources/webengine/gonnectJitsiSession.js</file>
+        <file alias="gonnectRemoteVideo.js">../resources/webengine/gonnectRemoteVideo.js</file>
+    </qresource>
 </RCC>

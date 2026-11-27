@@ -2,21 +2,25 @@
 
 #include <QObject>
 #include <QTimer>
-#include <QMediaDevices>
-#include <QCameraDevice>
 #include <QQmlEngine>
 #include <qqmlintegration.h>
 
 #include "AppSettings.h"
 #include "VideoDevice.h"
+#include "CameraSource.h"
 
-#ifdef Q_OS_FLATPAK
-#  include "linux/PipeWireCameraDevices.h"
-#endif
+#include <atomic>
+#include <memory>
+
+#include <QCoroCore>
+
+class FramePump;
 
 class VideoManager : public QObject
 {
     Q_OBJECT
+    Q_CLASSINFO("RegisterEnumClassesUnscoped", "false")
+
     Q_PROPERTY(QList<VideoDevice> devices READ devices NOTIFY devicesChanged FINAL)
     Q_PROPERTY(
             QString selectedDeviceId MEMBER m_selectedDeviceId NOTIFY selectedDeviceIdChanged FINAL)
@@ -24,14 +28,14 @@ class VideoManager : public QObject
                        cameraAccessStateChanged FINAL)
     Q_PROPERTY(bool isCameraAccessDenied READ isCameraAccessDenied NOTIFY cameraAccessStateChanged
                        FINAL)
+    Q_PROPERTY(QString cameraError READ cameraError NOTIFY cameraErrorChanged FINAL)
 
 public:
     enum class CameraAccessState {
         Unknown,
         Pending,
         Granted, // Either specifically granted or system has no restrictions at all
-        Denied,
-        DeniedRestartRequired // App must be restarted to apply correct state
+        Denied
     };
     Q_ENUM(CameraAccessState)
 
@@ -49,6 +53,16 @@ public:
     VideoManager::CameraAccessState cameraAccessState() const { return m_cameraAccessState; }
     bool isCameraAccessDenied() const;
 
+    /// Last error of running camera or empty
+    QString cameraError() const { return m_cameraError; }
+
+    // Access not denied and ≥ 1 camera existent
+    bool isCameraAvailable() const;
+
+    /// Camera runs whilst consumer(s) registered
+    void addConsumer(FramePump *consumer);
+    void removeConsumer(FramePump *consumer);
+
     Q_INVOKABLE void acquireCameras();
 
 public Q_SLOTS:
@@ -56,33 +70,46 @@ public Q_SLOTS:
 
 private Q_SLOTS:
     void updateProfile();
+    void checkForStall();
 
 private:
     explicit VideoManager(QObject *parent = nullptr);
+    void setCameraSource(std::unique_ptr<CameraSource> source);
+    void updateFrameHandler();
+    void startCamera();
+    void stopCamera();
+    void reportCameraError(const QString &message);
+    void setCameraError(const QString &message);
     bool isDeviceAvailable(const QString &deviceId) const;
     VideoDevice deviceById(const QString &deviceId) const;
-    QList<VideoDevice> devicesFromMediaDevices() const;
     void setCameraAccessState(CameraAccessState value);
 
+#ifdef Q_OS_FLATPAK
+    QCoro::Task<> requestCameraAccess();
+#endif
+
     QTimer m_debounceUpdateTimer;
-    QMediaDevices m_mediaDevices;
+    QTimer m_stallTimer;
+    // Camera thread
+    std::atomic<bool> m_hasReceivedFrame = false;
+    std::unique_ptr<CameraSource> m_cameraSource;
+    QList<FramePump *> m_consumers;
 
     QList<VideoDevice> m_devices;
-#ifdef Q_OS_FLATPAK
-    PipeWireCameraDevices m_pipewireCameras;
-#endif
 
     QString m_selectedDeviceId;
     std::unique_ptr<AppSettings> m_settings = nullptr;
     unsigned m_currentProfile = 0;
 
-    bool m_portalPending = false;
     CameraAccessState m_cameraAccessState = CameraAccessState::Unknown;
+    QString m_cameraError;
 
 Q_SIGNALS:
     void devicesChanged();
     void selectedDeviceIdChanged();
     void cameraAccessStateChanged();
+    void cameraErrorOccurred(QString message);
+    void cameraErrorChanged();
 };
 
 class VideoManagerWrapper

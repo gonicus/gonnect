@@ -124,6 +124,11 @@ cmake --preset conan-relwithdebinfo .
 cmake --build --preset conan-relwithdebinfo
 ```
 
+Performance measurements (e.g. CPU load of camera or video decoding) must use the RelWithDebInfo
+build. For Debug builds, Conan builds FFmpeg with --disable-optimizations --disable-mmx, which
+turns off all SIMD code and makes decoding several times slower.
+
+
 ## Packaging and platforms
 
 GOnnect is served as a Flatpak for Linux and as MSIX for Microsoft Windows. Platform related code lives in `src/platform`. Flatpak
@@ -140,6 +145,8 @@ is prefered over "plain Linux" style packages and as much as possible should be 
 * The C++ code uses clang format as defined in `.clang-format`, which is enforced by CI.
 * C++ header and source files must be written in (upper) camel case.
 * A .cpp file should correspond to a single header file with the exact same name.
+* Specific casts (like `static_cast<int>(x)`) should be used. C-style casts (like `(int) x` should be avoided.
+* Predicates and bool flags should start with "is", "has" or sim. indicating its boolean nature.
 * The QML code follows standard code format as invoked by the auto-format function of Qt Creator.
 * Each QML file should start with `pragma ComponentBehavior: Bound`. The general import is `import base`.
 * Properties in QML must be referenced fully-qualified (i.e. preceeded with the items id), except for `parent`.

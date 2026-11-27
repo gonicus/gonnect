@@ -15,6 +15,10 @@ QHash<int, QByteArray> UsersModel::roleNames() const
         { static_cast<int>(Roles::Id), "id" },
         { static_cast<int>(Roles::DisplayName), "displayName" },
         { static_cast<int>(Roles::Role), "role" },
+        { static_cast<int>(Roles::IsAudioMuted), "isAudioMuted" },
+        { static_cast<int>(Roles::IsVideoMuted), "isVideoMuted" },
+        { static_cast<int>(Roles::IsHandRaised), "isHandRaised" },
+        { static_cast<int>(Roles::IsDominantSpeaker), "isDominantSpeaker" },
     };
 }
 
@@ -31,15 +35,22 @@ QVariant UsersModel::data(const QModelIndex &index, int role) const
 
     const auto user = m_conferenceConnector->users().at(index.row());
 
-    switch (role) {
-    case static_cast<int>(Roles::Id):
+    switch (static_cast<Roles>(role)) {
+    case Roles::Id:
         return user->id();
-
-    case static_cast<int>(Roles::Role):
+    case Roles::Role:
         return static_cast<int>(user->role());
+    case Roles::IsAudioMuted:
+        return user->isAudioMuted();
+    case Roles::IsVideoMuted:
+        return user->isVideoMuted();
+    case Roles::IsHandRaised:
+        return user->isHandRaised();
+    case Roles::IsDominantSpeaker:
+        return user->isDominantSpeaker();
 
-    case static_cast<int>(Roles::DisplayName):
     default:
+    case Roles::DisplayName:
         return user->displayName();
     }
 }
@@ -77,6 +88,12 @@ void UsersModel::onConferenceConnectorChanged()
                 [this](qsizetype index, ConferenceUser *, ConferenceUser::Role) {
                     const auto modelIndex = createIndex(index, 0);
                     Q_EMIT dataChanged(modelIndex, modelIndex, { static_cast<int>(Roles::Role) });
+                });
+
+        connect(m_conferenceConnector, &IConferenceConnector::userChanged, this,
+                [this](qsizetype index, ConferenceUser *) {
+                    const auto modelIndex = createIndex(index, 0);
+                    Q_EMIT dataChanged(modelIndex, modelIndex);
                 });
     }
 

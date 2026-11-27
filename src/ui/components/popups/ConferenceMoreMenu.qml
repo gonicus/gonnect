@@ -60,6 +60,7 @@ Menu {
         VideoDeviceMenu {
             id: videoDeviceMenu
             selectedDeviceId: VideoManager.selectedDeviceId
+            isVirtualBackgroundAvailable: control.iConferenceConnector.hasCapability(IConferenceConnector.Capability.VirtualBackground)
             onDeviceSelected: deviceId => VideoManager.selectedDeviceId = deviceId
             onVirtualBackgroundButtonClicked: () => control.showVirtualBackgroundDialog()
         }

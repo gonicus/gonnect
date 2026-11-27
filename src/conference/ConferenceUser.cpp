@@ -20,3 +20,43 @@ void ConferenceUser::setRole(Role newRole)
         Q_EMIT roleChanged();
     }
 }
+
+void ConferenceUser::setDisplayName(const QString &displayName)
+{
+    if (m_displayName != displayName) {
+        m_displayName = displayName;
+        Q_EMIT displayNameChanged();
+    }
+}
+
+void ConferenceUser::setAudioMuted(bool isMuted)
+{
+    if (m_isAudioMuted != isMuted) {
+        m_isAudioMuted = isMuted;
+        Q_EMIT isAudioMutedChanged();
+    }
+}
+
+void ConferenceUser::setVideoMuted(bool isMuted)
+{
+    if (m_isVideoMuted != isMuted) {
+        m_isVideoMuted = isMuted;
+        Q_EMIT isVideoMutedChanged();
+    }
+}
+
+void ConferenceUser::setHandRaisedDateTime(const QDateTime &dateTime)
+{
+    if (m_handRaisedDateTime != dateTime) {
+        m_handRaisedDateTime = dateTime;
+        Q_EMIT handRaisedDateTimeChanged();
+    }
+}
+
+void ConferenceUser::setDominantSpeaker(bool isDominantSpeaker)
+{
+    if (m_isDominantSpeaker != isDominantSpeaker) {
+        m_isDominantSpeaker = isDominantSpeaker;
+        Q_EMIT isDominantSpeakerChanged();
+    }
+}

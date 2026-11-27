@@ -1,6 +1,7 @@
 samples/callhistory.db
 .qtcreator
 .agent-jail/
+node_modules/
 
 # Used https://www.toptal.com/developers/gitignore/api/qtcreator,vim
 # as a starting point.

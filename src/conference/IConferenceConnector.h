@@ -3,6 +3,7 @@
 #include "ICallState.h"
 #include "IChatRoom.h"
 #include "ConferenceUser.h"
+#include "ConferenceVideoModel.h"
 #include "CallHistoryItem.h"
 
 #include <QPointer>
@@ -20,6 +21,7 @@ class IConferenceConnector : public ICallState
     Q_PROPERTY(bool isInConference READ isInConference NOTIFY isInConferenceChanged FINAL)
     Q_PROPERTY(
             bool isPasswordRequired READ isPasswordRequired NOTIFY isPasswordRequiredChanged FINAL)
+    Q_PROPERTY(bool isRoomLocked READ isRoomLocked NOTIFY isRoomLockedChanged FINAL)
     Q_PROPERTY(QString roomPassword READ roomPassword NOTIFY roomPasswordChanged FINAL)
     Q_PROPERTY(QString displayName READ displayName NOTIFY displayNameChanged FINAL)
     Q_PROPERTY(QString conferenceName READ conferenceName NOTIFY conferenceNameChanged FINAL)
@@ -44,6 +46,9 @@ class IConferenceConnector : public ICallState
     Q_PROPERTY(bool isTranscriptionActive READ isTranscriptionActive NOTIFY
                        isTranscriptionActiveChanged FINAL)
     Q_PROPERTY(bool isLobbyEnabled READ isLobbyEnabled NOTIFY isLobbyEnabledChanged FINAL)
+    Q_PROPERTY(bool isWaitingInLobby READ isWaitingInLobby NOTIFY isWaitingInLobbyChanged FINAL)
+    Q_PROPERTY(bool isConnectionInterrupted READ isConnectionInterrupted NOTIFY
+                       isConnectionInterruptedChanged FINAL)
 
     Q_PROPERTY(IConferenceConnector::VideoQuality videoQuality READ videoQuality NOTIFY
                        videoQualityChanged FINAL)
@@ -52,6 +57,7 @@ class IConferenceConnector : public ICallState
     Q_PROPERTY(uint numberOfUsers READ numberOfUsers NOTIFY numberOfUsersChanged FINAL)
     Q_PROPERTY(
             ConferenceUser *largeVideoUser READ largeVideoUser NOTIFY largeVideoUserChanged FINAL)
+    Q_PROPERTY(ConferenceVideoModel *videoModel READ videoModel CONSTANT FINAL)
 
 public:
     IConferenceConnector(QObject *parent = nullptr) : ICallState{ parent } { }
@@ -76,6 +82,7 @@ public:
         VideoQualityAdjustable,
         Whiteboard,
         Transcription,
+        VirtualBackground,
         Lobby
     };
     Q_ENUM(Capability)
@@ -95,7 +102,10 @@ public:
 
     virtual bool isInitialized() = 0;
     virtual bool isInConference() const = 0;
+    /// User must enter password
     virtual bool isPasswordRequired() const = 0;
+    /// Room is protected by password (does not mean user must enter one)
+    virtual bool isRoomLocked() const = 0;
     virtual QString roomPassword() const = 0;
     Q_INVOKABLE virtual void setRoomPassword(QString password) = 0;
     Q_INVOKABLE virtual void joinConference(const QString &conferenceId, const QString &displayName,
@@ -178,10 +188,18 @@ public:
     virtual ConferenceUser *largeVideoUser() const = 0;
     virtual void setLargeVideoUser(ConferenceUser *user) = 0;
 
+    virtual ConferenceVideoModel *videoModel() const = 0;
+
     Q_INVOKABLE virtual void muteAll() = 0;
 
     virtual bool isLobbyEnabled() const = 0;
     Q_INVOKABLE virtual void setLobbyEnabled(bool enabled) = 0;
+
+    /// This client is waiting for moderator to have entrance granted
+    virtual bool isWaitingInLobby() const = 0;
+
+    /// Media connection is lost and being restored
+    virtual bool isConnectionInterrupted() const = 0;
 
     Q_INVOKABLE virtual void showVirtualBackgroundDialog() = 0;
 
@@ -196,7 +214,10 @@ Q_SIGNALS:
     void hasTranscriptionChanged();
     void isTranscriptionActiveChanged();
     void isLobbyEnabledChanged();
+    void isWaitingInLobbyChanged();
+    void isConnectionInterruptedChanged();
     void isPasswordRequiredChanged();
+    void isRoomLockedChanged();
     void roomPasswordChanged();
     void displayNameChanged();
     void conferenceNameChanged();
@@ -217,6 +238,7 @@ Q_SIGNALS:
     void userAdded(qsizetype index, ConferenceUser *user);
     void userRemoved(qsizetype index, ConferenceUser *user);
     void userRoleChanged(qsizetype index, ConferenceUser *user, ConferenceUser::Role newRole);
+    void userChanged(qsizetype index, ConferenceUser *user);
     void usersCleared();
     void numberOfUsersChanged();
     void largeVideoUserChanged();

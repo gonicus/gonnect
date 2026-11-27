@@ -1,13 +1,56 @@
 #include "VideoManager.h"
+#include "FramePump.h"
+#include "QtCameraSource.h"
 
+#include <QGuiApplication>
 #include <QLoggingCategory>
 #include <QRegularExpression>
+
+#include <algorithm>
+#include <chrono>
+
+#include <QCoroSignal>
 
 #ifdef Q_OS_FLATPAK
 #  include "CameraPortal.h"
 #endif
 
-Q_LOGGING_CATEGORY(lcVideoManager, "gonnect.sip.video")
+#ifdef Q_OS_LINUX
+#  include "linux/PipeWireCameraSource.h"
+#endif
+
+Q_LOGGING_CATEGORY(lcVideoManager, "gonnect.media.video")
+
+namespace {
+
+constexpr auto StallTimeout = std::chrono::seconds(10);
+
+bool isSameDeviceList(const QList<VideoDevice> &left, const QList<VideoDevice> &right)
+{
+    return std::ranges::equal(left, right, [](const VideoDevice &a, const VideoDevice &b) {
+        return a.id == b.id && a.description == b.description && a.isDefault == b.isDefault;
+    });
+}
+
+// Two different cameras can have same name - use this to seperate them in menus
+void numberDuplicateDescriptions(QList<VideoDevice> &devices)
+{
+    QHash<QString, int> counts;
+    for (const auto &device : std::as_const(devices)) {
+        ++counts[device.description];
+    }
+
+    QHash<QString, int> numbers;
+    for (auto &device : devices) {
+        const QString description = device.description;
+        if (counts.value(description) > 1) {
+            device.description =
+                    QStringLiteral("%1 (%2)").arg(description).arg(++numbers[description]);
+        }
+    }
+}
+
+} // namespace
 
 VideoManager::VideoManager(QObject *parent) : QObject{ parent }
 {
@@ -18,25 +61,30 @@ VideoManager::VideoManager(QObject *parent) : QObject{ parent }
     m_debounceUpdateTimer.setInterval(500);
     m_debounceUpdateTimer.callOnTimeout(this, &VideoManager::updateDevices);
 
-    connect(&m_mediaDevices, &QMediaDevices::videoInputsChanged, this,
-            [this]() { m_debounceUpdateTimer.start(); });
+    m_stallTimer.setInterval(StallTimeout);
+    m_stallTimer.callOnTimeout(this, &VideoManager::checkForStall);
 
-#ifdef Q_OS_FLATPAK
-    connect(&m_pipewireCameras, &PipeWireCameraDevices::devicesChanged, this,
-            [this]() { m_debounceUpdateTimer.start(); });
-#endif
+    setCameraSource(std::make_unique<QtCameraSource>());
 
     connect(this, &VideoManager::selectedDeviceIdChanged, this, [this]() {
-        qCInfo(lcVideoManager) << "Video device selected:" << m_selectedDeviceId
-                               << "saving as profile" << m_currentProfile;
+        const auto key = QString("video%1/camera").arg(m_currentProfile);
+        const auto device = deviceById(m_selectedDeviceId);
 
-        // Save selected device to settings
-        auto device = deviceById(m_selectedDeviceId);
+        // Default device is fallback (requires no profile entry)
         if (device.isNull() || device.isDefault) {
-            m_settings->remove(QString("video%1/camera").arg(m_currentProfile));
+            qCInfo(lcVideoManager) << "Video device selected:" << m_selectedDeviceId
+                                   << "(default - no profile entry)";
+            m_settings->remove(key);
         } else {
-            m_settings->setValue(QString("video%1/camera").arg(m_currentProfile),
-                                 m_selectedDeviceId);
+            qCInfo(lcVideoManager) << "Video device selected:" << m_selectedDeviceId
+                                   << "saving as profile" << m_currentProfile;
+            m_settings->setValue(key, m_selectedDeviceId);
+        }
+    });
+
+    connect(this, &VideoManager::selectedDeviceIdChanged, this, [this]() {
+        if (!m_consumers.isEmpty()) {
+            startCamera();
         }
     });
 
@@ -45,63 +93,142 @@ VideoManager::VideoManager(QObject *parent) : QObject{ parent }
     updateDevices();
 }
 
-void VideoManager::acquireCameras()
+void VideoManager::setCameraSource(std::unique_ptr<CameraSource> source)
 {
-#ifdef Q_OS_FLATPAK
-    auto &portal = CameraPortal::instance();
+    m_cameraSource = std::move(source);
+    connect(m_cameraSource.get(), &CameraSource::devicesChanged, this,
+            [this]() { m_debounceUpdateTimer.start(); });
+    connect(m_cameraSource.get(), &CameraSource::errorOccurred, this,
+            &VideoManager::reportCameraError);
 
-    if (m_pipewireCameras.isRunning() || m_portalPending) {
+    updateFrameHandler();
+    if (!m_consumers.isEmpty()) {
+        startCamera();
+    }
+}
+
+void VideoManager::updateFrameHandler()
+{
+    // Must copy consumer list because running on camera's thread
+    m_cameraSource->setFrameHandler([this, consumers = m_consumers](const QVideoFrame &frame) {
+        m_hasReceivedFrame.store(true, std::memory_order_relaxed);
+
+        for (auto *consumer : consumers) {
+            consumer->push(frame);
+        }
+    });
+}
+
+void VideoManager::startCamera()
+{
+    setCameraError({});
+    m_hasReceivedFrame = false;
+    m_stallTimer.start();
+    m_cameraSource->start(m_selectedDeviceId);
+}
+
+void VideoManager::stopCamera()
+{
+    m_stallTimer.stop();
+    m_cameraSource->stop();
+    setCameraError({});
+}
+
+void VideoManager::checkForStall()
+{
+    // Camera can hang without reporting error
+    if (m_hasReceivedFrame.exchange(false)) {
         return;
     }
 
+    reportCameraError(tr("Camera does not deliver any images"));
+}
+
+void VideoManager::reportCameraError(const QString &message)
+{
+    m_stallTimer.stop();
+
+    qCWarning(lcVideoManager) << "Camera error:" << message;
+    setCameraError(message);
+    Q_EMIT cameraErrorOccurred(message);
+}
+
+void VideoManager::setCameraError(const QString &message)
+{
+    if (m_cameraError != message) {
+        m_cameraError = message;
+        Q_EMIT cameraErrorChanged();
+    }
+}
+
+void VideoManager::acquireCameras()
+{
+#ifdef Q_OS_FLATPAK
+    if (m_cameraAccessState == CameraAccessState::Pending
+        || m_cameraAccessState == CameraAccessState::Granted) {
+        return;
+    }
+
+    auto &portal = CameraPortal::instance();
     if (!portal.isValid()) {
-        qCInfo(lcVideoManager) << "camera portal unavailable - falling back to QMediaDevices";
+        qCInfo(lcVideoManager) << "camera portal unavailable - staying with Qt cameras";
         setCameraAccessState(CameraAccessState::Granted);
         return;
     }
 
     setCameraAccessState(CameraAccessState::Pending);
-    m_portalPending = true;
+    requestCameraAccess();
+#elif defined(Q_OS_LINUX)
+    setCameraAccessState(CameraAccessState::Granted);
 
-    portal.AccessCamera([this, &portal](uint code, const QVariantMap &response) {
-        if (code != AbstractPortal::ResponseCode::SUCCESS) {
-            m_portalPending = false;
-            m_settings->setValue("video/cameraAccessDenied", true);
+    if (qobject_cast<PipeWireCameraSource *>(m_cameraSource.get())) {
+        return;
+    }
 
-            const bool isPipeWireCameraActive =
-                    qgetenv("QTWEBENGINE_CHROMIUM_FLAGS").contains("WebRtcPipeWireCamera");
-            setCameraAccessState(isPipeWireCameraActive ? CameraAccessState::DeniedRestartRequired
-                                                        : CameraAccessState::Denied);
+    auto source = std::make_unique<PipeWireCameraSource>();
+    if (!source->open(-1)) {
+        qCWarning(lcVideoManager) << "Cannot connect to PipeWire - staying with Qt cameras";
+        return;
+    }
 
-            qCWarning(lcVideoManager)
-                    << "camera access not granted:" << response.value("error").toString();
-            return;
-        }
-
-        m_settings->remove("video/cameraAccessDenied");
-        setCameraAccessState(CameraAccessState::Granted);
-
-        portal.OpenPipeWireRemote([this](int fd, const QString &error) {
-            m_portalPending = false;
-
-            if (fd < 0) {
-                qCWarning(lcVideoManager) << "could not open PipeWire remote:" << error;
-                return;
-            }
-
-            if (!m_pipewireCameras.start(fd)) {
-                qCWarning(lcVideoManager) << "could not start PipeWire camera enumeration - "
-                                             "falling back to QMediaDevices";
-                return;
-            }
-
-            m_debounceUpdateTimer.start();
-        });
-    });
+    setCameraSource(std::move(source));
+    m_debounceUpdateTimer.start();
 #else
     setCameraAccessState(CameraAccessState::Granted);
 #endif
 }
+
+#ifdef Q_OS_FLATPAK
+QCoro::Task<> VideoManager::requestCameraAccess()
+{
+    // Make sure dialog is shown when window focused
+    if (!qGuiApp->focusWindow()) {
+        qCInfo(lcVideoManager) << "Waiting for focus to request camera access";
+        co_await qCoro(qGuiApp, &QGuiApplication::focusWindowChanged);
+    }
+
+    auto &portal = CameraPortal::instance();
+
+    const AbstractPortal::Response access = co_await portal.AccessCamera();
+    if (access.code != AbstractPortal::ResponseCode::SUCCESS) {
+        setCameraAccessState(CameraAccessState::Denied);
+        co_return;
+    }
+
+    setCameraAccessState(CameraAccessState::Granted);
+
+    // No open() with negative fd - would connect to PipeWire directly
+    const int fd = co_await portal.OpenPipeWireRemote();
+    auto source = std::make_unique<PipeWireCameraSource>();
+    if (fd < 0 || !source->open(fd)) {
+        qCWarning(lcVideoManager) << "Cannot connect to camera portal - staying with Qt cameras";
+        co_return;
+    }
+
+    setCameraSource(std::move(source));
+    m_debounceUpdateTimer.start();
+}
+#endif
 
 bool VideoManager::isDeviceAvailable(const QString &deviceId) const
 {
@@ -140,23 +267,12 @@ VideoDevice VideoManager::selectedDevice() const
 
 bool VideoManager::isCameraAccessDenied() const
 {
-    return m_cameraAccessState == CameraAccessState::Denied
-            || m_cameraAccessState == CameraAccessState::DeniedRestartRequired;
+    return m_cameraAccessState == CameraAccessState::Denied;
 }
 
-QList<VideoDevice> VideoManager::devicesFromMediaDevices() const
+bool VideoManager::isCameraAvailable() const
 {
-    QList<VideoDevice> devices;
-
-    const auto videoInputs = m_mediaDevices.videoInputs();
-
-    for (const auto &device : videoInputs) {
-        if (!device.isNull()) {
-            devices.append(VideoDevice{ device.id(), device.description(), device.isDefault() });
-        }
-    }
-
-    return devices;
+    return !isCameraAccessDenied() && !m_devices.isEmpty();
 }
 
 void VideoManager::setCameraAccessState(CameraAccessState value)
@@ -167,27 +283,53 @@ void VideoManager::setCameraAccessState(CameraAccessState value)
     }
 }
 
+void VideoManager::addConsumer(FramePump *consumer)
+{
+    if (!consumer) {
+        qCWarning(lcVideoManager) << "Ignoring nullptr consumer";
+        return;
+    }
+
+    if (m_consumers.contains(consumer)) {
+        return;
+    }
+
+    m_consumers.append(consumer);
+    updateFrameHandler();
+
+    if (m_consumers.size() == 1) {
+        startCamera();
+    }
+}
+
+void VideoManager::removeConsumer(FramePump *consumer)
+{
+    if (!consumer) {
+        qCWarning(lcVideoManager) << "Ignoring nullptr consumer";
+        return;
+    }
+
+    if (!m_consumers.removeOne(consumer)) {
+        return;
+    }
+
+    updateFrameHandler();
+
+    if (m_consumers.isEmpty()) {
+        stopCamera();
+    }
+}
+
 void VideoManager::updateDevices()
 {
-    m_devices.clear();
+    QList<VideoDevice> devices = m_cameraSource->devices();
+    numberDuplicateDescriptions(devices);
 
-#ifdef Q_OS_FLATPAK
-    if (m_pipewireCameras.isRunning()) {
-        const auto cameras = m_pipewireCameras.devices();
-
-        for (const auto &camera : std::as_const(cameras)) {
-            m_devices.append(VideoDevice{ camera.name, camera.description, false });
-        }
-
-        if (!m_devices.isEmpty()) {
-            m_devices.first().isDefault = true;
-        }
-    } else {
-        m_devices = devicesFromMediaDevices();
+    if (isSameDeviceList(devices, m_devices)) {
+        return;
     }
-#else
-    m_devices = devicesFromMediaDevices();
-#endif
+
+    m_devices = devices;
 
     qCInfo(lcVideoManager) << "Found" << m_devices.size() << "video input devices";
 
