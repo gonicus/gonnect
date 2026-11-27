@@ -1,5 +1,6 @@
 #include <QLoggingCategory>
 #include <QRegularExpression>
+#include "SIPAccount.h"
 #include "SIPAccountManager.h"
 #include "SIPCallManager.h"
 #include "SIPBuddy.h"
@@ -81,6 +82,15 @@ bool Toggler::initialize()
 
         Q_EMIT activeChanged();
     });
+
+    // Registration might not be finished on first try of subscribe, so try again if registered.
+    // (Calling multiple times is harmless).
+    connect(m_account, &SIPAccount::isRegisteredChanged, m_buddy, [this]() {
+        if (m_account->isRegistered()) {
+            m_buddy->subscribe();
+        }
+    });
+
     m_buddy->initialize();
 
     m_settings.endGroup();
