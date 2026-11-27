@@ -135,7 +135,40 @@ QString JitsiSession::endedMessage(const QString &reason) const
     if (reason == "conference.kicked"_L1) {
         return tr("A moderator removed you from the conference.");
     }
+    if (reason == "conference.time_limit"_L1 || reason == "connection.timeLimitError"_L1) {
+        return tr("The time limit of the conference was reached.");
+    }
     return {};
+}
+
+QString JitsiSession::failureMessage(const QString &reason) const
+{
+    if (reason == "connection.droppedError"_L1 || reason == "connection.disconnected"_L1) {
+        return tr("The connection to the conference server was lost.");
+    }
+    if (reason == "connection.passwordRequired"_L1
+        || reason == "conference.authenticationRequired"_L1
+        || reason == "conference.connectionError.notAllowed"_L1) {
+        return tr("You are not allowed to join this conference.");
+    }
+    if (reason.startsWith("connection."_L1)) {
+        return tr("The conference server could not be reached.");
+    }
+    if (reason == "conference.iceFailed"_L1) {
+        return tr("No media connection could be established. A firewall might block it.");
+    }
+    if (reason == "conference.focusLeft"_L1 || reason == "conference.focusDisconnected"_L1
+        || reason == "conference.videobridgeNotAvailable"_L1
+        || reason == "conference.gracefulShutdown"_L1) {
+        return tr("The conference service is currently not available. Please try again later.");
+    }
+    if (reason == "conference.max_users"_L1) {
+        return tr("The conference has reached its maximum number of participants.");
+    }
+    if (reason == "libraryNotLoaded"_L1) {
+        return tr("The conference software could not be loaded from the server.");
+    }
+    return tr("Conference failed: %1").arg(reason);
 }
 
 void JitsiSession::receiveEvent(const QString &message)
@@ -267,6 +300,14 @@ void JitsiSession::handle(const JitsiSessionProtocol::LobbyWaiting &)
     m_connector->setIsWaitingInLobbyInternal(true);
 }
 
+void JitsiSession::handle(
+        const JitsiSessionProtocol::MediaConnectionChanged &mediaConnectionChanged)
+{
+    qCInfo(lcJitsiSession) << "Media connection interrupted:"
+                           << mediaConnectionChanged.isInterrupted;
+    m_connector->setIsConnectionInterruptedInternal(mediaConnectionChanged.isInterrupted);
+}
+
 void JitsiSession::handle(const JitsiSessionProtocol::LobbyChanged &lobbyChanged)
 {
     qCInfo(lcJitsiSession) << "Lobby enabled:" << lobbyChanged.isEnabled;
@@ -298,7 +339,7 @@ void JitsiSession::handle(const JitsiSessionProtocol::Failed &failed)
     // Dispatch failure as notification or "real" error
     const QString message = endedMessage(failed.reason);
     if (message.isEmpty()) {
-        ErrorBus::instance().error(tr("Conference failed: %1").arg(failed.reason));
+        ErrorBus::instance().error(failureMessage(failed.reason));
     } else {
         const auto title = tr("[%1] Conference ended").arg(m_connector->conferenceName());
         auto *notification =

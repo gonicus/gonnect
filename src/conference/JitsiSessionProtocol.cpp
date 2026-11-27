@@ -216,6 +216,11 @@ Event parseScreenSharing(EventFields &fields)
     return ScreenSharing{ .isSharing = fields.requiredBool("isSharing"_L1) };
 }
 
+Event parseMediaConnectionChanged(EventFields &fields)
+{
+    return MediaConnectionChanged{ .isInterrupted = fields.requiredBool("isInterrupted"_L1) };
+}
+
 Event parseFailed(EventFields &fields)
 {
     return Failed{ .reason = fields.optionalString("reason"_L1) };
@@ -239,6 +244,7 @@ constexpr EventParser eventParsers[] = {
     { "lobbyUserJoined"_L1, parseLobbyUserJoined },
     { "lobbyUserLeft"_L1, parseLobbyUserLeft },
     { "lobbyWaiting"_L1, parseLobbyWaiting },
+    { "mediaConnectionChanged"_L1, parseMediaConnectionChanged },
     { "messageReceived"_L1, parseMessageReceived },
     { "participantMuted"_L1, parseParticipantMuted },
     { "passwordRequired"_L1, parsePasswordRequired },

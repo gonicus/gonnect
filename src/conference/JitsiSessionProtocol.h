@@ -71,6 +71,10 @@ struct ScreenSharing
 {
     bool isSharing = false;
 };
+struct MediaConnectionChanged
+{
+    bool isInterrupted = false;
+};
 struct Failed
 {
     QString reason;
@@ -151,6 +155,7 @@ using Event = std::variant<
     LobbyUserJoined,
     LobbyUserLeft,
     LobbyWaiting,
+    MediaConnectionChanged,
     MessageReceived,
     ParticipantMuted,
     PasswordRequired,

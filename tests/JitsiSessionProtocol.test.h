@@ -26,6 +26,7 @@ private slots:
     void parsesRoomLockChanged();
     void parsesLobbyEvents();
     void parsesScreenSharing();
+    void parsesMediaConnectionChanged();
     void parsesFailed();
 
     void rejectsInvalidEvent_data();

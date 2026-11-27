@@ -270,6 +270,17 @@ void JitsiSessionProtocolTest::parsesScreenSharing()
     QVERIFY(screenSharing->isSharing);
 }
 
+void JitsiSessionProtocolTest::parsesMediaConnectionChanged()
+{
+    const auto event = JitsiSessionProtocol::parseEvent(
+            uR"({"type":"mediaConnectionChanged","isInterrupted":true})"_s);
+
+    QVERIFY2(event.has_value(), errorText(event).constData());
+    const auto *changed = std::get_if<JitsiSessionProtocol::MediaConnectionChanged>(&*event);
+    QVERIFY(changed);
+    QVERIFY(changed->isInterrupted);
+}
+
 void JitsiSessionProtocolTest::parsesFailed()
 {
     const auto event = JitsiSessionProtocol::parseEvent(
@@ -312,6 +323,7 @@ void JitsiSessionProtocolTest::rejectsInvalidEvent_data()
             << uR"({"type":"lobbyUserJoined","displayName":"Carol"})"_s;
     QTest::newRow("lobby leave without id") << uR"({"type":"lobbyUserLeft"})"_s;
     QTest::newRow("screen sharing without state") << uR"({"type":"screenSharing"})"_s;
+    QTest::newRow("media connection without state") << uR"({"type":"mediaConnectionChanged"})"_s;
 }
 void JitsiSessionProtocolTest::rejectsInvalidEvent()
 {

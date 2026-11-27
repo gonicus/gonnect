@@ -18,6 +18,8 @@ public:
 private:
     /// Text describing why a conference was ended if it is a regular ending (not a real error)
     QString endedMessage(const QString &reason) const;
+    /// Text for the user describing a real error
+    QString failureMessage(const QString &reason) const;
 
     void receiveEvent(const QString &message);
 
@@ -32,6 +34,7 @@ private:
     void handle(const JitsiSessionProtocol::LobbyUserJoined &lobbyUserJoined);
     void handle(const JitsiSessionProtocol::LobbyUserLeft &lobbyUserLeft);
     void handle(const JitsiSessionProtocol::LobbyWaiting &lobbyWaiting);
+    void handle(const JitsiSessionProtocol::MediaConnectionChanged &mediaConnectionChanged);
     void handle(const JitsiSessionProtocol::MessageReceived &message);
     void handle(const JitsiSessionProtocol::ParticipantMuted &participantMuted);
     void handle(const JitsiSessionProtocol::PasswordRequired &passwordRequired);

@@ -66,6 +66,7 @@ public:
     Q_INVOKABLE void setIsLobbyEnabledInternal(bool value);
     void setIsRoomLockedInternal(bool value);
     void setIsWaitingInLobbyInternal(bool value);
+    void setIsConnectionInterruptedInternal(bool value);
     void removeKnockingParticipant(const QString &id);
 
     Q_INVOKABLE void onPasswordRequired();
@@ -145,6 +146,7 @@ public:
     bool isLobbyEnabled() const override { return m_isLobbyEnabled; }
     void setLobbyEnabled(bool enabled) override;
     bool isWaitingInLobby() const override { return m_isWaitingInLobby; }
+    bool isConnectionInterrupted() const override { return m_isConnectionInterrupted; }
     void setCallHistoryItem(
             QPointer<CallHistoryItem> callHistoryItem = QPointer<CallHistoryItem>()) override;
     QString displayName() const override { return m_displayName; }
@@ -239,6 +241,7 @@ private:
     bool m_isTranscriptionActive = false;
     bool m_isLobbyEnabled = false;
     bool m_isWaitingInLobby = false;
+    bool m_isConnectionInterrupted = false;
 
     QString m_roomName;
     QString m_displayName;

@@ -1029,6 +1029,14 @@ void JitsiConnector::setIsWaitingInLobbyInternal(bool value)
     }
 }
 
+void JitsiConnector::setIsConnectionInterruptedInternal(bool value)
+{
+    if (m_isConnectionInterrupted != value) {
+        m_isConnectionInterrupted = value;
+        Q_EMIT isConnectionInterruptedChanged();
+    }
+}
+
 void JitsiConnector::removeKnockingParticipant(const QString &id)
 {
     if (m_knockedIds.remove(id)) {
@@ -1803,6 +1811,7 @@ void JitsiConnector::resetConferenceState()
     setIsPasswordRequired(false);
     setIsRoomLockedInternal(false);
     setIsWaitingInLobbyInternal(false);
+    setIsConnectionInterruptedInternal(false);
     if (m_isAudioMuted) {
         m_isAudioMuted = false;
         Q_EMIT isAudioMutedChanged();

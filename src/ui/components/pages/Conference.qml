@@ -565,6 +565,22 @@ Item {
                     }
                 }
 
+                // TODO: correct design
+                Label {
+                    id: connectionInterruptedHint
+                    visible: confConn.isConnectinInterrupted && !confConn.isWaitingInLobby
+                    text: qsTr("Connection interrupted, trying to restore...")
+                    anchors {
+                        top: nativeVideoLoader.top
+                        horizontalCenter: nativeVideoLoader.horizontalCenter
+                        topMargin: Theme.d * 2
+                    }
+
+                    Accessible.id: "conference.connection.interrupted"
+                    Accessible.role: Accessible.StaticText
+                    Accessible.name: connectionInterruptedHint.text
+                }
+
                 Component {
                     id: passwordItemComponent
 

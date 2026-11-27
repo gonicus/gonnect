@@ -80,7 +80,8 @@
                 fail('conference.setupFailed')
             })
         })
-        connection.addEventListener(events.CONNECTION_FAILED, error => fail(`connection.${error}`))
+        // Library tried to resume connection on its own
+        connection.addEventListener(events.CONNECTION_FAILED, error => fail(error))
         connection.addEventListener(events.CONNECTION_DISCONNECTED, () => {
             if (!isLeaving) {
                 fail('connection.disconnected')
@@ -193,6 +194,14 @@
         })
 
         conference.on(events.KICKED, () => fail('conference.kicked'))
+
+        // Connection means media connection to bridge (ICE)
+        conference.on(events.CONNECTION_INTERRUPTED, () => {
+            control.send({ type: 'mediaConnectionChanged', isInterrupted: true })
+        })
+        conference.on(events.CONNECTION_RESTORED, () => {
+            control.send({ type: 'mediaConnectionChanged', isInterrupted: false })
+        })
 
         // Can be reported right after joining a locked room
         conference.on(events.LOCK_STATE_CHANGED, isLocked => {
