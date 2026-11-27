@@ -1125,7 +1125,7 @@ SIPBuddy *SIPAccount::createBuddy(const QString &sipUrl)
 
 bool SIPAccount::makeSpaceForBuddy()
 {
-    if (m_buddies.size() < maxBuddies) {
+    if (pjsua_get_buddy_count() < maxBuddies) {
         return true;
     }
 
