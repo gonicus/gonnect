@@ -5,8 +5,10 @@
 
 #include <QUuid>
 
+using namespace Qt::StringLiterals;
+
 namespace {
-constexpr QStringView temporaryEventIdPrefix = QStringLiteral("gonnect-pending:");
+constexpr QStringView temporaryEventIdPrefix = u"gonnect-pending:";
 }
 
 QString ChatMessage::createTemporaryEventId()
