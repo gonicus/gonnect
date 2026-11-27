@@ -6,7 +6,7 @@
 #include <QUuid>
 
 namespace {
-const QString temporaryEventIdPrefix = QStringLiteral("gonnect-pending:");
+constexpr QStringView temporaryEventIdPrefix = QStringLiteral("gonnect-pending:");
 }
 
 QString ChatMessage::createTemporaryEventId()
