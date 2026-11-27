@@ -3,6 +3,22 @@
 #include "ChatMessageReaction.h"
 #include "IChatRoom.h"
 
+#include <QUuid>
+
+namespace {
+const QString temporaryEventIdPrefix = QStringLiteral("gonnect-pending:");
+}
+
+QString ChatMessage::createTemporaryEventId()
+{
+    return temporaryEventIdPrefix + QUuid::createUuid().toString(QUuid::WithoutBraces);
+}
+
+bool ChatMessage::isTemporaryEventId(const QString &eventId)
+{
+    return eventId.startsWith(temporaryEventIdPrefix);
+}
+
 ChatMessage::ChatMessage(const QString &eventId, const QString &fromId, const QString &nickName,
                          QObject *content, const QDateTime &timestamp, IChatRoom *chatRoom,
                          Flags flags, const QString &threadId)

@@ -10,6 +10,11 @@
 
 // INFO: Uses SQLCipher amalgamation (AES-256 + FTS5): https://github.com/sqlcipher/sqlcipher
 #include <sqlite3.h>
+#include <QUuid>
+
+using namespace Qt::Literals::StringLiterals;
+
+static constexpr int CURRENT_SCHEMA_VERSION = 1;
 
 Q_LOGGING_CATEGORY(lcChatMessageSearchIndexer, "gonnect.chat.message.search.indexer")
 
@@ -92,7 +97,18 @@ void ChatMessageSearchIndexer::setupDB(const QString &secret)
         return;
     } else if (state == ChatMessageSearchIndexer::State::Incomplete) {
         // Schema non-/partially existent
-        initDB();
+        if (!initDB()) {
+            qCCritical(lcChatMessageSearchIndexer)
+                    << "Cannot create message search index:" << m_error;
+            return;
+        }
+    }
+
+    if (!migrateDB()) {
+        qCCritical(lcChatMessageSearchIndexer) << "Cannot migrate message search index:" << m_error;
+        sqlite3_close(m_db);
+        m_db = nullptr;
+        return;
     }
 
     m_isInitialized = true;
@@ -621,6 +637,85 @@ bool ChatMessageSearchIndexer::initDB()
         sqlite3_close(m_db);
         m_db = nullptr;
         return false;
+    }
+
+    return true;
+}
+
+bool ChatMessageSearchIndexer::migrateDB()
+{
+    if (!m_db) {
+        return false;
+    }
+
+    const int version = schemaVersion();
+    if (version < 0) {
+        return false;
+    }
+    if (version >= CURRENT_SCHEMA_VERSION) {
+        return true;
+    }
+    if (!exec(u"BEGIN TRANSACTION;"_s)) {
+        return false;
+    }
+    if (version < 1 && !removeTemporaryMessageIds()) {
+        exec(u"ROLLBACK;"_s);
+        return false;
+    }
+    if (!exec(u"PRAGMA user_version = %1;"_s.arg(CURRENT_SCHEMA_VERSION))) {
+        exec(u"ROLLBACK;"_s);
+        return false;
+    }
+
+    return exec(u"COMMIT;"_s);
+}
+
+int ChatMessageSearchIndexer::schemaVersion()
+{
+    Statement query;
+    if (sqlite3_prepare_v2(m_db, "PRAGMA user_version;", -1, &query.statement, nullptr) != SQLITE_OK
+        || sqlite3_step(query.statement) != SQLITE_ROW) {
+        m_error = QString::fromUtf8(sqlite3_errmsg(m_db));
+        return -1;
+    }
+
+    return sqlite3_column_int(query.statement, 0);
+}
+
+bool ChatMessageSearchIndexer::removeTemporaryMessageIds()
+{
+    // Cleanup of temporary UUID only for schema v0
+
+    Statement query;
+    if (sqlite3_prepare_v2(m_db, "SELECT message_uid FROM messages_map;", -1, &query.statement,
+                           nullptr)
+        != SQLITE_OK) {
+        m_error = QString::fromUtf8(sqlite3_errmsg(m_db));
+        return false;
+    }
+
+    QStringList temporaryIds;
+    int status = SQLITE_ROW;
+    while ((status = sqlite3_step(query.statement)) == SQLITE_ROW) {
+        const auto messageUid = QString::fromUtf8(
+                reinterpret_cast<const char *>(sqlite3_column_text(query.statement, 0)));
+        if (!QUuid::fromString(messageUid).isNull()) {
+            temporaryIds.append(messageUid);
+        }
+    }
+
+    if (status != SQLITE_DONE) {
+        m_error = QString::fromUtf8(sqlite3_errmsg(m_db));
+        return false;
+    }
+
+    qCInfo(lcChatMessageSearchIndexer)
+            << "Removing" << temporaryIds.size() << "temporary message ids from search index";
+
+    for (const auto &messageUid : std::as_const(temporaryIds)) {
+        if (!removeMessage(messageUid)) {
+            return false;
+        }
     }
 
     return true;

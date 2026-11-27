@@ -17,7 +17,6 @@
 #include <QLoggingCategory>
 #include <QFutureWatcher>
 #include <QtConcurrent>
-#include <QUuid>
 
 Q_LOGGING_CATEGORY(lcIpcChatRoom, "gonnect.app.chat.IpcChatRoom")
 
@@ -164,7 +163,7 @@ qsizetype IpcChatRoom::indexOfPinnedChatMessage(ChatMessage *message) const
 
 void IpcChatRoom::ensureMessageLoaded(const QString &id)
 {
-    if (id.isEmpty() || m_mainMessageContainer.contains(id)
+    if (id.isEmpty() || ChatMessage::isTemporaryEventId(id) || m_mainMessageContainer.contains(id)
         || m_loadRequestedMessageIds.contains(id)) {
         return;
     }
@@ -238,7 +237,7 @@ void IpcChatRoom::sendFile(const QString &filePath, const QString &threadId)
     }
 
     // Create pending/optimistic message for immediate display
-    const auto tempEventId = QUuid::createUuid().toString(QUuid::WithoutBraces);
+    const auto tempEventId = ChatMessage::createTemporaryEventId();
     const auto ownUserId = dispatcher->ownUserId();
     QString nickName = ownUserId;
     if (const auto *ownUser = dispatcher->userById(ownUserId)) {
@@ -554,7 +553,9 @@ void IpcChatRoom::loadMessages(const QString &threadId, const QString &beforeMes
         return;
     }
 
-    ipcDispatcher()->loadMessages(this, limit, threadId, beforeMessageId);
+    const auto anchor =
+            ChatMessage::isTemporaryEventId(beforeMessageId) ? QString() : beforeMessageId;
+    ipcDispatcher()->loadMessages(this, limit, threadId, anchor);
 
     if (!m_isInitiallyLoaded) {
         m_isInitiallyLoaded = true;
