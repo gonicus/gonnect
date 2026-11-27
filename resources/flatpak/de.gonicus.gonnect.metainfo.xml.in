@@ -132,6 +132,7 @@
     <category>Network</category>
     <category>Telephony</category>
     <category>VideoConference</category>
+    <category>InstantMessaging</category>
   </categories>
 
   <keywords>
@@ -141,6 +142,8 @@
       <keyword>Telephony</keyword>
       <keyword>Softphone</keyword>
       <keyword>Video conference</keyword>
+      <keyword>Chat</keyword>
+      <keyword>Matrix</keyword>
       <keyword>Teams</keyword>
       <keyword>Collaboration</keyword>
       <keyword>Headset</keyword>

@@ -145,7 +145,7 @@ modules:
         commit: 5a457451fa2712ba18e12b01738e8ff3af2b26fd
         x-checker-data:
           type: git
-          tag-pattern: ^([0-9]+\.[0-9]+(\.[0-9]+)?)$
+          tag-pattern: ^([0-9]+\.[0-9]+(?:\.[0-9]+)?)$
       - type: patch
         path: patches/pjproject-site-config.patch
       - type: patch

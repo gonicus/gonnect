@@ -1,8 +1,7 @@
-diff --git a/pjsip/src/pjsua-lib/pjsua_media.c b/pjsip/src/pjsua-lib/pjsua_media.c
-index c93d3de..40a22d0 100644
---- a/pjsip/src/pjsua-lib/pjsua_media.c
-+++ b/pjsip/src/pjsua-lib/pjsua_media.c
-@@ -1167,8 +1167,12 @@ static pj_status_t create_ice_media_transport(
+diff -Naur a/pjsip/src/pjsua-lib/pjsua_media.c b/pjsip/src/pjsua-lib/pjsua_media.c
+--- a/pjsip/src/pjsua-lib/pjsua_media.c	2026-11-25 06:37:44.000000000 +0100
++++ b/pjsip/src/pjsua-lib/pjsua_media.c	2026-11-25 14:48:23.018351906 +0100
+@@ -1178,8 +1178,12 @@
      pj_ice_strans_cfg_default(&ice_cfg);
      pj_bzero(&ice_cfg.stun, sizeof(ice_cfg.stun));
      pj_bzero(&ice_cfg.turn, sizeof(ice_cfg.turn));
