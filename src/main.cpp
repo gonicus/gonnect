@@ -12,7 +12,14 @@
 #  include <QDBusConnection>
 #  include <QDBusMetaType>
 #  include <signal.h>
+#  include <unistd.h>
+#  include <linux/close_range.h>
+#  include <cerrno>
+#  include <cstring>
 #endif
+
+#include <string>
+#include <vector>
 
 using namespace Qt::Literals::StringLiterals;
 
@@ -43,8 +50,94 @@ static int setup_unix_signal_handlers()
     return 0;
 }
 
+static int runApplication(int &argc, char *argv[])
+{
+    Application app(argc, argv);
+    if (!app.isFirstInstance()) {
+        qInfo() << "another instance is running - sending args and exit";
+        app.sendArguments();
+        return 2;
+    }
+
+    qRegisterProtobufTypes();
+
+    app.setWindowIcon(QIcon(":/icons/gonnect.svg"));
+
+    app.installEventFilter(&WebEngineKeyEventFilter::instance());
+
+    // Fonts
+    const QStringList fontPaths = { ":/font/NotoColorEmoji-Regular.ttf" };
+
+    for (const QString &fontPath : fontPaths) {
+
+        QFileInfo fontFileInfo(fontPath);
+        fontFileInfo.makeAbsolute();
+        qInfo().noquote().nospace()
+                << "Trying to load font from file " << fontFileInfo.absoluteFilePath()
+                << " (exists: " << fontFileInfo.exists()
+                << ", readable: " << fontFileInfo.isReadable() << ")";
+
+        const int fontId = QFontDatabase::addApplicationFont(fontPath);
+        if (fontId >= 0) {
+            const auto fontFamily = QFontDatabase::applicationFontFamilies(fontId).at(0);
+            QFontDatabase::addApplicationEmojiFontFamily(fontFamily);
+            qInfo() << "Loaded font" << fontFamily;
+        } else {
+            qWarning() << "Custom font could not be loaded";
+        }
+    }
+
+    QQmlApplicationEngine engine;
+    QObject::connect(
+            &engine, &QQmlApplicationEngine::objectCreationFailed, &app,
+            []() { QCoreApplication::exit(-1); }, Qt::QueuedConnection);
+
+    engine.addImageProvider(QLatin1String("personcoin"), new PersonCoinProvider);
+    engine.loadFromModule("base", "Main");
+
+    const auto &objs = engine.rootObjects();
+    if (objs.isEmpty()) {
+        qFatal() << "no QML windows registered";
+    }
+
+    const auto &itemObjs = objs.first();
+
+    QQuickWindow *mainWindow = itemObjs->findChild<QQuickWindow *>("gonnectWindow");
+    if (mainWindow) {
+        app.setRootWindow(mainWindow);
+    }
+
+    // Take care for running "initialize" after exec() is called
+    QTimer::singleShot(0, &app, &Application::initialize);
+
+    return app.exec();
+}
+
+static void restartApplication(std::vector<std::string> arguments)
+{
+#ifdef Q_OS_LINUX
+    // Replace the process image instead of spawning a child process. This keeps the PID that
+    // bwrap watches alive, so the Flatpak sandbox is not torn down together with the old process.
+    std::vector<char *> execArguments;
+    for (auto &argument : arguments) {
+        execArguments.push_back(argument.data());
+    }
+    execArguments.push_back(nullptr);
+
+    // File descriptors opened without O_CLOEXEC must not leak into the new process image
+    ::close_range(3, ~0U, CLOSE_RANGE_CLOEXEC);
+
+    ::execv("/proc/self/exe", execArguments.data());
+    qCritical() << "Restart failed:" << std::strerror(errno);
+#else
+    QProcess::startDetached(QString::fromLocal8Bit(arguments.front()));
+#endif
+}
+
 int main(int argc, char *argv[])
 {
+    const std::vector<std::string> originalArguments(argv, argv + argc);
+
 #ifdef Q_OS_LINUX
     // Enforce desktopportal whatever the auto detection says
     if (QFile::exists("/.flatpak-info")) {
@@ -111,69 +204,9 @@ int main(int argc, char *argv[])
         qputenv("QTWEBENGINE_CHROMIUM_FLAGS", webenginePresetEnv);
     }
 
-    int exitCode = 0;
-
-    Application app(argc, argv);
-    if (!app.isFirstInstance()) {
-        qInfo() << "another instance is running - sending args and exit";
-        app.sendArguments();
-        return 2;
-    }
-
-    qRegisterProtobufTypes();
-
-    app.setWindowIcon(QIcon(":/icons/gonnect.svg"));
-
-    app.installEventFilter(&WebEngineKeyEventFilter::instance());
-
-    // Fonts
-    const QStringList fontPaths = { ":/font/NotoColorEmoji-Regular.ttf" };
-
-    for (const QString &fontPath : fontPaths) {
-
-        QFileInfo fontFileInfo(fontPath);
-        fontFileInfo.makeAbsolute();
-        qInfo().noquote().nospace()
-                << "Trying to load font from file " << fontFileInfo.absoluteFilePath()
-                << " (exists: " << fontFileInfo.exists()
-                << ", readable: " << fontFileInfo.isReadable() << ")";
-
-        const int fontId = QFontDatabase::addApplicationFont(fontPath);
-        if (fontId >= 0) {
-            const auto fontFamily = QFontDatabase::applicationFontFamilies(fontId).at(0);
-            QFontDatabase::addApplicationEmojiFontFamily(fontFamily);
-            qInfo() << "Loaded font" << fontFamily;
-        } else {
-            qWarning() << "Custom font could not be loaded";
-        }
-    }
-
-    QQmlApplicationEngine engine;
-    QObject::connect(
-            &engine, &QQmlApplicationEngine::objectCreationFailed, &app,
-            []() { QCoreApplication::exit(-1); }, Qt::QueuedConnection);
-
-    engine.addImageProvider(QLatin1String("personcoin"), new PersonCoinProvider);
-    engine.loadFromModule("base", "Main");
-
-    const auto &objs = engine.rootObjects();
-    if (objs.isEmpty()) {
-        qFatal() << "no QML windows registered";
-    }
-
-    const auto &itemObjs = objs.first();
-
-    QQuickWindow *mainWindow = itemObjs->findChild<QQuickWindow *>("gonnectWindow");
-    if (mainWindow) {
-        app.setRootWindow(mainWindow);
-    }
-
-    // Take care for running "initialize" after exec() is called
-    QTimer::singleShot(0, &app, &Application::initialize);
-
-    exitCode = app.exec();
+    int exitCode = runApplication(argc, argv);
     if (exitCode == RESTART_CODE) {
-        QProcess::startDetached(argv[0]);
+        restartApplication(originalArguments);
     }
 
     return exitCode;
