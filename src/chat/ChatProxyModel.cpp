@@ -5,6 +5,11 @@ ChatProxyModel::ChatProxyModel(QObject *parent) : QSortFilterProxyModel{ parent 
 {
     sort(0);
 
+    connect(this, &QAbstractItemModel::rowsInserted, this, &ChatProxyModel::invalidateProxyRoles);
+    connect(this, &QAbstractItemModel::rowsRemoved, this, &ChatProxyModel::invalidateProxyRoles);
+    connect(this, &QAbstractItemModel::rowsMoved, this, &ChatProxyModel::invalidateProxyRoles);
+    connect(this, &QAbstractItemModel::layoutChanged, this, &ChatProxyModel::invalidateProxyRoles);
+
     connect(this, &QSortFilterProxyModel::sourceModelChanged, this,
             &ChatProxyModel::onSourceModelChanged);
     onSourceModelChanged();
@@ -34,6 +39,15 @@ QVariant ChatProxyModel::data(const QModelIndex &index, int role) const
     }
 
     switch (role) {
+
+    case static_cast<int>(ChatModel::Roles::IsSameUserAsPrevious):
+    case static_cast<int>(ChatModel::Roles::IsSameMinuteAsPrevious):
+    case static_cast<int>(ChatModel::Roles::IsSameDayAsPrevious): {
+        const auto *prev = messageAt(this->index(index.row() + 1, 0));
+        return ChatModel::compareMessagesByRole(prev, messageAt(index),
+                                                static_cast<ChatModel::Roles>(role));
+    }
+
     case static_cast<int>(Roles::IsLatestOwnMessage): {
         const QModelIndex sourceIndex = mapToSource(index);
         if (!isValidOwnMessage(sourceIndex)) {
@@ -116,6 +130,20 @@ ChatMessage *ChatProxyModel::ownMessageAt(qsizetype proxyIndex) const
             ->chatRoom()
             ->chatMessages()
             .at(prevSource.row());
+}
+
+ChatMessage *ChatProxyModel::messageAt(const QModelIndex &proxyIndex) const
+{
+    if (!proxyIndex.isValid()) {
+        return nullptr;
+    }
+
+    const auto *model = qobject_cast<ChatModel *>(sourceModel());
+    if (!model || !model->chatRoom()) {
+        return nullptr;
+    }
+
+    return model->chatRoom()->chatMessages().value(mapToSource(proxyIndex).row(), nullptr);
 }
 
 qsizetype ChatProxyModel::firstUnreadSourceRow() const
@@ -315,9 +343,11 @@ void ChatProxyModel::invalidateProxyRoles()
 {
     const auto rows = rowCount(QModelIndex());
     if (rows > 0) {
-        Q_EMIT dataChanged(index(0, 0), index(rows - 1, 0),
-                           { static_cast<int>(Roles::ReadUsers),
+        QList<int> roles = { static_cast<int>(Roles::ReadUsers),
                              static_cast<int>(Roles::IsLatestOwnMessage),
-                             static_cast<int>(Roles::IsFirstUnread) });
+                             static_cast<int>(Roles::IsFirstUnread) };
+        roles.append(ChatModel::nextItemContentRoles());
+
+        Q_EMIT dataChanged(index(0, 0), index(rows - 1, 0), roles);
     }
 }

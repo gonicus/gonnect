@@ -624,14 +624,14 @@ Item {
                 visible: !control.isFailed && !control.isPending && !!(control.capabilities & IChatProvider.Capability.MessageRelations)
                 text: qsTr("Reply...")
                 icon.source: Icons.mailReplyCustom
-                onTriggered: () => chatMessageContextMenu.actionAfterClose = () => control.respondInNewThread(control.eventId)
+                onTriggered: () => chatMessageContextMenu.actionAfterClose = () => control.respondTo(control.eventId)
             }
 
             HideableMenuItem {
                 visible: !control.isFailed && !control.isPending && !control.isThreadRoot && control.threadId === "" && !!(control.capabilities & IChatProvider.Capability.MessageRelations)
                 text: qsTr("Reply in thread...")
                 icon.source: Icons.messageThread
-                onTriggered: () => control.respondInNewThread(control.eventId)
+                onTriggered: () => chatMessageContextMenu.actionAfterClose = () => control.respondInNewThread(control.eventId)
             }
 
             HideableMenuItem {

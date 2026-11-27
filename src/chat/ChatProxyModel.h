@@ -47,6 +47,7 @@ private:
     QList<ChatUser *> readUsersFor(const IChatRoom *chatRoom, const ChatMessage *message) const;
     bool isValidOwnMessage(const QModelIndex &index) const;
     ChatMessage *ownMessageAt(qsizetype proxyIndex) const;
+    ChatMessage *messageAt(const QModelIndex &proxyIndex) const;
     qsizetype firstUnreadSourceRow() const;
 
 private Q_SLOTS:

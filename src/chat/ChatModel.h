@@ -61,6 +61,13 @@ public:
 
     Q_INVOKABLE qsizetype rowOfMessage(const QString &eventId) const;
 
+    static QList<int> nextItemContentRoles();
+
+    /// Compares the role (if comparable) of both messages.
+    /// Returns true if equal, false if not equal or one is nullptr or role is not supported for
+    /// comparison.
+    static bool compareMessagesByRole(const ChatMessage *a, const ChatMessage *b, Roles role);
+
 private Q_SLOTS:
     void onChatRoomChanged();
     void updateRealMessagesCount();
@@ -74,7 +81,6 @@ private:
     void refreshAvatarPath(ChatUser *user);
     ChatMessage *relatedMessage(ChatMessage *originalMessage) const;
     void updateRelatedMessages(const QString &originalMessageId, const QList<int> &roles);
-    static QList<int> nextItemContentRoles();
     QList<int> relatedContentRoles(const ChatMessage &messageObject) const;
 
     IChatRoom *m_chatRoom = nullptr;
